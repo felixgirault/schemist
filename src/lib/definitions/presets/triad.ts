@@ -1,5 +1,5 @@
-import triadCold from '$lib/definitions/nodes/triadCold';
-import triadWarm from '$lib/definitions/nodes/triadWarm';
+import triadLeft from '$lib/definitions/nodes/triadLeft';
+import triadRight from '$lib/definitions/nodes/triadRight';
 import type {Preset} from '$lib/presets';
 
 export default {
@@ -7,12 +7,12 @@ export default {
 	description: '',
 	nodes: [
 		{
-			type: triadCold.type,
-			token: 'Cold $ triad'
+			type: triadLeft.type,
+			token: 'Left $ triad'
 		},
 		{
-			type: triadWarm.type,
-			token: 'Warm $ triad'
+			type: triadRight.type,
+			token: 'Right $ triad'
 		}
 	]
 } as Preset;

@@ -10,12 +10,12 @@ import negative from './negative';
 import positive from './positive';
 import saturation from './saturation';
 import shadow from './shadow';
-import splitComplementaryCold from './splitComplementaryCold';
-import splitComplementaryWarm from './splitComplementaryWarm';
-import tetradCold from './tetradCold';
-import tetradWarm from './tetradWarm';
-import triadCold from './triadCold';
-import triadWarm from './triadWarm';
+import splitComplementaryLeft from './splitComplementaryLeft';
+import splitComplementaryRight from './splitComplementaryRight';
+import tetradLeft from './tetradLeft';
+import tetradRight from './tetradRight';
+import triadLeft from './triadLeft';
+import triadRight from './triadRight';
 import warning from './warning';
 
 export default {
@@ -31,24 +31,24 @@ export default {
 	[positive.type]: positive,
 	[saturation.type]: saturation,
 	[shadow.type]: shadow,
-	[splitComplementaryCold.type]: splitComplementaryCold,
-	[splitComplementaryWarm.type]: splitComplementaryWarm,
-	[tetradCold.type]: tetradCold,
-	[tetradWarm.type]: tetradWarm,
-	[triadCold.type]: triadCold,
-	[triadWarm.type]: triadWarm,
+	[splitComplementaryLeft.type]: splitComplementaryLeft,
+	[splitComplementaryRight.type]: splitComplementaryRight,
+	[tetradLeft.type]: tetradLeft,
+	[tetradRight.type]: tetradRight,
+	[triadLeft.type]: triadLeft,
+	[triadRight.type]: triadRight,
 	[warning.type]: warning
 };
 
 export const defList = [
 	analogous,
 	complementary,
-	splitComplementaryCold,
-	splitComplementaryWarm,
-	tetradCold,
-	tetradWarm,
-	triadCold,
-	triadWarm,
+	splitComplementaryLeft,
+	splitComplementaryRight,
+	tetradLeft,
+	tetradRight,
+	triadLeft,
+	triadRight,
 	contrasting,
 	informative,
 	positive,

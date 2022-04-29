@@ -7,8 +7,6 @@ import {
 	closestAngle
 } from '$lib/utils/math';
 
-const WarmestHue = 35;
-
 export const setHue = (color: SchemistColor, h: number) => ({
 	...color,
 	h
@@ -122,11 +120,6 @@ export const randomUsableColor = (): SchemistColor => ({
 	s: 50 + Math.random() * 50,
 	l: 30 + Math.random() * 60
 });
-
-export const warmerDirection = ({h}: SchemistColor) => {
-	const offsetHue = circular(h - WarmestHue);
-	return offsetHue > 360 - offsetHue ? 1 : -1;
-};
 
 // @see http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code
 // @see https://gist.github.com/EDais/1ba1be0fe04eca66bbd588a6c9cbd666

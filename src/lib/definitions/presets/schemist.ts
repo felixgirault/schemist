@@ -1,6 +1,6 @@
 import type {Preset} from '$lib/presets';
-import triadCold from '../nodes/triadCold';
-import triadWarm from '../nodes/triadWarm';
+import triadLeft from '../nodes/triadLeft';
+import triadRight from '../nodes/triadRight';
 import neutral from './neutral';
 import semanticPairs from './semanticPairs';
 import states from './states';
@@ -10,12 +10,12 @@ export default {
 	description: '',
 	nodes: [
 		{
-			type: triadWarm.type,
+			type: triadLeft.type,
 			token: 'Secondary',
 			children: states.nodes
 		},
 		{
-			type: triadCold.type,
+			type: triadRight.type,
 			token: 'Tertiary',
 			children: states.nodes
 		},

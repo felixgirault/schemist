@@ -1,5 +1,5 @@
-import splitComplementaryCold from '$lib/definitions/nodes/splitComplementaryCold';
-import splitComplementaryWarm from '$lib/definitions/nodes/splitComplementaryWarm';
+import splitComplementaryLeft from '$lib/definitions/nodes/splitComplementaryLeft';
+import splitComplementaryRight from '$lib/definitions/nodes/splitComplementaryRight';
 import type {Preset} from '$lib/presets';
 
 export default {
@@ -7,12 +7,12 @@ export default {
 	description: '',
 	nodes: [
 		{
-			type: splitComplementaryCold.type,
-			token: 'Cold $ complementary'
+			type: splitComplementaryLeft.type,
+			token: 'Left $ complementary'
 		},
 		{
-			type: splitComplementaryWarm.type,
-			token: 'Warm $ complementary'
+			type: splitComplementaryRight.type,
+			token: 'Right $ complementary'
 		}
 	]
 } as Preset;
