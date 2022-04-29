@@ -1,0 +1,37 @@
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 400;
+	font-display: block;
+	src: url('/fonts/inter-regular.woff2?v=3.19') format('woff2'),
+		url('/fonts/inter-regular.woff?v=3.19') format('woff');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 600;
+	font-display: block;
+	src: url('/fonts/inter-semibold.woff2?v=3.19') format('woff2'),
+		url('/fonts/inter-semibold.woff?v=3.19') format('woff');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 900;
+	font-display: block;
+	src: url('/fonts/inter-black.woff2?v=3.19') format('woff2'),
+		url('/fonts/inter-black.woff?v=3.19') format('woff');
+}
+
+@font-face {
+	font-family: 'Source';
+	font-style: normal;
+	font-weight: 500;
+	font-display: block;
+	src: url('/fonts/sourcecodepro-medium.woff2?v=2.010')
+			format('woff2'),
+		url('/fonts/sourcecodepro-medium.woff?v=2.010')
+			format('woff');
+}

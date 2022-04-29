@@ -1,0 +1,39 @@
+{
+  "name": "schemist",
+  "description": "Build cohesive and accessible color schemes.",
+  "author": "Félix Girault <felix.girault@gmail.com>",
+  "license": "MIT",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "preview": "svelte-kit preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "prettier --check --plugin-search-dir=. .",
+    "format": "prettier --write --plugin-search-dir=. .",
+    "test": "jest src"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^1.0.0-next.29",
+    "@sveltejs/kit": "^1.0.0-next.323",
+    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
+    "@types/apca-w3": "^0.1.0",
+    "@types/jest": "^27.4.1",
+    "apca-w3": "^0.1.2",
+    "color-name-list": "^9.4.0",
+    "culori": "^2.0.3",
+    "jest": "^28.0.2",
+    "nearest-color": "^0.4.4",
+    "prettier": "^2.6.2",
+    "prettier-plugin-svelte": "^2.7.0",
+    "svelte": "^3.47.0",
+    "svelte-accessible-dialog": "^2.1.3",
+    "svelte-check": "^2.7.0",
+    "svelte-preprocess": "^4.10.6",
+    "ts-jest": "^27.1.4",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.3"
+  }
+}

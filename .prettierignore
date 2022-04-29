@@ -1,0 +1,7 @@
+.svelte-kit/**
+static/**
+!static/*.css
+build/**
+node_modules/**
+package.json
+package-lock.json
