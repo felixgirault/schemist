@@ -1,5 +1,5 @@
 import type {Rgb} from 'culori/fn';
-import type {Readable} from 'svelte/store';
+import {readable, type Readable} from 'svelte/store';
 import {derived, get, writable} from 'svelte/store';
 import type {ContrastType} from '$lib/color/contrast';
 import {
@@ -123,6 +123,31 @@ const colorPairs = derived(filteredColors, ($colors) => {
 			.map((other) => [color, other])
 	);
 });
+
+export const cross = derived(
+	[filteredColors, contrastType],
+	([$colors, $type]) => {
+		const levelFn =
+			$type === 'wcag2' ? wcag2Contrast : wcag3Contrast;
+		const gradeFn =
+			$type === 'wcag2' ? wcag2Grade : wcag3Grade;
+
+		return $colors.map((fg) => ({
+			id: fg.id,
+			name: fg.name,
+			rgb: fg.rgbColor,
+			bgs: $colors.map((bg) => {
+				const level = levelFn(bg.rgbColor, fg.rgbColor);
+				return {
+					level,
+					grade: gradeFn(level)
+				};
+			})
+		}));
+	}
+);
+
+export const selectedCombinations = writable({});
 
 export const combinations = derived(
 	[colorPairs, contrastType, blindnessTypes],
