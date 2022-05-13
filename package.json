@@ -24,7 +24,7 @@
     "apca-w3": "^0.1.2",
     "color-name-list": "^9.4.0",
     "culori": "^2.0.3",
-    "jest": "^28.0.2",
+    "jest": "^27.5.1",
     "nearest-color": "^0.4.4",
     "prettier": "^2.6.2",
     "prettier-plugin-svelte": "^2.7.0",
