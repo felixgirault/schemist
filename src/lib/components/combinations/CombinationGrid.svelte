@@ -1,14 +1,11 @@
 <script lang="ts">
 	import {hexColor} from '$lib/color/spaces';
-	import BlindnessFilter from '$lib/components/combinations/BlindnessFilter.svelte';
-	import ColorFilter from '$lib/components/combinations/ColorFilter.svelte';
 	import Combination from '$lib/components/combinations/Combination.svelte';
-	import ContrastFilter from '$lib/components/combinations/ContrastFilter.svelte';
 	import ContrastTypeFilter from '$lib/components/combinations/ContrastTypeFilter.svelte';
 	import LuminosityFilter from '$lib/components/combinations/LuminosityFilter.svelte';
 	import {
 		colorEntries,
-		cross,
+		combinations,
 		previewedCombinationUid,
 		selectedCombinations
 	} from '$lib/stores/combinations';
@@ -20,8 +17,6 @@
 	};
 
 	$: colorCount = $colorEntries?.length || 0;
-
-	let a = $cross.map(() => {});
 </script>
 
 <div class="data-layout">
@@ -34,18 +29,20 @@
 		{/if}
 	</div>
 
-	<div class="list">
-		<!-- Using a keyed each here worsens performances as it causes layout shifts -->
-		{#if $cross.length}
+	<div>
+		{#if $colorEntries.length}
 			<table>
 				<caption>Test</caption>
 
 				<thead>
 					<tr>
 						<td />
-						{#each $cross as { id, name, rgb } (id)}
+						{#each $colorEntries as { id, name, rgbColor } (id)}
 							<th scope="col">
-								<span title="Foreground: {name}">
+								<span
+									title="Foreground: {name}"
+									style="color: {hexColor(rgbColor)}"
+								>
 									Tt
 								</span>
 							</th>
@@ -54,36 +51,51 @@
 				</thead>
 
 				<tbody>
-					{#each $cross as { id, name, rgb, bgs }, j (id)}
-						<tr>
+					{#each $colorEntries as { id: bgId, name, rgbColor }, bgIndex (bgId)}
+						<tr style="--cbg: {hexColor(rgbColor)};">
 							<th scope="row">
 								<Sample
-									color={hexColor(rgb)}
-									title="Background: {name}"
+									color={hexColor(rgbColor)}
+									title="background: {name}"
 								/>
 							</th>
-							{#each bgs as { grade }, i ($cross[i].id)}
+							{#each $colorEntries as { id: fgId }, fgIndex (fgId)}
 								<td
 									class="combination"
-									style="--cbg: {hexColor(
-										$cross[i].rgb
-									)}; --cfg: {hexColor(rgb)};"
+									style="--cfg: {hexColor(
+										$colorEntries[fgIndex].rgbColor
+									)};"
 								>
-									{#if i !== j}
+									{#if fgIndex !== bgIndex}
 										<input
 											type="checkbox"
-											id="combination-{j}-{i}"
+											id="combination-{bgId}-{fgId}"
 											checked={$selectedCombinations?.[
-												$cross[i].id
-											]?.[id]}
-											onchange={(e) => {
-												$selectedCombinations[
-													$cross[i].id
-												][id] = e.target.checked;
+												bgId
+											]?.[fgId]}
+											on:change={(e) => {
+												if (
+													bgId in
+													$selectedCombinations
+												) {
+													$selectedCombinations[
+														bgId
+													][fgId] =
+														e.target.checked;
+												} else {
+													$selectedCombinations[
+														bgId
+													] = {
+														[fgId]:
+															e.target.checked
+													};
+												}
 											}}
 										/>
-										<label for="combination-{j}-{i}">
-											{grade}
+										<label
+											for="combination-{bgId}-{fgId}"
+										>
+											Tt
 										</label>
 									{/if}
 								</td>
@@ -104,6 +116,34 @@
 				Add colors to your palette to try color combinations.
 			</p>
 		{/if}
+
+		<div class="list">
+			{#each $combinations as { uid, bgName, fgName, contrast, simulatedContrasts }}
+				<Combination
+					{uid}
+					{bgName}
+					{fgName}
+					{contrast}
+					{simulatedContrasts}
+					onPreview={handlePreview}
+				/>
+			{:else}
+				{#if colorCount > 1}
+					<p>
+						There is no color combination matching the
+						selected filters.
+						<br />
+						Try adding more colors to your palette or changing
+						filters.
+					</p>
+				{:else}
+					<p>
+						Add colors to your palette to try color
+						combinations.
+					</p>
+				{/if}
+			{/each}
+		</div>
 	</div>
 </div>
 
