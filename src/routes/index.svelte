@@ -4,8 +4,7 @@
 	import Palette from '$lib/components/Palette.svelte';
 	import Combinations from '$lib/components/combinations/Combinations.svelte';
 	import Export from '$lib/components/export/Export.svelte';
-	import {pack} from '$lib/packing';
-	import {serializeTree} from '$lib/presets';
+	import {permalink} from '$lib/routing';
 	import {
 		combinations,
 		filteredCombinations
@@ -15,9 +14,7 @@
 	let isShowingExport = false;
 
 	const handleShare = () => {
-		location.search = `?preset=${pack(
-			serializeTree($rootNode)
-		)}`;
+		window.location.assign(permalink($rootNode));
 	};
 </script>
 

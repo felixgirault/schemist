@@ -4,6 +4,8 @@
 		ExportEntry,
 		Format
 	} from '$lib/components/export/Export.svelte';
+	import {permalink} from '$lib/routing';
+	import {rootNode} from '$lib/stores/palette';
 	import {cssRule, sassRule} from '$lib/utils/css';
 	import {camelCase, dashCase} from '$lib/utils/strings';
 
@@ -20,4 +22,6 @@
 		.join('\n');
 </script>
 
-<pre class="elevated">{variables}</pre>
+<pre class="elevated">/* @see {permalink($rootNode)} */
+{variables}
+</pre>
