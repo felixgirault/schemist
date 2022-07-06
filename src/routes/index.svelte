@@ -2,6 +2,7 @@
 	import Layout from '$lib/components/Layout.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Palette from '$lib/components/Palette.svelte';
+	import CombinationGrid from '$lib/components/combinations/CombinationGrid.svelte';
 	import Combinations from '$lib/components/combinations/Combinations.svelte';
 	import Export from '$lib/components/export/Export.svelte';
 	import {permalink} from '$lib/routing';
@@ -60,7 +61,7 @@
 				</h2>
 			</header>
 
-			<Combinations />
+			<CombinationGrid />
 		</section>
 	</main>
 </Layout>
