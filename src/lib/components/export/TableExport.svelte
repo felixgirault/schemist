@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Sample from '$lib/components/Sample.svelte';
-	import type {ExportEntry} from '$lib/components/export/Export.svelte';
+	import type {ExportEntry} from '$lib/stores/export';
 
 	export let entries: ExportEntry[];
 

@@ -1,16 +1,5 @@
 <svelte:options immutable />
 
-<script lang="ts" context="module">
-	import type {Entry} from '$lib/stores/combinations';
-
-	export type Format = 'table' | 'css' | 'sass';
-	export type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'lch';
-	export type Casing = 'dash' | 'camel';
-	export interface ExportEntry extends Entry {
-		cssColor: string;
-	}
-</script>
-
 <script lang="ts">
 	import {
 		cssColor,
@@ -22,22 +11,23 @@
 	import TableExport from '$lib/components/export/TableExport.svelte';
 	import VariablesExport from '$lib/components/export/VariablesExport.svelte';
 	import {colorEntries} from '$lib/stores/combinations';
-
-	let format: Format = 'table';
-	let colorFormat: ColorFormat = 'hex';
-	let casing: Casing = 'dash';
-	let precision = 3;
+	import {
+		exportCasing,
+		exportColorFormat,
+		exportFormat,
+		exportPrecision
+	} from '$lib/stores/export';
 
 	$: entries = $colorEntries.map(({color, ...entry}) => ({
 		...entry,
 		color,
 		cssColor:
-			colorFormat === 'rgb'
-				? cssColor(rgbColor(color), precision)
-				: colorFormat === 'hsl'
-				? cssColor(hslColor(color), precision)
-				: colorFormat === 'lch'
-				? cssColor(lchColor(color), precision)
+			$exportColorFormat === 'rgb'
+				? cssColor(rgbColor(color), $exportPrecision)
+				: $exportColorFormat === 'hsl'
+				? cssColor(hslColor(color), $exportPrecision)
+				: $exportColorFormat === 'lch'
+				? cssColor(lchColor(color), $exportPrecision)
 				: hexColor(color)
 	}));
 </script>
@@ -58,7 +48,7 @@
 								id="format-table"
 								type="radio"
 								value="table"
-								bind:group={format}
+								bind:group={$exportFormat}
 							/>
 							<label class="button" for="format-table">
 								Table
@@ -69,7 +59,7 @@
 								id="format-css"
 								type="radio"
 								value="css"
-								bind:group={format}
+								bind:group={$exportFormat}
 							/>
 							<label class="button" for="format-css">
 								CSS
@@ -80,7 +70,7 @@
 								id="format-sass"
 								type="radio"
 								value="sass"
-								bind:group={format}
+								bind:group={$exportFormat}
 							/>
 							<label class="button" for="format-sass">
 								Sass
@@ -99,7 +89,7 @@
 								id="colorFormat-hex"
 								type="radio"
 								value="hex"
-								bind:group={colorFormat}
+								bind:group={$exportColorFormat}
 							/>
 							<label class="button" for="colorFormat-hex">
 								Hex
@@ -110,7 +100,7 @@
 								id="colorFormat-rgb"
 								type="radio"
 								value="rgb"
-								bind:group={colorFormat}
+								bind:group={$exportColorFormat}
 							/>
 							<label class="button" for="colorFormat-rgb">
 								RGB
@@ -121,7 +111,7 @@
 								id="colorFormat-hsl"
 								type="radio"
 								value="hsl"
-								bind:group={colorFormat}
+								bind:group={$exportColorFormat}
 							/>
 							<label class="button" for="colorFormat-hsl">
 								HSL
@@ -132,7 +122,7 @@
 								id="colorFormat-lch"
 								type="radio"
 								value="lch"
-								bind:group={colorFormat}
+								bind:group={$exportColorFormat}
 							/>
 							<label class="button" for="colorFormat-lch">
 								LCH
@@ -141,7 +131,7 @@
 					</div>
 				</fieldset>
 
-				{#if format !== 'table'}
+				{#if $exportFormat !== 'table'}
 					<fieldset>
 						<legend>Variables casing</legend>
 
@@ -152,7 +142,7 @@
 									id="casing-dash"
 									type="radio"
 									value="dash"
-									bind:group={casing}
+									bind:group={$exportCasing}
 								/>
 								<label class="button" for="casing-dash">
 									dash-case
@@ -163,7 +153,7 @@
 									id="casing-camel"
 									type="radio"
 									value="camel"
-									bind:group={casing}
+									bind:group={$exportCasing}
 								/>
 								<label class="button" for="casing-camel">
 									camelCase
@@ -173,7 +163,7 @@
 					</fieldset>
 				{/if}
 
-				{#if colorFormat !== 'hex' && colorFormat !== 'rgb'}
+				{#if $exportColorFormat !== 'hex' && $exportColorFormat !== 'rgb'}
 					<label for="precision">Precision</label>
 					<input
 						id="precision"
@@ -181,16 +171,20 @@
 						type="number"
 						min={0}
 						max={5}
-						bind:value={precision}
+						bind:value={$exportPrecision}
 					/>
 				{/if}
 			</div>
 		</div>
 
-		{#if format === 'table'}
+		{#if $exportFormat === 'table'}
 			<TableExport {entries} />
 		{:else}
-			<VariablesExport {entries} {format} {casing} />
+			<VariablesExport
+				{entries}
+				format={$exportFormat}
+				casing={$exportCasing}
+			/>
 		{/if}
 	</div>
 </section>
