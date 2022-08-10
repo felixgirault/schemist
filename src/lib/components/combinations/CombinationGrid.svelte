@@ -33,6 +33,28 @@
 	$: gradeFn =
 		$contrastType === 'wcag2' ? wcag2Grade : wcag3Grade;
 
+	const selectAll = (bgId) => {
+		const areAllSelected = $colorEntries.every(({id: bgId}) =>
+			$colorEntries.every(
+				({id: fgId}) =>
+					bgId === fgId ||
+					$selectedCombinations?.[bgId]?.[fgId]
+			)
+		);
+
+		$selectedCombinations = Object.fromEntries(
+			$colorEntries.map(({id: bgId}) => [
+				bgId,
+				Object.fromEntries(
+					$colorEntries.map(({id: fgId}) => [
+						fgId,
+						!areAllSelected
+					])
+				)
+			])
+		);
+	};
+
 	const selectBackgrounds = (bgId) => {
 		const areAllSelected = $colorEntries.every(
 			({id}) =>
@@ -77,143 +99,160 @@
 	</div>
 
 	<div>
-		{#if $colorEntries.length}
-			<div role="table" aria-label="Color combinations">
-				<div role="rowgroup">
-					<div role="row">
-						<div />
-						{#each $colorEntries as { id, name, rgbColor } (id)}
+		<div class="table-container">
+			{#if $colorEntries.length}
+				<div role="table" aria-label="Color combinations">
+					<div role="rowgroup">
+						<div role="row">
 							<div role="columnheader">
 								<button
 									class="button"
-									title="Select all colors with foreground {name}"
-									on:click={() => selectForegrounds(id)}
+									title="Select all colors"
+									on:click={selectAll}
 								>
-									<span
-										title="Foreground: {name}"
-										style="color: {hexColor(rgbColor)}"
-									>
-										Tt
-									</span>
+									All
 								</button>
+							</div>
+
+							{#each $colorEntries as { id, name, rgbColor } (id)}
+								<div role="columnheader">
+									<button
+										class="button"
+										title="Select all colors with foreground {name}"
+										on:click={() =>
+											selectForegrounds(id)}
+									>
+										<span
+											title="Foreground: {name}"
+											style="color: {hexColor(
+												rgbColor
+											)}"
+										>
+											Tt
+										</span>
+									</button>
+								</div>
+							{/each}
+						</div>
+					</div>
+
+					<div role="rowgroup">
+						{#each $colorEntries as { id: bgId, name, color, rgbColor }, bgIndex (bgId)}
+							<div
+								role="row"
+								style="--cbg: {hexColor(
+									rgbColor
+								)}; --cbg-soft: {cssColor({
+									...rgbColor,
+									alpha: 0.5
+								})}; --cbg-light: {cssColor({
+									...color,
+									l: 95,
+									alpha: 0.5
+								})}; --cbg-dark: {cssColor({
+									...color,
+									l: 5,
+									alpha: 0.5
+								})};"
+							>
+								<div role="rowheader">
+									<button
+										class="button button--icon"
+										title="Select all colors with background {name}"
+										on:click={() =>
+											selectBackgrounds(bgId)}
+									>
+										<Sample
+											color={hexColor(rgbColor)}
+											title="background: {name}"
+										/>
+									</button>
+								</div>
+
+								{#each $colorEntries as { id: fgId }, fgIndex (fgId)}
+									{@const level = levelFn(
+										rgbColor,
+										$colorEntries[fgIndex].rgbColor
+									)}
+									{@const grade = gradeFn(level)}
+									{@const roundedLevel = round(
+										level,
+										1
+									)}
+
+									<div
+										role="cell"
+										style="--cfg: {hexColor(
+											$colorEntries[fgIndex].rgbColor
+										)}; --cfg-soft: {cssColor({
+											...$colorEntries[fgIndex]
+												.rgbColor,
+											alpha: 0.1
+										})};"
+									>
+										{#if fgIndex !== bgIndex}
+											<input
+												type="checkbox"
+												id="combination-{bgId}-{fgId}"
+												checked={$selectedCombinations?.[
+													bgId
+												]?.[fgId]}
+												on:change={(e) => {
+													if (
+														bgId in
+														$selectedCombinations
+													) {
+														$selectedCombinations[
+															bgId
+														][fgId] =
+															e.target.checked;
+													} else {
+														$selectedCombinations[
+															bgId
+														] = {
+															[fgId]:
+																e.target.checked
+														};
+													}
+												}}
+											/>
+
+											<label
+												class="combination"
+												class:invalid={level <
+													$minLevel}
+												for="combination-{bgId}-{fgId}"
+												title="{$colorEntries[
+													fgIndex
+												].name} on {name}"
+											>
+												<span
+													class="background button"
+												>
+													<span class="foreground">
+														<span class="grade">
+															{grade}
+														</span>
+														<span class="level">
+															({roundedLevel})
+														</span>
+													</span>
+												</span>
+											</label>
+										{/if}
+									</div>
+								{/each}
 							</div>
 						{/each}
 					</div>
 				</div>
-
-				<div role="rowgroup">
-					{#each $colorEntries as { id: bgId, name, color, rgbColor }, bgIndex (bgId)}
-						<div
-							role="row"
-							style="--cbg: {hexColor(
-								rgbColor
-							)}; --cbg-soft: {cssColor({
-								...rgbColor,
-								alpha: 0.5
-							})}; --cbg-light: {cssColor({
-								...color,
-								l: 95,
-								alpha: 0.5
-							})}; --cbg-dark: {cssColor({
-								...color,
-								l: 5,
-								alpha: 0.5
-							})};"
-						>
-							<div role="rowheader">
-								<button
-									class="button button--icon"
-									title="Select all colors with background {name}"
-									on:click={() =>
-										selectBackgrounds(bgId)}
-								>
-									<Sample
-										color={hexColor(rgbColor)}
-										title="background: {name}"
-									/>
-								</button>
-							</div>
-
-							{#each $colorEntries as { id: fgId }, fgIndex (fgId)}
-								{@const level = levelFn(
-									rgbColor,
-									$colorEntries[fgIndex].rgbColor
-								)}
-								{@const grade = gradeFn(level)}
-								{@const roundedLevel = round(level, 1)}
-
-								<div
-									role="cell"
-									style="--cfg: {hexColor(
-										$colorEntries[fgIndex].rgbColor
-									)}; --cfg-soft: {cssColor({
-										...$colorEntries[fgIndex].rgbColor,
-										alpha: 0.1
-									})};"
-								>
-									{#if fgIndex !== bgIndex}
-										<input
-											type="checkbox"
-											id="combination-{bgId}-{fgId}"
-											checked={$selectedCombinations?.[
-												bgId
-											]?.[fgId]}
-											on:change={(e) => {
-												if (
-													bgId in
-													$selectedCombinations
-												) {
-													$selectedCombinations[
-														bgId
-													][fgId] =
-														e.target.checked;
-												} else {
-													$selectedCombinations[
-														bgId
-													] = {
-														[fgId]:
-															e.target.checked
-													};
-												}
-											}}
-										/>
-
-										<label
-											class="combination"
-											class:invalid={level <
-												$minLevel}
-											for="combination-{bgId}-{fgId}"
-											title="{$colorEntries[fgIndex]
-												.name} on {name}"
-										>
-											<span class="background button">
-												<span class="foreground">
-													<span class="grade">
-														{grade}
-													</span>
-													({roundedLevel})
-												</span>
-											</span>
-										</label>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{/each}
-				</div>
-			</div>
-		{:else if colorCount > 1}
-			<p>
-				There is no color combination matching the selected
-				filters.
-				<br />
-				Try adding more colors to your palette or changing filters.
-			</p>
-		{:else}
-			<p>
-				Add colors to your palette to try color combinations.
-			</p>
-		{/if}
+			{:else}
+				<p>
+					Add colors to your palette to try color
+					combinations.
+				</p>
+			{/if}
+		</div>
 
 		<div class="list">
 			{#each $combinations as { uid, bgName, fgName, contrast, simulatedContrasts }}
@@ -261,9 +300,12 @@
 		contain: layout;
 	}
 
+	.table-container {
+		overflow: auto;
+	}
+
 	[role='table'] {
-		width: auto;
-		caption-side: bottom;
+		margin-bottom: var(--vgap);
 	}
 
 	[role='table'] :global(.sample) {
@@ -275,16 +317,19 @@
 		display: grid;
 		grid-auto-columns: 1fr;
 		grid-template-rows: 1fr;
+		gap: 5px;
 		align-items: stretch;
 		justify-content: stretch;
+		margin-bottom: 5px;
 	}
 
 	[role='row'] > * {
 		grid-row: 1;
 	}
 
-	[role='cell'] {
-		padding: 0;
+	[role='columnheader'] {
+		position: sticky;
+		top: 0;
 	}
 
 	input {
@@ -294,7 +339,6 @@
 	.combination {
 		display: block;
 		box-sizing: border-box;
-		padding: 3px 1.5px;
 		height: 100%;
 	}
 
@@ -356,6 +400,12 @@
 
 	.grade {
 		font-weight: bold;
+	}
+
+	.level {
+		display: none;
+		line-height: 1;
+		font-size: 0.9rem;
 	}
 
 	.combination:hover .background,
