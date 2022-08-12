@@ -7,12 +7,11 @@ module.exports = {
 		'culori/fn':
 			'<rootDir>/node_modules/culori/src/index-fn.js'
 	},
-	transformIgnorePatterns: [
-		'node_modules/(?!(culori|color-name-list))'
-	],
+	transformIgnorePatterns: ['node_modules/(?!(culori))'],
 	globals: {
 		'ts-jest': {
-			diagnostics: false
+			diagnostics: false,
+			isolatedModules: true
 		}
 	}
 };
