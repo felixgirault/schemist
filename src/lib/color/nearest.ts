@@ -1,4 +1,4 @@
-import colors from 'color-name-list/dist/colornames.bestof.esm';
+import colors from 'color-name-list/dist/colornames.bestof.json';
 import nearestColor from 'nearest-color';
 
 const find = nearestColor.from(
