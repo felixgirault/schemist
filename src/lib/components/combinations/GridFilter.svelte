@@ -14,6 +14,16 @@
 	$: levelFn =
 		$contrastType === 'wcag2' ? wcag2Contrast : wcag3Contrast;
 
+	const selectOne = (bgId, fgId, selected) => {
+		if (bgId in $selectedCombinations) {
+			$selectedCombinations[bgId][fgId] = selected;
+		} else {
+			$selectedCombinations[bgId] = {
+				[fgId]: selected
+			};
+		}
+	};
+
 	const selectAll = () => {
 		const areAllSelected = $colorEntries.every(({id: bgId}) =>
 			$colorEntries.every(
@@ -78,7 +88,7 @@
 					<tr>
 						<th>
 							<button
-								class="button button--inline "
+								class="button button--inline"
 								title="Select all colors"
 								on:click={selectAll}
 							>
@@ -89,8 +99,9 @@
 						{#each $colorEntries as { id, name, rgbColor } (id)}
 							<th>
 								<button
-									class="button button--inline "
+									class="button button--inline"
 									title="Select all colors with foreground {name}"
+									data-name={name}
 									on:click={() => selectForegrounds(id)}
 								>
 									<span
@@ -125,11 +136,12 @@
 						>
 							<th scope="row">
 								<button
-									class="button button--inline "
+									class="button button--inline"
 									title="Select all colors with background {name}"
 									style="background: {hexColor(
 										rgbColor
 									)}"
+									data-name={name}
 									on:click={() =>
 										selectBackgrounds(bgId)}
 								/>
@@ -157,22 +169,11 @@
 												bgId
 											]?.[fgId]}
 											on:change={(e) => {
-												if (
-													bgId in
-													$selectedCombinations
-												) {
-													$selectedCombinations[
-														bgId
-													][fgId] =
-														e.target.checked;
-												} else {
-													$selectedCombinations[
-														bgId
-													] = {
-														[fgId]:
-															e.target.checked
-													};
-												}
+												selectOne(
+													bgId,
+													fgId,
+													e.target.checked
+												);
 											}}
 										/>
 
@@ -236,6 +237,43 @@
 		width: 100%;
 	}
 
+	[data-name] {
+		position: relative;
+	}
+
+	[data-name]::before {
+		position: absolute;
+		box-shadow: 0 0.1rem 0.5rem 0 var(--shadow),
+			0 0.5rem 2rem 0 var(--shadow);
+		border-radius: var(--radius);
+		border: 1px solid var(--bg);
+		background: var(--fg);
+		color: var(--bg);
+	}
+
+	table:hover [data-name]::before,
+	table:focus-within [data-name]::before {
+		content: attr(data-name) ' ';
+	}
+
+	thead th [data-name]::before {
+		right: 25%;
+		bottom: calc(100% + 0.5rem);
+		padding: 0.5rem 0.15rem;
+		height: max-content;
+		writing-mode: vertical-rl;
+		text-orientation: mixed;
+		transform: rotate(-45deg);
+		transform-origin: bottom;
+	}
+
+	th[scope='row'] [data-name]::before {
+		top: 0;
+		right: calc(100% + 0.5rem);
+		padding: 0.15rem 0.5rem;
+		width: max-content;
+	}
+
 	.button {
 		width: 100%;
 		height: 100%;
@@ -254,58 +292,22 @@
 		display: block;
 		box-sizing: border-box;
 		height: 100%;
+		opacity: 0.3;
 	}
 
 	.background {
 		display: inline-block;
 		box-sizing: border-box;
-		background: repeating-linear-gradient(
-			120deg,
-			transparent 0 calc(0.5ch - 1px),
-			var(--cbg) 0.5ch,
-			transparent calc(0.5ch + 1px)
-		);
-		/*
-		background-color: var(--cbg-light);
-		background-color: transparent;
-		background-image: repeating-linear-gradient(
-				45deg,
-				var(--cbg-dark) 25%,
-				transparent 25%,
-				transparent 75%,
-				var(--cbg-dark) 75%,
-				var(--cbg-dark)
-			),
-			repeating-linear-gradient(
-				45deg,
-				var(--cbg-dark) 25%,
-				var(--cbg-light) 25%,
-				var(--cbg-light) 75%,
-				var(--cbg-dark) 75%,
-				var(--cbg-dark)
-			);
-		background-position: 0 0, 0.1875rem 0.1875rem;
-		background-size: 0.375rem 0.375rem;
-		*/
+		background: var(--cbg);
+	}
 
-		//background-attachment: fixed;
+	.combination .background {
+		border-radius: 2rem;
 	}
 
 	.foreground {
 		font-family: var(--font-sans);
-		background: repeating-linear-gradient(
-			120deg,
-			var(--cfg-soft) 0 calc(0.25ch - 1px),
-			var(--cfg) 0.25ch,
-			var(--cfg-soft) calc(0.25ch + 1px) calc(0.5ch - 1px),
-			var(--cfg) 0.5ch,
-			var(--cfg-soft) calc(0.5ch + 1px)
-		);
-		background-clip: text;
-		-webkit-background-clip: text;
-		color: var(--cfg-soft);
-		background-attachment: fixed;
-		background-position: top left;
+		color: var(--cfg);
 	}
 
 	.combination:hover .background,
@@ -315,29 +317,25 @@
 
 	.combination:hover .foreground,
 	.combination:focus .foreground {
-		color: var(--cfg-soft);
+		color: var(--cfg);
 	}
 
 	input ~ .invalid {
-		opacity: 0.2;
+		opacity: 0.1;
 	}
 
 	input:checked ~ .combination,
 	.combination:hover,
 	.combination:focus {
 		opacity: 1;
+		transform: scale(100%);
+	}
+
+	input:checked ~ .invalid {
+		opacity: 0.6;
 	}
 
 	input:checked ~ .combination .background {
-		box-shadow: 0 0 0 1px var(--fg), inset 0 0 0 1px var(--bg);
-		background: var(--cbg) !important;
-	}
-
-	input:checked ~ .combination .foreground {
-		color: var(--cfg) !important;
-	}
-
-	input:checked ~ .invalid .foreground {
-		text-decoration: solid line-through currentColor 0.25ex;
+		border-radius: calc(var(--radius) / 2);
 	}
 </style>

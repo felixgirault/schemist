@@ -195,8 +195,9 @@ a.button {
 
 .button--inline {
 	border-radius: calc(var(--radius) / 2);
-	padding: 0 0.25rem;
+	padding: 0.15rem 0.25rem;
 	text-transform: lowercase;
+	line-height: 1;
 	font-variant: small-caps;
 	font-weight: 900;
 	letter-spacing: 0.05ch;
