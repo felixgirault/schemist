@@ -10,6 +10,7 @@
 		filteredCombinations,
 		previewedCombinationUid
 	} from '$lib/stores/combinations';
+	import GridFilter from './GridFilter.svelte';
 
 	const handlePreview = (uid: string) => {
 		$previewedCombinationUid =
@@ -19,47 +20,31 @@
 	$: colorCount = $colorEntries?.length || 0;
 </script>
 
-<div class="data-layout">
-	<div class="data-options-track">
+<div class="combinations">
+	<!-- Using a keyed each here worsens performances as it causes layout shifts -->
+	{#each $filteredCombinations as { uid, bgName, fgName, contrast, simulatedContrasts }}
+		<Combination
+			{uid}
+			{bgName}
+			{fgName}
+			{contrast}
+			{simulatedContrasts}
+			onPreview={handlePreview}
+		/>
+	{:else}
 		{#if colorCount > 1}
-			<div class="data-options form">
-				<ColorFilter />
-				<ContrastTypeFilter />
-				<ContrastFilter />
-				<BlindnessFilter />
-				<LuminosityFilter />
-			</div>
-		{/if}
-	</div>
-
-	<div class="list">
-		<!-- Using a keyed each here worsens performances as it causes layout shifts -->
-		{#each $filteredCombinations as { uid, bgName, fgName, contrast, simulatedContrasts }}
-			<Combination
-				{uid}
-				{bgName}
-				{fgName}
-				{contrast}
-				{simulatedContrasts}
-				onPreview={handlePreview}
-			/>
+			<p>
+				There is no color combination matching the selected
+				filters.
+				<br />
+				Try adding more colors to your palette or changing filters.
+			</p>
 		{:else}
-			{#if colorCount > 1}
-				<p>
-					There is no color combination matching the
-					selected filters.
-					<br />
-					Try adding more colors to your palette or changing
-					filters.
-				</p>
-			{:else}
-				<p>
-					Add colors to your palette to try color
-					combinations.
-				</p>
-			{/if}
-		{/each}
-	</div>
+			<p>
+				Add colors to your palette to try color combinations.
+			</p>
+		{/if}
+	{/each}
 </div>
 
 <style>
@@ -71,7 +56,7 @@
 		contain: layout;
 	}
 
-	.list {
+	.combinations {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
 		gap: 1rem;

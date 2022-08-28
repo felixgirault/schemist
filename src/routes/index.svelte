@@ -2,8 +2,8 @@
 	import Layout from '$lib/components/Layout.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Palette from '$lib/components/Palette.svelte';
-	import CombinationGrid from '$lib/components/combinations/CombinationGrid.svelte';
 	import Combinations from '$lib/components/combinations/Combinations.svelte';
+	import Filters from '$lib/components/combinations/Filters.svelte';
 	import Export from '$lib/components/export/Export.svelte';
 	import {pack} from '$lib/packing';
 	import {serializeTree} from '$lib/presets';
@@ -55,6 +55,14 @@
 			</footer>
 		</section>
 
+		<section class="filters">
+			<header>
+				<h2 class="h2">Filters</h2>
+			</header>
+
+			<Filters />
+		</section>
+
 		<section class="combinations">
 			<header>
 				<h2 class="h2">
@@ -64,7 +72,7 @@
 				</h2>
 			</header>
 
-			<CombinationGrid />
+			<Combinations />
 		</section>
 	</main>
 </Layout>
@@ -90,7 +98,7 @@
 
 	@media screen and (min-width: 80rem) {
 		main {
-			grid-template-columns: 50ch 1fr;
+			grid-template-columns: 50ch minmax(40ch, min-content) auto;
 		}
 	}
 
