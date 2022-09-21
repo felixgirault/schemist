@@ -55,9 +55,7 @@ export type Combination = {
 export const colorFilters = writable<Node['id'][]>([]);
 export const contrastType = writable<ContrastType>('wcag2');
 export const minLevel = writable<number>(
-	get(contrastType) === 'wcag2'
-		? Wcag2Level.aa18
-		: Wcag3Level.large
+	get(contrastType) === 'wcag2' ? Wcag2Level.ko : Wcag3Level.ko
 );
 
 contrastType.subscribe((type) => {
