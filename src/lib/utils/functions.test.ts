@@ -6,7 +6,7 @@ const delay = (duration) =>
 	});
 
 test('debounce', async () => {
-	const fn = jest.fn();
+	const fn = vi.fn();
 	const debounced = debounce(fn, 2);
 
 	debounced();

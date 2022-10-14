@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1
 
 exports[`pack node Analogous 1`] = `"0@01221@anl,,steps"`;
 
