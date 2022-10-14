@@ -9,6 +9,7 @@
 	import type {Node} from '$lib/stores/nodes';
 	import {createNode} from '$lib/stores/nodes';
 	import {overlayColor} from '$lib/style';
+	import NodeInfo from './NodeInfo.svelte';
 
 	export let node: Node;
 
@@ -22,11 +23,13 @@
 		output,
 		parent
 	} = node;
+	const infoId = `${id}-info`;
 	const optionsId = `${id}-options`;
 	const hasParent = !!parent;
 	const hasOptions = !!def.params.length;
 
-	let isOpen = !hasParent;
+	let isInfoOpen = false;
+	let areOptionsOpen = !hasParent;
 	let isEditingToken = false;
 	let isPickingChild = false;
 
@@ -57,7 +60,7 @@
 		style="--output: {cssColor($output[0])};"
 	/>
 
-	<div class="self" class:open={isOpen}>
+	<div class="self" class:open={areOptionsOpen}>
 		<header>
 			<div class="title">
 				<h3 class="name">
@@ -96,11 +99,13 @@
 			</div>
 
 			<NodeActions
+				{infoId}
 				{optionsId}
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
 				bind:isHidden={$isHidden}
-				bind:isOpen
+				bind:isInfoOpen
+				bind:areOptionsOpen
 				{hasOptions}
 				{hasHint}
 				onPick={() => {
@@ -112,7 +117,11 @@
 			/>
 		</header>
 
-		{#if hasOptions && isOpen}
+		{#if isInfoOpen}
+			<NodeInfo id={infoId} {node} />
+		{/if}
+
+		{#if hasOptions && areOptionsOpen}
 			<NodeOptions id={optionsId} {node} />
 		{/if}
 	</div>

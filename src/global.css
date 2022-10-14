@@ -65,6 +65,7 @@ td {
 	border-bottom: 1px solid var(--bg-neutral);
 	padding: 0.5rem 1rem;
 	text-align: left;
+	vertical-align: baseline;
 }
 
 th {
@@ -78,6 +79,21 @@ td {
 tbody tr:last-child th,
 tbody tr:last-child td {
 	border: 0;
+}
+
+.table--small th,
+.table--small td {
+	padding: 0.25rem 0.5rem;
+}
+
+.table--small th:first-child,
+.table--small td:first-child {
+	padding-left: 0;
+}
+
+.table--small th:last-child,
+.table--small td:last-child {
+	padding-right: 0;
 }
 
 pre {
