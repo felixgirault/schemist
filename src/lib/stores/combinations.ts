@@ -122,8 +122,29 @@ const colorPairs = derived(filteredColors, ($colors) => {
 	);
 });
 
+// TODO don't calc here
+// just make paires for classic combinations list
+export const selectedCombinations = writable<
+	Record<Node['id'], Record<Node['id'], boolean>>
+>({});
+
+export const selectedPairs = derived(
+	[filteredColors, selectedCombinations],
+	([$colors, $selected]) => {
+		return Object.entries($selected).flatMap(([bgId, fgs]) => {
+			const bg = $colors.find((c) => c.id === bgId);
+			return Object.entries(fgs)
+				.filter(([_, used]) => used)
+				.map(([fgId]) => {
+					const fg = $colors.find((c) => c.id === fgId);
+					return [bg, fg];
+				});
+		});
+	}
+);
+
 export const combinations = derived(
-	[colorPairs, contrastType, blindnessTypes],
+	[selectedPairs, contrastType, blindnessTypes],
 	([$pairs, $type, $blindnessTypes]) => {
 		// Not in derived dependencies so it doesn't trigger
 		// a computation (only sortedColorIds should).
@@ -132,10 +153,10 @@ export const combinations = derived(
 		const gradeFn =
 			$type === 'wcag2' ? wcag2Grade : wcag3Grade;
 
-		return $pairs.map(([bgOutput, fgOutput]): Combination => {
+		return $pairs.map(([bgEntry, fgEntry]): Combination => {
 			const baseLevel = levelFn(
-				bgOutput.rgbColor,
-				fgOutput.rgbColor
+				bgEntry.rgbColor,
+				fgEntry.rgbColor
 			);
 
 			const baseGrade = gradeFn(baseLevel);
@@ -152,8 +173,8 @@ export const combinations = derived(
 							? simulateDeuteranomaly
 							: simulateTritanomaly;
 
-					const bg = simulate(bgOutput.rgbColor);
-					const fg = simulate(fgOutput.rgbColor);
+					const bg = simulate(bgEntry.rgbColor);
+					const fg = simulate(fgEntry.rgbColor);
 					const level = levelFn(bg, fg);
 					const grade = gradeFn(level);
 
@@ -173,15 +194,15 @@ export const combinations = derived(
 			);
 
 			return {
-				uid: `${bgOutput.id}-${fgOutput.id}`,
-				bgName: bgOutput.name,
-				fgName: fgOutput.name,
+				uid: `${bgEntry.id}-${fgEntry.id}`,
+				bgName: bgEntry.name,
+				fgName: fgEntry.name,
 				minLevel,
 				minGrade,
 				contrast: {
 					type: 'none',
-					bg: bgOutput.rgbColor,
-					fg: fgOutput.rgbColor,
+					bg: bgEntry.rgbColor,
+					fg: fgEntry.rgbColor,
 					level: baseLevel,
 					grade: baseGrade
 				},
