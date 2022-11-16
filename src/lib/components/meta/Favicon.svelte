@@ -13,7 +13,10 @@
 	canvas.width = size;
 	canvas.height = size;
 
-	const context = canvas.getContext('2d');
+	const context = canvas.getContext('2d', {
+		willReadFrequently: true
+	});
+
 	const img = document.createElement('img');
 	img.src = '/img/favicon-template.png';
 

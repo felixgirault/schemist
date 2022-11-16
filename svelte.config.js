@@ -5,12 +5,6 @@ import preprocess from 'svelte-preprocess';
 export default {
 	preprocess: preprocess(),
 	kit: {
-		adapter: adapter(),
-		prerender: {
-			default: true
-		},
-		browser: {
-			router: false
-		}
+		adapter: adapter()
 	}
 };

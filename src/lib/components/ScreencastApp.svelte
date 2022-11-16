@@ -4,14 +4,14 @@
 	// starting with #dbdb00, adding a contrasting color,
 	// a complementary color, then changing HSL hue of the
 	// root color to ~180, and finally to ~360.
-	import Index from './index.svelte';
+	import App from '$lib/components/App.svelte';
 </script>
 
 <svelte:head>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<Index />
+<App />
 
 <style>
 	:global(.header),
