@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {browser} from '$app/env';
+	import {browser} from '$app/environment';
 	import Favicon from '$lib/components/meta/Favicon.svelte';
 	import GlobalStyle from '$lib/components/meta/GlobalStyle.svelte';
 	import OpenGraph from '$lib/components/meta/OpenGraph.svelte';

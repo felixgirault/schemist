@@ -53,6 +53,10 @@ body {
 	min-height: 100%;
 }
 
+.app {
+	display: contents;
+}
+
 table {
 	margin-bottom: 1rem;
 	border-collapse: collapse;
