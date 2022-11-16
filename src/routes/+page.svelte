@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Layout from '$lib/components/Layout.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Palette from '$lib/components/Palette.svelte';
 	import Combinations from '$lib/components/combinations/Combinations.svelte';
@@ -18,52 +17,50 @@
 	};
 </script>
 
-<Layout>
-	<!-- svelte-ignore a11y-no-redundant-roles -->
-	<main role="main">
-		<section class="palette">
-			<header>
-				<h2 class="h2">Palette</h2>
-			</header>
+<!-- svelte-ignore a11y-no-redundant-roles -->
+<main role="main">
+	<section class="palette">
+		<header>
+			<h2 class="h2">Palette</h2>
+		</header>
 
-			<Palette />
+		<Palette />
 
-			<footer class="form">
-				<div class="button-list">
-					<button
-						class="button"
-						title="Export colors in various formats"
-						on:click={() => {
-							isShowingExport = true;
-						}}
-					>
-						Export
-					</button>
+		<footer class="form">
+			<div class="button-list">
+				<button
+					class="button"
+					title="Export colors in various formats"
+					on:click={() => {
+						isShowingExport = true;
+					}}
+				>
+					Export
+				</button>
 
-					<button
-						class="button"
-						title="Get a permalink to this palette"
-						on:click={handleShare}
-					>
-						Share
-					</button>
-				</div>
-			</footer>
-		</section>
+				<button
+					class="button"
+					title="Get a permalink to this palette"
+					on:click={handleShare}
+				>
+					Share
+				</button>
+			</div>
+		</footer>
+	</section>
 
-		<section class="combinations">
-			<header>
-				<h2 class="h2">
-					Combinations <span>
-						({$filteredCombinations.length} / {$combinations.length})
-					</span>
-				</h2>
-			</header>
+	<section class="combinations">
+		<header>
+			<h2 class="h2">
+				Combinations <span>
+					({$filteredCombinations.length} / {$combinations.length})
+				</span>
+			</h2>
+		</header>
 
-			<Combinations />
-		</section>
-	</main>
-</Layout>
+		<Combinations />
+	</section>
+</main>
 
 {#if isShowingExport}
 	<Modal
