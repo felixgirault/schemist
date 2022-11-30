@@ -17,6 +17,7 @@
 		exportFormat,
 		exportPrecision
 	} from '$lib/stores/export';
+	import DesignTokensExport from './DesignTokensExport.svelte';
 
 	$: entries = $colorEntries.map(({color, ...entry}) => ({
 		...entry,
@@ -56,6 +57,17 @@
 
 							<input
 								class="button-trigger hidden"
+								id="format-tokens"
+								type="radio"
+								value="tokens"
+								bind:group={$exportFormat}
+							/>
+							<label class="button" for="format-tokens">
+								Design tokens
+							</label>
+
+							<input
+								class="button-trigger hidden"
 								id="format-css"
 								type="radio"
 								value="css"
@@ -79,59 +91,73 @@
 					</div>
 				</fieldset>
 
-				<fieldset>
-					<legend>Color format</legend>
+				{#if $exportFormat !== 'tokens'}
+					<fieldset>
+						<legend>Color format</legend>
 
-					<div class="fieldset-fields">
-						<div class="button-list">
-							<input
-								class="button-trigger hidden"
-								id="colorFormat-hex"
-								type="radio"
-								value="hex"
-								bind:group={$exportColorFormat}
-							/>
-							<label class="button" for="colorFormat-hex">
-								Hex
-							</label>
+						<div class="fieldset-fields">
+							<div class="button-list">
+								<input
+									class="button-trigger hidden"
+									id="colorFormat-hex"
+									type="radio"
+									value="hex"
+									bind:group={$exportColorFormat}
+								/>
+								<label
+									class="button"
+									for="colorFormat-hex"
+								>
+									Hex
+								</label>
 
-							<input
-								class="button-trigger hidden"
-								id="colorFormat-rgb"
-								type="radio"
-								value="rgb"
-								bind:group={$exportColorFormat}
-							/>
-							<label class="button" for="colorFormat-rgb">
-								RGB
-							</label>
+								<input
+									class="button-trigger hidden"
+									id="colorFormat-rgb"
+									type="radio"
+									value="rgb"
+									bind:group={$exportColorFormat}
+								/>
+								<label
+									class="button"
+									for="colorFormat-rgb"
+								>
+									RGB
+								</label>
 
-							<input
-								class="button-trigger hidden"
-								id="colorFormat-hsl"
-								type="radio"
-								value="hsl"
-								bind:group={$exportColorFormat}
-							/>
-							<label class="button" for="colorFormat-hsl">
-								HSL
-							</label>
+								<input
+									class="button-trigger hidden"
+									id="colorFormat-hsl"
+									type="radio"
+									value="hsl"
+									bind:group={$exportColorFormat}
+								/>
+								<label
+									class="button"
+									for="colorFormat-hsl"
+								>
+									HSL
+								</label>
 
-							<input
-								class="button-trigger hidden"
-								id="colorFormat-lch"
-								type="radio"
-								value="lch"
-								bind:group={$exportColorFormat}
-							/>
-							<label class="button" for="colorFormat-lch">
-								LCH
-							</label>
+								<input
+									class="button-trigger hidden"
+									id="colorFormat-lch"
+									type="radio"
+									value="lch"
+									bind:group={$exportColorFormat}
+								/>
+								<label
+									class="button"
+									for="colorFormat-lch"
+								>
+									LCH
+								</label>
+							</div>
 						</div>
-					</div>
-				</fieldset>
+					</fieldset>
+				{/if}
 
-				{#if $exportFormat !== 'table'}
+				{#if $exportFormat !== 'table' && $exportFormat !== 'tokens'}
 					<fieldset>
 						<legend>Variables casing</legend>
 
@@ -179,6 +205,8 @@
 
 		{#if $exportFormat === 'table'}
 			<TableExport {entries} />
+		{:else if $exportFormat === 'tokens'}
+			<DesignTokensExport entries={$colorEntries} />
 		{:else}
 			<VariablesExport
 				{entries}

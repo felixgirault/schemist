@@ -1,7 +1,7 @@
 import {writable} from 'svelte/store';
 import type {Entry} from './combinations';
 
-export type ExportFormat = 'table' | 'css' | 'sass';
+export type ExportFormat = 'table' | 'tokens' | 'css' | 'sass';
 export type ExportColorFormat = 'hex' | 'rgb' | 'hsl' | 'lch';
 export type ExportCasing = 'dash' | 'camel';
 export interface ExportEntry extends Entry {
