@@ -69,11 +69,9 @@ export const generateName = (
 	color: SchemistColor,
 	parentColorName?: string
 ) =>
-	sentenceCase(
-		token
-			? token.replace('$', parentColorName)
-			: nearestColor(hexColor(color))
-	);
+	token
+		? token.replace('$', parentColorName)
+		: sentenceCase(nearestColor(hexColor(color)));
 
 // This whole thing is quite convoluted (shall I say shitty?)
 // but at least it makes the tree logic self contained.
