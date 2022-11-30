@@ -5,6 +5,7 @@
 		hslColor,
 		lchColor,
 		rgbColor,
+		toHsl100,
 		toRgb255
 	} from '$lib/color/spaces';
 	import type {Node} from '$lib/stores/nodes';
@@ -18,6 +19,7 @@
 	$: rgb = rgbColor($output[0]);
 	$: rgb255 = toRgb255(rgb);
 	$: hsl = hslColor($output[0]);
+	$: hsl100 = toHsl100(hsl);
 	$: lch = lchColor($output[0]);
 </script>
 
@@ -51,8 +53,8 @@
 			<tr>
 				<td>HSL</td>
 				<td>
-					{Math.round(hsl.h)}, {Math.round(hsl.s)}, {Math.round(
-						hsl.l
+					{Math.round(hsl100.h)}, {Math.round(hsl100.s)}, {Math.round(
+						hsl100.l
 					)}
 				</td>
 				<td>
