@@ -1,3 +1,4 @@
+import {expect, test} from 'vitest';
 import {omit} from './objects';
 
 test('omit', () => {

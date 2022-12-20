@@ -1,3 +1,4 @@
+import {expect, test} from 'vitest';
 import {unique, withoutIndex} from './arrays';
 
 test('withoutIndex', () => {
