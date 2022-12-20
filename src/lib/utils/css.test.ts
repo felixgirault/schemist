@@ -1,3 +1,4 @@
+import {expect, test} from 'vitest';
 import {cssColor, schemistColor} from '$lib/color/spaces';
 import {
 	continuousGradient,

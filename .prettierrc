@@ -14,5 +14,13 @@
 	"svelteSortOrder": "options-scripts-markup-styles",
 	"tabWidth": 3,
 	"trailingComma": "none",
-	"useTabs": true
+	"useTabs": true,
+	"overrides": [
+		{
+			"files": "*.svelte",
+			"options": {
+				"parser": "svelte"
+			}
+		}
+	]
 }

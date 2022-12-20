@@ -1,3 +1,4 @@
+import {expect, test} from 'vitest';
 import {range, uid} from './generators';
 
 test('uid', () => {

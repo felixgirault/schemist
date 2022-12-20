@@ -1,3 +1,4 @@
+import {expect, test, vi} from 'vitest';
 import {debounce} from './functions';
 
 const delay = (duration) =>

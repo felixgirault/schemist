@@ -1,3 +1,4 @@
+import {expect, test} from 'vitest';
 import {schemistColor} from '$lib/color/spaces';
 import defs from '$lib/definitions/nodes';
 import color from '$lib/definitions/nodes/color';

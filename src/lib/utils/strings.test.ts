@@ -1,3 +1,4 @@
+import {expect, test} from 'vitest';
 import {camelCase, dashCase, sentenceCase} from './strings';
 
 test('sentenceCase', () => {
