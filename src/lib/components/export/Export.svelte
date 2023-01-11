@@ -189,7 +189,7 @@
 					</fieldset>
 				{/if}
 
-				{#if $exportColorFormat !== 'hex' && $exportColorFormat !== 'rgb'}
+				{#if $exportFormat !== 'tokens' && $exportColorFormat !== 'hex' && $exportColorFormat !== 'rgb'}
 					<label for="precision">Precision</label>
 					<input
 						id="precision"
