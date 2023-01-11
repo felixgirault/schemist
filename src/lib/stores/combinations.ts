@@ -1,4 +1,3 @@
-import type {Rgb} from 'culori/fn';
 import type {Readable} from 'svelte/store';
 import {derived, get, writable} from 'svelte/store';
 import type {ContrastType} from '$lib/color/contrast';
@@ -11,12 +10,13 @@ import {
 	wcag3Contrast,
 	wcag3Grade
 } from '$lib/color/contrast';
+import {schemistToRgb} from '$lib/color/conversion';
 import {
 	simulateDeuteranomaly,
 	simulateProtanomaly,
 	simulateTritanomaly
 } from '$lib/color/simulation';
-import {rgbColor} from '$lib/color/spaces';
+import type {RgbColor} from '$lib/color/types';
 import type {Node, NodeOutput} from '$lib/stores/nodes';
 import {debouncedOutputs, rootNode} from '$lib/stores/palette';
 import {circular} from '$lib/utils/math';
@@ -31,13 +31,13 @@ export type Entry = {
 	id: Node['id'];
 	name: NodeOutput[1];
 	color: NodeOutput[0];
-	rgbColor: Rgb;
+	rgbColor: RgbColor;
 };
 
 export type CombinationContrast = {
 	type: BlindnessType;
-	bg: Rgb;
-	fg: Rgb;
+	bg: RgbColor;
+	fg: RgbColor;
 	level: number;
 	grade: string;
 };
@@ -72,7 +72,7 @@ export const colorEntries = derived(
 			([id, output]): Entry => ({
 				id,
 				color: output[0],
-				rgbColor: rgbColor(output[0]),
+				rgbColor: schemistToRgb(output[0]),
 				name: output[1]
 			})
 		)

@@ -1,11 +1,11 @@
-import type {SchemistColor} from '$lib/color/spaces';
-import {fromRgb255, schemistColor} from '$lib/color/spaces';
 import {
 	circular,
 	circularInterval,
 	clamp,
 	closestAngle
 } from '$lib/utils/math';
+import {rgbToSchemist} from './conversion';
+import type {SchemistColor} from './types';
 
 export const setHue = (color: SchemistColor, h: number) => ({
 	...color,
@@ -115,7 +115,6 @@ export const reddishColor = (
 ) => setHue(color, closestHue(color, target));
 
 export const randomUsableColor = (): SchemistColor => ({
-	mode: 'schemist',
 	h: Math.round(Math.random() * 360),
 	s: 50 + Math.random() * 50,
 	l: 30 + Math.random() * 60
@@ -123,7 +122,7 @@ export const randomUsableColor = (): SchemistColor => ({
 
 // @see http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code
 // @see https://gist.github.com/EDais/1ba1be0fe04eca66bbd588a6c9cbd666
-export const temperatureToHue = (kelvins) => {
+export const temperatureToHue = (kelvins: number): number => {
 	const temperature = clamp(kelvins, 40000, 1000) / 100;
 	const r =
 		temperature <= 66
@@ -158,14 +157,11 @@ export const temperatureToHue = (kelvins) => {
 					255
 			  );
 
-	const color = schemistColor(
-		fromRgb255({
-			mode: 'rgb255',
-			r: Math.round(r),
-			g: Math.round(g),
-			b: Math.round(b)
-		})
-	);
+	const color = rgbToSchemist({
+		r: Math.round(r),
+		g: Math.round(g),
+		b: Math.round(b)
+	});
 
 	// @TODO undefined HUE at 6600K
 	// return 95.09736692688655; // temperatureToHue(6504)

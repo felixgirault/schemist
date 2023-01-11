@@ -1,11 +1,9 @@
 <script lang="ts">
 	import {
-		fromHsl100,
-		hslColor,
-		schemistColor,
-		toHsl100
-	} from '$lib/color/spaces';
-	import type {Hsl100, SchemistColor} from '$lib/color/spaces';
+		hslToSchemist,
+		schemistToHsl
+	} from '$lib/color/conversion';
+	import type {HslColor, SchemistColor} from '$lib/color/types';
 	import RangeField from '$lib/components/forms/RangeField.svelte';
 	import {continuousGradient} from '$lib/utils/css';
 	import {range} from '$lib/utils/generators';
@@ -13,19 +11,16 @@
 	export let id: number;
 	export let value: SchemistColor;
 
-	const toSchemist = (color) =>
-		schemistColor(fromHsl100(color));
-
 	let lastValue: SchemistColor;
-	let color: Hsl100;
+	let color: HslColor;
 
-	$: color =
-		value !== lastValue ? toHsl100(hslColor(value)) : color;
+	$: color = value !== lastValue ? schemistToHsl(value) : color;
 
 	const inputHandler =
-		(channel: string) => (channelValue: number) => {
+		(channel: keyof SchemistColor) =>
+		(channelValue: number) => {
 			color[channel] = channelValue;
-			value = lastValue = toSchemist(color);
+			value = lastValue = hslToSchemist(color);
 		};
 </script>
 
@@ -35,7 +30,7 @@
 	max={360}
 	unit="°"
 	gradient={continuousGradient(
-		range(12).map((i) => toSchemist({...color, h: i * 30}))
+		range(12).map((i) => hslToSchemist({...color, h: i * 30}))
 	)}
 	value={color.h}
 	onInput={inputHandler('h')}
@@ -46,7 +41,7 @@
 	label="Saturation"
 	unit="%"
 	gradient={continuousGradient(
-		range(10).map((i) => toSchemist({...color, s: i * 10}))
+		range(10).map((i) => hslToSchemist({...color, s: i * 10}))
 	)}
 	value={color.s}
 	onInput={inputHandler('s')}
@@ -57,7 +52,7 @@
 	label="Lightness"
 	unit="%"
 	gradient={continuousGradient(
-		range(10).map((i) => toSchemist({...color, l: i * 10}))
+		range(10).map((i) => hslToSchemist({...color, l: i * 10}))
 	)}
 	value={color.l}
 	onInput={inputHandler('l')}

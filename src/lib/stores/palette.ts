@@ -1,5 +1,5 @@
 import {derived, get, writable} from 'svelte/store';
-import {schemistColor} from '$lib/color/spaces';
+import {parseColor} from '$lib/color/parsing';
 import type {Node, NodeOutputRecord} from '$lib/stores/nodes';
 import {withElapsedTime} from '$lib/utils/functions';
 import {clamp} from '$lib/utils/math';
@@ -32,6 +32,6 @@ export const rootColor = derived(debouncedOutputs, () => {
 	return (
 		$outputs?.[rootId]?.[0] ??
 		Object.values($outputs).shift()?.[0] ??
-		schemistColor('#feffff') // not fully white so there is a hue to pick up
+		parseColor('#feffff')[1] // not fully white so there is a hue to pick up
 	);
 });

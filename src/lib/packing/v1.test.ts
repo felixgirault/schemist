@@ -1,5 +1,5 @@
 import {expect, test} from 'vitest';
-import {schemistColor} from '$lib/color/spaces';
+import {parseColor} from '$lib/color/parsing';
 import defs from '$lib/definitions/nodes';
 import color from '$lib/definitions/nodes/color';
 import presets from '$lib/definitions/presets';
@@ -25,7 +25,7 @@ test.each(Object.values(presets))(
 		const tree = {
 			type: color.type,
 			args: {
-				color: schemistColor('#f00')
+				color: parseColor('#f00')[1]
 			},
 			children: nodes
 		};

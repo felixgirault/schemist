@@ -1,39 +1,32 @@
 <script lang="ts">
-	import type {Color} from 'culori/fn';
 	import {
-		convertColor,
-		cssColor,
-		hexColor,
-		isHexColor,
-		parseColor,
-		schemistColor
-	} from '$lib/color/spaces';
-	import type {SchemistColor} from '$lib/color/spaces';
+		formatSchemistTo,
+		formatSchemistToHex
+	} from '$lib/color/formatting';
+	import {parseColor} from '$lib/color/parsing';
+	import type {SchemistColor} from '$lib/color/types';
 	import {colorInputFormat} from '$lib/stores/features';
 
-	const format = (color: Color | string) =>
-		$colorInputFormat === 'hex'
-			? hexColor(color)
-			: cssColor(convertColor(color, $colorInputFormat), 0);
+	const format = (color: SchemistColor) =>
+		formatSchemistTo(color, $colorInputFormat, 0);
 
 	export let id: string;
 	export let value: SchemistColor;
 
-	let inputValue = format(value);
+	let formattedValue = format(value);
 
-	$: inputValue =
-		hexColor(value) === inputValue
-			? inputValue
+	$: formattedValue =
+		formatSchemistToHex(value) === formattedValue
+			? formattedValue
 			: format(value);
 
 	const handleInput = ({target}) => {
 		const newValue = target.value.trim();
-		const isHex = isHexColor(newValue);
-		const color = isHex ? newValue : parseColor(newValue);
+		const [format, color] = parseColor(newValue);
 
-		if (color) {
-			value = schemistColor(color);
-			$colorInputFormat = isHex ? 'hex' : color.mode;
+		if (format && color) {
+			$colorInputFormat = format;
+			value = color;
 			target.setCustomValidity('');
 		} else {
 			target.setCustomValidity('Invalid color');
@@ -47,6 +40,6 @@
 	id="{id}-css"
 	class="input-grid-lastCols"
 	type="text"
-	value={inputValue}
+	value={formattedValue}
 	on:input={handleInput}
 />

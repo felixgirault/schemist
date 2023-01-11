@@ -1,24 +1,19 @@
-import {
-	cssColor,
-	rgbColor,
-	schemistColor
-} from '$lib/color/spaces';
-import type {SchemistColor} from '$lib/color/spaces';
 import {joinProperties} from '$lib/utils/css';
+import {formatSchemist} from './color/formatting';
+import {parseColor} from './color/parsing';
+import type {SchemistColor} from './color/types';
 
-export const defaultThemeColor = schemistColor('#ffc208');
+export const defaultThemeColor = parseColor('#ffc208')[1];
 
 export const overlayColor = (
 	color: SchemistColor,
 	isDark: boolean
 ) =>
-	cssColor({
-		...rgbColor({
-			...color,
-			s: isDark ? 8 : 25,
-			l: isDark ? 35 : 10
-		}),
-		alpha: 0.7
+	formatSchemist({
+		...color,
+		s: isDark ? 8 : 25,
+		l: isDark ? 35 : 10,
+		a: 0.7
 	});
 
 export const duoThemeStyle = (
@@ -28,13 +23,13 @@ export const duoThemeStyle = (
 	const isDark = background.l < foreground.l;
 
 	return joinProperties({
-		'--bg': cssColor(background),
-		'--bg-soft': cssColor({...foreground, alpha: 0.05}),
-		'--bg-hard': cssColor({
+		'--bg': formatSchemist(background),
+		'--bg-soft': formatSchemist({...foreground, a: 0.05}),
+		'--bg-hard': formatSchemist({
 			...background,
 			l: isDark ? background.l - 2 : background.l + 2
 		}),
-		'--bg-neutral': cssColor({
+		'--bg-neutral': formatSchemist({
 			...background,
 			s: 0.8 * background.s,
 			l: isDark
@@ -42,8 +37,8 @@ export const duoThemeStyle = (
 				: 0.85 * background.l
 		}),
 		'--bg-overlay': overlayColor(background, isDark),
-		'--fg': cssColor(foreground),
-		'--fg-light': cssColor({...foreground, alpha: 0.75})
+		'--fg': formatSchemist(foreground),
+		'--fg-light': formatSchemist({...foreground, a: 0.75})
 	});
 };
 

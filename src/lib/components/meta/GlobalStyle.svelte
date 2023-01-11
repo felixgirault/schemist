@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {schemistColor} from '$lib/color/spaces';
+	import {rgbToSchemist} from '$lib/color/conversion';
 	import {previewedCombination} from '$lib/stores/combinations';
 	import {isDarkScheme} from '$lib/stores/features';
 	import {rootColor} from '$lib/stores/palette';
@@ -21,8 +21,8 @@
 			style = styleTag(
 				':root',
 				duoThemeStyle(
-					schemistColor($previewedCombination.contrast.bg),
-					schemistColor($previewedCombination.contrast.fg)
+					rgbToSchemist($previewedCombination.contrast.bg),
+					rgbToSchemist($previewedCombination.contrast.fg)
 				)
 			);
 		} else if ($rootColor) {

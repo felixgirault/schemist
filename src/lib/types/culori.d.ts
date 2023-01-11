@@ -1,114 +1,151 @@
 // @see https://github.com/akx/gradient/blob/master/src/culori.d.ts
 declare module 'culori/fn' {
-	export interface Color {
-		mode: string;
-		alpha?: number;
-		[component: string]: string | number;
-	}
+	export module Culori {
+		export interface Hsl extends Color {
+			mode: 'hsl';
+			h: number;
+			s: number;
+			l: number;
+			alpha?: number;
+		}
 
-	export interface Rgb extends Color {
-		mode: 'rgb';
-		r: number;
-		g: number;
-		b: number;
-	}
+		export interface Lab extends Color {
+			mode: 'lab';
+			l: number;
+			a: number;
+			b: number;
+			alpha?: number;
+		}
 
-	export interface Lrgb extends Color {
-		mode: 'lrgb';
-		r: number;
-		g: number;
-		b: number;
-	}
+		export interface Lch extends Color {
+			mode: 'lch';
+			l: number;
+			c: number;
+			h: number;
+			alpha?: number;
+		}
 
-	export interface Hsl extends Color {
-		mode: 'hsl';
-		h: number;
-		s: number;
-		l: number;
-	}
+		export interface Okhsl extends Color {
+			mode: 'okhsl';
+			h: number;
+			s: number;
+			l: number;
+			alpha?: number;
+		}
 
-	export interface Lch extends Color {
-		mode: 'lch';
-		l: number;
-		c: number;
-		h: number;
-	}
+		export interface Oklab extends Color {
+			mode: 'oklab';
+			l: number;
+			a: number;
+			b: number;
+			alpha?: number;
+		}
 
-	export interface Okhsl extends Color {
-		mode: 'okhsl';
-		h: number;
-		s: number;
-		l: number;
-	}
+		export interface Oklch extends Color {
+			mode: 'oklch';
+			l: number;
+			c: number;
+			h: number;
+			alpha?: number;
+		}
 
-	export interface Oklch extends Color {
-		mode: 'oklch';
-		l: number;
-		c: number;
-		h: number;
-	}
+		export interface Rgb extends Color {
+			mode: 'rgb';
+			r: number;
+			g: number;
+			b: number;
+			alpha?: number;
+		}
 
-	type Definition<T extends Color> = {
-		mode: string;
-		channels: string[];
-		ranges: {
-			[channel: string]: [number, number];
+		type Color = Hsl | Lab | Lch | Okhsl | Oklch | Rgb;
+
+		type Definition = {
+			mode: string;
+			ranges: {
+				[channel: string]: [number, number];
+			};
 		};
-		interpolate: {
-			[channel: string]: any;
-		};
-		toMode: {
-			[mode: string]: (color: T) => Color;
-		};
-		fromMode: {
-			[mode: string]: (color: Color) => T;
-		};
-	};
+	}
 
-	type DefinitionColor<T> = T extends Definition<infer C>
-		? C
-		: never;
+	export function useMode<D extends Definition>(mode: D): void;
 
-	type Converter<Converted extends Color = Color> = (
-		color: string | Color
-	) => Converted;
+	export function parse(color: string): Culori.Color | null;
+	export function parseHex(color: string): Culori.Rgb | null;
 
-	export function clampChroma<T extends Color>(
+	export function formatHex(color: any): string;
+
+	export function convertHslToRgb(
+		color: Culori.Hsl
+	): Culori.Rgb;
+
+	export function convertLabToLch(
+		color: Culori.Lab
+	): Culori.Lch;
+
+	export function convertLabToLch(
+		color: Culori.Oklab,
+		mode: 'oklch'
+	): Culori.Oklch;
+
+	export function convertLabToRgb(
+		color: Culori.Lab
+	): Culori.Rgb;
+
+	export function convertLchToLab(
+		color: Culori.Lch
+	): Culori.Lab;
+
+	export function convertLchToLab(
+		color: Culori.Oklch,
+		mode: 'oklab'
+	): Culori.Oklab;
+
+	export function convertOkhslToOklab(
+		color: Culori.Okhsl
+	): Culori.Oklab;
+
+	export function convertOklabToOkhsl(
+		color: Culori.Oklab
+	): Culori.Okhsl;
+
+	export function convertOklabToRgb(
+		color: Culori.Oklab
+	): Culori.Rgb;
+
+	export function convertRgbToHsl(
+		color: Culori.Rgb
+	): Culori.Hsl;
+
+	export function convertRgbToLab(
+		color: Culori.Rgb
+	): Culori.Lab;
+
+	export function convertRgbToOklab(
+		color: Culori.Rgb
+	): Culori.Oklab;
+
+	export function clampChroma<T extends Culori.Color>(
 		color: T,
 		mode?: string
 	): T;
 
-	export function parse(color: string): Color | null;
-	export function parseHex(color: any): string | null;
-
-	export function formatHex(color: any): string | null;
-	export function formatCss(color: any): string | null;
-
-	export function useMode<D extends Definition<T>>(
-		mode: D
-	): Converter<DefinitionColor<D>>;
-
-	export function wcagContrast(
-		color: Color,
-		color: Color
+	export function wcagContrast<T extends Culori.Color>(
+		background: T,
+		foreground: T
 	): number;
 
-	export const modeRgb: Definition<Rgb>;
-	export const modeLrgb: Definition<Lrgb>;
-	export const modeHsl: Definition<Hsl>;
-	export const modeLch: Definition<Lch>;
-	export const modeOkhsl: Definition<Okhsl>;
-	export const modeOklch: Definition<Oklch>;
-
-	export function filterDeficiencyProt(
+	export function filterDeficiencyProt<T extends Culori.Color>(
 		severity?: number
-	): (color: Color) => Rgb;
+	): (color: T) => T;
 
-	export function filterDeficiencyDeuter(
-		severity?: number
-	): (color: Color) => Rgb;
+	export function filterDeficiencyDeuter<
+		T extends Culori.Color
+	>(severity?: number): (color: T) => T;
 
-	export function filterDeficiencyTrit(
+	export function filterDeficiencyTrit<T extends Culori.Color>(
 		severity?: number
-	): (color: Color) => Rgb;
+	): (color: T) => T;
+
+	export const modeLch: Culori.Definition;
+	export const modeLrgb: Culori.Definition;
 }

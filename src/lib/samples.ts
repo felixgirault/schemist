@@ -1,9 +1,9 @@
-import type {SchemistColor} from '$lib/color/spaces';
 import defs from '$lib/definitions/nodes';
 import type {PresetNode} from '$lib/presets';
 import type {Args, NodeDef, Param} from '$lib/stores/nodes';
 import {range} from '$lib/utils/generators';
 import {interval} from '$lib/utils/math';
+import type {SchemistColor} from './color/types';
 
 export const sample = (
 	def: NodeDef,

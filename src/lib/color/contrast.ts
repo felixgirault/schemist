@@ -1,7 +1,7 @@
 import {APCAcontrast, sRGBtoY} from 'apca-w3';
-import {wcagContrast} from 'culori';
-import type {Rgb} from 'culori/fn';
-import {toRgb255} from '$lib/color/spaces';
+import {wcagContrast} from 'culori/fn';
+import {rgbToCulori} from './culori';
+import type {RgbColor} from './types';
 
 export type ContrastType = 'wcag2' | 'wcag3';
 
@@ -72,12 +72,12 @@ export const wcag3Grade = (level: number) =>
 		? '1'
 		: '0';
 
-export const wcag2Contrast = (bg: Rgb, fg: Rgb) =>
-	wcagContrast(bg, fg);
+export const wcag2Contrast = (bg: RgbColor, fg: RgbColor) =>
+	wcagContrast(rgbToCulori(bg), rgbToCulori(fg));
 
-export const wcag3Contrast = (bg: Rgb, fg: Rgb) => {
-	const {r: bgR, g: bgG, b: bgB} = toRgb255(bg);
-	const {r: fgR, g: fgG, b: fgB} = toRgb255(fg);
+export const wcag3Contrast = (bg: RgbColor, fg: RgbColor) => {
+	const {r: bgR, g: bgG, b: bgB} = bg;
+	const {r: fgR, g: fgG, b: fgB} = fg;
 
 	return Math.abs(
 		APCAcontrast(

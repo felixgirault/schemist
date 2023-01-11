@@ -1,13 +1,15 @@
 <script lang="ts">
 	import {
-		cssColor,
-		hexColor,
-		hslColor,
-		lchColor,
-		rgbColor,
-		toHsl100,
-		toRgb255
-	} from '$lib/color/spaces';
+		schemistToHsl,
+		schemistToLch,
+		schemistToRgb
+	} from '$lib/color/conversion';
+	import {
+		formatHsl,
+		formatLch,
+		formatRgb,
+		formatSchemistToHex
+	} from '$lib/color/formatting';
 	import type {Node} from '$lib/stores/nodes';
 
 	export let id: string;
@@ -15,12 +17,10 @@
 
 	const {output} = node;
 
-	$: hex = hexColor($output[0]);
-	$: rgb = rgbColor($output[0]);
-	$: rgb255 = toRgb255(rgb);
-	$: hsl = hslColor($output[0]);
-	$: hsl100 = toHsl100(hsl);
-	$: lch = lchColor($output[0]);
+	$: hex = formatSchemistToHex($output[0]);
+	$: rgb = schemistToRgb($output[0]);
+	$: hsl = schemistToHsl($output[0]);
+	$: lch = schemistToLch($output[0]);
 </script>
 
 <section {id} class="form">
@@ -42,23 +42,23 @@
 			<tr>
 				<td>RGB</td>
 				<td>
-					{Math.round(rgb255.r)}, {Math.round(rgb255.g)}, {Math.round(
-						rgb255.b
+					{Math.round(rgb.r)}, {Math.round(rgb.g)}, {Math.round(
+						rgb.b
 					)}
 				</td>
 				<td>
-					{cssColor(rgb, 0)}
+					{formatRgb(rgb, 0)}
 				</td>
 			</tr>
 			<tr>
 				<td>HSL</td>
 				<td>
-					{Math.round(hsl100.h)}, {Math.round(hsl100.s)}, {Math.round(
-						hsl100.l
+					{Math.round(hsl.h)}, {Math.round(hsl.s)}, {Math.round(
+						hsl.l
 					)}
 				</td>
 				<td>
-					{cssColor(hsl, 0)}
+					{formatHsl(hsl, 0)}
 				</td>
 			</tr>
 			<tr>
@@ -69,7 +69,7 @@
 					)}
 				</td>
 				<td>
-					{cssColor(lch, 0)}
+					{formatLch(lch, 0)}
 				</td>
 			</tr>
 		</tbody>

@@ -1,5 +1,7 @@
 import {expect, test} from 'vitest';
-import {cssColor, schemistColor} from '$lib/color/spaces';
+import {formatSchemist} from '$lib/color/formatting';
+import {parseColor} from '$lib/color/parsing';
+import type {SchemistColor} from '$lib/color/types';
 import {
 	continuousGradient,
 	discreteGradient,
@@ -7,30 +9,32 @@ import {
 } from './css';
 
 test('continuousGradient', () => {
-	const color1 = schemistColor('#000');
-	const color2 = schemistColor('#111');
+	const color1 = parseColor('#000')[1] as SchemistColor;
+	const color2 = parseColor('#111')[1] as SchemistColor;
 
 	expect(continuousGradient([color1, color2])).toBe(
-		`linear-gradient(90deg, ${cssColor(color1)} 0%, ${cssColor(
-			color2
-		)} 50%)`
+		`linear-gradient(90deg, ${formatSchemist(
+			color1
+		)} 0%, ${formatSchemist(color2)} 50%)`
 	);
 });
 
 test('discreteGradient', () => {
-	const color1 = schemistColor('#000');
-	const color2 = schemistColor('#111');
-	const color3 = schemistColor('#222');
-	const color4 = schemistColor('#333');
+	const color1 = parseColor('#000')[1] as SchemistColor;
+	const color2 = parseColor('#111')[1] as SchemistColor;
+	const color3 = parseColor('#222')[1] as SchemistColor;
+	const color4 = parseColor('#333')[1] as SchemistColor;
 
 	expect(
 		discreteGradient([color1, color2, color3, color4])
 	).toBe(
-		`linear-gradient(90deg, ${cssColor(
+		`linear-gradient(90deg, ${formatSchemist(
 			color1
-		)} 0% 25%, ${cssColor(color2)} 25% 50%, ${cssColor(
+		)} 0% 25%, ${formatSchemist(
+			color2
+		)} 25% 50%, ${formatSchemist(
 			color3
-		)} 50% 75%, ${cssColor(color4)} 75% 100%)`
+		)} 50% 75%, ${formatSchemist(color4)} 75% 100%)`
 	);
 });
 

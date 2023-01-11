@@ -1,4 +1,6 @@
-import {hexColor, schemistColor} from '$lib/color/spaces';
+import {formatSchemistToHex} from '$lib/color/formatting';
+import {parseColor} from '$lib/color/parsing';
+import type {SchemistColor} from '$lib/color/types';
 import defs from '$lib/definitions/nodes';
 import type {PresetNode} from '$lib/presets';
 import type {Args, Param} from '$lib/stores/nodes';
@@ -16,14 +18,21 @@ export const pack = (node: PresetNode): string => {
 		return index[key];
 	};
 
-	const packValue = (type: Param['type'], value: any) => {
+	const packValue = (
+		type: Param['type'],
+		value: boolean | number | SchemistColor
+	) => {
 		switch (type) {
 			case 'boolean':
 				return value ? 1 : 0;
 			case 'range':
 				return value;
 			case 'color':
-				return indice(hexColor(value).substring(1));
+				return indice(
+					formatSchemistToHex(
+						value as SchemistColor
+					).substring(1)
+				);
 		}
 	};
 
@@ -90,7 +99,7 @@ export const unpack = (data: string) => {
 			case 'range':
 				return value;
 			case 'color':
-				return schemistColor(`#${index[value]}`);
+				return parseColor(`#${index[value]}`)[1];
 		}
 	};
 

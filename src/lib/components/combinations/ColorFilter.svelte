@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {cssColor} from '$lib/color/spaces';
+	import {formatSchemist} from '$lib/color/formatting';
 	import Sample from '$lib/components/Sample.svelte';
 	import {
 		colorFilters,
@@ -26,7 +26,10 @@
 					class="button button--small"
 					for="filter-{id}"
 				>
-					<Sample color={cssColor(color)} title={name} />
+					<Sample
+						color={formatSchemist(color)}
+						title={name}
+					/>
 				</label>
 			{/each}
 

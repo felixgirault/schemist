@@ -1,10 +1,10 @@
 <svelte:options immutable />
 
 <script lang="ts">
-	import {hexColor} from '$lib/color/spaces';
+	import {formatRgbToHex} from '$lib/color/formatting';
 	import PreviewIcon from '$lib/components/icons/PreviewIcon.svelte';
-	import {contrastType} from '$lib/stores/combinations';
 	import type {CombinationContrast} from '$lib/stores/combinations';
+	import {contrastType} from '$lib/stores/combinations';
 	import {round} from '$lib/utils/math';
 
 	export let uid: string;
@@ -14,12 +14,14 @@
 	export let simulatedContrasts: CombinationContrast[];
 	export let onPreview: (uid: string) => void;
 
-	$: hexFg = hexColor(contrast.fg);
+	$: hexFg = formatRgbToHex(contrast.fg);
 </script>
 
 <div
 	class="combination elevated"
-	style="background: {hexColor(contrast.bg)}; color: {hexFg};"
+	style="background: {formatRgbToHex(
+		contrast.bg
+	)}; color: {hexFg};"
 >
 	<div class="inner">
 		<p class="colors">
@@ -54,9 +56,9 @@
 			{#each simulatedContrasts as { type, bg, fg, level, grade }}
 				<li
 					class="simulation simulation--{type}"
-					style="background: {hexColor(
+					style="background: {formatRgbToHex(
 						bg
-					)}; color: {hexColor(fg)};"
+					)}; color: {formatRgbToHex(fg)};"
 				>
 					<strong class="simulation-type">
 						{type}
