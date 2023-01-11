@@ -17,7 +17,7 @@ export default {
 			default: 80
 		}
 	],
-	samples: 'single',
+	samples: 'continuous',
 	apply(color, {amount}) {
 		return contrastingColor(color, amount);
 	}
