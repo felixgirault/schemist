@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {randomUsableColor} from '$lib/color/manipulation';
-	import type {SchemistColor} from '$lib/color/spaces';
+	import type {SchemistColor} from '$lib/color/types';
 	import CssColorField from '$lib/components/forms/CssColorField.svelte';
 	import HslColorField from '$lib/components/forms/HslColorField.svelte';
 	import LchColorField from '$lib/components/forms/LchColorField.svelte';

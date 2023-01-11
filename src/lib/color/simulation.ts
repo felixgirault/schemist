@@ -1,18 +1,21 @@
-import type {Rgb} from 'culori/fn';
 import {
+	type Culori,
 	filterDeficiencyDeuter,
 	filterDeficiencyProt,
 	filterDeficiencyTrit
 } from 'culori/fn';
+import {rgbFromCulori, rgbToCulori} from './culori';
+import type {RgbColor} from './types';
 
-const protanomalyFilter = filterDeficiencyProt();
-export const simulateProtanomaly = (color: Rgb) =>
-	protanomalyFilter(color);
+const protanomalyFilter = filterDeficiencyProt<Culori.Rgb>();
+const deuteranomalyFilter = filterDeficiencyDeuter<Culori.Rgb>();
+const tritanomalyFilter = filterDeficiencyTrit<Culori.Rgb>();
 
-const deuteranomalyFilter = filterDeficiencyDeuter();
-export const simulateDeuteranomaly = (color: Rgb) =>
-	deuteranomalyFilter(color);
+export const simulateProtanomaly = (color: RgbColor) =>
+	rgbFromCulori(protanomalyFilter(rgbToCulori(color)));
 
-const tritanomalyFilter = filterDeficiencyTrit();
-export const simulateTritanomaly = (color: Rgb) =>
-	tritanomalyFilter(color);
+export const simulateDeuteranomaly = (color: RgbColor) =>
+	rgbFromCulori(deuteranomalyFilter(rgbToCulori(color)));
+
+export const simulateTritanomaly = (color: RgbColor) =>
+	rgbFromCulori(tritanomalyFilter(rgbToCulori(color)));

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {cssColor} from '$lib/color/spaces';
+	import {formatSchemist} from '$lib/color/formatting';
 	import Sample from '$lib/components/Sample.svelte';
 	import ChildOption from '$lib/components/palette/ChildOption.svelte';
 	import {defList as defs} from '$lib/definitions/nodes';
@@ -57,7 +57,7 @@
 				>
 					<Sample
 						color={def.samples === 'single'
-							? cssColor(sample(def, color))
+							? formatSchemist(sample(def, color))
 							: def.samples === 'continuous'
 							? continuousGradient(
 									samples(def, color, 10)

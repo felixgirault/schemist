@@ -1,6 +1,6 @@
 <script lang="ts">
-	import {rgbColor, toRgb255} from '$lib/color/spaces';
-	import type {SchemistColor} from '$lib/color/spaces';
+	import type {SchemistColor} from '$lib/color/conversion';
+	import {schemistToRgb} from '$lib/color/conversion';
 	import lightness from '$lib/definitions/nodes/lightness';
 	import {presetSamples} from '$lib/samples';
 	import {debounce} from '$lib/utils/functions';
@@ -31,8 +31,8 @@
 			return;
 		}
 
-		const [c1, c2, c3] = presetSamples(preset, base).map((c) =>
-			toRgb255(rgbColor(c))
+		const [c1, c2, c3] = presetSamples(preset, base).map(
+			schemistToRgb
 		);
 
 		context.drawImage(img, 0, 0, size, size);

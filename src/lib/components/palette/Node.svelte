@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {cssColor} from '$lib/color/spaces';
+	import {formatSchemist} from '$lib/color/formatting';
 	import Modal from '$lib/components/Modal.svelte';
 	import ChildPicker from '$lib/components/palette/ChildPicker.svelte';
 	import NodeActions from '$lib/components/palette/NodeActions.svelte';
@@ -57,7 +57,7 @@
 <article class:isHidden={$isHidden}>
 	<div
 		class="output"
-		style="--output: {cssColor($output[0])};"
+		style="--output: {formatSchemist($output[0])};"
 	/>
 
 	<div class="self" class:open={areOptionsOpen}>

@@ -1,4 +1,5 @@
 import {writable} from 'svelte/store';
+import type {ColorFormat} from '$lib/color/formatting';
 import {
 	isDarkSchemeEnabled,
 	toggleDarkScheme
@@ -10,4 +11,4 @@ export const isDarkScheme = writable<boolean>(
 
 isDarkScheme.subscribe(toggleDarkScheme);
 
-export const colorInputFormat = writable<string>('hex');
+export const colorInputFormat = writable<ColorFormat>('hex');

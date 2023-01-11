@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {schemistColor} from '$lib/color/spaces';
+	import {rgbToSchemist} from '$lib/color/conversion';
 	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
 	import type {Combination} from '$lib/stores/combinations';
 	import {duoThemeStyle} from '$lib/style';
@@ -7,8 +7,8 @@
 	export let combination: Combination;
 	export let onClose: () => void;
 
-	$: fg = schemistColor(combination.contrast.fg);
-	$: bg = schemistColor(combination.contrast.bg);
+	$: fg = rgbToSchemist(combination.contrast.fg);
+	$: bg = rgbToSchemist(combination.contrast.bg);
 	$: style =
 		bg.l < fg.l
 			? duoThemeStyle({...bg, l: 10}, {...fg, l: 95})

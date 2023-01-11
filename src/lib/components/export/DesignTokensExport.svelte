@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {formatHex} from 'culori/fn';
+	import {formatSchemistToHex} from '$lib/color/formatting';
 	import {permalink} from '$lib/routing';
 	import type {Entry} from '$lib/stores/combinations';
 	import {rootNode} from '$lib/stores/palette';
@@ -7,11 +7,11 @@
 	export let entries: Entry[];
 
 	$: tokens = Object.fromEntries(
-		entries.map(({name, rgbColor}) => [
+		entries.map(({name, color}) => [
 			name,
 			{
 				'$type': 'color',
-				'$value': formatHex(rgbColor)
+				'$value': formatSchemistToHex(color)
 			}
 		])
 	);

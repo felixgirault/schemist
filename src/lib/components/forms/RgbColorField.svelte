@@ -1,11 +1,9 @@
 <script lang="ts">
+	import type {SchemistColor} from '$lib/color/conversion';
 	import {
-		fromRgb255,
-		rgbColor,
-		schemistColor,
-		toRgb255
-	} from '$lib/color/spaces';
-	import type {SchemistColor} from '$lib/color/spaces';
+		rgbToSchemist,
+		schemistToRgb
+	} from '$lib/color/conversion';
 	import RangeField from '$lib/components/forms/RangeField.svelte';
 	import {continuousGradient} from '$lib/utils/css';
 	import {range} from '$lib/utils/generators';
@@ -13,13 +11,14 @@
 	export let id: number;
 	export let value: SchemistColor;
 
-	$: color = toRgb255(rgbColor(value));
+	$: color = schemistToRgb(value);
 
 	const inputHandler =
 		(channel: string) => (channelValue: number) => {
-			value = schemistColor(
-				fromRgb255({...color, [channel]: channelValue})
-			);
+			value = rgbToSchemist({
+				...color,
+				[channel]: channelValue
+			});
 		};
 </script>
 
@@ -29,9 +28,7 @@
 	max={255}
 	gradient={continuousGradient(
 		range(8).map((i) =>
-			schemistColor(
-				fromRgb255({...color, r: Math.floor(i * 32)})
-			)
+			rgbToSchemist({...color, r: Math.floor(i * 32)})
 		)
 	)}
 	value={color.r}
@@ -44,9 +41,7 @@
 	max={255}
 	gradient={continuousGradient(
 		range(8).map((i) =>
-			schemistColor(
-				fromRgb255({...color, g: Math.floor(i * 32)})
-			)
+			rgbToSchemist({...color, g: Math.floor(i * 32)})
 		)
 	)}
 	value={color.g}
@@ -59,9 +54,7 @@
 	max={255}
 	gradient={continuousGradient(
 		range(8).map((i) =>
-			schemistColor(
-				fromRgb255({...color, b: Math.floor(i * 32)})
-			)
+			rgbToSchemist({...color, b: Math.floor(i * 32)})
 		)
 	)}
 	value={color.b}

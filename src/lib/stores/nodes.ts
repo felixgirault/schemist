@@ -4,9 +4,10 @@ import type {
 	Writable
 } from 'svelte/store';
 import {derived, get, writable} from 'svelte/store';
+import {formatSchemistToHex} from '$lib/color/formatting';
 import nearestColor from '$lib/color/nearest';
-import {hexColor, schemistColor} from '$lib/color/spaces';
-import type {SchemistColor} from '$lib/color/spaces';
+import {parseColor} from '$lib/color/parsing';
+import type {SchemistColor} from '$lib/color/types';
 import defs from '$lib/definitions/nodes';
 import {withoutIndex} from '$lib/utils/arrays';
 import {uid} from '$lib/utils/generators';
@@ -71,7 +72,7 @@ export const generateName = (
 ) =>
 	token
 		? token.replace('$', parentColorName)
-		: sentenceCase(nearestColor(hexColor(color)));
+		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
 // This whole thing is quite convoluted (shall I say shitty?)
 // but at least it makes the tree logic self contained.
@@ -89,7 +90,7 @@ export const createNode = (
 	const isHiddenStore = writable(isHidden);
 	const tokenStore = writable(token);
 	const input: Writable<NodeOutput> = writable([
-		schemistColor('#fff'),
+		parseColor('#fff')[1],
 		''
 	]);
 

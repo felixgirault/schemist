@@ -1,13 +1,7 @@
 <svelte:options immutable />
 
 <script lang="ts">
-	import {
-		cssColor,
-		hexColor,
-		hslColor,
-		lchColor,
-		rgbColor
-	} from '$lib/color/spaces';
+	import {formatSchemistTo} from '$lib/color/formatting';
 	import TableExport from '$lib/components/export/TableExport.svelte';
 	import VariablesExport from '$lib/components/export/VariablesExport.svelte';
 	import {colorEntries} from '$lib/stores/combinations';
@@ -22,14 +16,11 @@
 	$: entries = $colorEntries.map(({color, ...entry}) => ({
 		...entry,
 		color,
-		cssColor:
-			$exportColorFormat === 'rgb'
-				? cssColor(rgbColor(color), $exportPrecision)
-				: $exportColorFormat === 'hsl'
-				? cssColor(hslColor(color), $exportPrecision)
-				: $exportColorFormat === 'lch'
-				? cssColor(lchColor(color), $exportPrecision)
-				: hexColor(color)
+		cssColor: formatSchemistTo(
+			color,
+			$exportColorFormat,
+			$exportPrecision
+		)
 	}));
 </script>
 

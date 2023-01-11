@@ -1,10 +1,10 @@
-import type {SchemistColor} from '$lib/color/spaces';
-import {cssColor} from '$lib/color/spaces';
+import {formatSchemist} from '$lib/color/formatting';
+import type {SchemistColor} from '$lib/color/types';
 
 export const continuousGradient = (colors: SchemistColor[]) => {
 	const l = 100 / colors.length;
 	const stops = colors
-		.map((color, i) => `${cssColor(color)} ${i * l}%`)
+		.map((color, i) => `${formatSchemist(color)} ${i * l}%`)
 		.join(', ');
 
 	return `linear-gradient(90deg, ${stops})`;
@@ -15,7 +15,7 @@ export const discreteGradient = (colors: SchemistColor[]) => {
 	const stops = colors
 		.map(
 			(color, i) =>
-				`${cssColor(color)} ${i * l}% ${(i + 1) * l}%`
+				`${formatSchemist(color)} ${i * l}% ${(i + 1) * l}%`
 		)
 		.join(', ');
 
