@@ -13,7 +13,7 @@
 	export let param: Param;
 	export let value: SchemistColor;
 
-	let format: InputFormat = 'css';
+	let format: InputFormat = 'rgb';
 </script>
 
 <div class="input-grid-firstCol input-grid-lastCol">
@@ -31,20 +31,6 @@
 					role="group"
 					aria-labelledby="{id}-format"
 				>
-					<input
-						id="{id}-css"
-						class="button-trigger hidden"
-						type="radio"
-						value="css"
-						bind:group={format}
-					/>
-					<label
-						class="button button--inline"
-						for="{id}-css"
-					>
-						CSS
-					</label>
-
 					<input
 						id="{id}-rgb"
 						class="button-trigger hidden"
@@ -85,6 +71,20 @@
 						for="{id}-lch"
 					>
 						LCH
+					</label>
+
+					<input
+						id="{id}-css"
+						class="button-trigger hidden"
+						type="radio"
+						value="css"
+						bind:group={format}
+					/>
+					<label
+						class="button button--inline"
+						for="{id}-css"
+					>
+						CSS
 					</label>
 				</div>
 
