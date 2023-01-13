@@ -9,7 +9,7 @@
 	export let value: number;
 	export let unit = '';
 	export let onInput: RangeInput['$$prop_def']['onInput'] =
-		null;
+		undefined;
 </script>
 
 <label class="input-grid-firstCol" for={id}>

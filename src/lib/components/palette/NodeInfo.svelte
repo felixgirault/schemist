@@ -36,7 +36,7 @@
 		<tbody>
 			<tr>
 				<td>Hex</td>
-				<td>{hex.slice(1)}</td>
+				<td>{hex?.slice(1)}</td>
 				<td>{hex}</td>
 			</tr>
 			<tr>

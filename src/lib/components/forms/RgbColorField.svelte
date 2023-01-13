@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type {SchemistColor} from '$lib/color/conversion';
 	import {
 		rgbToSchemist,
 		schemistToRgb
 	} from '$lib/color/conversion';
+	import type {SchemistColor} from '$lib/color/types';
 	import RangeField from '$lib/components/forms/RangeField.svelte';
 	import {continuousGradient} from '$lib/utils/css';
 	import {range} from '$lib/utils/generators';

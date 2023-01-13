@@ -37,13 +37,20 @@ const wcag3To2Equivalences = {
 	[Wcag3Level.ko]: Wcag2Level.ko
 };
 
-export const equivalence = (type, level) => {
+export const equivalence = (
+	type: ContrastType,
+	level: number
+) => {
 	switch (type) {
 		case 'wcag2':
-			return wcag3To2Equivalences?.[level] ?? level;
+			return (
+				wcag3To2Equivalences?.[level as Wcag3Level] ?? level
+			);
 
 		case 'wcag3':
-			return wcag2To3Equivalences?.[level] ?? level;
+			return (
+				wcag2To3Equivalences?.[level as Wcag2Level] ?? level
+			);
 
 		default:
 			return level;

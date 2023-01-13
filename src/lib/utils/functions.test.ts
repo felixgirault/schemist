@@ -1,7 +1,7 @@
 import {expect, test, vi} from 'vitest';
 import {debounce} from './functions';
 
-const delay = (duration) =>
+const delay = (duration: number) =>
 	new Promise((resolve) => {
 		setTimeout(resolve, duration);
 	});

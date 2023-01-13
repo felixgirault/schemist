@@ -32,6 +32,6 @@ export const rootColor = derived(debouncedOutputs, () => {
 	return (
 		$outputs?.[rootId]?.[0] ??
 		Object.values($outputs).shift()?.[0] ??
-		parseColor('#feffff')[1] // not fully white so there is a hue to pick up
+		parseColor('#feffff')[1]! // not fully white so there is a hue to pick up
 	);
 });

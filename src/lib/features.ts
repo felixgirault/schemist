@@ -10,7 +10,7 @@ export const isDarkSchemeEnabled = () => {
 	}
 
 	const stored = localStorage.getItem(DarkSchemeFeature);
-	return stored === undefined
+	return stored === null
 		? prefersDarkScheme()
 		: !!parseInt(stored);
 };

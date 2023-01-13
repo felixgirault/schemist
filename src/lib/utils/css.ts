@@ -27,8 +27,11 @@ export const joinProperties = (props: Record<string, string>) =>
 		.map(([name, value]) => `${name}: ${value}`)
 		.join('; ');
 
-export const cssRule = (name, value) => `--${name}: ${value};`;
-export const sassRule = (name, value) => `$${name}: ${value};`;
+export const cssRule = (name: string, value: string) =>
+	`--${name}: ${value};`;
+
+export const sassRule = (name: string, value: string) =>
+	`$${name}: ${value};`;
 
 export const styleTag = (tagName: string, rules: string) =>
 	`<style>${tagName} {${rules}}</style>`;

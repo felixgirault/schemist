@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type {FormEventHandler} from 'svelte/elements';
 	import {
 		formatSchemistTo,
 		formatSchemistToHex
@@ -20,17 +21,19 @@
 			? formattedValue
 			: format(value);
 
-	const handleInput = ({target}) => {
-		const newValue = target.value.trim();
+	const handleInput: FormEventHandler<HTMLInputElement> = ({
+		currentTarget: input
+	}) => {
+		const newValue = input.value.trim();
 		const [format, color] = parseColor(newValue);
 
 		if (format && color) {
 			$colorInputFormat = format;
 			value = color;
-			target.setCustomValidity('');
+			input.setCustomValidity('');
 		} else {
-			target.setCustomValidity('Invalid color');
-			target.reportValidity();
+			input.setCustomValidity('Invalid color');
+			input.reportValidity();
 		}
 	};
 </script>

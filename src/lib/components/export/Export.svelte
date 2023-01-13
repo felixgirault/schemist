@@ -6,12 +6,15 @@
 	import VariablesExport from '$lib/components/export/VariablesExport.svelte';
 	import {colorEntries} from '$lib/stores/combinations';
 	import {
+		type ExportEntry,
 		exportCasing,
 		exportColorFormat,
 		exportFormat,
 		exportPrecision
 	} from '$lib/stores/export';
 	import DesignTokensExport from './DesignTokensExport.svelte';
+
+	let entries: ExportEntry[] = [];
 
 	$: entries = $colorEntries.map(({color, ...entry}) => ({
 		...entry,

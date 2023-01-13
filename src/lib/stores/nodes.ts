@@ -16,15 +16,31 @@ import {sentenceCase} from '$lib/utils/strings';
 
 export type SampleType = 'single' | 'discrete' | 'continuous';
 
-export type Param = {
-	type: 'boolean' | 'range' | 'color';
+export type BooleanParam = {
+	type: 'boolean';
 	name: string;
 	label: string;
-	unit?: string;
-	min?: number;
-	max?: number;
-	default: any;
+	default: boolean;
 };
+
+export type ColorParam = {
+	type: 'color';
+	name: string;
+	label: string;
+	default: SchemistColor;
+};
+
+export type RangeParam = {
+	type: 'range';
+	name: string;
+	label: string;
+	unit: string;
+	min: number;
+	max: number;
+	default: number;
+};
+
+export type Param = BooleanParam | ColorParam | RangeParam;
 
 export type Args = {
 	[name: string]: any;
@@ -37,7 +53,7 @@ export type NodeDef = {
 	description?: string;
 	params: Param[];
 	samples: SampleType;
-	apply: (color: SchemistColor, args?: Args) => SchemistColor;
+	apply: (color: SchemistColor, args: Args) => SchemistColor;
 };
 
 export type NodeOutput = [color: SchemistColor, name: string];
@@ -60,7 +76,7 @@ export type Node = {
 	destroy: () => void;
 };
 
-export const defaultArgs = (def) =>
+export const defaultArgs = (def: NodeDef) =>
 	Object.fromEntries(
 		def.params.map(({name, default: d}) => [name, d])
 	);
@@ -71,7 +87,9 @@ export const generateName = (
 	parentColorName?: string
 ) =>
 	token
-		? token.replace('$', parentColorName)
+		? parentColorName
+			? token.replace('$', parentColorName)
+			: token
 		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
 // This whole thing is quite convoluted (shall I say shitty?)
@@ -83,14 +101,14 @@ export const createNode = (
 ): Node => {
 	let self: Node;
 	let connectedOutputs: Writable<NodeOutputRecord>;
-	let disconnect: () => void;
+	let disconnect: (() => void) | null;
 
 	const id = `n${uid()}`;
 	const def = defs[type];
 	const isHiddenStore = writable(isHidden);
 	const tokenStore = writable(token);
 	const input: Writable<NodeOutput> = writable([
-		parseColor('#fff')[1],
+		parseColor('#fff')[1]!,
 		''
 	]);
 
@@ -109,7 +127,7 @@ export const createNode = (
 		}
 	);
 
-	const children = writable([]);
+	const children = writable<Node[]>([]);
 
 	const removeChild = (child: Node) => {
 		children.update((children) => {
@@ -119,13 +137,14 @@ export const createNode = (
 				return children;
 			}
 
-			child?.disconnectFromParent();
-			child.parent = null;
+			child.disconnectFromParent?.();
+			delete child.parent;
+
 			return withoutIndex(children, i);
 		});
 	};
 
-	const removeFromParent = (node) => {
+	const removeFromParent = (node: Node) => {
 		node.parent?.removeChild(node);
 	};
 

@@ -3,7 +3,7 @@ import {formatSchemist} from './color/formatting';
 import {parseColor} from './color/parsing';
 import type {SchemistColor} from './color/types';
 
-export const defaultThemeColor = parseColor('#ffc208')[1];
+export const defaultThemeColor = parseColor('#ffc208')[1]!;
 
 export const overlayColor = (
 	color: SchemistColor,

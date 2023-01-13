@@ -2,8 +2,7 @@ import {
 	type Culori,
 	clampChroma,
 	convertHslToRgb,
-	convertRgbToHsl,
-	parseHex
+	convertRgbToHsl
 } from 'culori/fn';
 import {
 	culoriLchToRgb,

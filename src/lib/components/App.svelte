@@ -66,7 +66,7 @@
 	<Modal
 		label="Color values"
 		onClose={() => {
-			isShowingExport = null;
+			isShowingExport = false;
 		}}
 	>
 		<Export />

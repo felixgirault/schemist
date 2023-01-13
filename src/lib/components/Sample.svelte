@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let color: string;
-	export let title: string;
+	export let title: string = '';
 </script>
 
 <span class="sample" style="background: {color};" {title} />
