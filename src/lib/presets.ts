@@ -1,6 +1,6 @@
 import {get} from 'svelte/store';
 import type defs from '$lib/definitions/nodes';
-import type {Args, Node, NodeDef} from '$lib/stores/nodes';
+import type {Args, Node} from '$lib/stores/nodes';
 import {createNode} from '$lib/stores/nodes';
 
 export type PresetNode = {

@@ -6,7 +6,7 @@
 	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
 
 	export let label: string;
-	export let overlayColor: string = null;
+	export let overlayColor: string = '';
 	export let onClose: () => void;
 </script>
 

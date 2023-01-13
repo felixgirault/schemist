@@ -198,7 +198,7 @@ export const filteredCombinations = derived(
 		$combinations.filter(({minLevel}) => minLevel >= $level)
 );
 
-export const previewedCombinationUid = writable<string>();
+export const previewedCombinationUid = writable<string | null>();
 
 export const previewedCombination = derived(
 	[previewedCombinationUid, combinations],

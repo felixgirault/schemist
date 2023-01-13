@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let label: string;
-	export let description: string = undefined;
+	export let description: string = '';
 	export let onClick: () => void;
 </script>
 

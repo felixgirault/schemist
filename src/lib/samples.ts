@@ -13,11 +13,11 @@ export const sample = (
 	def.apply(
 		color,
 		Object.fromEntries(
-			def.params.map(({name, type, min, max, default: d}) => [
-				name,
-				ratio !== undefined && type === 'range'
-					? interval(min, max, ratio)
-					: d
+			def.params.map((param) => [
+				param.name,
+				ratio !== undefined && param.type === 'range'
+					? interval(param.min, param.max, ratio)
+					: param.default
 			])
 		)
 	);
@@ -39,13 +39,13 @@ export const paramSample = (
 	def.apply(
 		color,
 		Object.fromEntries(
-			def.params.map(({name, type, min, max, default: d}) => [
-				name,
-				name === paramName && type === 'range'
-					? interval(min, max, ratio)
-					: name in args
-					? args[name]
-					: d
+			def.params.map((param) => [
+				param.name,
+				param.name === paramName && param.type === 'range'
+					? interval(param.min, param.max, ratio)
+					: param.name in args
+					? args[param.name]
+					: param.default
 			])
 		)
 	);
@@ -64,7 +64,7 @@ export const paramSamples = (
 export const presetSample = (
 	def: NodeDef,
 	color: SchemistColor,
-	args: Args
+	args?: Args
 ) =>
 	def.apply(
 		color,

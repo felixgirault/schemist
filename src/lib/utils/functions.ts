@@ -1,16 +1,16 @@
 export type DebounceTimeout = number | (() => number);
 
-export const debounce = (
-	callback: (...args: any[]) => any,
+export const debounce = <Fn extends (...args: any) => any>(
+	callback: Fn,
 	timeout: DebounceTimeout
 ) => {
-	let timer;
+	let timer: NodeJS.Timeout;
 
-	return (...args) => {
+	return (...args: Parameters<Fn>) => {
 		clearTimeout(timer);
 		timer = setTimeout(
 			() => {
-				callback(...args);
+				callback.apply(null, args);
 			},
 			typeof timeout === 'function' ? timeout() : timeout
 		);

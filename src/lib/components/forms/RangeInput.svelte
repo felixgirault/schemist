@@ -1,14 +1,18 @@
 <script lang="ts">
+	import type {FormEventHandler} from 'svelte/elements';
+
 	export let id: string;
 	export let min: number;
 	export let max: number;
 	export let value: number;
 	export let gradient: string;
-	export let onInput: (value: number) => void = null;
+	export let onInput: ((value: number) => void) | null = null;
 
-	const handleInput = onInput
-		? (event) => onInput(parseInt(event.target.value))
-		: null;
+	const handleInput: FormEventHandler<HTMLInputElement> = (
+		event
+	) => {
+		onInput?.(parseInt(event.currentTarget.value));
+	};
 </script>
 
 <input

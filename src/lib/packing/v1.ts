@@ -5,12 +5,16 @@ import defs from '$lib/definitions/nodes';
 import type {PresetNode} from '$lib/presets';
 import type {Args, Param} from '$lib/stores/nodes';
 
+type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
+	children: number[];
+};
+
 export const pack = (node: PresetNode): string => {
-	const packed = [];
-	const index = {};
+	const packed: string[] = [];
+	const index: Record<string, number> = {};
 	let i = 0;
 
-	const indice = (key) => {
+	const indice = (key: string) => {
 		if (!(key in index)) {
 			index[key] = i++;
 		}
@@ -43,7 +47,7 @@ export const pack = (node: PresetNode): string => {
 		]);
 
 	const packNode = (node: PresetNode): number => {
-		const typeIndex = indice(node.type);
+		const typeIndex = indice(node.type as string);
 		const tokenIndex = indice(node.token ?? '');
 		const hiddenFlag = node.isHidden ? '!' : '';
 		const args = node.args
@@ -124,7 +128,7 @@ export const unpack = (data: string) => {
 			/y[0-9a-f]{3}|x[0-9a-f]{2}|[0-9a-f]/gi
 		);
 
-		const data = matches
+		const data = matches!
 			.map((v) =>
 				v.startsWith('x') || v.startsWith('y')
 					? v.substring(1)
@@ -132,13 +136,16 @@ export const unpack = (data: string) => {
 			)
 			.map((v) => parseInt(v, 16));
 
-		const type = index[data.shift()];
-		const token = index[data.shift()];
-		const argCount = data.shift();
-		const argEntries = [];
+		const type = index[data.shift() as number];
+		const token = index[data.shift() as number];
+		const argCount = data.shift() as number;
+		const argEntries: [number, number][] = [];
 
 		for (let i = 0; i < argCount; i += 2) {
-			argEntries.push([data.shift(), data.shift()]);
+			argEntries.push([
+				data.shift() as number,
+				data.shift() as number
+			]);
 		}
 
 		return {
@@ -147,7 +154,7 @@ export const unpack = (data: string) => {
 			isHidden: packedData.startsWith('!'),
 			args: unpackArgs(defs[type].params, argEntries),
 			children: data
-		};
+		} as IntermediatePresetNode;
 	};
 
 	const nodes = packed.map(unpackData);
@@ -158,7 +165,7 @@ export const unpack = (data: string) => {
 		isHidden,
 		args,
 		children
-	}): PresetNode => ({
+	}: IntermediatePresetNode): PresetNode => ({
 		type,
 		token,
 		isHidden,

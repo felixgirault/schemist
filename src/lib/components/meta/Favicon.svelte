@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type {SchemistColor} from '$lib/color/conversion';
 	import {schemistToRgb} from '$lib/color/conversion';
+	import type {SchemistColor} from '$lib/color/types';
 	import lightness from '$lib/definitions/nodes/lightness';
 	import {presetSamples} from '$lib/samples';
 	import {debounce} from '$lib/utils/functions';
 
 	export let color: SchemistColor;
-	let dataUrl;
+	let dataUrl: string;
 
 	const size = 16;
 	const canvas = document.createElement('canvas');
@@ -27,6 +27,10 @@
 	];
 
 	const update = (base: SchemistColor) => {
+		if (!context) {
+			return;
+		}
+
 		if (!img.complete) {
 			return;
 		}

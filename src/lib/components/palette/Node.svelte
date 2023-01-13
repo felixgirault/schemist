@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type {EventHandler} from 'svelte/elements';
 	import {formatSchemist} from '$lib/color/formatting';
 	import Modal from '$lib/components/Modal.svelte';
 	import ChildPicker from '$lib/components/palette/ChildPicker.svelte';
@@ -35,18 +36,27 @@
 
 	$: hasHint = !hasParent && !$children.length;
 
-	const handleTokenFocus: EventListener = ({target}) => {
-		(target as HTMLElement).innerText = $token;
+	const handleTokenFocus: EventHandler<
+		FocusEvent,
+		HTMLDivElement
+	> = ({currentTarget}) => {
+		currentTarget.innerText = $token;
 		isEditingToken = true;
 	};
 
-	const handleTokenBlur: EventListener = ({target}) => {
-		$token = (target as HTMLElement).innerText;
-		(target as HTMLElement).innerText = $output[1];
+	const handleTokenBlur: EventHandler<
+		Event,
+		HTMLDivElement
+	> = ({currentTarget}) => {
+		$token = currentTarget.innerText;
+		currentTarget.innerText = $output[1];
 		isEditingToken = false;
 	};
 
-	const handleTokenKey = (event: KeyboardEvent) => {
+	const handleTokenKey: EventHandler<
+		KeyboardEvent,
+		HTMLDivElement
+	> = (event) => {
 		if (event.code === 'Enter') {
 			event.preventDefault();
 			handleTokenBlur(event);

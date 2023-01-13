@@ -25,7 +25,7 @@ test.each(Object.values(presets))(
 		const tree = {
 			type: color.type,
 			args: {
-				color: parseColor('#f00')[1]
+				color: parseColor('#f00')[1]!
 			},
 			children: nodes
 		};
