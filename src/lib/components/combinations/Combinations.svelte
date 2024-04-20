@@ -64,9 +64,6 @@
 
 <style>
 	.data-options {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(28ch, 1fr));
-		gap: 1rem;
 		animation: slide-up 250ms ease-out;
 		contain: layout;
 	}

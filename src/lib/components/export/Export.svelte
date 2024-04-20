@@ -183,25 +183,29 @@
 						</div>
 					</fieldset>
 
-					<label for="prefix">Variables prefix</label>
-					<input
-						id="prefix"
-						name="prefix"
-						type="text"
-						bind:value={$exportPrefix}
-					/>
+					<div>
+						<label for="prefix">Variables prefix</label>
+						<input
+							id="prefix"
+							name="prefix"
+							type="text"
+							bind:value={$exportPrefix}
+						/>
+					</div>
 				{/if}
 
 				{#if $exportFormat !== 'tokens' && $exportColorFormat !== 'hex' && $exportColorFormat !== 'rgb'}
-					<label for="precision">Precision</label>
-					<input
-						id="precision"
-						name="precision"
-						type="number"
-						min={0}
-						max={5}
-						bind:value={$exportPrecision}
-					/>
+					<div>
+						<label for="precision">Precision</label>
+						<input
+							id="precision"
+							name="precision"
+							type="number"
+							min={0}
+							max={5}
+							bind:value={$exportPrecision}
+						/>
+					</div>
 				{/if}
 			</div>
 		</div>
