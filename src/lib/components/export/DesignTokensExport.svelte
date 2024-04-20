@@ -3,6 +3,7 @@
 	import {permalink} from '$lib/routing';
 	import type {Entry} from '$lib/stores/combinations';
 	import {rootNode} from '$lib/stores/palette';
+	import CodeArea from './CodeArea.svelte';
 
 	export let entries: Entry[];
 
@@ -24,6 +25,8 @@
 			...tokens
 		}
 	};
+
+	$: code = JSON.stringify(json, null, 2);
 </script>
 
-<pre class="elevated">{JSON.stringify(json, null, 2)}</pre>
+<CodeArea {code} />

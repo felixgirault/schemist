@@ -10,7 +10,8 @@
 		exportCasing,
 		exportColorFormat,
 		exportFormat,
-		exportPrecision
+		exportPrecision,
+		exportPrefix
 	} from '$lib/stores/export';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
@@ -181,18 +182,30 @@
 							</div>
 						</div>
 					</fieldset>
+
+					<div>
+						<label for="prefix">Variables prefix</label>
+						<input
+							id="prefix"
+							name="prefix"
+							type="text"
+							bind:value={$exportPrefix}
+						/>
+					</div>
 				{/if}
 
 				{#if $exportFormat !== 'tokens' && $exportColorFormat !== 'hex' && $exportColorFormat !== 'rgb'}
-					<label for="precision">Precision</label>
-					<input
-						id="precision"
-						name="precision"
-						type="number"
-						min={0}
-						max={5}
-						bind:value={$exportPrecision}
-					/>
+					<div>
+						<label for="precision">Precision</label>
+						<input
+							id="precision"
+							name="precision"
+							type="number"
+							min={0}
+							max={5}
+							bind:value={$exportPrecision}
+						/>
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -206,6 +219,7 @@
 				{entries}
 				format={$exportFormat}
 				casing={$exportCasing}
+				prefix={$exportPrefix}
 			/>
 		{/if}
 	</div>

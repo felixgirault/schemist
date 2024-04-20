@@ -12,3 +12,4 @@ export const exportFormat = writable<ExportFormat>('table');
 export const exportColorFormat = writable<ColorFormat>('hex');
 export const exportCasing = writable<ExportCasing>('dash');
 export const exportPrecision = writable(3);
+export const exportPrefix = writable('');

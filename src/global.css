@@ -100,15 +100,6 @@ tbody tr:last-child td {
 	padding-right: 0;
 }
 
-pre {
-	border-radius: var(--radius);
-	padding: 1rem;
-	background: var(--bg-hard);
-	font: inherit;
-	font-family: var(--font-mono);
-	overflow-x: auto;
-}
-
 .h2 {
 	margin-bottom: var(--vgap);
 	text-transform: lowercase;
@@ -361,6 +352,9 @@ input[type='range'] {
 .data-options {
 	position: sticky;
 	top: 1rem;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(28ch, 1fr));
+	gap: 1rem;
 	min-width: 20ch;
 }
 
