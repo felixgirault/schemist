@@ -100,15 +100,6 @@ tbody tr:last-child td {
 	padding-right: 0;
 }
 
-pre {
-	border-radius: var(--radius);
-	padding: 1rem;
-	background: var(--bg-hard);
-	font: inherit;
-	font-family: var(--font-mono);
-	overflow-x: auto;
-}
-
 .h2 {
 	margin-bottom: var(--vgap);
 	text-transform: lowercase;

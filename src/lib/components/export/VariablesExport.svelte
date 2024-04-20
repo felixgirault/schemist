@@ -8,6 +8,7 @@
 	import {rootNode} from '$lib/stores/palette';
 	import {cssRule, sassRule} from '$lib/utils/css';
 	import {camelCase, dashCase} from '$lib/utils/strings';
+	import CodeArea from './CodeArea.svelte';
 
 	export let entries: ExportEntry[];
 	export let format: ExportFormat;
@@ -20,8 +21,8 @@
 			formatRule(formatCase(name), cssColor)
 		)
 		.join('\n');
+
+	$: code = `/* @see ${permalink($rootNode)} */\n${variables}`;
 </script>
 
-<pre class="elevated">/* @see {permalink($rootNode)} */
-{variables}
-</pre>
+<CodeArea {code} />
