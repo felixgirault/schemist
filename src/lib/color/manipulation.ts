@@ -49,7 +49,7 @@ export const scaleLightness = (
 				h,
 				targetH,
 				Math.abs(amount / 100) * (hueShiftAmount / 100)
-		  )
+			)
 		: h
 });
 
@@ -131,7 +131,7 @@ export const temperatureToHue = (kelvins: number): number => {
 					329.698727446 *
 						Math.pow(temperature - 60, -0.1332047592),
 					255
-			  );
+				);
 
 	const g =
 		temperature <= 66
@@ -139,23 +139,23 @@ export const temperatureToHue = (kelvins: number): number => {
 					99.4708025861 * Math.log(temperature) -
 						161.1195681661,
 					255
-			  )
+				)
 			: clamp(
 					288.1221695283 *
 						Math.pow(temperature - 60, -0.0755148492),
 					255
-			  );
+				);
 
 	const b =
 		temperature >= 66
 			? 255
 			: temperature <= 19
-			? 0
-			: clamp(
-					138.5177312231 * Math.log(temperature - 10) -
-						305.0447927307,
-					255
-			  );
+				? 0
+				: clamp(
+						138.5177312231 * Math.log(temperature - 10) -
+							305.0447927307,
+						255
+					);
 
 	const color = rgbToSchemist({
 		r: Math.round(r),

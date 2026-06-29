@@ -44,8 +44,8 @@ export const paramSample = (
 				param.name === paramName && param.type === 'range'
 					? interval(param.min, param.max, ratio)
 					: param.name in args
-					? args[param.name]
-					: param.default
+						? args[param.name]
+						: param.default
 			])
 		)
 	);

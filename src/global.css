@@ -137,7 +137,8 @@ tbody tr:last-child td {
 	border: 0;
 	border-radius: var(--radius);
 	padding: 0.5rem;
-	box-shadow: inset 0 0 0 1px var(--fg-light),
+	box-shadow:
+		inset 0 0 0 1px var(--fg-light),
 		inset 0 -2px 0 0 var(--fg-light);
 	background: var(--bg-hard);
 	color: var(--fg);
@@ -154,7 +155,9 @@ a.button {
 .button:hover,
 .button:focus,
 .button-trigger:focus + .button {
-	box-shadow: 0 0 0 1px var(--fg), inset 0 0 0 1px var(--fg);
+	box-shadow:
+		0 0 0 1px var(--fg),
+		inset 0 0 0 1px var(--fg);
 	background: var(--bg-neutral);
 	color: var(--fg);
 }
@@ -176,7 +179,9 @@ a.button {
 .button-trigger:checked + .button:focus,
 .button--active:hover,
 .button--active:focus {
-	box-shadow: 0 0 0 1px var(--fg), inset 0 0 0 1px var(--bg);
+	box-shadow:
+		0 0 0 1px var(--fg),
+		inset 0 0 0 1px var(--bg);
 }
 
 .button:disabled {
@@ -257,7 +262,8 @@ input {
 input[type='text'],
 input[type='number'] {
 	box-sizing: border-box;
-	box-shadow: inset 0 0 0 1px var(--fg),
+	box-shadow:
+		inset 0 0 0 1px var(--fg),
 		inset 0 0 0 1px var(--bg-soft);
 	border-radius: calc(var(--radius) / 4);
 	border: 0;
@@ -307,14 +313,16 @@ input[type='range'] {
 }
 
 .elevated {
-	box-shadow: 0 0.1rem 0.5rem 0 var(--shadow),
+	box-shadow:
+		0 0.1rem 0.5rem 0 var(--shadow),
 		0 0.5rem 2rem 0 var(--shadow);
 	transition: box-shadow ease-in 300ms;
 }
 
 .elevated:hover,
 .elevated:focus-within {
-	box-shadow: 0 0.1rem 0.5rem 0 var(--shadow),
+	box-shadow:
+		0 0.1rem 0.5rem 0 var(--shadow),
 		0 0.5rem 2rem 0 var(--shadow),
 		0 0.1rem 0.5rem 0 var(--shadow),
 		0 0.5rem 2rem 0 var(--shadow);
