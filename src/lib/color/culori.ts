@@ -1,5 +1,5 @@
+import type {Hsl, Lch, Okhsl, Oklch, Rgb} from 'culori';
 import {
-	type Culori,
 	convertLabToLch,
 	convertLabToRgb,
 	convertLchToLab,
@@ -22,19 +22,14 @@ export const rgbFromCulori = ({
 	g,
 	b,
 	alpha
-}: Culori.Rgb): RgbColor => ({
+}: Rgb): RgbColor => ({
 	r: r * 255,
 	g: g * 255,
 	b: b * 255,
 	a: alpha
 });
 
-export const rgbToCulori = ({
-	r,
-	g,
-	b,
-	a
-}: RgbColor): Culori.Rgb => ({
+export const rgbToCulori = ({r, g, b, a}: RgbColor): Rgb => ({
 	mode: 'rgb',
 	r: r / 255,
 	g: g / 255,
@@ -43,23 +38,18 @@ export const rgbToCulori = ({
 });
 
 export const hslFromCulori = ({
-	h,
+	h = 0,
 	s,
 	l,
 	alpha
-}: Culori.Hsl): HslColor => ({
+}: Hsl): HslColor => ({
 	h,
 	s: s * 100,
 	l: l * 100,
 	a: alpha
 });
 
-export const hslToCulori = ({
-	h,
-	s,
-	l,
-	a
-}: HslColor): Culori.Hsl => ({
+export const hslToCulori = ({h, s, l, a}: HslColor): Hsl => ({
 	mode: 'hsl',
 	h,
 	s: s / 100,
@@ -70,21 +60,16 @@ export const hslToCulori = ({
 export const lchFromCulori = ({
 	l,
 	c,
-	h,
+	h = 0,
 	alpha
-}: Culori.Lch): LchColor => ({
+}: Lch): LchColor => ({
 	l,
 	c: (c / modeLch.ranges.c[1]) * 100,
 	h,
 	a: alpha
 });
 
-export const lchToCulori = ({
-	l,
-	c,
-	h,
-	a
-}: LchColor): Culori.Lch => ({
+export const lchToCulori = ({l, c, h, a}: LchColor): Lch => ({
 	mode: 'lch',
 	l,
 	c: (c / 100) * modeLch.ranges.c[1],
@@ -92,20 +77,20 @@ export const lchToCulori = ({
 	alpha: a
 });
 
-export const culoriLchToRgb = (color: Culori.Lch) =>
+export const culoriLchToRgb = (color: Lch) =>
 	convertLabToRgb(convertLchToLab(color));
 
-export const culoriOkhslToOklch = (color: Culori.Okhsl) =>
+export const culoriOkhslToOklch = (color: Okhsl) =>
 	convertLabToLch(convertOkhslToOklab(color), 'oklch');
 
-export const culoriOklchToRgb = (color: Culori.Oklch) =>
-	convertOklabToRgb(convertLchToLab(color, 'oklab'));
+export const culoriOklchToRgb = (color: Oklch) =>
+	convertOklabToRgb(convertLchToLab(color));
 
-export const culoriRgbToLch = (color: Culori.Rgb) =>
+export const culoriRgbToLch = (color: Rgb) =>
 	convertLabToLch(convertRgbToLab(color));
 
-export const culoriRgbToOkhsl = (color: Culori.Rgb) =>
+export const culoriRgbToOkhsl = (color: Rgb) =>
 	convertOklabToOkhsl(convertRgbToOklab(color));
 
-export const culoriRgbToOklch = (color: Culori.Rgb) =>
+export const culoriRgbToOklch = (color: Rgb) =>
 	convertLabToLch(convertRgbToOklab(color), 'oklch');
