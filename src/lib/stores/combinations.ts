@@ -22,10 +22,7 @@ import {debouncedOutputs, rootNode} from '$lib/stores/palette';
 import {circular} from '$lib/utils/math';
 
 export type BlindnessType =
-	| 'none'
-	| 'protanomaly'
-	| 'deuteranomaly'
-	| 'tritanomaly';
+	'none' | 'protanomaly' | 'deuteranomaly' | 'tritanomaly';
 
 export type Entry = {
 	id: Node['id'];
@@ -68,14 +65,12 @@ export const isLuminosityAnalysisEnabled = writable(false);
 export const colorEntries = derived(
 	debouncedOutputs,
 	($outputs) =>
-		Object.entries($outputs).map(
-			([id, output]): Entry => ({
-				id,
-				color: output[0],
-				rgbColor: schemistToRgb(output[0]),
-				name: output[1]
-			})
-		)
+		Object.entries($outputs).map(([id, output]): Entry => ({
+			id,
+			color: output[0],
+			rgbColor: schemistToRgb(output[0]),
+			name: output[1]
+		}))
 );
 
 // sorts colors by hue and lightness
@@ -149,8 +144,8 @@ export const combinations = derived(
 						type === 'protanomaly'
 							? simulateProtanomaly
 							: type === 'deuteranomaly'
-							? simulateDeuteranomaly
-							: simulateTritanomaly;
+								? simulateDeuteranomaly
+								: simulateTritanomaly;
 
 					const bg = simulate(bgOutput.rgbColor);
 					const fg = simulate(fgOutput.rgbColor);

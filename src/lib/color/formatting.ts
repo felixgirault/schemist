@@ -69,7 +69,7 @@ export const formatSchemistTo = (
 	format === 'hex'
 		? formatSchemistToHex(color)
 		: format === 'hsl'
-		? formatHsl(schemistToHsl(color), precision)
-		: format === 'lch'
-		? formatLch(schemistToLch(color), precision)
-		: formatRgb(schemistToRgb(color), precision);
+			? formatHsl(schemistToHsl(color), precision)
+			: format === 'lch'
+				? formatLch(schemistToLch(color), precision)
+				: formatRgb(schemistToRgb(color), precision);

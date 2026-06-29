@@ -61,23 +61,23 @@ export const wcag2Grade = (level: number) =>
 	level >= Wcag2Level.aaa
 		? 'AAA'
 		: level >= Wcag2Level.aa
-		? 'AA'
-		: level >= Wcag2Level.aa18
-		? 'AA18'
-		: 'KO';
+			? 'AA'
+			: level >= Wcag2Level.aa18
+				? 'AA18'
+				: 'KO';
 
 export const wcag3Grade = (level: number) =>
 	level >= Wcag3Level.all
 		? '5'
 		: level >= Wcag3Level.body
-		? '4'
-		: level >= Wcag3Level.large
-		? '3'
-		: level >= Wcag3Level.text
-		? '2'
-		: level >= Wcag3Level.nonText
-		? '1'
-		: '0';
+			? '4'
+			: level >= Wcag3Level.large
+				? '3'
+				: level >= Wcag3Level.text
+					? '2'
+					: level >= Wcag3Level.nonText
+						? '1'
+						: '0';
 
 export const wcag2Contrast = (bg: RgbColor, fg: RgbColor) =>
 	wcagContrast(rgbToCulori(bg), rgbToCulori(fg));

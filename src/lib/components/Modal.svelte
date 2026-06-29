@@ -52,7 +52,8 @@
 		max-width: 150ch;
 		background: var(--bg) !important;
 		color: var(--fg);
-		box-shadow: 0 0.1rem 0.5rem 0 var(--shadow),
+		box-shadow:
+			0 0.1rem 0.5rem 0 var(--shadow),
 			0 0.5rem 2rem 0 var(--shadow);
 	}
 

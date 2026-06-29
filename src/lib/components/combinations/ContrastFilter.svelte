@@ -15,7 +15,7 @@
 						Wcag2Level.aa18
 					],
 					['KO', Wcag2Level.ko]
-			  ]
+				]
 			: [
 					['All', Wcag3Level.all],
 					['Body text', Wcag3Level.body],
@@ -23,7 +23,7 @@
 					['Text ', Wcag3Level.text],
 					['Non text', Wcag3Level.nonText],
 					['KO', Wcag3Level.ko]
-			  ];
+				];
 </script>
 
 <fieldset>

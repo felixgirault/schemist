@@ -71,8 +71,8 @@ export const pack = (node: PresetNode): string => {
 				v.length === 3
 					? `y${v}`
 					: v.length === 2
-					? `x${v}`
-					: v
+						? `x${v}`
+						: v
 			)
 			.join('');
 
