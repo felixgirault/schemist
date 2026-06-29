@@ -22,20 +22,11 @@ export default {
 			unit: '%',
 			min: 0,
 			max: 100,
-			default: 15
-		},
-		{
-			type: 'range',
-			name: 'temp',
-			label: 'Temperature',
-			unit: '0K', // hacky shit
-			min: 550,
-			max: 750,
-			default: 650
+			default: 20
 		}
 	],
 	samples: 'continuous',
-	apply(color, {amount, shift, temp}) {
-		return shadowColor(color, amount, shift, temp * 10);
+	apply(color, {amount, shift}) {
+		return shadowColor(color, amount, shift);
 	}
 } satisfies NodeDef;

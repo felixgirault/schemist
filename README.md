@@ -67,4 +67,4 @@ Schemist is build upon these fabulous projects and resources:
 
 - [Making a useful LCh color palette](https://ninedegreesbelow.com/photography/gimp-srgb-lch-color-palettes.html#saturation)
 - [Using LCh to pick complementary colors and for making hue-based color harmonies](https://ninedegreesbelow.com/photography/lch-complements-and-color-harmonies.html)
-- [How to Convert Temperature (K) to RGB: Algorithm and Sample Code](https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
+- [What are the best colours or hues for painting shadows?](https://www.winsornewton.com/blogs/guides/best-colours-for-painting-shadows)
