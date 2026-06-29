@@ -15,4 +15,4 @@ export default {
 			token: 'Right $ complementary'
 		}
 	]
-} as Preset;
+} satisfies Preset;

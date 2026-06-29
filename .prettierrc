@@ -6,6 +6,10 @@
 	"importOrder": ["^\\$lib", "^[./]"],
 	"importOrderSeparation": false,
 	"importOrderSortSpecifiers": true,
+	"plugins": [
+		"@trivago/prettier-plugin-sort-imports",
+		"prettier-plugin-svelte"
+	],
 	"printWidth": 65,
 	"proseWrap": "always",
 	"quoteProps": "preserve",
@@ -20,6 +24,12 @@
 			"files": "*.svelte",
 			"options": {
 				"parser": "svelte"
+			}
+		},
+		{
+			"files": "*.yml",
+			"options": {
+				"tabWidth": 2
 			}
 		}
 	]

@@ -16,4 +16,4 @@ export default {
 	apply(_, {color}) {
 		return color;
 	}
-} as NodeDef;
+} satisfies NodeDef;

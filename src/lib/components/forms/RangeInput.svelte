@@ -27,7 +27,7 @@
 
 <style>
 	input {
-		-webkit-appearance: none;
+		appearance: none;
 		width: 100%;
 		height: 1rem;
 		background: transparent;

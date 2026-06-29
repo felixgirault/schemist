@@ -53,4 +53,4 @@ export default {
 			]
 		}
 	]
-} as Preset;
+} satisfies Preset;

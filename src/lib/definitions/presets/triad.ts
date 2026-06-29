@@ -15,4 +15,4 @@ export default {
 			token: 'Right $ triad'
 		}
 	]
-} as Preset;
+} satisfies Preset;

@@ -11,4 +11,4 @@ export default {
 			steps: steps + 1
 		}
 	}))
-} as Preset;
+} satisfies Preset;

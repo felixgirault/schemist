@@ -49,8 +49,7 @@
 					There is no color combination matching the
 					selected filters.
 					<br />
-					Try adding more colors to your palette or changing
-					filters.
+					Try adding more colors to your palette or changing filters.
 				</p>
 			{:else}
 				<p>

@@ -59,10 +59,12 @@
 						color={def.samples === 'single'
 							? formatSchemist(sample(def, color))
 							: def.samples === 'continuous'
-							? continuousGradient(
-									samples(def, color, 10)
-							  )
-							: discreteGradient(samples(def, color, 10))}
+								? continuousGradient(
+										samples(def, color, 10)
+									)
+								: discreteGradient(
+										samples(def, color, 10)
+									)}
 					/>
 				</ChildOption>
 			{/each}

@@ -92,11 +92,11 @@
 					this={format === 'css'
 						? CssColorField
 						: format === 'rgb'
-						? RgbColorField
-						: format === 'hsl'
-						? HslColorField
-						: LchColorField}
-					{id}
+							? RgbColorField
+							: format === 'hsl'
+								? HslColorField
+								: LchColorField}
+					id={id as never}
 					bind:value
 				/>
 

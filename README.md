@@ -48,23 +48,23 @@ the best results overall, in terms of ergonomics and outputs.
 
 Schemist is build upon these fabulous projects and resources:
 
--  [SvelteKit](https://kit.svelte.dev/)
--  [Culori](https://github.com/Evercoder/culori) for the core
-   color mechanics
--  [color-name-list](https://github.com/meodai/color-names) to
-   name colors
--  [nearest-color](https://github.com/dtao/nearest-color) to find
-   matching color names
--  [APCA](https://github.com/Myndex/apca-w3) to calculate
-   contrast ratios
--  [Inter](https://rsms.me/inter/) for the main font
--  [Source code pro](https://fonts.adobe.com/fonts/source-code-pro)
-   for monospace texts
--  [Font Squirrel generator](https://www.fontsquirrel.com/tools/webfont-generator)
-   to subset Source code pro
+- [SvelteKit](https://kit.svelte.dev/)
+- [Culori](https://github.com/Evercoder/culori) for the core
+  color mechanics
+- [color-name-list](https://github.com/meodai/color-names) to
+  name colors
+- [nearest-color](https://github.com/dtao/nearest-color) to find
+  matching color names
+- [APCA](https://github.com/Myndex/apca-w3) to calculate contrast
+  ratios
+- [Inter](https://rsms.me/inter/) for the main font
+- [Source code pro](https://fonts.adobe.com/fonts/source-code-pro)
+  for monospace texts
+- [Font Squirrel generator](https://www.fontsquirrel.com/tools/webfont-generator)
+  to subset Source code pro
 
 ## Resources
 
--  [Making a useful LCh color palette](https://ninedegreesbelow.com/photography/gimp-srgb-lch-color-palettes.html#saturation)
--  [Using LCh to pick complementary colors and for making hue-based color harmonies](https://ninedegreesbelow.com/photography/lch-complements-and-color-harmonies.html)
--  [How to Convert Temperature (K) to RGB: Algorithm and Sample Code](https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
+- [Making a useful LCh color palette](https://ninedegreesbelow.com/photography/gimp-srgb-lch-color-palettes.html#saturation)
+- [Using LCh to pick complementary colors and for making hue-based color harmonies](https://ninedegreesbelow.com/photography/lch-complements-and-color-harmonies.html)
+- [How to Convert Temperature (K) to RGB: Algorithm and Sample Code](https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
