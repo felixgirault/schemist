@@ -68,7 +68,7 @@
 	<div
 		class="output"
 		style="--output: {formatSchemist($output[0])};"
-	/>
+	></div>
 
 	<div class="self" class:open={areOptionsOpen}>
 		<header>
@@ -76,6 +76,7 @@
 				<h3 class="name">
 					<div
 						role="textbox"
+						tabindex="-1"
 						contenteditable="true"
 						spellcheck="false"
 						aria-label="Design token"

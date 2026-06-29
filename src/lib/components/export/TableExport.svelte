@@ -15,7 +15,7 @@
 	<table>
 		<thead>
 			<tr>
-				<td />
+				<td></td>
 				<th>Name</th>
 				<th>Value</th>
 			</tr>

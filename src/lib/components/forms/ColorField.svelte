@@ -96,7 +96,7 @@
 							: format === 'hsl'
 								? HslColorField
 								: LchColorField}
-					{id}
+					id={id as never}
 					bind:value
 				/>
 
