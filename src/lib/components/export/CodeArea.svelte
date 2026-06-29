@@ -11,6 +11,7 @@
 		border-radius: var(--radius);
 		padding: 1rem;
 		background: var(--bg-hard);
+		color: var(--fg);
 		font: inherit;
 		font-family: var(--font-mono);
 		resize: none;

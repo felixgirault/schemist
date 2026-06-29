@@ -3,7 +3,7 @@
 	export let title: string = '';
 </script>
 
-<span class="sample" style="background: {color};" {title} />
+<span class="sample" style="background: {color};" {title}></span>
 
 <style>
 	span {

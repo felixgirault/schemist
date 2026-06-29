@@ -1,5 +1,5 @@
 import {
-	type Culori,
+	type Okhsl,
 	clampChroma,
 	convertHslToRgb,
 	convertRgbToHsl
@@ -29,7 +29,7 @@ export const rgbToSchemist = (
 	color: RgbColor
 ): SchemistColor => {
 	const culoriRgb = rgbToCulori(color);
-	const {h} = culoriRgbToOklch(culoriRgb);
+	const {h = 0} = culoriRgbToOklch(culoriRgb);
 	const {s, l} = culoriRgbToOkhsl(culoriRgb);
 
 	return {
@@ -46,7 +46,7 @@ export const schemistToRgb = ({
 	l,
 	a
 }: SchemistColor): RgbColor => {
-	const hsl: Culori.Okhsl = {
+	const hsl: Okhsl = {
 		mode: 'okhsl',
 		h,
 		s: s / 100,
