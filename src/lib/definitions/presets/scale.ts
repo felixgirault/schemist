@@ -17,4 +17,4 @@ export default {
 		{type: lightness.type, args: {amount: 90}},
 		{type: lightness.type, args: {amount: 100}}
 	]
-} as Preset;
+} satisfies Preset;

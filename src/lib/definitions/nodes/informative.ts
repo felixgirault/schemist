@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return blueishColor(color);
 	}
-} as NodeDef;
+} satisfies NodeDef;

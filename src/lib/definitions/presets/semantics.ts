@@ -26,4 +26,4 @@ export default {
 			token: 'Error'
 		}
 	]
-} as Preset;
+} satisfies Preset;

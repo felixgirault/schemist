@@ -22,4 +22,4 @@ export default {
 		...semanticPairs.nodes,
 		...neutral.nodes
 	]
-} as Preset;
+} satisfies Preset;

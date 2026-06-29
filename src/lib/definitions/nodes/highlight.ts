@@ -38,4 +38,4 @@ export default {
 	apply(color, {amount, shift, temp}) {
 		return highlightColor(color, amount, shift, temp * 100);
 	}
-} as NodeDef;
+} satisfies NodeDef;

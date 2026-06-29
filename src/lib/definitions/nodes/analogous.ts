@@ -18,4 +18,4 @@ export default {
 	apply(color, {steps}) {
 		return rotateHue(color, steps * 30);
 	}
-} as NodeDef;
+} satisfies NodeDef;

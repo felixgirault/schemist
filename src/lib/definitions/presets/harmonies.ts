@@ -13,4 +13,4 @@ export default {
 		triad.nodes[1],
 		tetrad.nodes[1]
 	]
-} as Preset;
+} satisfies Preset;
