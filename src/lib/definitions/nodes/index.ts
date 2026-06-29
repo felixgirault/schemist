@@ -1,3 +1,4 @@
+import type {NodeDef} from '$lib/stores/nodes';
 import analogous from './analogous';
 import color from './color';
 import complementary from './complementary';
@@ -60,4 +61,4 @@ export const defList = [
 	saturation,
 	hue,
 	color
-];
+] as NodeDef[];

@@ -21,4 +21,4 @@ export default {
 	apply(color, {amount}) {
 		return setLightness(color, amount);
 	}
-} as NodeDef;
+} satisfies NodeDef;

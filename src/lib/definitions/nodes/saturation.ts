@@ -21,4 +21,4 @@ export default {
 	apply(color, {amount}) {
 		return setSaturation(color, amount);
 	}
-} as NodeDef;
+} satisfies NodeDef;

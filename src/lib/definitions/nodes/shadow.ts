@@ -38,4 +38,4 @@ export default {
 	apply(color, {amount, shift, temp}) {
 		return shadowColor(color, amount, shift, temp * 10);
 	}
-} as NodeDef;
+} satisfies NodeDef;

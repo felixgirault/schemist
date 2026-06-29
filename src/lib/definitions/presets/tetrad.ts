@@ -15,4 +15,4 @@ export default {
 			token: 'Right $ tetrad'
 		}
 	]
-} as Preset;
+} satisfies Preset;

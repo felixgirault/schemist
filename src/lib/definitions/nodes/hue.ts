@@ -19,4 +19,4 @@ export default {
 	apply(color, {degrees}) {
 		return rotateHue(color, degrees);
 	}
-} as NodeDef;
+} satisfies NodeDef;

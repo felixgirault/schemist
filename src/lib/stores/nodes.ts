@@ -34,7 +34,7 @@ export type RangeParam = {
 	type: 'range';
 	name: string;
 	label: string;
-	unit: string;
+	unit?: string;
 	min: number;
 	max: number;
 	default: number;
