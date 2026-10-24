@@ -1,14 +1,14 @@
 <script lang="ts">
-	import {rgbToSchemist} from '$lib/color/conversion';
-	import {previewedCombination} from '$lib/stores/combinations';
-	import {isDarkScheme} from '$lib/stores/features';
-	import {rootColor} from '$lib/stores/palette';
+	import {rgbToSchemist} from '#lib/color/conversion.js';
+	import {previewedCombination} from '#lib/stores/combinations.js';
+	import {isDarkScheme} from '#lib/stores/features.js';
+	import {rootColor} from '#lib/stores/palette.js';
 	import {
 		defaultThemeColor,
 		duoThemeStyle,
 		themeStyle
-	} from '$lib/style';
-	import {styleTag} from '$lib/utils/css';
+	} from '#lib/style.js';
+	import {styleTag} from '#lib/utils/css.js';
 	import '../../../global.css';
 
 	let style = styleTag(

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import {permalink} from '$lib/routing';
+	import {permalink} from '#lib/routing.js';
 	import type {
 		ExportCasing,
 		ExportEntry,
 		ExportFormat
-	} from '$lib/stores/export';
-	import {rootNode} from '$lib/stores/palette';
-	import {cssRule, sassRule} from '$lib/utils/css';
-	import {camelCase, dashCase} from '$lib/utils/strings';
+	} from '#lib/stores/export.js';
+	import {rootNode} from '#lib/stores/palette.js';
+	import {cssRule, sassRule} from '#lib/utils/css.js';
+	import {camelCase, dashCase} from '#lib/utils/strings.js';
 	import CodeArea from './CodeArea.svelte';
 
 	export let entries: ExportEntry[];

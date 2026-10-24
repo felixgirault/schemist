@@ -1,4 +1,4 @@
-import type {Preset} from '$lib/presets';
+import type {Preset} from '#lib/presets.js';
 import triadLeft from '../nodes/triadLeft';
 import triadRight from '../nodes/triadRight';
 import neutral from './neutral';

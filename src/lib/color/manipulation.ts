@@ -3,7 +3,7 @@ import {
 	circularInterval,
 	clamp,
 	closestAngle
-} from '$lib/utils/math';
+} from '#lib/utils/math.js';
 import {rgbToSchemist} from './conversion';
 import type {SchemistColor} from './types';
 

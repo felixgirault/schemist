@@ -1,8 +1,8 @@
 <script lang="ts">
-	import {formatSchemistToHex} from '$lib/color/formatting';
-	import {permalink} from '$lib/routing';
-	import type {Entry} from '$lib/stores/combinations';
-	import {rootNode} from '$lib/stores/palette';
+	import {formatSchemistToHex} from '#lib/color/formatting.js';
+	import {permalink} from '#lib/routing.js';
+	import type {Entry} from '#lib/stores/combinations.js';
+	import {rootNode} from '#lib/stores/palette.js';
 	import CodeArea from './CodeArea.svelte';
 
 	export let entries: Entry[];

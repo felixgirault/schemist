@@ -1,13 +1,13 @@
 <script lang="ts">
-	import {browser} from '$app/environment';
-	import Favicon from '$lib/components/meta/Favicon.svelte';
-	import GlobalStyle from '$lib/components/meta/GlobalStyle.svelte';
-	import OpenGraph from '$lib/components/meta/OpenGraph.svelte';
-	import TwitterCards from '$lib/components/meta/TwitterCards.svelte';
-	import NotificationArea from '$lib/components/notifications/NotificationArea.svelte';
-	import {isLuminosityAnalysisEnabled} from '$lib/stores/combinations';
-	import {isDarkScheme} from '$lib/stores/features';
-	import {rootColor} from '$lib/stores/palette';
+	import Favicon from '#lib/components/meta/Favicon.svelte';
+	import GlobalStyle from '#lib/components/meta/GlobalStyle.svelte';
+	import OpenGraph from '#lib/components/meta/OpenGraph.svelte';
+	import TwitterCards from '#lib/components/meta/TwitterCards.svelte';
+	import NotificationArea from '#lib/components/notifications/NotificationArea.svelte';
+	import {isLuminosityAnalysisEnabled} from '#lib/stores/combinations.js';
+	import {isDarkScheme} from '#lib/stores/features.js';
+	import {rootColor} from '#lib/stores/palette.js';
+	import {browser} from '$app/env';
 	import GitHubIcon from './icons/GitHubIcon.svelte';
 	import ThemeIcon from './icons/ThemeIcon.svelte';
 </script>
@@ -62,7 +62,7 @@
 
 	<NotificationArea />
 
-	<slot />
+	<slot></slot>
 </div>
 
 <style>

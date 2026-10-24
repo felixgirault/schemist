@@ -1,9 +1,9 @@
 <script lang="ts">
-	import {Wcag2Level, Wcag3Level} from '$lib/color/contrast';
+	import {Wcag2Level, Wcag3Level} from '#lib/color/contrast.js';
 	import {
 		contrastType,
 		minLevel
-	} from '$lib/stores/combinations';
+	} from '#lib/stores/combinations.js';
 
 	$: entries =
 		$contrastType === 'wcag2'

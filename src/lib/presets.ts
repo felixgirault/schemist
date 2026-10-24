@@ -1,7 +1,7 @@
+import type defs from '#lib/definitions/nodes/index.js';
+import type {Args, Node} from '#lib/stores/nodes.js';
+import {createNode} from '#lib/stores/nodes.js';
 import {get} from 'svelte/store';
-import type defs from '$lib/definitions/nodes';
-import type {Args, Node} from '$lib/stores/nodes';
-import {createNode} from '$lib/stores/nodes';
 
 export type PresetNode = {
 	type: keyof typeof defs;

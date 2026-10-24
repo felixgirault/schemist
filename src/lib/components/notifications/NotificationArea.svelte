@@ -1,9 +1,9 @@
 <script lang="ts">
-	import PreviewNotification from '$lib/components/notifications/PreviewNotification.svelte';
+	import PreviewNotification from '#lib/components/notifications/PreviewNotification.svelte';
 	import {
 		previewedCombination,
 		previewedCombinationUid
-	} from '$lib/stores/combinations';
+	} from '#lib/stores/combinations.js';
 </script>
 
 <div aria-live="polite">

@@ -1,5 +1,5 @@
-import lightness from '$lib/definitions/nodes/lightness';
-import type {Preset} from '$lib/presets';
+import lightness from '#lib/definitions/nodes/lightness.js';
+import type {Preset} from '#lib/presets.js';
 
 // @see https://m3.material.io/styles/color/the-color-system/tokens
 export default {

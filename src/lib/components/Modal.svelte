@@ -1,9 +1,9 @@
 <script lang="ts">
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import {
 		DialogContent,
 		DialogOverlay
 	} from 'svelte-accessible-dialog';
-	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
 
 	export let label: string;
 	export let overlayColor: string = '';

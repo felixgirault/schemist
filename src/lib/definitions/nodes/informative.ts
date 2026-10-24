@@ -1,5 +1,5 @@
-import {blueishColor} from '$lib/color/manipulation';
-import type {NodeDef} from '$lib/stores/nodes';
+import {blueishColor} from '#lib/color/manipulation.js';
+import type {NodeDef} from '#lib/stores/nodes.js';
 
 export default {
 	type: 'inf',

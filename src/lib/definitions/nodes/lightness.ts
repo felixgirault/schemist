@@ -1,5 +1,5 @@
-import {setLightness} from '$lib/color/manipulation';
-import type {NodeDef} from '$lib/stores/nodes';
+import {setLightness} from '#lib/color/manipulation.js';
+import type {NodeDef} from '#lib/stores/nodes.js';
 
 export default {
 	type: 'l',

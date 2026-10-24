@@ -1,10 +1,10 @@
 <svelte:options immutable />
 
 <script lang="ts">
-	import {formatSchemistTo} from '$lib/color/formatting';
-	import TableExport from '$lib/components/export/TableExport.svelte';
-	import VariablesExport from '$lib/components/export/VariablesExport.svelte';
-	import {colorEntries} from '$lib/stores/combinations';
+	import {formatSchemistTo} from '#lib/color/formatting.js';
+	import TableExport from '#lib/components/export/TableExport.svelte';
+	import VariablesExport from '#lib/components/export/VariablesExport.svelte';
+	import {colorEntries} from '#lib/stores/combinations.js';
 	import {
 		type ExportEntry,
 		exportCasing,
@@ -12,7 +12,7 @@
 		exportFormat,
 		exportPrecision,
 		exportPrefix
-	} from '$lib/stores/export';
+	} from '#lib/stores/export.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
 	let entries: ExportEntry[] = [];

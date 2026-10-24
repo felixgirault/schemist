@@ -1,4 +1,4 @@
-import type {PresetNode} from '$lib/presets';
+import type {PresetNode} from '#lib/presets.js';
 import {pack as packV1, unpack as unpackV1} from './v1';
 
 export const pack = (node: PresetNode): string =>

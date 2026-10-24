@@ -4,7 +4,7 @@
 	// starting with #dbdb00, adding a contrasting color,
 	// a complementary color, then changing HSL hue of the
 	// root color to ~180, and finally to ~360.
-	import App from '$lib/components/App.svelte';
+	import App from '#lib/components/App.svelte';
 </script>
 
 <svelte:head>

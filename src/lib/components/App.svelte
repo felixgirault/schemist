@@ -1,14 +1,14 @@
 <script lang="ts">
-	import Combinations from '$lib/components/combinations/Combinations.svelte';
-	import Export from '$lib/components/export/Export.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import Palette from '$lib/components/Palette.svelte';
-	import {permalink} from '$lib/routing';
+	import Combinations from '#lib/components/combinations/Combinations.svelte';
+	import Export from '#lib/components/export/Export.svelte';
+	import Modal from '#lib/components/Modal.svelte';
+	import Palette from '#lib/components/Palette.svelte';
+	import {permalink} from '#lib/routing.js';
 	import {
 		combinations,
 		filteredCombinations
-	} from '$lib/stores/combinations';
-	import {rootNode} from '$lib/stores/palette';
+	} from '#lib/stores/combinations.js';
+	import {rootNode} from '#lib/stores/palette.js';
 
 	let isShowingExport = false;
 

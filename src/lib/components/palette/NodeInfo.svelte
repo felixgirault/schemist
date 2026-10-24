@@ -3,14 +3,14 @@
 		schemistToHsl,
 		schemistToLch,
 		schemistToRgb
-	} from '$lib/color/conversion';
+	} from '#lib/color/conversion.js';
 	import {
 		formatHsl,
 		formatLch,
 		formatRgb,
 		formatSchemistToHex
-	} from '$lib/color/formatting';
-	import type {Node} from '$lib/stores/nodes';
+	} from '#lib/color/formatting.js';
+	import type {Node} from '#lib/stores/nodes.js';
 
 	export let id: string;
 	export let node: Node;

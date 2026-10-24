@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {contrastType} from '$lib/stores/combinations';
+	import {contrastType} from '#lib/stores/combinations.js';
 </script>
 
 <fieldset>

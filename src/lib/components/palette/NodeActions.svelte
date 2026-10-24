@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AddIcon from '$lib/components/icons/AddIcon.svelte';
-	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
-	import OptionsIcon from '$lib/components/icons/OptionsIcon.svelte';
+	import AddIcon from '#lib/components/icons/AddIcon.svelte';
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';

@@ -1,11 +1,11 @@
 <svelte:options immutable />
 
 <script lang="ts">
-	import {formatRgbToHex} from '$lib/color/formatting';
-	import PreviewIcon from '$lib/components/icons/PreviewIcon.svelte';
-	import type {CombinationContrast} from '$lib/stores/combinations';
-	import {contrastType} from '$lib/stores/combinations';
-	import {round} from '$lib/utils/math';
+	import {formatRgbToHex} from '#lib/color/formatting.js';
+	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
+	import type {CombinationContrast} from '#lib/stores/combinations.js';
+	import {contrastType} from '#lib/stores/combinations.js';
+	import {round} from '#lib/utils/math.js';
 
 	export let uid: string;
 	export let bgName: string;

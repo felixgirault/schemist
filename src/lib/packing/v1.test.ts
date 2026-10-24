@@ -1,9 +1,9 @@
+import {parseColor} from '#lib/color/parsing.js';
+import color from '#lib/definitions/nodes/color.js';
+import defs from '#lib/definitions/nodes/index.js';
+import presets from '#lib/definitions/presets/index.js';
+import {defaultArgs} from '#lib/stores/nodes.js';
 import {expect, test} from 'vitest';
-import {parseColor} from '$lib/color/parsing';
-import defs from '$lib/definitions/nodes';
-import color from '$lib/definitions/nodes/color';
-import presets from '$lib/definitions/presets';
-import {defaultArgs} from '$lib/stores/nodes';
 import {pack, unpack} from './v1';
 
 test.each(Object.values(defs))('pack node $label', ({type}) => {

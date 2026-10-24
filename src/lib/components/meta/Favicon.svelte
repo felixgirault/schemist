@@ -1,9 +1,9 @@
 <script lang="ts">
-	import {schemistToRgb} from '$lib/color/conversion';
-	import type {SchemistColor} from '$lib/color/types';
-	import lightness from '$lib/definitions/nodes/lightness';
-	import {presetSamples} from '$lib/samples';
-	import {debounce} from '$lib/utils/functions';
+	import {schemistToRgb} from '#lib/color/conversion.js';
+	import type {SchemistColor} from '#lib/color/types.js';
+	import lightness from '#lib/definitions/nodes/lightness.js';
+	import {presetSamples} from '#lib/samples.js';
+	import {debounce} from '#lib/utils/functions.js';
 
 	export let color: SchemistColor;
 	let dataUrl: string;

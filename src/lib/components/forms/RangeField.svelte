@@ -1,5 +1,5 @@
 <script lang="ts">
-	import RangeInput from '$lib/components/forms/RangeInput.svelte';
+	import RangeInput from '#lib/components/forms/RangeInput.svelte';
 
 	export let id: string;
 	export let label: string;

@@ -1,5 +1,5 @@
-import {rotateHue} from '$lib/color/manipulation';
-import type {NodeDef} from '$lib/stores/nodes';
+import {rotateHue} from '#lib/color/manipulation.js';
+import type {NodeDef} from '#lib/stores/nodes.js';
 
 export default {
 	type: 'h',

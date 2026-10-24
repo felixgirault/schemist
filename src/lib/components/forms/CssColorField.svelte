@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type {FormEventHandler} from 'svelte/elements';
 	import {
 		formatSchemistTo,
 		formatSchemistToHex
-	} from '$lib/color/formatting';
-	import {parseColor} from '$lib/color/parsing';
-	import type {SchemistColor} from '$lib/color/types';
-	import {colorInputFormat} from '$lib/stores/features';
+	} from '#lib/color/formatting.js';
+	import {parseColor} from '#lib/color/parsing.js';
+	import type {SchemistColor} from '#lib/color/types.js';
+	import {colorInputFormat} from '#lib/stores/features.js';
+	import type {FormEventHandler} from 'svelte/elements';
 
 	const format = (color: SchemistColor) =>
 		formatSchemistTo(color, $colorInputFormat, 0);

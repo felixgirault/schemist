@@ -1,6 +1,6 @@
-import {randomUsableColor} from '$lib/color/manipulation';
-import {unpack} from '$lib/packing';
-import {parseTree} from '$lib/presets';
+import {randomUsableColor} from '#lib/color/manipulation.js';
+import {unpack} from '#lib/packing/index.js';
+import {parseTree} from '#lib/presets.js';
 
 export const getRootNode = () => {
 	const query = new URLSearchParams(location.search);

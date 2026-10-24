@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type {BlindnessType} from '$lib/stores/combinations';
-	import {blindnessTypes} from '$lib/stores/combinations';
+	import type {BlindnessType} from '#lib/stores/combinations.js';
+	import {blindnessTypes} from '#lib/stores/combinations.js';
 
 	const entries: [string, BlindnessType][] = [
 		['Protanomaly', 'protanomaly'],

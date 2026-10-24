@@ -1,8 +1,8 @@
 <script>
+	import Node from '#lib/components/palette/Node.svelte';
+	import {getRootNode} from '#lib/palette.js';
+	import {outputs, rootNode} from '#lib/stores/palette.js';
 	import {onMount} from 'svelte';
-	import Node from '$lib/components/palette/Node.svelte';
-	import {getRootNode} from '$lib/palette';
-	import {outputs, rootNode} from '$lib/stores/palette';
 
 	onMount(() => {
 		$rootNode = getRootNode();

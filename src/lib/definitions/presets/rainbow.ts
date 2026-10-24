@@ -1,6 +1,6 @@
-import analogous from '$lib/definitions/nodes/analogous';
-import type {Preset} from '$lib/presets';
-import {range} from '$lib/utils/generators';
+import analogous from '#lib/definitions/nodes/analogous.js';
+import type {Preset} from '#lib/presets.js';
+import {range} from '#lib/utils/generators.js';
 
 export default {
 	label: 'Rainbow',

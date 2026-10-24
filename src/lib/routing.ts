@@ -1,6 +1,6 @@
-import {pack} from '$lib/packing';
-import {serializeTree} from '$lib/presets';
-import type {Node} from '$lib/stores/nodes';
+import {pack} from '#lib/packing/index.js';
+import {serializeTree} from '#lib/presets.js';
+import type {Node} from '#lib/stores/nodes.js';
 
 export const permalink = (node: Node) =>
 	`${window.location.origin}?preset=${encodeURI(

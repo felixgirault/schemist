@@ -1,6 +1,4 @@
-import type {Readable} from 'svelte/store';
-import {derived, get, writable} from 'svelte/store';
-import type {ContrastType} from '$lib/color/contrast';
+import type {ContrastType} from '#lib/color/contrast.js';
 import {
 	Wcag2Level,
 	Wcag3Level,
@@ -9,17 +7,22 @@ import {
 	wcag2Grade,
 	wcag3Contrast,
 	wcag3Grade
-} from '$lib/color/contrast';
-import {schemistToRgb} from '$lib/color/conversion';
+} from '#lib/color/contrast.js';
+import {schemistToRgb} from '#lib/color/conversion.js';
 import {
 	simulateDeuteranomaly,
 	simulateProtanomaly,
 	simulateTritanomaly
-} from '$lib/color/simulation';
-import type {RgbColor} from '$lib/color/types';
-import type {Node, NodeOutput} from '$lib/stores/nodes';
-import {debouncedOutputs, rootNode} from '$lib/stores/palette';
-import {circular} from '$lib/utils/math';
+} from '#lib/color/simulation.js';
+import type {RgbColor} from '#lib/color/types.js';
+import type {Node, NodeOutput} from '#lib/stores/nodes.js';
+import {
+	debouncedOutputs,
+	rootNode
+} from '#lib/stores/palette.js';
+import {circular} from '#lib/utils/math.js';
+import type {Readable} from 'svelte/store';
+import {derived, get, writable} from 'svelte/store';
 
 export type BlindnessType =
 	| 'none'

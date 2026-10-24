@@ -1,8 +1,8 @@
-import informative from '$lib/definitions/nodes/informative';
-import negative from '$lib/definitions/nodes/negative';
-import positive from '$lib/definitions/nodes/positive';
-import warning from '$lib/definitions/nodes/warning';
-import type {Preset} from '$lib/presets';
+import informative from '#lib/definitions/nodes/informative.js';
+import negative from '#lib/definitions/nodes/negative.js';
+import positive from '#lib/definitions/nodes/positive.js';
+import warning from '#lib/definitions/nodes/warning.js';
+import type {Preset} from '#lib/presets.js';
 
 export default {
 	label: 'Semantic colors',

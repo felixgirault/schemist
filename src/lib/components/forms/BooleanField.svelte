@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {Node, Param} from '$lib/stores/nodes';
+	import type {Node, Param} from '#lib/stores/nodes.js';
 
 	export let id: Node['id'];
 	export let param: Param;

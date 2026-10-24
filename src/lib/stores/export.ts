@@ -1,5 +1,5 @@
+import type {ColorFormat} from '#lib/color/formatting.js';
 import {writable} from 'svelte/store';
-import type {ColorFormat} from '$lib/color/formatting';
 import type {Entry} from './combinations';
 
 export type ExportFormat = 'table' | 'tokens' | 'css' | 'sass';

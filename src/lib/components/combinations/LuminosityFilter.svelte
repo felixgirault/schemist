@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {isLuminosityAnalysisEnabled} from '$lib/stores/combinations';
+	import {isLuminosityAnalysisEnabled} from '#lib/stores/combinations.js';
 </script>
 
 <fieldset>

@@ -1,4 +1,4 @@
-import type {NodeDef} from '$lib/stores/nodes';
+import type {NodeDef} from '#lib/stores/nodes.js';
 import analogous from './analogous';
 import color from './color';
 import complementary from './complementary';

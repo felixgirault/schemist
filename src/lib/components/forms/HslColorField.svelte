@@ -2,11 +2,14 @@
 	import {
 		hslToSchemist,
 		schemistToHsl
-	} from '$lib/color/conversion';
-	import type {HslColor, SchemistColor} from '$lib/color/types';
-	import RangeField from '$lib/components/forms/RangeField.svelte';
-	import {continuousGradient} from '$lib/utils/css';
-	import {range} from '$lib/utils/generators';
+	} from '#lib/color/conversion.js';
+	import type {
+		HslColor,
+		SchemistColor
+	} from '#lib/color/types.js';
+	import RangeField from '#lib/components/forms/RangeField.svelte';
+	import {continuousGradient} from '#lib/utils/css.js';
+	import {range} from '#lib/utils/generators.js';
 
 	export let id: number;
 	export let value: SchemistColor;

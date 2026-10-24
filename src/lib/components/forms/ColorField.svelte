@@ -1,11 +1,11 @@
 <script lang="ts">
-	import {randomUsableColor} from '$lib/color/manipulation';
-	import type {SchemistColor} from '$lib/color/types';
-	import CssColorField from '$lib/components/forms/CssColorField.svelte';
-	import HslColorField from '$lib/components/forms/HslColorField.svelte';
-	import LchColorField from '$lib/components/forms/LchColorField.svelte';
-	import RgbColorField from '$lib/components/forms/RgbColorField.svelte';
-	import type {Node, Param} from '$lib/stores/nodes';
+	import {randomUsableColor} from '#lib/color/manipulation.js';
+	import type {SchemistColor} from '#lib/color/types.js';
+	import CssColorField from '#lib/components/forms/CssColorField.svelte';
+	import HslColorField from '#lib/components/forms/HslColorField.svelte';
+	import LchColorField from '#lib/components/forms/LchColorField.svelte';
+	import RgbColorField from '#lib/components/forms/RgbColorField.svelte';
+	import type {Node, Param} from '#lib/stores/nodes.js';
 
 	type InputFormat = 'css' | 'rgb' | 'hsl' | 'lch';
 

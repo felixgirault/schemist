@@ -1,5 +1,5 @@
-import type {NodeDef} from '$lib/stores/nodes';
-import {defaultThemeColor} from '$lib/style';
+import type {NodeDef} from '#lib/stores/nodes.js';
+import {defaultThemeColor} from '#lib/style.js';
 
 export default {
 	type: 'clr',

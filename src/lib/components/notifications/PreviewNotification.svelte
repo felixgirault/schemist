@@ -1,8 +1,8 @@
 <script lang="ts">
-	import {rgbToSchemist} from '$lib/color/conversion';
-	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
-	import type {Combination} from '$lib/stores/combinations';
-	import {duoThemeStyle} from '$lib/style';
+	import {rgbToSchemist} from '#lib/color/conversion.js';
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import type {Combination} from '#lib/stores/combinations.js';
+	import {duoThemeStyle} from '#lib/style.js';
 
 	export let combination: Combination;
 	export let onClose: () => void;

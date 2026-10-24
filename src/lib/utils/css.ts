@@ -1,5 +1,5 @@
-import {formatSchemist} from '$lib/color/formatting';
-import type {SchemistColor} from '$lib/color/types';
+import {formatSchemist} from '#lib/color/formatting.js';
+import type {SchemistColor} from '#lib/color/types.js';
 
 export const continuousGradient = (colors: SchemistColor[]) => {
 	const l = 100 / colors.length;

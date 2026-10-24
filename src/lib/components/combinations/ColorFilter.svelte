@@ -1,10 +1,10 @@
 <script lang="ts">
-	import {formatSchemist} from '$lib/color/formatting';
-	import Sample from '$lib/components/Sample.svelte';
+	import {formatSchemist} from '#lib/color/formatting.js';
+	import Sample from '#lib/components/Sample.svelte';
 	import {
 		colorFilters,
 		sortedColors
-	} from '$lib/stores/combinations';
+	} from '#lib/stores/combinations.js';
 </script>
 
 <fieldset>

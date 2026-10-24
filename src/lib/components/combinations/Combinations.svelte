@@ -1,15 +1,15 @@
 <script lang="ts">
-	import BlindnessFilter from '$lib/components/combinations/BlindnessFilter.svelte';
-	import ColorFilter from '$lib/components/combinations/ColorFilter.svelte';
-	import Combination from '$lib/components/combinations/Combination.svelte';
-	import ContrastFilter from '$lib/components/combinations/ContrastFilter.svelte';
-	import ContrastTypeFilter from '$lib/components/combinations/ContrastTypeFilter.svelte';
-	import LuminosityFilter from '$lib/components/combinations/LuminosityFilter.svelte';
+	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
+	import ColorFilter from '#lib/components/combinations/ColorFilter.svelte';
+	import Combination from '#lib/components/combinations/Combination.svelte';
+	import ContrastFilter from '#lib/components/combinations/ContrastFilter.svelte';
+	import ContrastTypeFilter from '#lib/components/combinations/ContrastTypeFilter.svelte';
+	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
 	import {
 		colorEntries,
 		filteredCombinations,
 		previewedCombinationUid
-	} from '$lib/stores/combinations';
+	} from '#lib/stores/combinations.js';
 
 	const handlePreview = (uid: string) => {
 		$previewedCombinationUid =

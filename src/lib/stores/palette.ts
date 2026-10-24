@@ -1,9 +1,9 @@
+import {parseColor} from '#lib/color/parsing.js';
+import type {Node, NodeOutputRecord} from '#lib/stores/nodes.js';
+import {withElapsedTime} from '#lib/utils/functions.js';
+import {clamp} from '#lib/utils/math.js';
+import {debouncedStore} from '#lib/utils/stores.js';
 import {derived, get, writable} from 'svelte/store';
-import {parseColor} from '$lib/color/parsing';
-import type {Node, NodeOutputRecord} from '$lib/stores/nodes';
-import {withElapsedTime} from '$lib/utils/functions';
-import {clamp} from '$lib/utils/math';
-import {debouncedStore} from '$lib/utils/stores';
 
 export const outputs = writable<NodeOutputRecord>({});
 

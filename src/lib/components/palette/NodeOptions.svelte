@@ -1,14 +1,14 @@
 <script lang="ts">
-	import BooleanField from '$lib/components/forms/BooleanField.svelte';
-	import ColorField from '$lib/components/forms/ColorField.svelte';
-	import RangeField from '$lib/components/forms/RangeField.svelte';
-	import {paramSamples} from '$lib/samples';
-	import type {Node} from '$lib/stores/nodes';
+	import BooleanField from '#lib/components/forms/BooleanField.svelte';
+	import ColorField from '#lib/components/forms/ColorField.svelte';
+	import RangeField from '#lib/components/forms/RangeField.svelte';
+	import {paramSamples} from '#lib/samples.js';
+	import type {Node} from '#lib/stores/nodes.js';
 	import {
 		continuousGradient,
 		discreteGradient
-	} from '$lib/utils/css';
-	import {clamp} from '$lib/utils/math';
+	} from '#lib/utils/css.js';
+	import {clamp} from '#lib/utils/math.js';
 
 	export let id: string;
 	export let node: Node;

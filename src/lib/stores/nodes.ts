@@ -1,18 +1,18 @@
+import {formatSchemistToHex} from '#lib/color/formatting.js';
+import nearestColor from '#lib/color/nearest.js';
+import {parseColor} from '#lib/color/parsing.js';
+import type {SchemistColor} from '#lib/color/types.js';
+import defs from '#lib/definitions/nodes/index.js';
+import {withoutIndex} from '#lib/utils/arrays.js';
+import {uid} from '#lib/utils/generators.js';
+import {omit} from '#lib/utils/objects.js';
+import {sentenceCase} from '#lib/utils/strings.js';
 import type {
 	Readable,
 	Unsubscriber,
 	Writable
 } from 'svelte/store';
 import {derived, get, writable} from 'svelte/store';
-import {formatSchemistToHex} from '$lib/color/formatting';
-import nearestColor from '$lib/color/nearest';
-import {parseColor} from '$lib/color/parsing';
-import type {SchemistColor} from '$lib/color/types';
-import defs from '$lib/definitions/nodes';
-import {withoutIndex} from '$lib/utils/arrays';
-import {uid} from '$lib/utils/generators';
-import {omit} from '$lib/utils/objects';
-import {sentenceCase} from '$lib/utils/strings';
 
 export type SampleType = 'single' | 'discrete' | 'continuous';
 

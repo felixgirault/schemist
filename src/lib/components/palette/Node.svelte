@@ -1,15 +1,15 @@
 <script lang="ts">
+	import {formatSchemist} from '#lib/color/formatting.js';
+	import Modal from '#lib/components/Modal.svelte';
+	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
+	import NodeActions from '#lib/components/palette/NodeActions.svelte';
+	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
+	import {parseTree} from '#lib/presets.js';
+	import {isDarkScheme} from '#lib/stores/features.js';
+	import type {Node} from '#lib/stores/nodes.js';
+	import {createNode} from '#lib/stores/nodes.js';
+	import {overlayColor} from '#lib/style.js';
 	import type {EventHandler} from 'svelte/elements';
-	import {formatSchemist} from '$lib/color/formatting';
-	import Modal from '$lib/components/Modal.svelte';
-	import ChildPicker from '$lib/components/palette/ChildPicker.svelte';
-	import NodeActions from '$lib/components/palette/NodeActions.svelte';
-	import NodeOptions from '$lib/components/palette/NodeOptions.svelte';
-	import {parseTree} from '$lib/presets';
-	import {isDarkScheme} from '$lib/stores/features';
-	import type {Node} from '$lib/stores/nodes';
-	import {createNode} from '$lib/stores/nodes';
-	import {overlayColor} from '$lib/style';
 	import NodeInfo from './NodeInfo.svelte';
 
 	export let node: Node;

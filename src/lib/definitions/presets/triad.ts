@@ -1,6 +1,6 @@
-import triadLeft from '$lib/definitions/nodes/triadLeft';
-import triadRight from '$lib/definitions/nodes/triadRight';
-import type {Preset} from '$lib/presets';
+import triadLeft from '#lib/definitions/nodes/triadLeft.js';
+import triadRight from '#lib/definitions/nodes/triadRight.js';
+import type {Preset} from '#lib/presets.js';
 
 export default {
 	label: 'Triad',
