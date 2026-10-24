@@ -8,14 +8,18 @@ import {
 	convertOklabToRgb,
 	convertRgbToLab,
 	convertRgbToOklab,
+	modeHsl,
 	modeLch,
 	modeLrgb,
+	modeRgb,
 	useMode
 } from 'culori/fn';
 import type {HslColor, LchColor, RgbColor} from './types';
 
 useMode(modeLch); // required by chroma clamping
 useMode(modeLrgb); // required by contrast calculations
+useMode(modeRgb); // required to parse rgb() and named colors
+useMode(modeHsl); // required to parse hsl()
 
 export const rgbFromCulori = ({
 	r,
