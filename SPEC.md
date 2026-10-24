@@ -310,12 +310,12 @@ Undo and redo of the palette tree, as decided in
 of snapshots (`serializeTree` of the root, with ids), capped at
 100 entries.
 
-| Method     | Effect                                                                                                                                                                  |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `reset()`  | Clears the stacks and takes the current tree as the committed state (on palette mount), without updating the URL or storage, so opening a link keeps the stored palette |
-| `commit()` | Pushes the last committed state to `past` and clears `future`, unless the tree is unchanged                                                                             |
-| `undo()`   | Commits pending edits, then restores the last `past` snapshot                                                                                                           |
-| `redo()`   | Commits pending edits, then restores the last `future` snapshot                                                                                                         |
+| Method     | Effect                                                                                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reset()`  | Clears the stacks and takes the current tree as the committed state, without notifying. On palette mount, `startHistory()` calls it then syncs the URL, but not storage, so opening a link keeps the stored palette |
+| `commit()` | Pushes the last committed state to `past` and clears `future`, unless the tree is unchanged                                                                                                                         |
+| `undo()`   | Commits pending edits, then restores the last `past` snapshot                                                                                                                                                       |
+| `redo()`   | Commits pending edits, then restores the last `future` snapshot                                                                                                                                                     |
 
 Restoring rebuilds the `Node` tree with the same ids, so node
 components update in place (open panels are kept).

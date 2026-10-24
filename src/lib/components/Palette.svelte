@@ -1,13 +1,13 @@
 <script>
 	import Node from '#lib/components/palette/Node.svelte';
 	import {getRootNode} from '#lib/palette.js';
-	import {history} from '#lib/stores/history.svelte.js';
+	import {startHistory} from '#lib/stores/history.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {onMount} from 'svelte';
 
 	onMount(() => {
 		palette.root = getRootNode();
-		history.reset();
+		startHistory();
 	});
 </script>
 
