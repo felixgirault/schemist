@@ -72,12 +72,12 @@ every built-in preset. Compressed outputs are base64url encoded.
 
 ## Decision
 
-Keep `v1` as the permalink format and do not use the Compression
-Streams API for now.
+Keep the custom packing format for permalinks and do not use the
+Compression Streams API for now.
 
-If shorter links become a requirement, add a `v2` that applies
-`deflate-raw` to the `v1` output and encodes it in base64url,
-used only when it is shorter than `v1`. The `v1` decoder stays to
+If shorter links become a requirement, add a new version that
+applies `deflate-raw` to the packed output and encodes it in
+base64url, used only when it is shorter. Older decoders stay to
 support existing links, which the version prefix already allows.
 
 ## Consequences
@@ -85,9 +85,11 @@ support existing links, which the version prefix already allows.
 - Permalink generation stays synchronous and links stay readable.
 - Links of large palettes remain 15 to 25% longer than they could
   be.
-- A future format change is better spent on precision: `v1`
-  stores colors as hex, which rounds them. A palette opened from
-  a permalink can differ by one unit on some channels (e.g.
-  `#407aa6` becomes `#407aa5`). Storing colors at full precision
-  in a `v2` would make permalinks lossless, for a few more
-  characters.
+- A format change was better spent on precision: `v1` stores
+  colors as hex, which rounds them, so a palette opened from a
+  permalink could differ by one unit on some channels (e.g.
+  `#407aa6` became `#407aa5`), in 74% of the palettes tested.
+  `v2` (`src/lib/packing/v2.ts`) is the same format with colors
+  stored at full precision, which makes permalinks lossless for
+  about 33 more characters per custom color. `v1` links are still
+  supported.
