@@ -378,10 +378,10 @@ kept as is.
 
 ### 9.4 Color vision deficiency simulation
 
-Culori's `filterDeficiencyProt/Deuter/Trit` filters at default
-severity, applied to both colors of a pair. Results are clamped
-to the sRGB gamut, since out-of-gamut values would make APCA
-return 0 (issue #46).
+The Machado et al. matrices at full severity, applied in linear
+RGB to both colors of a pair. Results are clamped to the sRGB
+gamut, since out-of-gamut values would make APCA return 0 (issue
+#46).
 
 ### 9.5 Luminosity analysis
 
