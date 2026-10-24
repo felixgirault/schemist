@@ -10,23 +10,35 @@
 	import {camelCase, dashCase} from '#lib/utils/strings.js';
 	import CodeArea from './CodeArea.svelte';
 
-	export let entries: ExportEntry[];
-	export let format: ExportFormat;
-	export let casing: ExportCasing;
-	export let prefix: string;
+	interface Props {
+		entries: ExportEntry[];
+		format: ExportFormat;
+		casing: ExportCasing;
+		prefix: string;
+	}
 
-	$: formatRule = format === 'css' ? cssRule : sassRule;
-	$: formatCase = casing === 'dash' ? dashCase : camelCase;
-	$: variables = entries
-		.map(({name, cssColor}) =>
-			formatRule(
-				formatCase(prefix ? `${prefix} ${name}` : name),
-				cssColor
+	let {entries, format, casing, prefix}: Props = $props();
+
+	let formatRule = $derived(
+		format === 'css' ? cssRule : sassRule
+	);
+	let formatCase = $derived(
+		casing === 'dash' ? dashCase : camelCase
+	);
+	let variables = $derived(
+		entries
+			.map(({name, cssColor}) =>
+				formatRule(
+					formatCase(prefix ? `${prefix} ${name}` : name),
+					cssColor
+				)
 			)
-		)
-		.join('\n');
+			.join('\n')
+	);
 
-	$: code = `/* @see ${permalink($rootNode)} */\n${variables}`;
+	let code = $derived(
+		`/* @see ${permalink($rootNode)} */\n${variables}`
+	);
 </script>
 
 <CodeArea {code} />

@@ -12,15 +12,19 @@
 	} from '#lib/color/formatting.js';
 	import type {Node} from '#lib/stores/nodes.js';
 
-	export let id: string;
-	export let node: Node;
+	interface Props {
+		id: string;
+		node: Node;
+	}
+
+	let {id, node}: Props = $props();
 
 	const {output} = node;
 
-	$: hex = formatSchemistToHex($output[0]);
-	$: rgb = schemistToRgb($output[0]);
-	$: hsl = schemistToHsl($output[0]);
-	$: lch = schemistToLch($output[0]);
+	let hex = $derived(formatSchemistToHex($output[0]));
+	let rgb = $derived(schemistToRgb($output[0]));
+	let hsl = $derived(schemistToHsl($output[0]));
+	let lch = $derived(schemistToLch($output[0]));
 </script>
 
 <section {id} class="form">

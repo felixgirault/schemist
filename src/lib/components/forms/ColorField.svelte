@@ -9,11 +9,25 @@
 
 	type InputFormat = 'css' | 'rgb' | 'hsl' | 'lch';
 
-	export let id: Node['id'];
-	export let param: Param;
-	export let value: SchemistColor;
+	interface Props {
+		id: Node['id'];
+		param: Param;
+		value: SchemistColor;
+	}
 
-	let format: InputFormat = 'rgb';
+	let {id, param, value = $bindable()}: Props = $props();
+
+	let format = $state<InputFormat>('rgb');
+
+	const SvelteComponent = $derived(
+		format === 'css'
+			? CssColorField
+			: format === 'rgb'
+				? RgbColorField
+				: format === 'hsl'
+					? HslColorField
+					: LchColorField
+	);
 </script>
 
 <div class="input-grid-firstCol input-grid-lastCol">
@@ -88,22 +102,12 @@
 					</label>
 				</div>
 
-				<svelte:component
-					this={format === 'css'
-						? CssColorField
-						: format === 'rgb'
-							? RgbColorField
-							: format === 'hsl'
-								? HslColorField
-								: LchColorField}
-					id={id as never}
-					bind:value
-				/>
+				<SvelteComponent id={id as never} bind:value />
 
 				<button
 					class="button button--inline input-grid-lastCols randomize"
 					type="button"
-					on:click={() => {
+					onclick={() => {
 						value = randomUsableColor();
 					}}
 				>

@@ -10,9 +10,14 @@
 	import {createNode} from '#lib/stores/nodes.js';
 	import {overlayColor} from '#lib/style.js';
 	import type {EventHandler} from 'svelte/elements';
+	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
 
-	export let node: Node;
+	interface Props {
+		node: Node;
+	}
+
+	let {node}: Props = $props();
 
 	const {
 		id,
@@ -29,12 +34,12 @@
 	const hasParent = !!parent;
 	const hasOptions = !!def.params.length;
 
-	let isInfoOpen = false;
-	let areOptionsOpen = !hasParent;
-	let isEditingToken = false;
-	let isPickingChild = false;
+	let isInfoOpen = $state(false);
+	let areOptionsOpen = $state(!hasParent);
+	let isEditingToken = $state(false);
+	let isPickingChild = $state(false);
 
-	$: hasHint = !hasParent && !$children.length;
+	let hasHint = $derived(!hasParent && !$children.length);
 
 	const handleTokenFocus: EventHandler<
 		FocusEvent,
@@ -81,9 +86,9 @@
 						spellcheck="false"
 						aria-label="Design token"
 						aria-describedby="{id}-token-hint"
-						on:focus={handleTokenFocus}
-						on:blur={handleTokenBlur}
-						on:keydown={handleTokenKey}
+						onfocus={handleTokenFocus}
+						onblur={handleTokenBlur}
+						onkeydown={handleTokenKey}
 					>
 						{$output[1]}
 					</div>
@@ -140,7 +145,7 @@
 	{#if $children.length}
 		<div class="children">
 			{#each $children as child (child.id)}
-				<svelte:self node={child} />
+				<Node_1 node={child} />
 			{/each}
 		</div>
 	{/if}

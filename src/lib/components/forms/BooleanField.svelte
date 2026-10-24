@@ -1,11 +1,15 @@
 <script lang="ts">
 	import type {Node, Param} from '#lib/stores/nodes.js';
 
-	export let id: Node['id'];
-	export let param: Param;
-	export let value: boolean;
+	interface Props {
+		id: Node['id'];
+		param: Param;
+		value: boolean;
+	}
 
-	const inputId = `${id}-${param.name}`;
+	let {id, param, value = $bindable()}: Props = $props();
+
+	const inputId = $derived(`${id}-${param.name}`);
 </script>
 
 <label for={inputId}>

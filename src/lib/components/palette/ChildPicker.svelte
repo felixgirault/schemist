@@ -16,9 +16,13 @@
 		discreteGradient
 	} from '#lib/utils/css.js';
 
-	export let node: Node;
-	export let onAddNode: (type: string) => void;
-	export let onAddPreset: (preset: Preset) => void;
+	interface Props {
+		node: Node;
+		onAddNode: (type: string) => void;
+		onAddPreset: (preset: Preset) => void;
+	}
+
+	let {node, onAddNode, onAddPreset}: Props = $props();
 
 	const {output} = node;
 	const color = $output[0];

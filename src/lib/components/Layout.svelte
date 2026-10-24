@@ -10,6 +10,11 @@
 	import {browser} from '$app/env';
 	import GitHubIcon from './icons/GitHubIcon.svelte';
 	import ThemeIcon from './icons/ThemeIcon.svelte';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let {children}: Props = $props();
 </script>
 
 {#if browser && $rootColor}
@@ -25,7 +30,7 @@
 	class:grayscale={$isLuminosityAnalysisEnabled}
 >
 	<div class="header">
-		<!-- svelte-ignore a11y-no-redundant-roles -->
+		<!-- svelte-ignore a11y_no_redundant_roles -->
 		<header class="brand" role="banner">
 			<h1>Schemist</h1>
 
@@ -35,7 +40,7 @@
 			</p>
 		</header>
 
-		<!-- svelte-ignore a11y-no-redundant-roles -->
+		<!-- svelte-ignore a11y_no_redundant_roles -->
 		<nav
 			class="button-list wrap"
 			role="navigation"
@@ -43,7 +48,7 @@
 		>
 			<button
 				class="button"
-				on:click={() => ($isDarkScheme = !$isDarkScheme)}
+				onclick={() => ($isDarkScheme = !$isDarkScheme)}
 			>
 				<ThemeIcon />
 				{$isDarkScheme ? 'Light' : 'Dark'} theme
@@ -62,7 +67,7 @@
 
 	<NotificationArea />
 
-	<slot></slot>
+	{@render children?.()}
 </div>
 
 <style>

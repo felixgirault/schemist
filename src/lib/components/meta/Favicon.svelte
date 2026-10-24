@@ -5,8 +5,12 @@
 	import {presetSamples} from '#lib/samples.js';
 	import {debounce} from '#lib/utils/functions.js';
 
-	export let color: SchemistColor;
-	let dataUrl: string;
+	interface Props {
+		color: SchemistColor;
+	}
+
+	let {color}: Props = $props();
+	let dataUrl = $state<string>();
 
 	const size = 16;
 	const canvas = document.createElement('canvas');
@@ -72,7 +76,9 @@
 
 	const debouncedUpdate = debounce(update, 500);
 
-	$: color && debouncedUpdate(color);
+	$effect(() => {
+		color && debouncedUpdate(color);
+	});
 </script>
 
 <svelte:head>

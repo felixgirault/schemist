@@ -10,14 +10,14 @@
 	} from '#lib/stores/combinations.js';
 	import {rootNode} from '#lib/stores/palette.js';
 
-	let isShowingExport = false;
+	let isShowingExport = $state(false);
 
 	const handleShare = () => {
 		window.location.assign(permalink($rootNode));
 	};
 </script>
 
-<!-- svelte-ignore a11y-no-redundant-roles -->
+<!-- svelte-ignore a11y_no_redundant_roles -->
 <main role="main">
 	<section class="palette">
 		<header>
@@ -31,7 +31,7 @@
 				<button
 					class="button"
 					title="Export colors in various formats"
-					on:click={() => {
+					onclick={() => {
 						isShowingExport = true;
 					}}
 				>
@@ -41,7 +41,7 @@
 				<button
 					class="button"
 					title="Get a permalink to this palette"
-					on:click={handleShare}
+					onclick={handleShare}
 				>
 					Share
 				</button>

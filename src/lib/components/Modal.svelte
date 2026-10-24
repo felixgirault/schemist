@@ -5,9 +5,19 @@
 		DialogOverlay
 	} from 'svelte-accessible-dialog';
 
-	export let label: string;
-	export let overlayColor: string = '';
-	export let onClose: () => void;
+	interface Props {
+		label: string;
+		overlayColor?: string;
+		onClose: () => void;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		label,
+		overlayColor = '',
+		onClose,
+		children
+	}: Props = $props();
 </script>
 
 <DialogOverlay
@@ -20,13 +30,13 @@
 			<div class="modal-actions">
 				<button
 					class="button button--close"
-					on:click={onClose}
+					onclick={onClose}
 				>
 					<CloseIcon />
 				</button>
 			</div>
 
-			<slot />
+			{@render children?.()}
 		</div>
 	</DialogContent>
 </DialogOverlay>

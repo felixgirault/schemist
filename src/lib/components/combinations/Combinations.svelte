@@ -16,7 +16,7 @@
 			$previewedCombinationUid === uid ? null : uid;
 	};
 
-	$: colorCount = $colorEntries?.length || 0;
+	let colorCount = $derived($colorEntries?.length || 0);
 </script>
 
 <div class="data-layout">

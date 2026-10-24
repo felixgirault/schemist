@@ -11,15 +11,20 @@
 	const format = (color: SchemistColor) =>
 		formatSchemistTo(color, $colorInputFormat, 0);
 
-	export let id: string;
-	export let value: SchemistColor;
+	interface Props {
+		id: string;
+		value: SchemistColor;
+	}
 
-	let formattedValue = format(value);
+	let {id, value = $bindable()}: Props = $props();
 
-	$: formattedValue =
-		formatSchemistToHex(value) === formattedValue
-			? formattedValue
-			: format(value);
+	let lastFormattedValue = '';
+	const formattedValue = $derived(
+		(lastFormattedValue =
+			formatSchemistToHex(value) === lastFormattedValue
+				? lastFormattedValue
+				: format(value))
+	);
 
 	const handleInput: FormEventHandler<HTMLInputElement> = ({
 		currentTarget: input
@@ -44,5 +49,5 @@
 	class="input-grid-lastCols"
 	type="text"
 	value={formattedValue}
-	on:input={handleInput}
+	oninput={handleInput}
 />

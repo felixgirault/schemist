@@ -10,13 +10,21 @@
 	} from '#lib/utils/css.js';
 	import {clamp} from '#lib/utils/math.js';
 
-	export let id: string;
-	export let node: Node;
+	interface Props {
+		id: string;
+		node: Node;
+	}
+
+	let {id, node}: Props = $props();
 
 	const {id: nodeId, def, args, input} = node;
 </script>
 
-<form {id} class="form input-grid" on:submit|preventDefault>
+<form
+	{id}
+	class="form input-grid"
+	onsubmit={(event) => event.preventDefault()}
+>
 	{#each def.params as param (param.name)}
 		{#if param.type === 'range'}
 			<RangeField
@@ -39,10 +47,9 @@
 				bind:value={$args[param.name]}
 			/>
 		{:else}
-			<svelte:component
-				this={param.type === 'color'
-					? ColorField
-					: BooleanField}
+			{@const SvelteComponent =
+				param.type === 'color' ? ColorField : BooleanField}
+			<SvelteComponent
 				id={nodeId}
 				{param}
 				bind:value={$args[param.name]}

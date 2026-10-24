@@ -5,7 +5,7 @@
 		minLevel
 	} from '#lib/stores/combinations.js';
 
-	$: entries =
+	let entries = $derived(
 		$contrastType === 'wcag2'
 			? [
 					['AAA', Wcag2Level.aaa],
@@ -23,7 +23,8 @@
 					['Text ', Wcag3Level.text],
 					['Non text', Wcag3Level.nonText],
 					['KO', Wcag3Level.ko]
-				];
+				]
+	);
 </script>
 
 <fieldset>

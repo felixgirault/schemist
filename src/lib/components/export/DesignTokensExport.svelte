@@ -5,28 +5,34 @@
 	import {rootNode} from '#lib/stores/palette.js';
 	import CodeArea from './CodeArea.svelte';
 
-	export let entries: Entry[];
+	interface Props {
+		entries: Entry[];
+	}
 
-	$: tokens = Object.fromEntries(
-		entries.map(({name, color}) => [
-			name,
-			{
-				'$type': 'color',
-				'$value': formatSchemistToHex(color)
-			}
-		])
+	let {entries}: Props = $props();
+
+	let tokens = $derived(
+		Object.fromEntries(
+			entries.map(({name, color}) => [
+				name,
+				{
+					'$type': 'color',
+					'$value': formatSchemistToHex(color)
+				}
+			])
+		)
 	);
 
-	$: json = {
+	let json = $derived({
 		'Colors': {
 			'$description': `Build with Schemist (${permalink(
 				$rootNode
 			)})`,
 			...tokens
 		}
-	};
+	});
 
-	$: code = JSON.stringify(json, null, 2);
+	let code = $derived(JSON.stringify(json, null, 2));
 </script>
 
 <CodeArea {code} />

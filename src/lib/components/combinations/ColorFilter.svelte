@@ -36,7 +36,7 @@
 			{#if $colorFilters.length}
 				<button
 					class="button"
-					on:click={() => {
+					onclick={() => {
 						$colorFilters = [];
 					}}
 				>

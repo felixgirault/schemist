@@ -11,27 +11,24 @@
 	import {styleTag} from '#lib/utils/css.js';
 	import '../../../global.css';
 
-	let style = styleTag(
-		':root',
-		themeStyle(defaultThemeColor, $isDarkScheme)
+	const style = $derived(
+		styleTag(
+			':root',
+			$previewedCombination
+				? duoThemeStyle(
+						rgbToSchemist(
+							$previewedCombination.contrast.bg
+						),
+						rgbToSchemist(
+							$previewedCombination.contrast.fg
+						)
+					)
+				: themeStyle(
+						$rootColor ?? defaultThemeColor,
+						$isDarkScheme
+					)
+		)
 	);
-
-	$: {
-		if ($previewedCombination) {
-			style = styleTag(
-				':root',
-				duoThemeStyle(
-					rgbToSchemist($previewedCombination.contrast.bg),
-					rgbToSchemist($previewedCombination.contrast.fg)
-				)
-			);
-		} else if ($rootColor) {
-			style = styleTag(
-				':root',
-				themeStyle($rootColor, $isDarkScheme)
-			);
-		}
-	}
 </script>
 
 <!-- @see https://github.com/sveltejs/svelte/issues/3105#issuecomment-1040580565 -->

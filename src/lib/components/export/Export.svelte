@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
 	import {formatSchemistTo} from '#lib/color/formatting.js';
 	import TableExport from '#lib/components/export/TableExport.svelte';
@@ -15,17 +13,17 @@
 	} from '#lib/stores/export.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
-	let entries: ExportEntry[] = [];
-
-	$: entries = $colorEntries.map(({color, ...entry}) => ({
-		...entry,
-		color,
-		cssColor: formatSchemistTo(
+	const entries: ExportEntry[] = $derived(
+		$colorEntries.map(({color, ...entry}) => ({
+			...entry,
 			color,
-			$exportColorFormat,
-			$exportPrecision
-		)
-	}));
+			cssColor: formatSchemistTo(
+				color,
+				$exportColorFormat,
+				$exportPrecision
+			)
+		}))
+	);
 </script>
 
 <section>

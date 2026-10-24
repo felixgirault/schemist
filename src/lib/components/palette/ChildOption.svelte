@@ -1,10 +1,20 @@
 <script lang="ts">
-	export let label: string;
-	export let description: string = '';
-	export let onClick: () => void;
+	interface Props {
+		label: string;
+		description?: string;
+		onClick: () => void;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		label,
+		description = '',
+		onClick,
+		children
+	}: Props = $props();
 </script>
 
-<button on:click={onClick}>
+<button onclick={onClick}>
 	<span class="label h3">
 		{label}
 	</span>
@@ -13,7 +23,7 @@
 		<span class="description hint">{description}</span>
 	{/if}
 
-	<slot />
+	{@render children?.()}
 </button>
 
 <style>

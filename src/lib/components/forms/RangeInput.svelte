@@ -1,12 +1,23 @@
 <script lang="ts">
 	import type {FormEventHandler} from 'svelte/elements';
 
-	export let id: string;
-	export let min: number;
-	export let max: number;
-	export let value: number;
-	export let gradient: string;
-	export let onInput: ((value: number) => void) | null = null;
+	interface Props {
+		id: string;
+		min: number;
+		max: number;
+		value: number;
+		gradient: string;
+		onInput?: ((value: number) => void) | null;
+	}
+
+	let {
+		id,
+		min,
+		max,
+		value = $bindable(),
+		gradient,
+		onInput = null
+	}: Props = $props();
 
 	const handleInput: FormEventHandler<HTMLInputElement> = (
 		event
@@ -22,7 +33,7 @@
 	{min}
 	{max}
 	bind:value
-	on:input={handleInput}
+	oninput={handleInput}
 />
 
 <style>

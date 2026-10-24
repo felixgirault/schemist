@@ -8,10 +8,14 @@
 	import {continuousGradient} from '#lib/utils/css.js';
 	import {range} from '#lib/utils/generators.js';
 
-	export let id: number;
-	export let value: SchemistColor;
+	interface Props {
+		id: number;
+		value: SchemistColor;
+	}
 
-	$: color = schemistToRgb(value);
+	let {id, value = $bindable()}: Props = $props();
+
+	let color = $derived(schemistToRgb(value));
 
 	const inputHandler =
 		(channel: string) => (channelValue: number) => {
