@@ -9,7 +9,6 @@
 		"start": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"package": "svelte-kit package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "oxfmt --check",
