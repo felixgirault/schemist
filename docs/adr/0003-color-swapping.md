@@ -1,6 +1,6 @@
 # 3. Changing the type of a color
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-24
 - Issue:
   [#13](https://github.com/felixgirault/schemist/issues/13)
