@@ -37,3 +37,21 @@ test.each(Object.values(presets))(
 		expect(unpacked).toMatchObject(tree);
 	}
 );
+
+// Integer-like keys come first when enumerating object keys,
+// which used to shift the packed dictionary (see #8).
+test.each([
+	{
+		type: color.type,
+		args: {color: parseColor('#367591')[1]!}
+	},
+	{
+		type: color.type,
+		args: {color: parseColor('#f00')[1]!},
+		children: [
+			{type: 'l' as const, token: '500', args: {amount: 50}}
+		]
+	}
+])('pack integer-like dictionary entries %#', (tree) => {
+	expect(unpack(pack(tree))).toMatchObject(tree);
+});
