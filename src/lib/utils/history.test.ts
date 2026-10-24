@@ -80,13 +80,14 @@ test('limits the undo stack', () => {
 	expect(history.past).toEqual([{value: 2}, {value: 3}]);
 });
 
-test('notifies every new state', () => {
+test('notifies every new state, but not the initial one', () => {
 	const {state, history, onChange} = setup();
 
+	expect(onChange).not.toHaveBeenCalled();
 	state.value = 1;
 	history.commit();
 	history.undo();
 	expect(onChange.mock.calls.map(([s]) => s.value)).toEqual([
-		0, 1, 0
+		1, 0
 	]);
 });

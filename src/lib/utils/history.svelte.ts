@@ -20,11 +20,13 @@ export class History<T> {
 		this.#options = options;
 	}
 
-	// Starts over from the current state.
+	// Starts over from the current state, which is not a new
+	// state, so it doesn't notify (e.g. opening a link doesn't
+	// overwrite the palette stored from a previous session).
 	reset() {
 		this.past = [];
 		this.future = [];
-		this.#set(this.#options.read());
+		this.#set(this.#options.read(), false);
 	}
 
 	// Pushes the current state, unless it didn't change since
@@ -74,9 +76,12 @@ export class History<T> {
 		this.#set(snapshot);
 	}
 
-	#set(snapshot: T) {
+	#set(snapshot: T, notify = true) {
 		this.#current = snapshot;
 		this.#key = JSON.stringify(snapshot);
-		this.#options.onChange?.(snapshot);
+
+		if (notify) {
+			this.#options.onChange?.(snapshot);
+		}
 	}
 }
