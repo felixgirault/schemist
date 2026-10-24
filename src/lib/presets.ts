@@ -3,6 +3,8 @@ import type {Args, Node} from '#lib/stores/nodes.svelte.js';
 import {createNode} from '#lib/stores/nodes.svelte.js';
 
 export type PresetNode = {
+	// Only set when serializing a tree, to restore it as is.
+	id?: string;
 	type: keyof typeof defs;
 	token?: string;
 	args?: Args;
@@ -17,8 +19,8 @@ export type Preset = {
 };
 
 export const parseTree = (preset: PresetNode) => {
-	const {type, isHidden, token, args, children} = preset;
-	const node = createNode(type, isHidden, token);
+	const {id, type, isHidden, token, args, children} = preset;
+	const node = createNode(type, isHidden, token, id);
 
 	if (args) {
 		Object.assign(node.args, args);
@@ -36,6 +38,7 @@ export const parseTree = (preset: PresetNode) => {
 export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
 	const data: PresetNode = {
+		id: node.id,
 		type: node.def.type as keyof typeof defs,
 		isHidden: node.isHidden
 	};
