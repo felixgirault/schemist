@@ -17,7 +17,7 @@
 
 	let {id, node}: Props = $props();
 
-	const {id: nodeId, def, args, input} = node;
+	const {id: nodeId, def, args, input} = $derived(node);
 </script>
 
 <form

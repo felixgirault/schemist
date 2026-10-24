@@ -19,7 +19,7 @@
 
 	let {id, node}: Props = $props();
 
-	const {output} = node;
+	const {output} = $derived(node);
 
 	let hex = $derived(formatSchemistToHex($output[0]));
 	let rgb = $derived(schemistToRgb($output[0]));

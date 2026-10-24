@@ -28,13 +28,15 @@
 		isHidden,
 		output,
 		parent
-	} = node;
-	const infoId = `${id}-info`;
-	const optionsId = `${id}-options`;
-	const hasParent = !!parent;
-	const hasOptions = !!def.params.length;
+	} = $derived(node);
+	const infoId = $derived(`${id}-info`);
+	const optionsId = $derived(`${id}-options`);
+	const hasParent = $derived(!!parent);
+	const hasOptions = $derived(!!def.params.length);
 
 	let isInfoOpen = $state(false);
+	// only the initial state depends on the node, then the user toggles it
+	// svelte-ignore state_referenced_locally
 	let areOptionsOpen = $state(!hasParent);
 	let isEditingToken = $state(false);
 	let isPickingChild = $state(false);

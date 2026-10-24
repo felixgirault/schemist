@@ -24,8 +24,8 @@
 
 	let {node, onAddNode, onAddPreset}: Props = $props();
 
-	const {output} = node;
-	const color = $output[0];
+	const {output} = $derived(node);
+	const color = $derived($output[0]);
 </script>
 
 <div class="picker">
