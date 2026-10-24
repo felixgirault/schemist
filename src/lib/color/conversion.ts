@@ -1,6 +1,8 @@
 import {
 	type Okhsl,
+	type Rgb,
 	clampChroma,
+	clampRgb,
 	convertHslToRgb,
 	convertRgbToHsl
 } from 'culori/fn';
@@ -72,12 +74,32 @@ export const schemistToHsl = (color: SchemistColor): HslColor =>
 		convertRgbToHsl(rgbToCulori(schemistToRgb(color)))
 	);
 
-export const lchToSchemist = (color: LchColor): SchemistColor =>
-	rgbToSchemist(
+// Colors converted from sRGB can come back slightly out of gamut,
+// due to rounding errors. Those are clipped instead of having
+// their chroma clamped, because some lower chromas at the same
+// lightness and hue are out of gamut too, near the corners of
+// the gamut (e.g. #ffff00 would become #fffac0).
+const gamutTolerance = 1e-4;
+
+const isNearlyInGamut = ({r, g, b}: Rgb) =>
+	[r, g, b].every(
+		(c) => c >= -gamutTolerance && c <= 1 + gamutTolerance
+	);
+
+export const lchToSchemist = (
+	color: LchColor
+): SchemistColor => {
+	const lch = lchToCulori(color);
+	const rgb = culoriLchToRgb(lch);
+
+	return rgbToSchemist(
 		rgbFromCulori(
-			culoriLchToRgb(clampChroma(lchToCulori(color)))
+			isNearlyInGamut(rgb)
+				? (clampRgb(rgb) as Rgb)
+				: culoriLchToRgb(clampChroma(lch))
 		)
 	);
+};
 
 export const schemistToLch = (color: SchemistColor): LchColor =>
 	lchFromCulori(
