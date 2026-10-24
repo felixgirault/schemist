@@ -1301,7 +1301,7 @@ exports[`outputs of preset Schemist theme under #3b82f6 1`] = `
     "Secondary",
   ],
   [
-    "#48be3b",
+    "#56bd34",
     "Secondary light",
   ],
   [
@@ -1313,7 +1313,7 @@ exports[`outputs of preset Schemist theme under #3b82f6 1`] = `
     "Tertiary",
   ],
   [
-    "#fc6b77",
+    "#fb6d71",
     "Tertiary light",
   ],
   [
@@ -1471,7 +1471,7 @@ exports[`outputs of preset Schemist theme under #ff0000 1`] = `
     "Secondary",
   ],
   [
-    "#7e9dff",
+    "#789eff",
     "Secondary light",
   ],
   [
@@ -1483,7 +1483,7 @@ exports[`outputs of preset Schemist theme under #ff0000 1`] = `
     "Tertiary",
   ],
   [
-    "#00c35f",
+    "#00c451",
     "Tertiary light",
   ],
   [
@@ -1801,7 +1801,7 @@ exports[`outputs of preset States under #3b82f6 1`] = `
     "Sky dancer",
   ],
   [
-    "#69a1fc",
+    "#63a2fc",
     "Sky dancer light",
   ],
   [
@@ -1835,7 +1835,7 @@ exports[`outputs of preset States under #ff0000 1`] = `
     "Red",
   ],
   [
-    "#ff6e62",
+    "#ff6f5b",
     "Red light",
   ],
   [
