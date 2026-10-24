@@ -407,7 +407,8 @@ index. The dictionary entry of a color is:
 | `1`     | 6-digit hex code without `#`, which rounds the color (lossy)                    |
 | `2`     | `h_s_l` of the `SchemistColor`, as full precision JavaScript numbers (lossless) |
 
-Version `2` rejects color entries with a non-numeric part.
+Version `2` rejects color entries that are not exactly three
+finite numbers.
 
 Examples, a Custom color alone: `1@0@01223@clr,,color,ffc208`,
 `2@0@01223@clr,,color,90_50_50`.
@@ -525,6 +526,3 @@ the unit tests only (not `check`, `lint` or `build`).
 - **`#lib` bare import** points to `src/lib/index.js`, which does
   not exist (only `#lib/*` is used).
 - **Alpha** is dropped by permalinks and design tokens.
-- **Incomplete v2 colors are accepted**: a color entry with fewer
-  than three parts (e.g. `1_2`) unpacks with missing channels
-  instead of being rejected.
