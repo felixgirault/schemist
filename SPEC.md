@@ -216,7 +216,7 @@ previews (`single`, `discrete`, `continuous`) and
 | `pos` | Positive                  | —                                                          | Greenish hue                           |
 | `wrn` | Warning                   | —                                                          | Orangeish hue                          |
 | `neg` | Negative                  | —                                                          | Reddish hue                            |
-| `hlt` | Highlight                 | amount % 0–50 (10), shift % 0–100 (15), temp 550–750 (650) | `highlightColor(…, temp × 100 K)`      |
+| `hlt` | Highlight                 | amount % 0–50 (10), shift % 0–100 (15), temp 550–750 (650) | `highlightColor(…, temp × 10 K)`       |
 | `sdw` | Shadow                    | amount % 0–50 (10), shift % 0–100 (15), temp 550–750 (650) | `shadowColor(…, temp × 10 K)`          |
 | `l`   | Lightness                 | amount % 0–100 (50)                                        | `l = amount`                           |
 | `s`   | Saturation                | amount % 0–100 (50)                                        | `s = amount`                           |
@@ -496,9 +496,10 @@ but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
 ## 12. Testing
 
 Unit tests cover utils, color parsing, color deficiency
-simulation and packing (snapshots of every node type and preset,
-and round trips). There are no component or end-to-end tests. CI
-runs the unit tests only (not `check`, `lint` or `build`).
+simulation, the highlight temperature and packing (snapshots of
+every node type and preset, and round trips). There are no
+component or end-to-end tests. CI runs the unit tests only (not
+`check`, `lint` or `build`).
 
 ## 13. Known issues and limits
 
@@ -510,9 +511,6 @@ runs the unit tests only (not `check`, `lint` or `build`).
 - **Tokens with `,` or `@` break permalinks**: the dictionary is
   comma-separated and sections are `@`-separated. `Info, light`
   comes back as `Info`, and the node loses its args.
-- **Highlight temperature has no effect**: `temp × 100` gives 55
-  000–75 000 K, above the 40 000 K clamp of `temperatureToHue`.
-  Shadow uses `temp × 10` (5 500–7 500 K).
 - **Packed numbers above `0xfff`** (4096) cannot be encoded,
   which caps the dictionary size and the node count per tree.
 - **`npm run package`** calls `svelte-kit package`, which no
