@@ -57,6 +57,36 @@ export const defaultArgs = (def: NodeDef) =>
 		def.params.map(({name, default: d}) => [name, d])
 	);
 
+const isSameParam = (a: Param, b: Param) =>
+	a.type === b.type &&
+	(a.type !== 'range' ||
+		(b.type === 'range' &&
+			a.min === b.min &&
+			a.max === b.max));
+
+// Types share param names with different meanings (e.g. the
+// `amount` of a lightness or of a highlight), so args are only
+// kept when the new type has the exact same param, see ADR 3.
+export const remapArgs = (
+	from: NodeDef,
+	to: NodeDef,
+	args: Args
+): Args =>
+	Object.fromEntries(
+		to.params.map((param) => {
+			const previous = from.params.find(
+				({name}) => name === param.name
+			);
+
+			return [
+				param.name,
+				previous && isSameParam(previous, param)
+					? args[param.name]
+					: param.default
+			];
+		})
+	);
+
 export const generateName = (
 	token: string,
 	color: SchemistColor,
@@ -72,7 +102,8 @@ const defaultInput: NodeOutput = [parseColor('#fff')[1]!, ''];
 
 export class Node {
 	readonly id: string;
-	readonly def: NodeDef;
+	// Raw, as definitions are never mutated, only replaced.
+	def: NodeDef = $state.raw(defs.clr);
 	token = $state('');
 	isHidden = $state(false);
 	args: Args = $state({});
@@ -102,6 +133,14 @@ export class Node {
 		this.isHidden = isHidden;
 		this.token = token;
 		this.args = defaultArgs(this.def);
+	}
+
+	// Keeps the id, token, visibility and children, so that the
+	// change is recorded as a single history step.
+	setType(type: keyof typeof defs) {
+		const def = defs[type];
+		this.args = remapArgs(this.def, def, this.args);
+		this.def = def;
 	}
 
 	addChild(child: Node) {

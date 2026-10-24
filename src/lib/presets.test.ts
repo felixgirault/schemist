@@ -1,3 +1,4 @@
+import {pack, unpack} from '#lib/packing/index.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
 import type {PresetNode} from './presets';
@@ -63,4 +64,30 @@ test('names no arg when anything else changed', () => {
 	child.token = '';
 	tree.addChild(parseTree({type: 'l'}));
 	expect(changedArg(previous, snapshot(tree))).toBeUndefined();
+});
+
+test('starts a new step when a type changes', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'hlt'}]
+	});
+	const previous = snapshot(tree);
+
+	// Same args, only the type changes.
+	tree.children[0].setType('sdw');
+	expect(changedArg(previous, snapshot(tree))).toBeUndefined();
+});
+
+test('keeps changed types in permalinks', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'l', children: [{type: 'cmp'}]}]
+	});
+
+	tree.children[0].setType('s');
+
+	const [child] = unpack(pack(snapshot(tree))).children!;
+	expect(child.type).toBe('s');
+	expect(child.args).toEqual({amount: 50});
+	expect(child.children).toHaveLength(1);
 });
