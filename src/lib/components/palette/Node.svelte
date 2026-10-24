@@ -59,7 +59,8 @@
 	> = (event) => {
 		if (event.code === 'Enter') {
 			event.preventDefault();
-			handleTokenBlur(event);
+			// Saving happens on blur, so it runs once.
+			event.currentTarget.blur();
 		}
 	};
 </script>
