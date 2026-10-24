@@ -22,7 +22,10 @@ import {debouncedOutputs, rootNode} from '$lib/stores/palette';
 import {circular} from '$lib/utils/math';
 
 export type BlindnessType =
-	'none' | 'protanomaly' | 'deuteranomaly' | 'tritanomaly';
+	| 'none'
+	| 'protanomaly'
+	| 'deuteranomaly'
+	| 'tritanomaly';
 
 export type Entry = {
 	id: Node['id'];

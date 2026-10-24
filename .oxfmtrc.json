@@ -1,0 +1,55 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"arrowParens": "always",
+	"bracketSameLine": false,
+	"bracketSpacing": false,
+	"htmlWhitespaceSensitivity": "ignore",
+	"printWidth": 65,
+	"proseWrap": "always",
+	"quoteProps": "preserve",
+	"semi": true,
+	"singleQuote": true,
+	"tabWidth": 3,
+	"trailingComma": "none",
+	"useTabs": true,
+	"sortPackageJson": false,
+	"svelte": {
+		"sortOrder": "options-scripts-markup-styles"
+	},
+	"sortImports": {
+		"internalPattern": ["$lib"],
+		"newlinesBetween": false,
+		"groups": [
+			["builtin", "external", "unknown"],
+			"internal",
+			["parent", "sibling", "index"]
+		]
+	},
+	"overrides": [
+		{
+			"files": ["*.yml"],
+			"options": {
+				"tabWidth": 2
+			}
+		}
+	],
+	"associations": [
+		{
+			"files": ["*.svelte"],
+			"language": "svelte"
+		}
+	],
+	"ignorePatterns": [
+		".DS_Store",
+		"node_modules",
+		"/build",
+		"/.svelte-kit",
+		"/package",
+		".env",
+		".env.*",
+		"!.env.example",
+		"pnpm-lock.yaml",
+		"package-lock.json",
+		"yarn.lock"
+	]
+}

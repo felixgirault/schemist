@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {formatSchemist} from '$lib/color/formatting';
-	import Sample from '$lib/components/Sample.svelte';
 	import ChildOption from '$lib/components/palette/ChildOption.svelte';
+	import Sample from '$lib/components/Sample.svelte';
 	import {defList as defs} from '$lib/definitions/nodes';
 	import presets from '$lib/definitions/presets';
 	import type {Preset} from '$lib/presets';
