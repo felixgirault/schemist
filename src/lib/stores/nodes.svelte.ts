@@ -71,7 +71,7 @@ export const generateName = (
 const defaultInput: NodeOutput = [parseColor('#fff')[1]!, ''];
 
 export class Node {
-	readonly id = `n${uid()}`;
+	readonly id: string;
 	readonly def: NodeDef;
 	token = $state('');
 	isHidden = $state(false);
@@ -94,8 +94,10 @@ export class Node {
 	constructor(
 		type: keyof typeof defs,
 		isHidden = false,
-		token = ''
+		token = '',
+		id = `n${uid()}`
 	) {
+		this.id = id;
 		this.def = defs[type];
 		this.isHidden = isHidden;
 		this.token = token;
@@ -125,8 +127,9 @@ export class Node {
 export const createNode = (
 	type: keyof typeof defs,
 	isHidden = false,
-	token = ''
-) => new Node(type, isHidden, token);
+	token = '',
+	id?: string
+) => new Node(type, isHidden, token, id);
 
 // Outputs of all visible nodes, in tree order.
 export const collectOutputs = (

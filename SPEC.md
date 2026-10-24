@@ -71,7 +71,7 @@ src/
     components/            UI (§11)
     utils/                 Generic helpers (arrays, css, math, strings, …)
     presets.ts             parseTree / serializeTree (tree ⇄ PresetNode)
-    palette.ts             getRootNode (initial tree from URL or random)
+    palette.ts             getRootNode (initial tree from URL, storage or random)
     routing.ts             permalink(node)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
@@ -187,11 +187,12 @@ children, and returns `{[id]: [color, name]}` for every
 
 ### 5.3 Tree serialization (`#lib/presets.ts`)
 
-`PresetNode = {type, token?, args?, children?, isHidden?}` is the
-plain form of a tree, used by presets and permalinks.
-`parseTree(PresetNode) → Node` merges given `args` over the type
-defaults; `serializeTree(Node) → PresetNode` omits empty tokens,
-args and children.
+`PresetNode = {id?, type, token?, args?, children?, isHidden?}`
+is the plain form of a tree, used by presets, permalinks and
+history snapshots. `parseTree(PresetNode) → Node` merges given
+`args` over the type defaults and reuses `id` when set;
+`serializeTree(Node) → PresetNode` includes ids and omits empty
+tokens, args and children. Permalinks don't store ids.
 
 ## 6. Node types
 
@@ -301,7 +302,41 @@ under `darkSchemeFeature` = `'1'` / `'0'`) and `colorInputFormat`
 default `dash`), `precision` (default 3), `prefix` (default
 `''`).
 
-None of this state is persisted except the dark scheme.
+### 8.5 `history`
+
+Undo and redo of the palette tree, as decided in
+`docs/adr/0002-snapshots-and-undo.md`. A generic `History` class
+(`#lib/utils/history.svelte.ts`) holds `past` and `future` stacks
+of snapshots (`serializeTree` of the root, with ids), capped at
+100 entries.
+
+| Method     | Effect                                                                                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reset()`  | Clears the stacks and takes the current tree as the committed state, without notifying. On palette mount, `startHistory()` calls it then syncs the URL, but not storage, so opening a link keeps the stored palette |
+| `commit()` | Pushes the last committed state to `past` and clears `future`, unless the tree is unchanged                                                                                                                         |
+| `undo()`   | Commits pending edits, then restores the last `past` snapshot                                                                                                                                                       |
+| `redo()`   | Commits pending edits, then restores the last `future` snapshot                                                                                                                                                     |
+
+Restoring rebuilds the `Node` tree with the same ids, so node
+components update in place (open panels are kept).
+
+Commits happen:
+
+- after adding a node, applying a preset, removing a node,
+  renaming a node and randomizing a color;
+- on every `change` event in the document (slider release,
+  checkbox, committed color field…); unchanged trees are skipped;
+- 500 ms after the last edit, as a fallback.
+
+Every new committed state replaces the URL query with its
+`?preset=` (shallow `goto`, no history entry) and is stored in
+`localStorage` under `palette`.
+
+### 8.6 Persistence
+
+The palette persists through the URL and `localStorage` (§8.5),
+the dark scheme through `localStorage` (§8.3). Undo history,
+combination filters and export settings are not persisted.
 
 ## 9. Contrast and accessibility
 
@@ -361,11 +396,15 @@ by eye.
   `<origin>?preset=<encodeURI(pack(serializeTree(root)))>`, with
   `&`, `#` and `+` also percent-encoded so they survive the query
   string.
-- **Share** navigates to that URL (the address bar then holds the
-  link; nothing is copied to the clipboard).
-- On load, `getRootNode()` unpacks `?preset=`. If it is missing
-  or invalid (the error is logged), the tree is a single Custom
-  color node with a random usable color.
+- The address bar always holds the permalink of the palette, as
+  it is updated on every commit (§8.5).
+- **Share** copies the permalink to the clipboard and shows "Link
+  copied" (or a hint to copy it from the address bar if the
+  clipboard is unavailable) for 2 seconds.
+- On load, `getRootNode()` unpacks `?preset=`, else the palette
+  stored in `localStorage`. If both are missing or invalid
+  (errors are logged), the tree is a single Custom color node
+  with a random usable color.
 - Exports embed the permalink (CSS/Sass comment, design tokens
   description).
 
@@ -424,8 +463,12 @@ compressing links is recorded in
 - Header: app name and baseline, **Dark/Light theme** toggle,
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
-- Two sections: **Palette** (tree, Export and Share buttons) and
-  **Combinations (filtered / total)**.
+- Two sections: **Palette** (tree, Export, Share, Undo and Redo
+  buttons) and **Combinations (filtered / total)**.
+- Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
+  `Z` redoes, except while editing text (text inputs, textareas,
+  the editable node name), where native undo applies. Undo and
+  Redo are disabled when their stack is empty.
 
 ### 11.2 Palette tree
 
@@ -515,9 +558,11 @@ but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
 Unit tests cover utils, color parsing, color deficiency
 simulation, the highlight temperature, packing (snapshots of
 every node type and preset, round trips, lossless colors and
-backward compatibility) and permalinks (tokens with special
-characters). There are no component or end-to-end tests. CI runs
-the unit tests only (not `check`, `lint` or `build`).
+backward compatibility), permalinks (tokens with special
+characters), tree serialization (ids), the undo history and the
+initial palette source (link, storage, random). There are no
+component or end-to-end tests. CI runs the unit tests only (not
+`check`, `lint` or `build`).
 
 ## 13. Known issues and limits
 

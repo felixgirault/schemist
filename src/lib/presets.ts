@@ -3,6 +3,8 @@ import type {Args, Node} from '#lib/stores/nodes.svelte.js';
 import {createNode} from '#lib/stores/nodes.svelte.js';
 
 export type PresetNode = {
+	// Only set when serializing a tree, to restore it as is.
+	id?: string;
 	type: keyof typeof defs;
 	token?: string;
 	args?: Args;
@@ -17,8 +19,8 @@ export type Preset = {
 };
 
 export const parseTree = (preset: PresetNode) => {
-	const {type, isHidden, token, args, children} = preset;
-	const node = createNode(type, isHidden, token);
+	const {id, type, isHidden, token, args, children} = preset;
+	const node = createNode(type, isHidden, token, id);
 
 	if (args) {
 		Object.assign(node.args, args);
@@ -36,6 +38,7 @@ export const parseTree = (preset: PresetNode) => {
 export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
 	const data: PresetNode = {
+		id: node.id,
 		type: node.def.type as keyof typeof defs,
 		isHidden: node.isHidden
 	};
@@ -53,4 +56,60 @@ export const serializeTree = (node: Node) => {
 	}
 
 	return data;
+};
+
+const flattenTree = (
+	tree: PresetNode,
+	nodes = new Map<string | undefined, PresetNode>()
+) => {
+	nodes.set(tree.id, tree);
+	tree.children?.forEach((child) => flattenTree(child, nodes));
+	return nodes;
+};
+
+const childIds = ({children}: PresetNode) =>
+	children?.map(({id}) => id).join() ?? '';
+
+// Names the only arg that differs between two serialized trees
+// (as `nodeId.argName`), or nothing if anything else changed.
+export const changedArg = (
+	previous: PresetNode,
+	next: PresetNode
+) => {
+	const before = flattenTree(previous);
+	const after = flattenTree(next);
+	let changed: string | undefined;
+
+	if (before.size !== after.size) {
+		return;
+	}
+
+	for (const [id, node] of after) {
+		const old = before.get(id);
+
+		if (
+			!old ||
+			old.type !== node.type ||
+			old.token !== node.token ||
+			old.isHidden !== node.isHidden ||
+			childIds(old) !== childIds(node)
+		) {
+			return;
+		}
+
+		for (const name of Object.keys(node.args ?? {})) {
+			if (
+				JSON.stringify(old.args?.[name]) !==
+				JSON.stringify(node.args?.[name])
+			) {
+				if (changed) {
+					return;
+				}
+
+				changed = `${id}.${name}`;
+			}
+		}
+	}
+
+	return changed;
 };
