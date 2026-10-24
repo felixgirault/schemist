@@ -1,4 +1,4 @@
-# 4. Changing the type of a color
+# 3. Changing the type of a color
 
 - Status: proposed
 - Date: 2026-10-24
@@ -70,9 +70,10 @@ added later, in memory only, if it proves useful.
 
 ### Interface
 
-- The type label under the node name ("Highlight 10%") becomes a
-  button, titled "Change this color's type". It is not shown as a
-  button on the root.
+- A new action button, titled "Change this color's type", sits in
+  `NodeActions` just before "Add matching colors". Like "Remove",
+  it is disabled (and hidden) on the root, which keeps the
+  buttons aligned across nodes.
 - It opens the child picker in a replace mode, titled "Change
   color type":
    - single colors only, as presets can't replace a single node;
@@ -90,7 +91,8 @@ added later, in memory only, if it proves useful.
    described, and Highlight ↔ Shadow keeps all of them.
 2. A history test: a swap is one undo step, and survives packing
    and unpacking.
-3. The replace mode of the child picker, and the label button.
+3. The replace mode of the child picker, and the action button,
+   with a new icon.
 4. Update `SPEC.md` (§5.1 for `setType`, §11.2 for the action,
    §11.4 for the replace mode).
 
