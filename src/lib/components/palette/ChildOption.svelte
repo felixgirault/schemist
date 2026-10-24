@@ -1,7 +1,10 @@
 <script lang="ts">
+	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
+
 	interface Props {
 		label: string;
 		description?: string;
+		isSelected?: boolean;
 		onClick: () => void;
 		children?: import('svelte').Snippet;
 	}
@@ -9,14 +12,19 @@
 	let {
 		label,
 		description = '',
+		isSelected = false,
 		onClick,
 		children
 	}: Props = $props();
 </script>
 
-<button onclick={onClick}>
+<button onclick={onClick} aria-current={isSelected || undefined}>
 	<span class="label h3">
 		{label}
+
+		{#if isSelected}
+			<CheckIcon />
+		{/if}
 	</span>
 
 	{#if description}
@@ -51,6 +59,12 @@
 		display: block;
 		margin-bottom: 0.25rem;
 		font-weight: 600;
+	}
+
+	.label :global(svg) {
+		width: 1em;
+		height: 1em;
+		vertical-align: middle;
 	}
 
 	.description {
