@@ -411,8 +411,10 @@ marks need more, points more than bars or lines (Szafir,
 
 - `permalink(tree, origin)`, with `tree` a `PresetNode`
   (`serializeTree(root)` for a store node), =
-  `<origin>?preset=<encodeURI(pack(tree))>`. `palette.permalink`
-  is the store's shortcut, using `window.location.origin`.
+  `<origin>?preset=<encodeURI(pack(tree))>`, with `&`, `#` and
+  `+` also percent-encoded so they survive the query string.
+  `palette.permalink` is the store's shortcut, using
+  `window.location.origin`.
 - **Share** navigates to that URL (the address bar then holds the
   link; nothing is copied to the clipboard).
 - On load, `getRootNode()` unpacks `?preset=`. If it is missing
@@ -433,11 +435,11 @@ Only version `1` exists. Its payload:
 <root>@<nodes>@<dictionary>
 ```
 
-| Part         | Content                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------- |
-| `dictionary` | Comma-separated strings, in order of first use: type codes, tokens, param names, colors |
-| `nodes`      | Comma-separated node records, children before their parent (post-order)                 |
-| `root`       | Index of the root record in `nodes`, in hexadecimal                                     |
+| Part         | Content                                                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dictionary` | Comma-separated strings, in order of first use: type codes, tokens, param names, colors. `%`, `,` and `@` are escaped as `%25`, `%2C` and `%40` |
+| `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                         |
+| `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                             |
 
 A node record is an optional `!` (hidden) followed by numbers,
 each written in hexadecimal: 1 digit as is, 2 digits prefixed
@@ -570,15 +572,16 @@ casing.
 ## 12. Testing
 
 Unit tests cover utils, color parsing, color deficiency
-simulation, the highlight temperature and packing (snapshots of
-every node type and preset, and round trips). Characterization snapshots cover the outputs
-(hex values and names) of every preset under a few root colors,
-`combinations.all` (WCAG 2 and APCA, with and without
-simulations) and the CSS, Sass and design tokens exports. Unit
-tests of `exportTokens` cover nesting, empty parts, `$` parts,
-conflicts and duplicates (with no color dropped, whatever the
-tree order); `names.test.ts` renders the tokens export and its
-conflict notice. Export components are rendered server-side;
+simulation, the highlight temperature, packing (snapshots of
+every node type and preset, and round trips) and permalinks
+(tokens with special characters). Characterization snapshots
+cover the outputs (hex values and names) of every preset under a
+few root colors, `combinations.all` (WCAG 2 and APCA, with and
+without simulations) and the CSS, Sass and design tokens exports.
+Unit tests of `exportTokens` cover nesting, empty parts, `$`
+parts, conflicts and duplicates (with no color dropped, whatever
+the tree order); `names.test.ts` renders the tokens export and
+its conflict notice. Export components are rendered server-side;
 there are no browser or end-to-end tests. A core test asserts
 that `evaluate` matches `collectOutputs` for every preset. CLI
 tests cover tree validation and argument handling, and build the
@@ -597,9 +600,6 @@ tests and `check` (not `lint` or `build`).
   channels. A lossless `v2` format exists on the
   `adr-url-compression` branch (see its ADR on permalink
   compression, issue #53).
-- **Tokens with `,` or `@` break permalinks**: the dictionary is
-  comma-separated and sections are `@`-separated. `Info, light`
-  comes back as `Info`, and the node loses its args.
 - **Packed numbers above `0xfff`** (4096) cannot be encoded,
   which caps the dictionary size and the node count per tree.
 - **`npm run package`** calls `svelte-kit package`, which no
