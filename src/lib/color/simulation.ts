@@ -1,5 +1,6 @@
 import {
 	type Rgb,
+	clampRgb,
 	filterDeficiencyDeuter,
 	filterDeficiencyProt,
 	filterDeficiencyTrit
@@ -7,15 +8,18 @@ import {
 import {rgbFromCulori, rgbToCulori} from './culori';
 import type {RgbColor} from './types';
 
-const protanomalyFilter = filterDeficiencyProt();
-const deuteranomalyFilter = filterDeficiencyDeuter();
-const tritanomalyFilter = filterDeficiencyTrit();
+// Filters can yield colors out of the sRGB gamut, which
+// can't be displayed and break APCA calculations (see #46).
+const simulate =
+	(filter: (color: Rgb) => Rgb) => (color: RgbColor) =>
+		rgbFromCulori(clampRgb(filter(rgbToCulori(color))) as Rgb);
 
-export const simulateProtanomaly = (color: RgbColor) =>
-	rgbFromCulori(protanomalyFilter(rgbToCulori(color)));
-
-export const simulateDeuteranomaly = (color: RgbColor) =>
-	rgbFromCulori(deuteranomalyFilter(rgbToCulori(color)));
-
-export const simulateTritanomaly = (color: RgbColor) =>
-	rgbFromCulori(tritanomalyFilter(rgbToCulori(color)));
+export const simulateProtanomaly = simulate(
+	filterDeficiencyProt()
+);
+export const simulateDeuteranomaly = simulate(
+	filterDeficiencyDeuter()
+);
+export const simulateTritanomaly = simulate(
+	filterDeficiencyTrit()
+);
