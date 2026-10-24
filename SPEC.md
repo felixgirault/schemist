@@ -77,6 +77,7 @@ src/
     style.ts               Theme CSS variables from a color
     features.ts            Dark scheme preference (localStorage)
 static/                    Fonts, favicon, favicon template, demo GIF
+docs/adr/                  Architecture decision records
 ```
 
 ## 4. Color model
@@ -374,7 +375,9 @@ by eye.
 <version>@<payload>
 ```
 
-Only version `1` exists. Its payload:
+Permalinks are generated with version `2`. Version `1` is still
+read, so older links keep working. Both share the payload below
+and only differ in how colors are written (see values).
 
 ```
 <root>@<nodes>@<dictionary>
@@ -396,11 +399,22 @@ with `x`, 3 digits prefixed with `y`. The numbers are, in order:
 4. `N / 2` pairs of (dictionary index of the param name, value),
 5. record indices of the children.
 
-Values: booleans `0`/`1`, ranges as is, colors as the dictionary
-index of their 6-digit hex code (without `#`).
+Values: booleans `0`/`1`, ranges as is, colors as a dictionary
+index. The dictionary entry of a color is:
 
-Example, a Custom color `#ffc208` alone:
-`1@0@01223@clr,,color,ffc208`.
+| Version | Color entry                                                                     |
+| ------- | ------------------------------------------------------------------------------- |
+| `1`     | 6-digit hex code without `#`, which rounds the color (lossy)                    |
+| `2`     | `h_s_l` of the `SchemistColor`, as full precision JavaScript numbers (lossless) |
+
+Version `2` rejects color entries with a non-numeric part.
+
+Examples, a Custom color alone: `1@0@01223@clr,,color,ffc208`,
+`2@0@01223@clr,,color,90_50_50`.
+
+The rationale for keeping this custom format rather than
+compressing links is recorded in
+`docs/adr/0001-url-packing-compression.md`.
 
 ## 11. User interface
 
@@ -499,20 +513,18 @@ but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
 
 Unit tests cover utils, color parsing, color deficiency
 simulation, the highlight temperature, packing (snapshots of
-every node type and preset, and round trips) and permalinks
-(tokens with special characters). There are no component or
-end-to-end tests. CI runs the unit tests only (not `check`,
-`lint` or `build`).
+every node type and preset, round trips, lossless colors and
+backward compatibility) and permalinks (tokens with special
+characters). There are no component or end-to-end tests. CI runs
+the unit tests only (not `check`, `lint` or `build`).
 
 ## 13. Known issues and limits
 
-- **Lossy permalinks**: colors are packed as hex, so derived
-  colors of a reopened palette can differ by one unit on some
-  channels. A lossless `v2` format exists on the
-  `adr-url-compression` branch (see its ADR on permalink
-  compression, issue #53).
 - **Packed numbers above `0xfff`** (4096) cannot be encoded,
   which caps the dictionary size and the node count per tree.
 - **`#lib` bare import** points to `src/lib/index.js`, which does
   not exist (only `#lib/*` is used).
 - **Alpha** is dropped by permalinks and design tokens.
+- **Incomplete v2 colors are accepted**: a color entry with fewer
+  than three parts (e.g. `1_2`) unpacks with missing channels
+  instead of being rejected.
