@@ -21,10 +21,12 @@ useMode(modeLrgb); // required by contrast calculations
 useMode(modeRgb); // required to parse rgb() and named colors
 useMode(modeHsl); // required to parse hsl()
 
+// Missing channels (e.g. parsed from `none`) are treated as 0.
+// @see https://drafts.csswg.org/css-color/#missing
 export const rgbFromCulori = ({
-	r,
-	g,
-	b,
+	r = 0,
+	g = 0,
+	b = 0,
 	alpha
 }: Rgb): RgbColor => ({
 	r: r * 255,
@@ -43,8 +45,8 @@ export const rgbToCulori = ({r, g, b, a}: RgbColor): Rgb => ({
 
 export const hslFromCulori = ({
 	h = 0,
-	s,
-	l,
+	s = 0,
+	l = 0,
 	alpha
 }: Hsl): HslColor => ({
 	h,
@@ -62,8 +64,8 @@ export const hslToCulori = ({h, s, l, a}: HslColor): Hsl => ({
 });
 
 export const lchFromCulori = ({
-	l,
-	c,
+	l = 0,
+	c = 0,
 	h = 0,
 	alpha
 }: Lch): LchColor => ({
