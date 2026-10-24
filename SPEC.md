@@ -166,7 +166,7 @@ A class with reactive fields:
 | Field      | Kind     | Description                                                              |
 | ---------- | -------- | ------------------------------------------------------------------------ |
 | `id`       | readonly | `n<uid>`, unique per session                                             |
-| `def`      | readonly | Node type definition (§6)                                                |
+| `def`      | raw      | Node type definition (§6), replaced by `setType`                         |
 | `token`    | state    | Name template (§4.4), `''` for an automatic name                         |
 | `isHidden` | state    | Excluded from combinations and exports, still drawn in the tree          |
 | `args`     | state    | Parameter values, initialized from the type's defaults                   |
@@ -177,7 +177,13 @@ A class with reactive fields:
 
 Operations: `addChild(child)` (detaches it from its previous
 parent first), `removeChild(child)`, `destroy()` (removes the
-node and its subtree from its parent).
+node and its subtree from its parent), `setType(type)` (changes
+the definition, keeping the id, token, visibility and children).
+
+`setType` remaps args with `remapArgs`: an arg is kept when the
+new type has a param with the same name, kind and range, and
+reset to the new type's default otherwise (ADR 3). Highlight ↔
+Shadow and Lightness ↔ Saturation keep all their args.
 
 ### 5.2 Outputs
 
@@ -474,13 +480,14 @@ compressing links is recorded in
 
 Each node shows its color and name, then actions:
 
-| Action     | Tooltip                                      | Effect                                             |
-| ---------- | -------------------------------------------- | -------------------------------------------------- |
-| Remove     | Remove this color and all of its derivatives | Not available on the root                          |
-| Visibility | Don't compare this color                     | Toggles `isHidden`                                 |
-| Info       | Show color info                              | Hex, RGB, HSL and LCH values                       |
-| Options    | Tune this color                              | Parameter fields; open by default on the root only |
-| Add        | Add matching colors                          | Opens the child picker                             |
+| Action     | Tooltip                                      | Effect                                                      |
+| ---------- | -------------------------------------------- | ----------------------------------------------------------- |
+| Remove     | Remove this color and all of its derivatives | Not available on the root                                   |
+| Visibility | Don't compare this color                     | Toggles `isHidden`                                          |
+| Info       | Show color info                              | Hex, RGB, HSL and LCH values                                |
+| Options    | Tune this color                              | Parameter fields; open by default on the root only          |
+| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root |
+| Add        | Add matching colors                          | Opens the child picker                                      |
 
 - The name is editable in place (Enter or blur commits). The hint
   reads "Insert parent color name with $." on child nodes.
@@ -503,6 +510,12 @@ typed in.
 A modal with two lists, each item previewed on the current color:
 **Color palettes** (presets, §7) and **Single colors** (node
 types, in `defList` order, §6).
+
+When changing a color's type, the modal is titled "Change color
+type" and only lists single colors, previewed on the parent's
+color (the node's input). The current type is marked with a check
+and `aria-current`. Picking a type calls `setType`, which history
+records as one step.
 
 ### 11.5 Combinations panel
 

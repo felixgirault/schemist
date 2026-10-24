@@ -2,6 +2,7 @@
 	import AddIcon from '#lib/components/icons/AddIcon.svelte';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
+	import SwapIcon from '#lib/components/icons/SwapIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';
@@ -11,12 +12,14 @@
 		optionsId: string;
 		isHiddenId: string;
 		isRemovable: boolean;
+		isSwappable: boolean;
 		isHidden: boolean;
 		isInfoOpen: boolean;
 		areOptionsOpen: boolean;
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
+		onSwap: () => void;
 		onRemove: () => void;
 	}
 
@@ -25,12 +28,14 @@
 		optionsId,
 		isHiddenId,
 		isRemovable,
+		isSwappable,
 		isHidden = $bindable(),
 		isInfoOpen = $bindable(),
 		areOptionsOpen = $bindable(),
 		hasOptions,
 		hasHint,
 		onPick,
+		onSwap,
 		onRemove
 	}: Props = $props();
 
@@ -89,6 +94,16 @@
 		}}
 	>
 		<OptionsIcon />
+	</button>
+
+	<button
+		class="button button--icon"
+		type="button"
+		title="Change this color's type"
+		disabled={!isSwappable}
+		onclick={onSwap}
+	>
+		<SwapIcon />
 	</button>
 
 	<button

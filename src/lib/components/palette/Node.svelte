@@ -31,6 +31,7 @@
 	let areOptionsOpen = $state(!hasParent);
 	let isEditingToken = $state(false);
 	let isPickingChild = $state(false);
+	let isPickingType = $state(false);
 
 	let hasHint = $derived(!hasParent && !node.children.length);
 
@@ -113,6 +114,7 @@
 				{optionsId}
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
+				isSwappable={hasParent}
 				bind:isHidden={node.isHidden}
 				bind:isInfoOpen
 				bind:areOptionsOpen
@@ -120,6 +122,9 @@
 				{hasHint}
 				onPick={() => {
 					isPickingChild = true;
+				}}
+				onSwap={() => {
+					isPickingType = true;
 				}}
 				onRemove={() => node.destroy()}
 			/>
@@ -155,7 +160,7 @@
 		}}
 	>
 		<ChildPicker
-			{node}
+			color={node.output[0]}
 			onAddNode={(type) => {
 				node.addChild(createNode(type));
 				isPickingChild = false;
@@ -166,6 +171,29 @@
 				});
 
 				isPickingChild = false;
+			}}
+		/>
+	</Modal>
+{/if}
+
+{#if isPickingType}
+	<!-- Samples show what the node would become, from its input. -->
+	<Modal
+		label="Change color type"
+		overlayColor={overlayColor(
+			node.input[0],
+			features.isDarkScheme
+		)}
+		onClose={() => {
+			isPickingType = false;
+		}}
+	>
+		<ChildPicker
+			color={node.input[0]}
+			selectedType={def.type}
+			onAddNode={(type) => {
+				node.setType(type);
+				isPickingType = false;
 			}}
 		/>
 	</Modal>
