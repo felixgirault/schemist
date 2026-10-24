@@ -1,18 +1,23 @@
 <script lang="ts">
-	import {rgbToSchemist} from '$lib/color/conversion';
-	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
-	import type {Combination} from '$lib/stores/combinations';
-	import {duoThemeStyle} from '$lib/style';
+	import {rgbToSchemist} from '#lib/color/conversion.js';
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import type {Combination} from '#lib/stores/combinations.svelte.js';
+	import {duoThemeStyle} from '#lib/style.js';
 
-	export let combination: Combination;
-	export let onClose: () => void;
+	interface Props {
+		combination: Combination;
+		onClose: () => void;
+	}
 
-	$: fg = rgbToSchemist(combination.contrast.fg);
-	$: bg = rgbToSchemist(combination.contrast.bg);
-	$: style =
+	let {combination, onClose}: Props = $props();
+
+	let fg = $derived(rgbToSchemist(combination.contrast.fg));
+	let bg = $derived(rgbToSchemist(combination.contrast.bg));
+	let style = $derived(
 		bg.l < fg.l
 			? duoThemeStyle({...bg, l: 10}, {...fg, l: 95})
-			: duoThemeStyle({...bg, l: 90}, {...fg, l: 10});
+			: duoThemeStyle({...bg, l: 90}, {...fg, l: 10})
+	);
 </script>
 
 <p class="elevated" {style}>
@@ -25,7 +30,7 @@
 	<button
 		class="button button--icon"
 		title="Stop"
-		on:click={onClose}
+		onclick={onClose}
 	>
 		<CloseIcon />
 	</button>

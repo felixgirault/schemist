@@ -1,5 +1,5 @@
-import {shadowColor} from '$lib/color/manipulation';
-import type {NodeDef} from '$lib/stores/nodes';
+import {shadowColor} from '#lib/color/manipulation.js';
+import type {NodeDef} from '#lib/stores/nodes.svelte.js';
 
 export default {
 	type: 'sdw',

@@ -1,4 +1,4 @@
-import {joinProperties} from '$lib/utils/css';
+import {joinProperties} from '#lib/utils/css.js';
 import {formatSchemist} from './color/formatting';
 import {parseColor} from './color/parsing';
 import type {SchemistColor} from './color/types';

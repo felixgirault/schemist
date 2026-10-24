@@ -1,25 +1,30 @@
 <script lang="ts">
-	import type {FormEventHandler} from 'svelte/elements';
 	import {
 		formatSchemistTo,
 		formatSchemistToHex
-	} from '$lib/color/formatting';
-	import {parseColor} from '$lib/color/parsing';
-	import type {SchemistColor} from '$lib/color/types';
-	import {colorInputFormat} from '$lib/stores/features';
+	} from '#lib/color/formatting.js';
+	import {parseColor} from '#lib/color/parsing.js';
+	import type {SchemistColor} from '#lib/color/types.js';
+	import {features} from '#lib/stores/features.svelte.js';
+	import type {FormEventHandler} from 'svelte/elements';
 
 	const format = (color: SchemistColor) =>
-		formatSchemistTo(color, $colorInputFormat, 0);
+		formatSchemistTo(color, features.colorInputFormat, 0);
 
-	export let id: string;
-	export let value: SchemistColor;
+	interface Props {
+		id: string;
+		value: SchemistColor;
+	}
 
-	let formattedValue = format(value);
+	let {id, value = $bindable()}: Props = $props();
 
-	$: formattedValue =
-		formatSchemistToHex(value) === formattedValue
-			? formattedValue
-			: format(value);
+	let lastFormattedValue = '';
+	const formattedValue = $derived(
+		(lastFormattedValue =
+			formatSchemistToHex(value) === lastFormattedValue
+				? lastFormattedValue
+				: format(value))
+	);
 
 	const handleInput: FormEventHandler<HTMLInputElement> = ({
 		currentTarget: input
@@ -28,7 +33,7 @@
 		const [format, color] = parseColor(newValue);
 
 		if (format && color) {
-			$colorInputFormat = format;
+			features.colorInputFormat = format;
 			value = color;
 			input.setCustomValidity('');
 		} else {
@@ -44,5 +49,5 @@
 	class="input-grid-lastCols"
 	type="text"
 	value={formattedValue}
-	on:input={handleInput}
+	oninput={handleInput}
 />

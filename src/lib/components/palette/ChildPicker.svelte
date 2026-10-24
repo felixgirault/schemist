@@ -1,23 +1,30 @@
 <script lang="ts">
-	import {formatSchemist} from '$lib/color/formatting';
-	import Sample from '$lib/components/Sample.svelte';
-	import ChildOption from '$lib/components/palette/ChildOption.svelte';
-	import {defList as defs} from '$lib/definitions/nodes';
-	import presets from '$lib/definitions/presets';
-	import type {Preset} from '$lib/presets';
-	import {presetSamples, sample, samples} from '$lib/samples';
-	import type {Node} from '$lib/stores/nodes';
+	import {formatSchemist} from '#lib/color/formatting.js';
+	import ChildOption from '#lib/components/palette/ChildOption.svelte';
+	import Sample from '#lib/components/Sample.svelte';
+	import {defList as defs} from '#lib/definitions/nodes/index.js';
+	import presets from '#lib/definitions/presets/index.js';
+	import type {Preset} from '#lib/presets.js';
+	import {
+		presetSamples,
+		sample,
+		samples
+	} from '#lib/samples.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
-	} from '$lib/utils/css';
+	} from '#lib/utils/css.js';
 
-	export let node: Node;
-	export let onAddNode: (type: string) => void;
-	export let onAddPreset: (preset: Preset) => void;
+	interface Props {
+		node: Node;
+		onAddNode: (type: string) => void;
+		onAddPreset: (preset: Preset) => void;
+	}
 
-	const {output} = node;
-	const color = $output[0];
+	let {node, onAddNode, onAddPreset}: Props = $props();
+
+	const color = $derived(node.output[0]);
 </script>
 
 <div class="picker">

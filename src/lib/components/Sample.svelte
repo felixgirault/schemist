@@ -1,6 +1,10 @@
 <script lang="ts">
-	export let color: string;
-	export let title: string = '';
+	interface Props {
+		color: string;
+		title?: string;
+	}
+
+	let {color, title = ''}: Props = $props();
 </script>
 
 <span class="sample" style="background: {color};" {title}></span>

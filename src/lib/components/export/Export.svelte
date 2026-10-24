@@ -1,31 +1,23 @@
-<svelte:options immutable />
-
 <script lang="ts">
-	import {formatSchemistTo} from '$lib/color/formatting';
-	import TableExport from '$lib/components/export/TableExport.svelte';
-	import VariablesExport from '$lib/components/export/VariablesExport.svelte';
-	import {colorEntries} from '$lib/stores/combinations';
-	import {
-		type ExportEntry,
-		exportCasing,
-		exportColorFormat,
-		exportFormat,
-		exportPrecision,
-		exportPrefix
-	} from '$lib/stores/export';
+	import {formatSchemistTo} from '#lib/color/formatting.js';
+	import TableExport from '#lib/components/export/TableExport.svelte';
+	import VariablesExport from '#lib/components/export/VariablesExport.svelte';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {type ExportEntry} from '#lib/stores/export.svelte.js';
+	import {exportSettings} from '#lib/stores/export.svelte.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
-	let entries: ExportEntry[] = [];
-
-	$: entries = $colorEntries.map(({color, ...entry}) => ({
-		...entry,
-		color,
-		cssColor: formatSchemistTo(
+	const entries: ExportEntry[] = $derived(
+		combinations.colorEntries.map(({color, ...entry}) => ({
+			...entry,
 			color,
-			$exportColorFormat,
-			$exportPrecision
-		)
-	}));
+			cssColor: formatSchemistTo(
+				color,
+				exportSettings.colorFormat,
+				exportSettings.precision
+			)
+		}))
+	);
 </script>
 
 <section>
@@ -44,7 +36,7 @@
 								id="format-table"
 								type="radio"
 								value="table"
-								bind:group={$exportFormat}
+								bind:group={exportSettings.format}
 							/>
 							<label class="button" for="format-table">
 								Table
@@ -55,7 +47,7 @@
 								id="format-tokens"
 								type="radio"
 								value="tokens"
-								bind:group={$exportFormat}
+								bind:group={exportSettings.format}
 							/>
 							<label class="button" for="format-tokens">
 								Design tokens
@@ -66,7 +58,7 @@
 								id="format-css"
 								type="radio"
 								value="css"
-								bind:group={$exportFormat}
+								bind:group={exportSettings.format}
 							/>
 							<label class="button" for="format-css">
 								CSS
@@ -77,7 +69,7 @@
 								id="format-sass"
 								type="radio"
 								value="sass"
-								bind:group={$exportFormat}
+								bind:group={exportSettings.format}
 							/>
 							<label class="button" for="format-sass">
 								Sass
@@ -86,7 +78,7 @@
 					</div>
 				</fieldset>
 
-				{#if $exportFormat !== 'tokens'}
+				{#if exportSettings.format !== 'tokens'}
 					<fieldset>
 						<legend>Color format</legend>
 
@@ -97,7 +89,9 @@
 									id="colorFormat-hex"
 									type="radio"
 									value="hex"
-									bind:group={$exportColorFormat}
+									bind:group={
+										exportSettings.colorFormat
+									}
 								/>
 								<label
 									class="button"
@@ -111,7 +105,9 @@
 									id="colorFormat-rgb"
 									type="radio"
 									value="rgb"
-									bind:group={$exportColorFormat}
+									bind:group={
+										exportSettings.colorFormat
+									}
 								/>
 								<label
 									class="button"
@@ -125,7 +121,9 @@
 									id="colorFormat-hsl"
 									type="radio"
 									value="hsl"
-									bind:group={$exportColorFormat}
+									bind:group={
+										exportSettings.colorFormat
+									}
 								/>
 								<label
 									class="button"
@@ -139,7 +137,9 @@
 									id="colorFormat-lch"
 									type="radio"
 									value="lch"
-									bind:group={$exportColorFormat}
+									bind:group={
+										exportSettings.colorFormat
+									}
 								/>
 								<label
 									class="button"
@@ -152,7 +152,7 @@
 					</fieldset>
 				{/if}
 
-				{#if $exportFormat !== 'table' && $exportFormat !== 'tokens'}
+				{#if exportSettings.format !== 'table' && exportSettings.format !== 'tokens'}
 					<fieldset>
 						<legend>Variables casing</legend>
 
@@ -163,7 +163,7 @@
 									id="casing-dash"
 									type="radio"
 									value="dash"
-									bind:group={$exportCasing}
+									bind:group={exportSettings.casing}
 								/>
 								<label class="button" for="casing-dash">
 									dash-case
@@ -174,7 +174,7 @@
 									id="casing-camel"
 									type="radio"
 									value="camel"
-									bind:group={$exportCasing}
+									bind:group={exportSettings.casing}
 								/>
 								<label class="button" for="casing-camel">
 									camelCase
@@ -189,12 +189,12 @@
 							id="prefix"
 							name="prefix"
 							type="text"
-							bind:value={$exportPrefix}
+							bind:value={exportSettings.prefix}
 						/>
 					</div>
 				{/if}
 
-				{#if $exportFormat !== 'tokens' && $exportColorFormat !== 'hex' && $exportColorFormat !== 'rgb'}
+				{#if exportSettings.format !== 'tokens' && exportSettings.colorFormat !== 'hex' && exportSettings.colorFormat !== 'rgb'}
 					<div>
 						<label for="precision">Precision</label>
 						<input
@@ -203,23 +203,25 @@
 							type="number"
 							min={0}
 							max={5}
-							bind:value={$exportPrecision}
+							bind:value={exportSettings.precision}
 						/>
 					</div>
 				{/if}
 			</div>
 		</div>
 
-		{#if $exportFormat === 'table'}
+		{#if exportSettings.format === 'table'}
 			<TableExport {entries} />
-		{:else if $exportFormat === 'tokens'}
-			<DesignTokensExport entries={$colorEntries} />
+		{:else if exportSettings.format === 'tokens'}
+			<DesignTokensExport
+				entries={combinations.colorEntries}
+			/>
 		{:else}
 			<VariablesExport
 				{entries}
-				format={$exportFormat}
-				casing={$exportCasing}
-				prefix={$exportPrefix}
+				format={exportSettings.format}
+				casing={exportSettings.casing}
+				prefix={exportSettings.prefix}
 			/>
 		{/if}
 	</div>

@@ -1,46 +1,44 @@
 <script lang="ts">
+	import {formatSchemist} from '#lib/color/formatting.js';
+	import Modal from '#lib/components/Modal.svelte';
+	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
+	import NodeActions from '#lib/components/palette/NodeActions.svelte';
+	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
+	import {parseTree} from '#lib/presets.js';
+	import {features} from '#lib/stores/features.svelte.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
+	import {createNode} from '#lib/stores/nodes.svelte.js';
+	import {overlayColor} from '#lib/style.js';
 	import type {EventHandler} from 'svelte/elements';
-	import {formatSchemist} from '$lib/color/formatting';
-	import Modal from '$lib/components/Modal.svelte';
-	import ChildPicker from '$lib/components/palette/ChildPicker.svelte';
-	import NodeActions from '$lib/components/palette/NodeActions.svelte';
-	import NodeOptions from '$lib/components/palette/NodeOptions.svelte';
-	import {parseTree} from '$lib/presets';
-	import {isDarkScheme} from '$lib/stores/features';
-	import type {Node} from '$lib/stores/nodes';
-	import {createNode} from '$lib/stores/nodes';
-	import {overlayColor} from '$lib/style';
+	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
 
-	export let node: Node;
+	interface Props {
+		node: Node;
+	}
 
-	const {
-		id,
-		def,
-		token,
-		args,
-		children,
-		isHidden,
-		output,
-		parent
-	} = node;
-	const infoId = `${id}-info`;
-	const optionsId = `${id}-options`;
-	const hasParent = !!parent;
-	const hasOptions = !!def.params.length;
+	let {node}: Props = $props();
 
-	let isInfoOpen = false;
-	let areOptionsOpen = !hasParent;
-	let isEditingToken = false;
-	let isPickingChild = false;
+	const {id, def, parent} = $derived(node);
+	const infoId = $derived(`${id}-info`);
+	const optionsId = $derived(`${id}-options`);
+	const hasParent = $derived(!!parent);
+	const hasOptions = $derived(!!def.params.length);
 
-	$: hasHint = !hasParent && !$children.length;
+	let isInfoOpen = $state(false);
+	// only the initial state depends on the node, then the user toggles it
+	// svelte-ignore state_referenced_locally
+	let areOptionsOpen = $state(!hasParent);
+	let isEditingToken = $state(false);
+	let isPickingChild = $state(false);
+
+	let hasHint = $derived(!hasParent && !node.children.length);
 
 	const handleTokenFocus: EventHandler<
 		FocusEvent,
 		HTMLDivElement
 	> = ({currentTarget}) => {
-		currentTarget.innerText = $token;
+		currentTarget.innerText = node.token;
 		isEditingToken = true;
 	};
 
@@ -48,8 +46,8 @@
 		Event,
 		HTMLDivElement
 	> = ({currentTarget}) => {
-		$token = currentTarget.innerText;
-		currentTarget.innerText = $output[1];
+		node.token = currentTarget.innerText;
+		currentTarget.innerText = node.output[1];
 		isEditingToken = false;
 	};
 
@@ -64,10 +62,10 @@
 	};
 </script>
 
-<article class:isHidden={$isHidden}>
+<article class:isHidden={node.isHidden}>
 	<div
 		class="output"
-		style="--output: {formatSchemist($output[0])};"
+		style="--output: {formatSchemist(node.output[0])};"
 	></div>
 
 	<div class="self" class:open={areOptionsOpen}>
@@ -81,11 +79,11 @@
 						spellcheck="false"
 						aria-label="Design token"
 						aria-describedby="{id}-token-hint"
-						on:focus={handleTokenFocus}
-						on:blur={handleTokenBlur}
-						on:keydown={handleTokenKey}
+						onfocus={handleTokenFocus}
+						onblur={handleTokenBlur}
+						onkeydown={handleTokenKey}
 					>
-						{$output[1]}
+						{node.output[1]}
 					</div>
 				</h3>
 
@@ -103,7 +101,7 @@
 					{def.label}
 					{#if def?.argsLabel}
 						<span class="args">
-							{def.argsLabel($args)}
+							{def.argsLabel(node.args)}
 						</span>
 					{/if}
 				</p>
@@ -114,7 +112,7 @@
 				{optionsId}
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
-				bind:isHidden={$isHidden}
+				bind:isHidden={node.isHidden}
 				bind:isInfoOpen
 				bind:areOptionsOpen
 				{hasOptions}
@@ -137,10 +135,10 @@
 		{/if}
 	</div>
 
-	{#if $children.length}
+	{#if node.children.length}
 		<div class="children">
-			{#each $children as child (child.id)}
-				<svelte:self node={child} />
+			{#each node.children as child (child.id)}
+				<Node_1 node={child} />
 			{/each}
 		</div>
 	{/if}
@@ -149,7 +147,10 @@
 {#if isPickingChild}
 	<Modal
 		label="Select matching color"
-		overlayColor={overlayColor($output[0], $isDarkScheme)}
+		overlayColor={overlayColor(
+			node.output[0],
+			features.isDarkScheme
+		)}
 		onClose={() => {
 			isPickingChild = false;
 		}}

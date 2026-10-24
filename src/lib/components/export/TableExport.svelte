@@ -1,8 +1,12 @@
 <script lang="ts">
-	import Sample from '$lib/components/Sample.svelte';
-	import type {ExportEntry} from '$lib/stores/export';
+	import Sample from '#lib/components/Sample.svelte';
+	import type {ExportEntry} from '#lib/stores/export.svelte.js';
 
-	export let entries: ExportEntry[];
+	interface Props {
+		entries: ExportEntry[];
+	}
+
+	let {entries}: Props = $props();
 
 	const highlight = (color: string) =>
 		color.replace(

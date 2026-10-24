@@ -1,22 +1,40 @@
 <script lang="ts">
-	import AddIcon from '$lib/components/icons/AddIcon.svelte';
-	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
-	import OptionsIcon from '$lib/components/icons/OptionsIcon.svelte';
+	import AddIcon from '#lib/components/icons/AddIcon.svelte';
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';
 
-	export let infoId: string;
-	export let optionsId: string;
-	export let isHiddenId: string;
-	export let isRemovable: boolean;
-	export let isHidden: boolean;
-	export let isInfoOpen: boolean;
-	export let areOptionsOpen: boolean;
-	export let hasOptions: boolean;
-	export let hasHint: boolean;
-	export let onPick: () => void;
-	export let onRemove: () => void;
+	interface Props {
+		infoId: string;
+		optionsId: string;
+		isHiddenId: string;
+		isRemovable: boolean;
+		isHidden: boolean;
+		isInfoOpen: boolean;
+		areOptionsOpen: boolean;
+		hasOptions: boolean;
+		hasHint: boolean;
+		onPick: () => void;
+		onRemove: () => void;
+	}
+
+	let {
+		infoId,
+		optionsId,
+		isHiddenId,
+		isRemovable,
+		isHidden = $bindable(),
+		isInfoOpen = $bindable(),
+		areOptionsOpen = $bindable(),
+		hasOptions,
+		hasHint,
+		onPick,
+		onRemove
+	}: Props = $props();
+
+	const SvelteComponent = $derived(isHidden ? OffIcon : OnIcon);
 </script>
 
 <div class="button-list">
@@ -25,7 +43,7 @@
 		type="button"
 		title="Remove this color and all of its derivatives"
 		disabled={!isRemovable}
-		on:click={onRemove}
+		onclick={onRemove}
 	>
 		<CloseIcon />
 	</button>
@@ -43,7 +61,7 @@
 		for={isHiddenId}
 		title="Don't compare this color"
 	>
-		<svelte:component this={isHidden ? OffIcon : OnIcon} />
+		<SvelteComponent />
 	</label>
 
 	<button
@@ -52,7 +70,7 @@
 		title="Show color info"
 		aria-controls={infoId}
 		aria-expanded={isInfoOpen}
-		on:click={() => {
+		onclick={() => {
 			isInfoOpen = !isInfoOpen;
 		}}
 	>
@@ -66,7 +84,7 @@
 		aria-controls={optionsId}
 		aria-expanded={areOptionsOpen}
 		disabled={!hasOptions}
-		on:click={() => {
+		onclick={() => {
 			areOptionsOpen = !areOptionsOpen;
 		}}
 	>
@@ -77,7 +95,7 @@
 		class="button button--icon button--hint"
 		type="button"
 		title="Add matching colors"
-		on:click={onPick}
+		onclick={onPick}
 	>
 		<AddIcon />
 

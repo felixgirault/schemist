@@ -1,20 +1,29 @@
-<svelte:options immutable />
-
 <script lang="ts">
-	import {formatRgbToHex} from '$lib/color/formatting';
-	import PreviewIcon from '$lib/components/icons/PreviewIcon.svelte';
-	import type {CombinationContrast} from '$lib/stores/combinations';
-	import {contrastType} from '$lib/stores/combinations';
-	import {round} from '$lib/utils/math';
+	import {formatRgbToHex} from '#lib/color/formatting.js';
+	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
+	import type {CombinationContrast} from '#lib/stores/combinations.svelte.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {round} from '#lib/utils/math.js';
 
-	export let uid: string;
-	export let bgName: string;
-	export let fgName: string;
-	export let contrast: CombinationContrast;
-	export let simulatedContrasts: CombinationContrast[];
-	export let onPreview: (uid: string) => void;
+	interface Props {
+		uid: string;
+		bgName: string;
+		fgName: string;
+		contrast: CombinationContrast;
+		simulatedContrasts: CombinationContrast[];
+		onPreview: (uid: string) => void;
+	}
 
-	$: hexFg = formatRgbToHex(contrast.fg);
+	let {
+		uid,
+		bgName,
+		fgName,
+		contrast,
+		simulatedContrasts,
+		onPreview
+	}: Props = $props();
+
+	let hexFg = $derived(formatRgbToHex(contrast.fg));
 </script>
 
 <div
@@ -33,7 +42,7 @@
 		<p class="level level--withPreview">
 			<span>
 				<span class="grade">
-					{#if $contrastType === 'wcag3'}
+					{#if combinations.contrastType === 'wcag3'}
 						APCA
 					{/if}
 					{contrast.grade}
@@ -44,7 +53,7 @@
 			<button
 				class="button button--icon preview-button"
 				title="Preview color combination"
-				on:click={() => onPreview(uid)}
+				onclick={() => onPreview(uid)}
 			>
 				<PreviewIcon />
 			</button>
@@ -66,7 +75,7 @@
 					{' '}
 					<span class="level">
 						<span class="grade">
-							{#if $contrastType === 'wcag3'}
+							{#if combinations.contrastType === 'wcag3'}
 								APCA
 							{/if}
 							{grade}

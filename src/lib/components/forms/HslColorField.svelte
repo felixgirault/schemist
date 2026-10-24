@@ -2,25 +2,36 @@
 	import {
 		hslToSchemist,
 		schemistToHsl
-	} from '$lib/color/conversion';
-	import type {HslColor, SchemistColor} from '$lib/color/types';
-	import RangeField from '$lib/components/forms/RangeField.svelte';
-	import {continuousGradient} from '$lib/utils/css';
-	import {range} from '$lib/utils/generators';
+	} from '#lib/color/conversion.js';
+	import type {
+		HslColor,
+		SchemistColor
+	} from '#lib/color/types.js';
+	import RangeField from '#lib/components/forms/RangeField.svelte';
+	import {continuousGradient} from '#lib/utils/css.js';
+	import {range} from '#lib/utils/generators.js';
 
-	export let id: number;
-	export let value: SchemistColor;
+	interface Props {
+		id: number;
+		value: SchemistColor;
+	}
 
-	let lastValue: SchemistColor;
-	let color: HslColor;
+	let {id, value = $bindable()}: Props = $props();
 
-	$: color = value !== lastValue ? schemistToHsl(value) : color;
+	// keeps the exact hsl channels while the value round-trips,
+	// as converting back from SchemistColor is lossy
+	let lastValue: SchemistColor | undefined;
+	let lastColor: HslColor | undefined;
+	const color = $derived(
+		value === lastValue && lastColor
+			? lastColor
+			: schemistToHsl(value)
+	);
 
 	const inputHandler =
-		(channel: keyof SchemistColor) =>
-		(channelValue: number) => {
-			color[channel] = channelValue;
-			value = lastValue = hslToSchemist(color);
+		(channel: keyof HslColor) => (channelValue: number) => {
+			lastColor = {...color, [channel]: channelValue};
+			value = lastValue = hslToSchemist(lastColor);
 		};
 </script>
 

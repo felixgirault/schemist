@@ -1,4 +1,4 @@
-import type {Preset} from '$lib/presets';
+import type {Preset} from '#lib/presets.js';
 import splitComplementary from './splitComplementary';
 import tetrad from './tetrad';
 import triad from './triad';

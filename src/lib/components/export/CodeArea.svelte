@@ -1,5 +1,9 @@
 <script lang="ts">
-	export let code: string;
+	interface Props {
+		code: string;
+	}
+
+	let {code}: Props = $props();
 </script>
 
 <textarea class="elevated" rows="10" readonly>{code}</textarea>

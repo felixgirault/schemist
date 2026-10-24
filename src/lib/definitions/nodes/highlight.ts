@@ -1,5 +1,5 @@
-import {highlightColor} from '$lib/color/manipulation';
-import type {NodeDef} from '$lib/stores/nodes';
+import {highlightColor} from '#lib/color/manipulation.js';
+import type {NodeDef} from '#lib/stores/nodes.svelte.js';
 
 export default {
 	type: 'hlt',

@@ -1,10 +1,7 @@
 <script lang="ts">
-	import {formatSchemist} from '$lib/color/formatting';
-	import Sample from '$lib/components/Sample.svelte';
-	import {
-		colorFilters,
-		sortedColors
-	} from '$lib/stores/combinations';
+	import {formatSchemist} from '#lib/color/formatting.js';
+	import Sample from '#lib/components/Sample.svelte';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 </script>
 
 <fieldset>
@@ -13,13 +10,13 @@
 	<div class="fieldset-fields">
 		<div class="button-list wrap">
 			<!-- Using a keyed each here worsens performances as it causes layout shifts -->
-			{#each $sortedColors as { id, name, color }}
+			{#each combinations.sortedColors as { id, name, color }}
 				<input
 					class="button-trigger hidden"
 					id="filter-{id}"
 					type="checkbox"
 					value={id}
-					bind:group={$colorFilters}
+					bind:group={combinations.colorFilters}
 				/>
 
 				<label
@@ -33,11 +30,11 @@
 				</label>
 			{/each}
 
-			{#if $colorFilters.length}
+			{#if combinations.colorFilters.length}
 				<button
 					class="button"
-					on:click={() => {
-						$colorFilters = [];
+					onclick={() => {
+						combinations.colorFilters = [];
 					}}
 				>
 					Reset

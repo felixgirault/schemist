@@ -1,5 +1,5 @@
+import {clamp, round} from '#lib/utils/math.js';
 import {formatHex as culoriFormatHex} from 'culori/fn';
-import {clamp, round} from '$lib/utils/math';
 import {
 	schemistToHsl,
 	schemistToLch,

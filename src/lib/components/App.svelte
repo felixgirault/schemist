@@ -1,23 +1,20 @@
 <script lang="ts">
-	import Modal from '$lib/components/Modal.svelte';
-	import Palette from '$lib/components/Palette.svelte';
-	import Combinations from '$lib/components/combinations/Combinations.svelte';
-	import Export from '$lib/components/export/Export.svelte';
-	import {permalink} from '$lib/routing';
-	import {
-		combinations,
-		filteredCombinations
-	} from '$lib/stores/combinations';
-	import {rootNode} from '$lib/stores/palette';
+	import Combinations from '#lib/components/combinations/Combinations.svelte';
+	import Export from '#lib/components/export/Export.svelte';
+	import Modal from '#lib/components/Modal.svelte';
+	import Palette from '#lib/components/Palette.svelte';
+	import {permalink} from '#lib/routing.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 
-	let isShowingExport = false;
+	let isShowingExport = $state(false);
 
 	const handleShare = () => {
-		window.location.assign(permalink($rootNode));
+		window.location.assign(permalink(palette.root));
 	};
 </script>
 
-<!-- svelte-ignore a11y-no-redundant-roles -->
+<!-- svelte-ignore a11y_no_redundant_roles -->
 <main role="main">
 	<section class="palette">
 		<header>
@@ -31,7 +28,7 @@
 				<button
 					class="button"
 					title="Export colors in various formats"
-					on:click={() => {
+					onclick={() => {
 						isShowingExport = true;
 					}}
 				>
@@ -41,7 +38,7 @@
 				<button
 					class="button"
 					title="Get a permalink to this palette"
-					on:click={handleShare}
+					onclick={handleShare}
 				>
 					Share
 				</button>
@@ -53,7 +50,8 @@
 		<header>
 			<h2 class="h2">
 				Combinations <span>
-					({$filteredCombinations.length} / {$combinations.length})
+					({combinations.filtered.length} / {combinations
+						.all.length})
 				</span>
 			</h2>
 		</header>

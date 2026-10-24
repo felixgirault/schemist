@@ -2,24 +2,36 @@
 	import {
 		lchToSchemist,
 		schemistToLch
-	} from '$lib/color/conversion';
-	import type {LchColor, SchemistColor} from '$lib/color/types';
-	import RangeField from '$lib/components/forms/RangeField.svelte';
-	import {continuousGradient} from '$lib/utils/css';
-	import {range} from '$lib/utils/generators';
+	} from '#lib/color/conversion.js';
+	import type {
+		LchColor,
+		SchemistColor
+	} from '#lib/color/types.js';
+	import RangeField from '#lib/components/forms/RangeField.svelte';
+	import {continuousGradient} from '#lib/utils/css.js';
+	import {range} from '#lib/utils/generators.js';
 
-	export let id: number;
-	export let value: SchemistColor;
+	interface Props {
+		id: number;
+		value: SchemistColor;
+	}
 
-	let lastValue: SchemistColor;
-	let color: LchColor;
+	let {id, value = $bindable()}: Props = $props();
 
-	$: color = value !== lastValue ? schemistToLch(value) : color;
+	// keeps the exact lch channels while the value round-trips,
+	// as converting back from SchemistColor is lossy
+	let lastValue: SchemistColor | undefined;
+	let lastColor: LchColor | undefined;
+	const color = $derived(
+		value === lastValue && lastColor
+			? lastColor
+			: schemistToLch(value)
+	);
 
 	const inputHandler =
 		(channel: keyof LchColor) => (channelValue: number) => {
-			color[channel] = channelValue;
-			value = lastValue = lchToSchemist(color);
+			lastColor = {...color, [channel]: channelValue};
+			value = lastValue = lchToSchemist(lastColor);
 		};
 </script>
 

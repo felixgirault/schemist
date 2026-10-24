@@ -1,32 +1,38 @@
 <script lang="ts">
-	import {formatSchemistToHex} from '$lib/color/formatting';
-	import {permalink} from '$lib/routing';
-	import type {Entry} from '$lib/stores/combinations';
-	import {rootNode} from '$lib/stores/palette';
+	import {formatSchemistToHex} from '#lib/color/formatting.js';
+	import {permalink} from '#lib/routing.js';
+	import type {Entry} from '#lib/stores/combinations.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import CodeArea from './CodeArea.svelte';
 
-	export let entries: Entry[];
+	interface Props {
+		entries: Entry[];
+	}
 
-	$: tokens = Object.fromEntries(
-		entries.map(({name, color}) => [
-			name,
-			{
-				'$type': 'color',
-				'$value': formatSchemistToHex(color)
-			}
-		])
+	let {entries}: Props = $props();
+
+	let tokens = $derived(
+		Object.fromEntries(
+			entries.map(({name, color}) => [
+				name,
+				{
+					'$type': 'color',
+					'$value': formatSchemistToHex(color)
+				}
+			])
+		)
 	);
 
-	$: json = {
+	let json = $derived({
 		'Colors': {
 			'$description': `Build with Schemist (${permalink(
-				$rootNode
+				palette.root
 			)})`,
 			...tokens
 		}
-	};
+	});
 
-	$: code = JSON.stringify(json, null, 2);
+	let code = $derived(JSON.stringify(json, null, 2));
 </script>
 
 <CodeArea {code} />

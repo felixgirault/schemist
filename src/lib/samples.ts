@@ -1,8 +1,12 @@
-import defs from '$lib/definitions/nodes';
-import type {PresetNode} from '$lib/presets';
-import type {Args, NodeDef, Param} from '$lib/stores/nodes';
-import {range} from '$lib/utils/generators';
-import {interval} from '$lib/utils/math';
+import defs from '#lib/definitions/nodes/index.js';
+import type {PresetNode} from '#lib/presets.js';
+import type {
+	Args,
+	NodeDef,
+	Param
+} from '#lib/stores/nodes.svelte.js';
+import {range} from '#lib/utils/generators.js';
+import {interval} from '#lib/utils/math.js';
 import type {SchemistColor} from './color/types';
 
 export const sample = (

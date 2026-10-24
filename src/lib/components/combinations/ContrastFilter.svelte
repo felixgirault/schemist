@@ -1,12 +1,9 @@
 <script lang="ts">
-	import {Wcag2Level, Wcag3Level} from '$lib/color/contrast';
-	import {
-		contrastType,
-		minLevel
-	} from '$lib/stores/combinations';
+	import {Wcag2Level, Wcag3Level} from '#lib/color/contrast.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 
-	$: entries =
-		$contrastType === 'wcag2'
+	let entries = $derived(
+		combinations.contrastType === 'wcag2'
 			? [
 					['AAA', Wcag2Level.aaa],
 					['AA', Wcag2Level.aa],
@@ -23,7 +20,8 @@
 					['Text ', Wcag3Level.text],
 					['Non text', Wcag3Level.nonText],
 					['KO', Wcag3Level.ko]
-				];
+				]
+	);
 </script>
 
 <fieldset>
@@ -36,13 +34,14 @@
 					class="button-trigger hidden"
 					id="grade-{value}"
 					type="radio"
-					bind:group={$minLevel}
+					bind:group={combinations.minLevel}
 					{value}
 				/>
 
 				<label
 					class="button"
-					class:button--active={Number(value) > $minLevel}
+					class:button--active={Number(value) >
+						combinations.minLevel}
 					for="grade-{value}"
 				>
 					{@html label}

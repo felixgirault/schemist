@@ -1,6 +1,6 @@
+import {formatSchemist} from '#lib/color/formatting.js';
+import {parseColor} from '#lib/color/parsing.js';
 import {expect, test} from 'vitest';
-import {formatSchemist} from '$lib/color/formatting';
-import {parseColor} from '$lib/color/parsing';
 import {
 	continuousGradient,
 	discreteGradient,
