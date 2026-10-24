@@ -127,11 +127,11 @@ $ npm run cli -- eval palette.json --contrast apca \
       "fg": "Brand light",
       "level": 89.21,
       "grade": "5",
-      "minLevel": 88.24,
+      "minLevel": 88.27,
       "minGrade": "5",
       "simulated": [
-        {"type": "protanomaly", "level": 90.6, "grade": "5"},
-        {"type": "deuteranomaly", "level": 88.24, "grade": "5"}
+        {"type": "protanomaly", "level": 90.63, "grade": "5"},
+        {"type": "deuteranomaly", "level": 88.27, "grade": "5"}
       ]
     }
   ],

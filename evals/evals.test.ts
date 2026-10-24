@@ -250,7 +250,7 @@ describe('check', () => {
 	});
 
 	test('keeps the detail of failing pairs', () => {
-		// The dark input border is only Lc 36.91 in the worst case.
+		// The dark input border is only Lc 36.92 in the worst case.
 		const result = check(1);
 
 		expect(result.pass).toBe(false);
@@ -263,7 +263,7 @@ describe('check', () => {
 				fg: 'border/input',
 				metric: 'apca',
 				target: 45,
-				level: 36.91
+				level: 36.92
 			}
 		]);
 	});
@@ -390,11 +390,11 @@ describe('scoring and report', () => {
 				].join('\n'),
 				'Failed checks:',
 				[
-					'- run-1, palette: out/dark.json: border/input on background/page, apca 36.91 < 45',
+					'- run-1, palette: out/dark.json: border/input on background/page, apca 36.92 < 45',
 					'- run-2, palette: out/dark.json: missing',
 					'- run-3, palette: out/dark.json: text/body on background/page, wcag2 5.91 < 7',
-					'- run-3, palette: out/dark.json: text/body on background/page, apca 42.06 < 75',
-					'- run-3, palette: out/dark.json: border/input on background/page, apca 36.91 < 45'
+					'- run-3, palette: out/dark.json: text/body on background/page, apca 42.07 < 75',
+					'- run-3, palette: out/dark.json: border/input on background/page, apca 36.92 < 45'
 				].join('\n')
 			].join('\n\n')}\n`
 		);
