@@ -1,14 +1,13 @@
 import {expect, test, vi} from 'vitest';
 import {History} from './history.svelte';
 
-const setup = (limit?: number) => {
+const setup = () => {
 	const state = {value: 0};
 	const onChange = vi.fn();
 	const history = new History({
 		read: () => ({...state}),
 		restore: (snapshot) => Object.assign(state, snapshot),
-		onChange,
-		limit
+		onChange
 	});
 
 	history.reset();
@@ -18,10 +17,11 @@ const setup = (limit?: number) => {
 test('commits only changed states', () => {
 	const {state, history} = setup();
 
-	expect(history.commit()).toBe(false);
+	history.commit();
+	expect(history.past).toEqual([]);
 	state.value = 1;
-	expect(history.commit()).toBe(true);
-	expect(history.commit()).toBe(false);
+	history.commit();
+	history.commit();
 	expect(history.past).toEqual([{value: 0}]);
 });
 
@@ -69,15 +69,16 @@ test('new commits clear the redo stack', () => {
 	expect(state.value).toBe(2);
 });
 
-test('limits the undo stack', () => {
-	const {state, history} = setup(2);
+test('limits the undo stack to 100 states', () => {
+	const {state, history} = setup();
 
-	for (const value of [1, 2, 3, 4]) {
+	for (let value = 1; value <= 101; value++) {
 		state.value = value;
 		history.commit();
 	}
 
-	expect(history.past).toEqual([{value: 2}, {value: 3}]);
+	expect(history.past).toHaveLength(100);
+	expect(history.past[0]).toEqual({value: 1});
 });
 
 test('notifies every new state, but not the initial one', () => {

@@ -5,8 +5,9 @@ export type HistoryOptions<T> = {
 	restore: (snapshot: T) => void;
 	// Called with the snapshot of every new state.
 	onChange?: (snapshot: T) => void;
-	limit?: number;
 };
+
+const Limit = 100;
 
 // Undo/redo stacks of snapshots, pushed at commit points.
 export class History<T> {
@@ -35,18 +36,15 @@ export class History<T> {
 		const snapshot = this.#options.read();
 
 		if (JSON.stringify(snapshot) === this.#key) {
-			return false;
+			return;
 		}
 
 		if (this.#current !== undefined) {
-			this.past = [...this.past, this.#current].slice(
-				-(this.#options.limit ?? 100)
-			);
+			this.past = [...this.past, this.#current].slice(-Limit);
 		}
 
 		this.future = [];
 		this.#set(snapshot);
-		return true;
 	}
 
 	undo() {
