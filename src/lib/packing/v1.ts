@@ -9,7 +9,20 @@ type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
 	children: number[];
 };
 
-export const pack = (node: PresetNode): string => {
+export type ColorCodec = {
+	encode: (color: SchemistColor) => string;
+	decode: (data: string) => SchemistColor | undefined;
+};
+
+const hexCodec: ColorCodec = {
+	encode: (color) => formatSchemistToHex(color).substring(1),
+	decode: (data) => parseColor(`#${data}`)[1]
+};
+
+export const pack = (
+	node: PresetNode,
+	colorCodec = hexCodec
+): string => {
 	const packed: string[] = [];
 	const index: Record<string, number> = {};
 	let i = 0;
@@ -33,9 +46,7 @@ export const pack = (node: PresetNode): string => {
 				return value;
 			case 'color':
 				return indice(
-					formatSchemistToHex(
-						value as SchemistColor
-					).substring(1)
+					colorCodec.encode(value as SchemistColor)
 				);
 		}
 	};
@@ -89,7 +100,7 @@ export const pack = (node: PresetNode): string => {
 	].join('@');
 };
 
-export const unpack = (data: string) => {
+export const unpack = (data: string, colorCodec = hexCodec) => {
 	const [rootIndex, inlinePacked, inlineIndex] =
 		data.split('@');
 
@@ -103,7 +114,7 @@ export const unpack = (data: string) => {
 			case 'range':
 				return value;
 			case 'color':
-				return parseColor(`#${index[value]}`)[1];
+				return colorCodec.decode(index[value]);
 		}
 	};
 
