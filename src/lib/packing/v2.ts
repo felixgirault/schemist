@@ -7,12 +7,16 @@ import {pack as packV1, unpack as unpackV1} from './v1';
 const preciseCodec: ColorCodec = {
 	encode: ({h, s, l}) => [h, s, l].join('_'),
 	decode: (data) => {
-		const [h, s, l] = data.split('_').map(Number);
+		const parts = data.split('_');
 
-		if ([h, s, l].some(Number.isNaN)) {
+		if (
+			parts.length !== 3 ||
+			!parts.every((part) => part.trim() && isFinite(+part))
+		) {
 			throw new Error(`Invalid color \`${data}\`.`);
 		}
 
+		const [h, s, l] = parts.map(Number);
 		return {h, s, l};
 	}
 };

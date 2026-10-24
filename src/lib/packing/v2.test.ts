@@ -40,8 +40,17 @@ test.each(Object.values(presets))(
 	}
 );
 
-test('invalid colors are rejected', () => {
-	expect(() => unpack('0@0122@clr,,color,red')).toThrow();
+test.each([
+	'red',
+	'1_2',
+	'1__2',
+	'1_2_',
+	'1_2_3_4',
+	'1_2_Infinity'
+])('invalid color %j is rejected', (color) => {
+	expect(() => unpack(`0@01223@clr,,color,${color}`)).toThrow(
+		'Invalid color'
+	);
 });
 
 test('v1 permalinks are still supported', () => {
