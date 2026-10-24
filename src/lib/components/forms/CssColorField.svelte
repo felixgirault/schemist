@@ -5,11 +5,11 @@
 	} from '#lib/color/formatting.js';
 	import {parseColor} from '#lib/color/parsing.js';
 	import type {SchemistColor} from '#lib/color/types.js';
-	import {colorInputFormat} from '#lib/stores/features.js';
+	import {features} from '#lib/stores/features.svelte.js';
 	import type {FormEventHandler} from 'svelte/elements';
 
 	const format = (color: SchemistColor) =>
-		formatSchemistTo(color, $colorInputFormat, 0);
+		formatSchemistTo(color, features.colorInputFormat, 0);
 
 	interface Props {
 		id: string;
@@ -33,7 +33,7 @@
 		const [format, color] = parseColor(newValue);
 
 		if (format && color) {
-			$colorInputFormat = format;
+			features.colorInputFormat = format;
 			value = color;
 			input.setCustomValidity('');
 		} else {

@@ -3,7 +3,7 @@
 	import ColorField from '#lib/components/forms/ColorField.svelte';
 	import RangeField from '#lib/components/forms/RangeField.svelte';
 	import {paramSamples} from '#lib/samples.js';
-	import type {Node} from '#lib/stores/nodes.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
@@ -17,7 +17,7 @@
 
 	let {id, node}: Props = $props();
 
-	const {id: nodeId, def, args, input} = $derived(node);
+	const {id: nodeId, def} = $derived(node);
 </script>
 
 <form
@@ -38,13 +38,13 @@
 					: discreteGradient)(
 					paramSamples(
 						def,
-						$args,
+						node.args,
 						param.name,
-						$input[0],
+						node.input[0],
 						clamp(param.max - param.min, 15)
 					)
 				)}
-				bind:value={$args[param.name]}
+				bind:value={node.args[param.name]}
 			/>
 		{:else}
 			{@const SvelteComponent =
@@ -52,7 +52,7 @@
 			<SvelteComponent
 				id={nodeId}
 				{param}
-				bind:value={$args[param.name]}
+				bind:value={node.args[param.name]}
 			/>
 		{/if}
 	{/each}

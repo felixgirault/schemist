@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
-	import type {CombinationContrast} from '#lib/stores/combinations.js';
-	import {contrastType} from '#lib/stores/combinations.js';
+	import type {CombinationContrast} from '#lib/stores/combinations.svelte.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {round} from '#lib/utils/math.js';
 
 	interface Props {
@@ -42,7 +42,7 @@
 		<p class="level level--withPreview">
 			<span>
 				<span class="grade">
-					{#if $contrastType === 'wcag3'}
+					{#if combinations.contrastType === 'wcag3'}
 						APCA
 					{/if}
 					{contrast.grade}
@@ -75,7 +75,7 @@
 					{' '}
 					<span class="level">
 						<span class="grade">
-							{#if $contrastType === 'wcag3'}
+							{#if combinations.contrastType === 'wcag3'}
 								APCA
 							{/if}
 							{grade}

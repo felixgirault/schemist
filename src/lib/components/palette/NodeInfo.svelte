@@ -10,7 +10,7 @@
 		formatRgb,
 		formatSchemistToHex
 	} from '#lib/color/formatting.js';
-	import type {Node} from '#lib/stores/nodes.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
 
 	interface Props {
 		id: string;
@@ -19,12 +19,10 @@
 
 	let {id, node}: Props = $props();
 
-	const {output} = $derived(node);
-
-	let hex = $derived(formatSchemistToHex($output[0]));
-	let rgb = $derived(schemistToRgb($output[0]));
-	let hsl = $derived(schemistToHsl($output[0]));
-	let lch = $derived(schemistToLch($output[0]));
+	let hex = $derived(formatSchemistToHex(node.output[0]));
+	let rgb = $derived(schemistToRgb(node.output[0]));
+	let hsl = $derived(schemistToHsl(node.output[0]));
+	let lch = $derived(schemistToLch(node.output[0]));
 </script>
 
 <section {id} class="form">

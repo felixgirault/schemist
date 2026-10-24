@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {rgbToSchemist} from '#lib/color/conversion.js';
-	import {previewedCombination} from '#lib/stores/combinations.js';
-	import {isDarkScheme} from '#lib/stores/features.js';
-	import {rootColor} from '#lib/stores/palette.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {features} from '#lib/stores/features.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import {
 		defaultThemeColor,
 		duoThemeStyle,
@@ -14,18 +14,18 @@
 	const style = $derived(
 		styleTag(
 			':root',
-			$previewedCombination
+			combinations.previewed
 				? duoThemeStyle(
 						rgbToSchemist(
-							$previewedCombination.contrast.bg
+							combinations.previewed.contrast.bg
 						),
 						rgbToSchemist(
-							$previewedCombination.contrast.fg
+							combinations.previewed.contrast.fg
 						)
 					)
 				: themeStyle(
-						$rootColor ?? defaultThemeColor,
-						$isDarkScheme
+						palette.rootColor ?? defaultThemeColor,
+						features.isDarkScheme
 					)
 		)
 	);

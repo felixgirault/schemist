@@ -4,8 +4,8 @@
 		ExportCasing,
 		ExportEntry,
 		ExportFormat
-	} from '#lib/stores/export.js';
-	import {rootNode} from '#lib/stores/palette.js';
+	} from '#lib/stores/export.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import {cssRule, sassRule} from '#lib/utils/css.js';
 	import {camelCase, dashCase} from '#lib/utils/strings.js';
 	import CodeArea from './CodeArea.svelte';
@@ -37,7 +37,7 @@
 	);
 
 	let code = $derived(
-		`/* @see ${permalink($rootNode)} */\n${variables}`
+		`/* @see ${permalink(palette.root)} */\n${variables}`
 	);
 </script>
 

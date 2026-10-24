@@ -4,9 +4,9 @@
 	import OpenGraph from '#lib/components/meta/OpenGraph.svelte';
 	import TwitterCards from '#lib/components/meta/TwitterCards.svelte';
 	import NotificationArea from '#lib/components/notifications/NotificationArea.svelte';
-	import {isLuminosityAnalysisEnabled} from '#lib/stores/combinations.js';
-	import {isDarkScheme} from '#lib/stores/features.js';
-	import {rootColor} from '#lib/stores/palette.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {features} from '#lib/stores/features.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import {browser} from '$app/env';
 	import GitHubIcon from './icons/GitHubIcon.svelte';
 	import ThemeIcon from './icons/ThemeIcon.svelte';
@@ -17,8 +17,8 @@
 	let {children}: Props = $props();
 </script>
 
-{#if browser && $rootColor}
-	<Favicon color={$rootColor} />
+{#if browser && palette.rootColor}
+	<Favicon color={palette.rootColor} />
 {/if}
 
 <OpenGraph />
@@ -27,7 +27,7 @@
 
 <div
 	class="layout"
-	class:grayscale={$isLuminosityAnalysisEnabled}
+	class:grayscale={combinations.isLuminosityAnalysisEnabled}
 >
 	<div class="header">
 		<!-- svelte-ignore a11y_no_redundant_roles -->
@@ -48,10 +48,11 @@
 		>
 			<button
 				class="button"
-				onclick={() => ($isDarkScheme = !$isDarkScheme)}
+				onclick={() =>
+					(features.isDarkScheme = !features.isDarkScheme)}
 			>
 				<ThemeIcon />
-				{$isDarkScheme ? 'Light' : 'Dark'} theme
+				{features.isDarkScheme ? 'Light' : 'Dark'} theme
 			</button>
 
 			<a

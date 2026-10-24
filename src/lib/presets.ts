@@ -1,7 +1,6 @@
 import type defs from '#lib/definitions/nodes/index.js';
-import type {Args, Node} from '#lib/stores/nodes.js';
-import {createNode} from '#lib/stores/nodes.js';
-import {get} from 'svelte/store';
+import type {Args, Node} from '#lib/stores/nodes.svelte.js';
+import {createNode} from '#lib/stores/nodes.svelte.js';
 
 export type PresetNode = {
 	type: keyof typeof defs;
@@ -22,10 +21,7 @@ export const parseTree = (preset: PresetNode) => {
 	const node = createNode(type, isHidden, token);
 
 	if (args) {
-		node.args.update((current) => ({
-			...current,
-			...args
-		}));
+		Object.assign(node.args, args);
 	}
 
 	if (children) {
@@ -38,12 +34,10 @@ export const parseTree = (preset: PresetNode) => {
 };
 
 export const serializeTree = (node: Node) => {
-	const token = get(node.token);
-	const args = get(node.args);
-	const children = get(node.children);
+	const {token, args, children} = node;
 	const data: PresetNode = {
 		type: node.def.type as keyof typeof defs,
-		isHidden: get(node.isHidden)
+		isHidden: node.isHidden
 	};
 
 	if (token) {

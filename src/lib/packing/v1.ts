@@ -3,7 +3,7 @@ import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import defs from '#lib/definitions/nodes/index.js';
 import type {PresetNode} from '#lib/presets.js';
-import type {Args, Param} from '#lib/stores/nodes.js';
+import type {Args, Param} from '#lib/stores/nodes.svelte.js';
 
 type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
 	children: number[];

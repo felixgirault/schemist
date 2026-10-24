@@ -1,4 +1,4 @@
-import type {NodeDef} from '#lib/stores/nodes.js';
+import type {NodeDef} from '#lib/stores/nodes.svelte.js';
 import {defaultThemeColor} from '#lib/style.js';
 
 export default {

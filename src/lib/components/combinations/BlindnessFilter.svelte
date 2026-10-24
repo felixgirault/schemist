@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type {BlindnessType} from '#lib/stores/combinations.js';
-	import {blindnessTypes} from '#lib/stores/combinations.js';
+	import type {BlindnessType} from '#lib/stores/combinations.svelte.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 
 	const entries: [string, BlindnessType][] = [
 		['Protanomaly', 'protanomaly'],
@@ -19,13 +19,13 @@
 					class="button-trigger hidden"
 					id="blindness-{type}"
 					type="checkbox"
-					bind:group={$blindnessTypes}
+					bind:group={combinations.blindnessTypes}
 					value={type}
 				/>
 
 				<label
 					class="button"
-					class:button--active={$blindnessTypes.includes(
+					class:button--active={combinations.blindnessTypes.includes(
 						type
 					)}
 					for="blindness-{type}"

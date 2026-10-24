@@ -1,18 +1,17 @@
 <script>
 	import Node from '#lib/components/palette/Node.svelte';
 	import {getRootNode} from '#lib/palette.js';
-	import {outputs, rootNode} from '#lib/stores/palette.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import {onMount} from 'svelte';
 
 	onMount(() => {
-		$rootNode = getRootNode();
-		$rootNode.connect(outputs);
+		palette.root = getRootNode();
 	});
 </script>
 
 <div>
-	{#if $rootNode}
-		<Node node={$rootNode} />
+	{#if palette.root}
+		<Node node={palette.root} />
 	{/if}
 </div>
 

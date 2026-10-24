@@ -5,9 +5,9 @@
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
 	import {parseTree} from '#lib/presets.js';
-	import {isDarkScheme} from '#lib/stores/features.js';
-	import type {Node} from '#lib/stores/nodes.js';
-	import {createNode} from '#lib/stores/nodes.js';
+	import {features} from '#lib/stores/features.svelte.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
+	import {createNode} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';
@@ -19,16 +19,7 @@
 
 	let {node}: Props = $props();
 
-	const {
-		id,
-		def,
-		token,
-		args,
-		children,
-		isHidden,
-		output,
-		parent
-	} = $derived(node);
+	const {id, def, parent} = $derived(node);
 	const infoId = $derived(`${id}-info`);
 	const optionsId = $derived(`${id}-options`);
 	const hasParent = $derived(!!parent);
@@ -41,13 +32,13 @@
 	let isEditingToken = $state(false);
 	let isPickingChild = $state(false);
 
-	let hasHint = $derived(!hasParent && !$children.length);
+	let hasHint = $derived(!hasParent && !node.children.length);
 
 	const handleTokenFocus: EventHandler<
 		FocusEvent,
 		HTMLDivElement
 	> = ({currentTarget}) => {
-		currentTarget.innerText = $token;
+		currentTarget.innerText = node.token;
 		isEditingToken = true;
 	};
 
@@ -55,8 +46,8 @@
 		Event,
 		HTMLDivElement
 	> = ({currentTarget}) => {
-		$token = currentTarget.innerText;
-		currentTarget.innerText = $output[1];
+		node.token = currentTarget.innerText;
+		currentTarget.innerText = node.output[1];
 		isEditingToken = false;
 	};
 
@@ -71,10 +62,10 @@
 	};
 </script>
 
-<article class:isHidden={$isHidden}>
+<article class:isHidden={node.isHidden}>
 	<div
 		class="output"
-		style="--output: {formatSchemist($output[0])};"
+		style="--output: {formatSchemist(node.output[0])};"
 	></div>
 
 	<div class="self" class:open={areOptionsOpen}>
@@ -92,7 +83,7 @@
 						onblur={handleTokenBlur}
 						onkeydown={handleTokenKey}
 					>
-						{$output[1]}
+						{node.output[1]}
 					</div>
 				</h3>
 
@@ -110,7 +101,7 @@
 					{def.label}
 					{#if def?.argsLabel}
 						<span class="args">
-							{def.argsLabel($args)}
+							{def.argsLabel(node.args)}
 						</span>
 					{/if}
 				</p>
@@ -121,7 +112,7 @@
 				{optionsId}
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
-				bind:isHidden={$isHidden}
+				bind:isHidden={node.isHidden}
 				bind:isInfoOpen
 				bind:areOptionsOpen
 				{hasOptions}
@@ -144,9 +135,9 @@
 		{/if}
 	</div>
 
-	{#if $children.length}
+	{#if node.children.length}
 		<div class="children">
-			{#each $children as child (child.id)}
+			{#each node.children as child (child.id)}
 				<Node_1 node={child} />
 			{/each}
 		</div>
@@ -156,7 +147,10 @@
 {#if isPickingChild}
 	<Modal
 		label="Select matching color"
-		overlayColor={overlayColor($output[0], $isDarkScheme)}
+		overlayColor={overlayColor(
+			node.output[0],
+			features.isDarkScheme
+		)}
 		onClose={() => {
 			isPickingChild = false;
 		}}

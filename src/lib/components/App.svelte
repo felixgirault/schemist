@@ -4,16 +4,13 @@
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
 	import {permalink} from '#lib/routing.js';
-	import {
-		combinations,
-		filteredCombinations
-	} from '#lib/stores/combinations.js';
-	import {rootNode} from '#lib/stores/palette.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 
 	let isShowingExport = $state(false);
 
 	const handleShare = () => {
-		window.location.assign(permalink($rootNode));
+		window.location.assign(permalink(palette.root));
 	};
 </script>
 
@@ -53,7 +50,8 @@
 		<header>
 			<h2 class="h2">
 				Combinations <span>
-					({$filteredCombinations.length} / {$combinations.length})
+					({combinations.filtered.length} / {combinations
+						.all.length})
 				</span>
 			</h2>
 		</header>

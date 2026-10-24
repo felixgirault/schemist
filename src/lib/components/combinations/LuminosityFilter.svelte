@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {isLuminosityAnalysisEnabled} from '#lib/stores/combinations.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 </script>
 
 <fieldset>
@@ -16,11 +16,13 @@
 			id="luminosity"
 			type="checkbox"
 			value={true}
-			bind:checked={$isLuminosityAnalysisEnabled}
+			bind:checked={combinations.isLuminosityAnalysisEnabled}
 		/>
 
 		<label class="button" for="luminosity">
-			{$isLuminosityAnalysisEnabled ? 'On' : 'Off'}
+			{combinations.isLuminosityAnalysisEnabled
+				? 'On'
+				: 'Off'}
 		</label>
 	</div>
 </fieldset>

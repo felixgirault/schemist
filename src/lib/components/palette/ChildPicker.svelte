@@ -10,7 +10,7 @@
 		sample,
 		samples
 	} from '#lib/samples.js';
-	import type {Node} from '#lib/stores/nodes.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
@@ -24,8 +24,7 @@
 
 	let {node, onAddNode, onAddPreset}: Props = $props();
 
-	const {output} = $derived(node);
-	const color = $derived($output[0]);
+	const color = $derived(node.output[0]);
 </script>
 
 <div class="picker">

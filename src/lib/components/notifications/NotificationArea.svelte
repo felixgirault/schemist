@@ -1,17 +1,14 @@
 <script lang="ts">
 	import PreviewNotification from '#lib/components/notifications/PreviewNotification.svelte';
-	import {
-		previewedCombination,
-		previewedCombinationUid
-	} from '#lib/stores/combinations.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 </script>
 
 <div aria-live="polite">
-	{#if $previewedCombination}
+	{#if combinations.previewed}
 		<PreviewNotification
-			combination={$previewedCombination}
+			combination={combinations.previewed}
 			onClose={() => {
-				$previewedCombinationUid = null;
+				combinations.previewedUid = null;
 			}}
 		/>
 	{/if}

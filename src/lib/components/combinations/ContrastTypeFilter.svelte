@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {contrastType} from '#lib/stores/combinations.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 </script>
 
 <fieldset>
@@ -12,7 +12,7 @@
 				id="wcag2"
 				type="radio"
 				value="wcag2"
-				bind:group={$contrastType}
+				bind:group={combinations.contrastType}
 			/>
 			<label class="button" for="wcag2">WCAG 2</label>
 
@@ -21,7 +21,7 @@
 				id="wcag3"
 				type="radio"
 				value={'wcag3'}
-				bind:group={$contrastType}
+				bind:group={combinations.contrastType}
 			/>
 			<label class="button" for="wcag3">
 				WCAG 3 <span>(APCA)</span>

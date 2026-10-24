@@ -5,18 +5,16 @@
 	import ContrastFilter from '#lib/components/combinations/ContrastFilter.svelte';
 	import ContrastTypeFilter from '#lib/components/combinations/ContrastTypeFilter.svelte';
 	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
-	import {
-		colorEntries,
-		filteredCombinations,
-		previewedCombinationUid
-	} from '#lib/stores/combinations.js';
+	import {combinations} from '#lib/stores/combinations.svelte.js';
 
 	const handlePreview = (uid: string) => {
-		$previewedCombinationUid =
-			$previewedCombinationUid === uid ? null : uid;
+		combinations.previewedUid =
+			combinations.previewedUid === uid ? null : uid;
 	};
 
-	let colorCount = $derived($colorEntries?.length || 0);
+	let colorCount = $derived(
+		combinations.colorEntries?.length || 0
+	);
 </script>
 
 <div class="data-layout">
@@ -34,7 +32,7 @@
 
 	<div class="list">
 		<!-- Using a keyed each here worsens performances as it causes layout shifts -->
-		{#each $filteredCombinations as { uid, bgName, fgName, contrast, simulatedContrasts }}
+		{#each combinations.filtered as { uid, bgName, fgName, contrast, simulatedContrasts }}
 			<Combination
 				{uid}
 				{bgName}
