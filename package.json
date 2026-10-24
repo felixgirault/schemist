@@ -13,7 +13,6 @@
 		"cli": "node build-cli/schemist.js",
 		"eval": "node evals/eval.ts",
 		"eval:grade": "node evals/grade.ts",
-		"package": "svelte-kit package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "oxfmt --check",

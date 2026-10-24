@@ -602,8 +602,6 @@ tests and `check` (not `lint` or `build`).
   compression, issue #53).
 - **Packed numbers above `0xfff`** (4096) cannot be encoded,
   which caps the dictionary size and the node count per tree.
-- **`npm run package`** calls `svelte-kit package`, which no
-  longer exists in SvelteKit 3.
 - **`#lib` bare import** points to `src/lib/index.js`, which does
   not exist (only `#lib/*` is used).
 - **Alpha** is dropped by permalinks and design tokens.
