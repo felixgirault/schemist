@@ -37,3 +37,11 @@ test.each(Object.values(presets))(
 		expect(unpacked).toMatchObject(tree);
 	}
 );
+
+test('unpack tokens packed before separators were escaped', () => {
+	expect(unpack('0@0122x28@l,100%,amount')).toMatchObject({
+		type: 'l',
+		token: '100%',
+		args: {amount: 40}
+	});
+});

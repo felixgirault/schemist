@@ -19,6 +19,13 @@ const hexCodec: ColorCodec = {
 	decode: (data) => parseColor(`#${data}`)[1]
 };
 
+// Escapes the separators so tokens can contain them.
+const escapeEntry = (entry: string) =>
+	entry.replace(/[%,@]/g, encodeURIComponent);
+
+const unescapeEntry = (entry: string) =>
+	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
+
 export const pack = (
 	node: PresetNode,
 	colorCodec = hexCodec
@@ -96,7 +103,7 @@ export const pack = (
 	return [
 		rootIndex,
 		packed.join(','),
-		Object.keys(index).join(',')
+		Object.keys(index).map(escapeEntry).join(',')
 	].join('@');
 };
 
@@ -105,7 +112,7 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 		data.split('@');
 
 	const packed = inlinePacked.split(',');
-	const index = inlineIndex.split(',');
+	const index = inlineIndex.split(',').map(unescapeEntry);
 
 	const unpackValue = (type: Param['type'], value: number) => {
 		switch (type) {
