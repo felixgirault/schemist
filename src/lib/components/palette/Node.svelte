@@ -6,6 +6,7 @@
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
 	import {parseTree} from '#lib/presets.js';
 	import {features} from '#lib/stores/features.svelte.js';
+	import {history} from '#lib/stores/history.svelte.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {createNode} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
@@ -49,6 +50,7 @@
 		node.token = currentTarget.innerText;
 		currentTarget.innerText = node.output[1];
 		isEditingToken = false;
+		history.commit();
 	};
 
 	const handleTokenKey: EventHandler<
@@ -122,6 +124,7 @@
 				}}
 				onRemove={() => {
 					node.destroy();
+					history.commit();
 				}}
 			/>
 		</header>
@@ -159,6 +162,7 @@
 			{node}
 			onAddNode={(type) => {
 				node.addChild(createNode(type));
+				history.commit();
 				isPickingChild = false;
 			}}
 			onAddPreset={(preset) => {
@@ -166,6 +170,7 @@
 					node.addChild(parseTree(tree));
 				});
 
+				history.commit();
 				isPickingChild = false;
 			}}
 		/>
