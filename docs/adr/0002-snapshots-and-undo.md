@@ -34,11 +34,17 @@ whose topmost item is derived into colors and names.
 - **The snapshot stack should not hold the live state.** If its
   topmost item were the edited definition, every keystroke or
   slider step would either push a snapshot or mutate the top of
-  the stack. Keeping one live definition and pushing frozen
-  copies of it at commit points keeps both concerns simple.
+  the stack. Keeping one live definition and recording frozen
+  copies of it keeps both concerns simple.
 - **Idle time makes a poor undo boundary.** Two quick unrelated
   edits would be merged into one step, and a slow slider drag
-  split into several. Commits should follow user actions instead.
+  split into several. Undo steps should follow user actions
+  instead.
+- **Components should not have to mark undo steps.** Calling
+  `commit()` after every action, or listening to `change` events,
+  scatters history concerns across the UI and is easy to forget.
+  Steps can be told apart from the data alone, by comparing each
+  state with the previous one.
 - **Ids must be part of the definition**, so that restoring a
   snapshot keeps components mounted.
 
@@ -51,29 +57,37 @@ whose topmost item is derived into colors and names.
   with an `id`). It is the single source of truth.
 - Colors and names are derived from it.
 
-### Commits
+### Recording
 
-A commit freezes the current definition (`$state.snapshot`) and
-pushes it to the undo stack. Commits happen:
+An effect records a frozen copy of the definition
+(`$state.snapshot`) on every change. Changes made in the same
+tick (e.g. applying a preset) are batched by the effect, so they
+form one change. Each change either starts a new undo step, or
+merges into the current one:
 
-- immediately after discrete actions: adding, removing or hiding
-  a node, applying a preset, renaming a node;
-- on the `change` event of continuous inputs (sliders, color
-  fields), i.e. once the user releases the slider or commits the
-  value;
-- after 500 ms of inactivity, as a fallback for edits that have
-  no natural end.
+- a change that only touches one arg of one node merges into the
+  current step if the previous change touched that same arg less
+  than 1 s ago, so that a slider drag or typing a color is one
+  step;
+- any other change starts a new step: adding, removing, hiding
+  or renaming a node, applying a preset, or changing another arg.
 
-Consecutive identical snapshots (same packed string) are not
-pushed.
+Unrelated edits never merge, however quick. Two drags of the same
+slider within a second do, and so do two quick Randomize clicks
+on the same color, which is an acceptable imprecision.
+
+A step whose changes lead back to its starting state (e.g. a
+slider dragged back) is dropped. Identical consecutive snapshots
+are ignored, which includes the change made by restoring a
+snapshot on undo.
 
 ### Undo and redo
 
 - `past` and `future` stacks of snapshots, capped at 100 entries.
-- Undo commits any pending edit, then restores the last snapshot
-  of `past` into the live definition and pushes the current one
-  to `future`. Redo does the opposite. Any new commit clears
-  `future`.
+- Undo restores the last snapshot of `past` into the live
+  definition and pushes the current one to `future`. Redo does
+  the opposite. Any new step clears `future`, and a restored
+  state never merges with the changes that follow it.
 - Snapshots keep node ids, so restoring one updates components in
   place instead of remounting them.
 - Undo and redo buttons, and the `Ctrl`/`Cmd` + `Z` and
@@ -84,12 +98,13 @@ pushed.
 
 ### Persistence
 
-- Every commit replaces the URL with the permalink of the
-  committed definition (`history.replaceState`, so the browser
-  history is not polluted). A refresh restores the exact palette,
-  since permalinks are lossless (ADR 1), and the address bar is
-  always a valid share link.
-- Every commit also stores the packed definition in
+- Every change replaces the URL with the permalink of the
+  definition (`history.replaceState`, so the browser history is
+  not polluted). A refresh restores the exact palette, since
+  permalinks are lossless (ADR 1), and the address bar is always
+  a valid share link. This happens 300 ms after the last change,
+  so that slider drags don't rewrite the URL constantly.
+- Every change also stores the packed definition in
   `localStorage`.
 - On load, the palette comes from the `preset` parameter if any,
   else from `localStorage`, else it is a random color.

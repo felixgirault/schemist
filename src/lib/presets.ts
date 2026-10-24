@@ -57,3 +57,59 @@ export const serializeTree = (node: Node) => {
 
 	return data;
 };
+
+const flattenTree = (
+	tree: PresetNode,
+	nodes = new Map<string | undefined, PresetNode>()
+) => {
+	nodes.set(tree.id, tree);
+	tree.children?.forEach((child) => flattenTree(child, nodes));
+	return nodes;
+};
+
+const childIds = ({children}: PresetNode) =>
+	children?.map(({id}) => id).join() ?? '';
+
+// Names the only arg that differs between two serialized trees
+// (as `nodeId.argName`), or nothing if anything else changed.
+export const changedArg = (
+	previous: PresetNode,
+	next: PresetNode
+) => {
+	const before = flattenTree(previous);
+	const after = flattenTree(next);
+	let changed: string | undefined;
+
+	if (before.size !== after.size) {
+		return;
+	}
+
+	for (const [id, node] of after) {
+		const old = before.get(id);
+
+		if (
+			!old ||
+			old.type !== node.type ||
+			old.token !== node.token ||
+			old.isHidden !== node.isHidden ||
+			childIds(old) !== childIds(node)
+		) {
+			return;
+		}
+
+		for (const name of Object.keys(node.args ?? {})) {
+			if (
+				JSON.stringify(old.args?.[name]) !==
+				JSON.stringify(node.args?.[name])
+			) {
+				if (changed) {
+					return;
+				}
+
+				changed = `${id}.${name}`;
+			}
+		}
+	}
+
+	return changed;
+};

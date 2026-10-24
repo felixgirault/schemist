@@ -58,9 +58,6 @@
 
 <svelte:window onkeydown={handleKey} />
 
-<!-- Form fields commit their value on change, see ADR 2 -->
-<svelte:document onchange={() => history.commit()} />
-
 <!-- svelte-ignore a11y_no_redundant_roles -->
 <main role="main">
 	<section class="palette">
