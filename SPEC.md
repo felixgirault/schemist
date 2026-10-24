@@ -559,9 +559,10 @@ Unit tests cover utils, color parsing, color deficiency
 simulation, the highlight temperature, packing (snapshots of
 every node type and preset, round trips, lossless colors and
 backward compatibility), permalinks (tokens with special
-characters), tree serialization (ids) and the undo history. There
-are no component or end-to-end tests. CI runs the unit tests only
-(not `check`, `lint` or `build`).
+characters), tree serialization (ids), the undo history and the
+initial palette source (link, storage, random). There are no
+component or end-to-end tests. CI runs the unit tests only (not
+`check`, `lint` or `build`).
 
 ## 13. Known issues and limits
 
