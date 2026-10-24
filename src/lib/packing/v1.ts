@@ -11,15 +11,16 @@ type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
 
 export const pack = (node: PresetNode): string => {
 	const packed: string[] = [];
-	const index: Record<string, number> = {};
-	let i = 0;
+	// A Map keeps insertion order, unlike an object which lists
+	// integer-like keys first (see #8).
+	const index = new Map<string, number>();
 
 	const indice = (key: string) => {
-		if (!(key in index)) {
-			index[key] = i++;
+		if (!index.has(key)) {
+			index.set(key, index.size);
 		}
 
-		return index[key];
+		return index.get(key)!;
 	};
 
 	const packValue = (
@@ -85,7 +86,7 @@ export const pack = (node: PresetNode): string => {
 	return [
 		rootIndex,
 		packed.join(','),
-		Object.keys(index).join(',')
+		[...index.keys()].join(',')
 	].join('@');
 };
 
