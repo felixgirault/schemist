@@ -4,7 +4,7 @@ import {presetSamples} from '#lib/samples.js';
 import {range} from '#lib/utils/generators.js';
 import {expect, test} from 'vitest';
 
-// Static presets that groups replaced, see ADR 4.
+// Static presets that parametric ones replaced, see ADR 4.
 const replaced: [type: string, nodes: PresetNode[]][] = [
 	[
 		'lsc',
@@ -54,7 +54,7 @@ const replaced: [type: string, nodes: PresetNode[]][] = [
 ];
 
 test.each(replaced)(
-	'group %s yields the colors of the preset it replaced',
+	'preset %s yields the colors of the static preset it replaced',
 	(type, nodes) => {
 		const color = parseColor('#c93')[1]!;
 

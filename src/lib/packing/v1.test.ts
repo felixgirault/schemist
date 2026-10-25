@@ -21,13 +21,13 @@ test.each(Object.values(defs))('pack node $label', ({type}) => {
 
 test.each(Object.values(presets))(
 	'pack preset $label',
-	({nodes}) => {
+	({type}) => {
 		const tree = {
 			type: color.type,
 			args: {
 				color: parseColor('#f00')[1]!
 			},
-			children: nodes
+			children: [{type}]
 		};
 
 		const packed = pack(tree);

@@ -134,35 +134,35 @@ test('evaluateTree skips hidden nodes but not their children', () => {
 	});
 });
 
-test('groups output their generated colors', () => {
+test('presets output their generated colors', () => {
 	const tree = parseTree({
 		type: 'clr',
 		token: 'Brand',
 		children: [{type: 'lsc', args: {steps: 3}}]
 	});
 
-	const [group] = tree.children;
+	const [preset] = tree.children;
 	const outputs = collectOutputs(tree);
 
 	expect(Object.keys(outputs)).toEqual([
 		tree.id,
-		`${group.id}.0`,
-		`${group.id}.1`,
-		`${group.id}.2`
+		`${preset.id}.0`,
+		`${preset.id}.1`,
+		`${preset.id}.2`
 	]);
 
-	expect(outputs[`${group.id}.1`][0]).toEqual(
+	expect(outputs[`${preset.id}.1`][0]).toEqual(
 		defs.l.apply(tree.output[0], {amount: 50})
 	);
 
-	group.args.steps = 2;
+	preset.args.steps = 2;
 	expect(Object.keys(collectOutputs(tree))).toHaveLength(3);
 
-	group.isHidden = true;
+	preset.isHidden = true;
 	expect(Object.keys(collectOutputs(tree))).toEqual([tree.id]);
 });
 
-test('groups lend their name to their colors', () => {
+test('presets lend their name to their colors', () => {
 	const tree = parseTree({
 		type: 'clr',
 		token: 'Brand',
@@ -171,23 +171,23 @@ test('groups lend their name to their colors', () => {
 		]
 	});
 
-	const [group] = tree.children;
+	const [preset] = tree.children;
 	const names = () =>
-		Object.values(group.generated).map(([, name]) => name);
+		Object.values(preset.generated).map(([, name]) => name);
 
 	expect(names()).toEqual([
 		'Left Brand complementary',
 		'Right Brand complementary'
 	]);
 
-	group.token = 'Accent';
+	preset.token = 'Accent';
 	expect(names()).toEqual([
 		'Left Accent complementary',
 		'Right Accent complementary'
 	]);
 });
 
-test('groups drop children', () => {
+test('presets drop children', () => {
 	const tree = parseTree({
 		type: 'lsc',
 		children: [{type: 'l'}]

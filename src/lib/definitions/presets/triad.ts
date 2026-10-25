@@ -1,8 +1,20 @@
-import triad from '#lib/definitions/nodes/triad.js';
-import type {Preset} from '#lib/presets.js';
+import triadLeft from '#lib/definitions/nodes/triadLeft.js';
+import triadRight from '#lib/definitions/nodes/triadRight.js';
+import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
 export default {
+	type: 'trd',
 	label: 'Triad',
-	description: '',
-	nodes: [{type: triad.type}]
-} satisfies Preset;
+	description: 'Hues evenly spread in three',
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return [
+			{type: triadLeft.type, token: 'Left $ triad'},
+			{type: triadRight.type, token: 'Right $ triad'}
+		];
+	}
+} satisfies PresetDef;

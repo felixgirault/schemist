@@ -5,7 +5,6 @@
 	import Sample from '#lib/components/Sample.svelte';
 	import {defList as defs} from '#lib/definitions/nodes/index.js';
 	import presets from '#lib/definitions/presets/index.js';
-	import type {Preset} from '#lib/presets.js';
 	import {
 		presetSamples,
 		sample,
@@ -20,32 +19,35 @@
 		// Color on which samples are computed.
 		color: SchemistColor;
 		selectedType?: string;
+		// Presets can't replace a type, see ADR 4.
+		hasPresets?: boolean;
 		onAddNode: (type: string) => void;
-		// Presets are only listed when they can be added.
-		onAddPreset?: (preset: Preset) => void;
 	}
 
-	let {color, selectedType, onAddNode, onAddPreset}: Props =
+	let {color, selectedType, hasPresets, onAddNode}: Props =
 		$props();
 </script>
 
 <div class="picker">
-	{#if onAddPreset}
+	{#if hasPresets}
 		<section>
 			<h2 class="h2">Color palettes</h2>
 
 			<div class="grid">
-				{#each presets as preset}
+				{#each presets as preset (preset.type)}
 					<ChildOption
 						label={preset.label}
 						description={preset.description}
 						onClick={() => {
-							onAddPreset(preset);
+							onAddNode(preset.type);
 						}}
 					>
 						<Sample
 							color={discreteGradient(
-								presetSamples(preset.nodes, color)
+								presetSamples(
+									[{type: preset.type}],
+									color
+								)
 							)}
 						/>
 					</ChildOption>

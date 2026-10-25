@@ -7,7 +7,7 @@ import {
 	changedArg,
 	parseTree,
 	serializeTree,
-	ungroup
+	expandPreset
 } from './presets';
 
 test('serialized trees are restored with the same ids', () => {
@@ -98,21 +98,21 @@ test('keeps changed types in permalinks', () => {
 	expect(child.children).toHaveLength(1);
 });
 
-test('a group arg change can merge with the next one', () => {
+test('a preset arg change can merge with the next one', () => {
 	const tree = parseTree({
 		type: 'clr',
 		children: [{type: 'lsc'}]
 	});
 	const previous = snapshot(tree);
-	const [group] = tree.children;
+	const [preset] = tree.children;
 
-	group.args.steps = 5;
+	preset.args.steps = 5;
 	expect(changedArg(previous, snapshot(tree))).toBe(
-		`${group.id}.steps`
+		`${preset.id}.steps`
 	);
 });
 
-test('ungroup puts the generated nodes in place of the group', () => {
+test('expandPreset puts the generated nodes in place of the preset', () => {
 	const tree = parseTree({
 		type: 'clr',
 		children: [
@@ -121,29 +121,29 @@ test('ungroup puts the generated nodes in place of the group', () => {
 			{type: 'h'}
 		]
 	});
-	const [first, group, last] = tree.children;
+	const [first, preset, last] = tree.children;
 	const outputs = collectOutputs(tree);
 	const previous = snapshot(tree);
 
-	ungroup(group);
+	expandPreset(preset);
 
 	expect(tree.children.map(({id}) => id)).toEqual([
 		first.id,
-		`${group.id}.0`,
-		`${group.id}.1`,
-		`${group.id}.2`,
+		`${preset.id}.0`,
+		`${preset.id}.1`,
+		`${preset.id}.2`,
 		last.id
 	]);
 
 	expect(tree.children[1].parent).toBe(tree);
-	expect(group.parent).toBeUndefined();
+	expect(preset.parent).toBeUndefined();
 	expect(collectOutputs(tree)).toEqual(outputs);
 
 	// Structural change, so it is a step of its own.
 	expect(changedArg(previous, snapshot(tree))).toBeUndefined();
 });
 
-test('ungroup keeps the name and visibility of the group', () => {
+test('expandPreset keeps the name and visibility of the preset', () => {
 	const tree = parseTree({
 		type: 'clr',
 		token: 'Brand',
@@ -157,7 +157,7 @@ test('ungroup keeps the name and visibility of the group', () => {
 		]
 	});
 
-	ungroup(tree.children[0]);
+	expandPreset(tree.children[0]);
 
 	expect(
 		tree.children.map(({token, isHidden}) => [token, isHidden])
@@ -167,24 +167,24 @@ test('ungroup keeps the name and visibility of the group', () => {
 	]);
 });
 
-test('ungroup ignores other nodes', () => {
+test('expandPreset ignores other nodes', () => {
 	const tree = parseTree({
 		type: 'lsc',
 		children: [{type: 'l'}]
 	});
 
-	ungroup(tree);
+	expandPreset(tree);
 	expect(tree.def.type).toBe('lsc');
 });
 
-test('ungroup turns nested groups into groups', () => {
+test('expandPreset turns nested presets into presets', () => {
 	const tree = parseTree({
 		type: 'clr',
 		children: [{type: 'mal'}]
 	});
 	const outputs = collectOutputs(tree);
 
-	ungroup(tree.children[0]);
+	expandPreset(tree.children[0]);
 
 	const [primary] = tree.children;
 	expect(primary.children.map(({def}) => def.type)).toEqual([

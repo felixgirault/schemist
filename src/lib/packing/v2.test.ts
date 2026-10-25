@@ -25,7 +25,7 @@ test('colors are packed losslessly', () => {
 	expect(unpack(pack(tree))).toMatchObject(tree);
 });
 
-test('groups are packed with their args', () => {
+test('presets are packed with their args', () => {
 	const tree = {
 		type: color.type,
 		children: [
@@ -45,11 +45,11 @@ test('groups are packed with their args', () => {
 
 test.each(Object.values(presets))(
 	'preset $label yields the same colors once unpacked',
-	({nodes}) => {
+	({type}) => {
 		const tree = {
 			type: color.type,
 			args: {color: randomUsableColor()},
-			children: nodes
+			children: [{type}]
 		};
 
 		expect(

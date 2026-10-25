@@ -6,13 +6,13 @@ import {expect, test} from 'vitest';
 import presets from './index';
 
 // Guards the colors and names of presets, whatever the way they
-// are built (plain nodes or groups, see ADR 4).
-test.each(presets)('preset $label', ({nodes}) => {
+// are built (static trees or parametric ones, see ADR 4).
+test.each(presets)('preset $label', ({type}) => {
 	const tree = parseTree({
 		type: 'clr',
 		token: 'Brand',
 		args: {color: parseColor('#c93')[1]!},
-		children: nodes
+		children: [{type}]
 	});
 
 	expect(

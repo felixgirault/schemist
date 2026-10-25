@@ -52,11 +52,11 @@ export type NodeDef = {
 
 // A node whose colors are generated from a template tree, see
 // ADR 4. Its own `apply` leaves the input unchanged.
-export type GroupDef = NodeDef & {
+export type PresetDef = NodeDef & {
 	build: (args: Args) => PresetNode[];
 };
 
-export const isGroupDef = (def: NodeDef): def is GroupDef =>
+export const isPresetDef = (def: NodeDef): def is PresetDef =>
 	'build' in def;
 
 export type NodeOutput = [color: SchemistColor, name: string];
@@ -108,7 +108,7 @@ export const generateName = (
 			: token
 		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
-// A group is named after its parent unless it has a token, so
+// A preset is named after its parent unless it has a token, so
 // that `$` in the tokens of its colors still makes sense.
 const applyDef = (
 	def: NodeDef,
@@ -120,14 +120,14 @@ const applyDef = (
 
 	return [
 		output,
-		isGroupDef(def) && !token
+		isPresetDef(def) && !token
 			? name
 			: generateName(token, output, name)
 	];
 };
 
 // Gives ids to template nodes, depth-first, so that generated
-// colors keep them once ungrouped.
+// colors keep them once expanded.
 export const withIds = (
 	nodes: PresetNode[],
 	prefix: string,
@@ -142,7 +142,7 @@ export const withIds = (
 	}));
 
 // Outputs of all visible nodes of a tree, in tree order, with
-// groups replaced by their colors.
+// presets replaced by their colors.
 export const evaluateTree = (
 	nodes: PresetNode[],
 	input: NodeOutput,
@@ -154,7 +154,7 @@ export const evaluateTree = (
 			const nodeArgs = {...defaultArgs(def), ...args};
 			const output = applyDef(def, nodeArgs, token, input);
 
-			if (isGroupDef(def)) {
+			if (isPresetDef(def)) {
 				if (!isHidden) {
 					evaluateTree(
 						withIds(def.build(nodeArgs), id!),
@@ -196,9 +196,9 @@ export class Node {
 	output: NodeOutput = $derived(
 		applyDef(this.def, this.args, this.token, this.input)
 	);
-	// Colors of a group, keyed by `<group id>.<index>`.
+	// Colors of a preset, keyed by `<preset id>.<index>`.
 	generated: NodeOutputRecord = $derived.by(() =>
-		isGroupDef(this.def)
+		isPresetDef(this.def)
 			? evaluateTree(
 					withIds(this.def.build(this.args), this.id),
 					this.output
@@ -278,13 +278,13 @@ export const createNode = (
 	id?: string
 ) => new Node(type, isHidden, token, id);
 
-// Outputs of all visible nodes, in tree order, with groups
+// Outputs of all visible nodes, in tree order, with presets
 // replaced by their colors.
 export const collectOutputs = (
 	node: Node,
 	outputs: NodeOutputRecord = {}
 ) => {
-	if (isGroupDef(node.def)) {
+	if (isPresetDef(node.def)) {
 		if (!node.isHidden) {
 			Object.assign(outputs, node.generated);
 		}

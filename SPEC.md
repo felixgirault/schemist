@@ -65,7 +65,7 @@ src/
     color/                 Color model, conversions, parsing, formatting,
                            manipulation, contrast, simulation, naming
     definitions/nodes/     Node types (§6)
-    definitions/presets/   Presets (§7)
+    definitions/presets/   Presets (§5.4, §7)
     stores/                Reactive state, `.svelte.ts` modules (§8)
     packing/               Permalink encoding (§10)
     components/            UI (§11)
@@ -174,7 +174,7 @@ A class with reactive fields:
 | `parent`    | state    | Parent node, `undefined` for the root                                    |
 | `input`     | derived  | `parent.output`, or `[white, '']` for the root                           |
 | `output`    | derived  | `[def.apply(input color, args), generateName(token, color, input name)]` |
-| `generated` | derived  | Colors of a group (§5.4), `{}` for other nodes                           |
+| `generated` | derived  | Colors of a preset (§5.4), `{}` for other nodes                          |
 
 Operations: `addChild(child)` (detaches it from its previous
 parent first), `removeChild(child)`, `destroy()` (removes the
@@ -193,11 +193,12 @@ Shadow and Lightness ↔ Saturation keep all their args.
 `collectOutputs(root)` walks the tree depth-first, parent before
 children, and returns `{[id]: [color, name]}` for every
 **visible** node. Children of a hidden node are still collected.
-A group is replaced by its generated colors, which are all left
-out when the group is hidden.
+A preset is replaced by its generated colors, which are all left
+out when the preset is hidden.
 
 `evaluateTree(PresetNode[], input)` computes the same record from
-a plain tree, without `Node`s. Picker previews and groups use it.
+a plain tree, without `Node`s. Picker previews and presets use
+it.
 
 ### 5.3 Tree serialization (`#lib/presets.ts`)
 
@@ -205,34 +206,34 @@ a plain tree, without `Node`s. Picker previews and groups use it.
 is the plain form of a tree, used by presets, permalinks and
 history snapshots. `parseTree(PresetNode) → Node` merges given
 `args` over the type defaults, reuses `id` when set, and drops
-the children of groups; `serializeTree(Node) → PresetNode`
+the children of presets; `serializeTree(Node) → PresetNode`
 includes ids and omits empty tokens, args and children.
 Permalinks don't store ids.
 
-### 5.4 Groups
+### 5.4 Presets
 
-A group is a node whose colors are generated (ADR 4). Its
-definition (`GroupDef`) adds `build(args) → PresetNode[]` to a
+A preset is a node whose colors are generated (ADR 4). Its
+definition (`PresetDef`) adds `build(args) → PresetNode[]` to a
 regular one, and its `apply` returns the input unchanged.
 
-- The tree returned by `build` is evaluated on the group's
+- The tree returned by `build` is evaluated on the preset's
   output. It is derived, never stored: permalinks, storage and
-  history only hold the group's type and args.
-- Template nodes get ids `<group id>.<index>`, depth-first
+  history only hold the preset's type and args.
+- Template nodes get ids `<preset id>.<index>`, depth-first
   (`withIds`), which key the generated colors in outputs.
-- A group is named after its token, or after its parent when the
+- A preset is named after its token, or after its parent when the
   token is empty, so that `$` in the tokens of its colors refers
   to it.
-- A group has no children.
-- A template can contain groups. Their colors get ids
-  `<group id>.<index>.<index>`, and so on.
-- `ungroup(group)` replaces the group with
+- A preset has no children.
+- A template can contain presets. Their colors get ids
+  `<preset id>.<index>.<index>`, and so on.
+- `expandPreset(preset)` replaces the preset with
   `parseTree(build(args))`, in a single change. The new nodes
   keep the ids of the generated colors, so combination filters
-  carry over. `$` in their tokens is replaced by the group's
-  token if any, and they are all hidden if the group was. Groups
-  of the template become group nodes, which can be ungrouped in
-  turn. The root can't be ungrouped.
+  carry over. `$` in their tokens is replaced by the preset's
+  token if any, and they are all hidden if the preset was.
+  Presets of the template become preset nodes, which can be
+  expanded in turn. The root can't be expanded.
 
 ## 6. Node types
 
@@ -265,30 +266,30 @@ previews (`single`, `discrete`, `continuous`) and
 | `h`   | Hue                       | degrees 0–360 (180)                                        | Hue + degrees                          |
 | `clr` | Custom color              | color (`#ffc208`)                                          | The color argument, ignoring the input |
 
-Groups (§5.4) are registered in `defs` but not in `defList`, and
-are offered through presets:
+Presets (§5.4, §7) are node types too. They are registered in
+`defs`, but not in `defList`:
 
-| Type  | Label                  | Params (min–max, default)                       | Generates                                                                                                                             |
-| ----- | ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `stt` | States                 | amount % 0–50 (10)                              | Highlight `$ light` and Shadow `$ dark` of `amount`                                                                                   |
-| `spc` | Split complementary    | —                                               | `scl` `Left $ complementary`, `scr` `Right $ complementary`                                                                           |
-| `trd` | Triad                  | —                                               | `trl` `Left $ triad`, `trr` `Right $ triad`                                                                                           |
-| `ttd` | Tetrad                 | —                                               | `ttl` `Left $ tetrad`, `ttr` `Right $ tetrad`                                                                                         |
-| `sem` | Semantic colors        | —                                               | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                                 |
-| `smp` | Semantic color pairs   | —                                               | Semantic colors, each with a Contrasting child `On $`                                                                                 |
-| `lsc` | Scale                  | steps 1–10 (9)                                  | `steps` Lightness nodes of `round(100 × i / (steps + 1))`%, `i` in 1…steps, i.e. without black and white                              |
-| `ntl` | Neutral                | saturation % 0–100 (5)                          | Hidden Saturation `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                                |
-| `hrm` | Harmonies              | tetrad, triad, split complementary (all `true`) | The enabled harmonies, left ones then right ones                                                                                      |
-| `rnb` | Rainbow                | count 1–23 (11)                                 | `count` Hue nodes of `round(360 × i / (count + 1))`°, `i` in 1…count                                                                  |
-| `mtl` | Material tones light   | —                                               | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                                   |
-| `mtd` | Material tones dark    | —                                               | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                                    |
-| `mnl` | Material neutral light | —                                               | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline                  |
-| `mnd` | Material neutral dark  | —                                               | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                         |
-| `mal` | Material light         | —                                               | Hidden Saturation 40 `Primary` with a `mtl` group, hidden Complementary and Error branches each with a `mtl` group, and a `mnl` group |
-| `mad` | Material dark          | —                                               | Same structure with `mtd` and `mnd` groups                                                                                            |
-| `sch` | Schemist theme         | accents, semantics, neutrals (all `true`)       | The enabled sections: Triad left `Secondary` and right `Tertiary`, each with a `stt` group; a `smp` group; a `ntl` group              |
+| Type  | Label                  | Params (min–max, default)                       | Generates                                                                                                                                |
+| ----- | ---------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `stt` | States                 | amount % 0–50 (10)                              | Highlight `$ light` and Shadow `$ dark` of `amount`                                                                                      |
+| `spc` | Split complementary    | —                                               | `scl` `Left $ complementary`, `scr` `Right $ complementary`                                                                              |
+| `trd` | Triad                  | —                                               | `trl` `Left $ triad`, `trr` `Right $ triad`                                                                                              |
+| `ttd` | Tetrad                 | —                                               | `ttl` `Left $ tetrad`, `ttr` `Right $ tetrad`                                                                                            |
+| `sem` | Semantic colors        | —                                               | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                                    |
+| `smp` | Semantic color pairs   | —                                               | Semantic colors, each with a Contrasting child `On $`                                                                                    |
+| `lsc` | Scale                  | steps 1–10 (9)                                  | `steps` Lightness nodes of `round(100 × i / (steps + 1))`%, `i` in 1…steps, i.e. without black and white                                 |
+| `ntl` | Neutral                | saturation % 0–100 (5)                          | Hidden Saturation `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                                   |
+| `hrm` | Harmonies              | tetrad, triad, split complementary (all `true`) | The enabled harmonies, left ones then right ones                                                                                         |
+| `rnb` | Rainbow                | count 1–23 (11)                                 | `count` Hue nodes of `round(360 × i / (count + 1))`°, `i` in 1…count                                                                     |
+| `mtl` | Material tones light   | —                                               | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                                      |
+| `mtd` | Material tones dark    | —                                               | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                                       |
+| `mnl` | Material neutral light | —                                               | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline                     |
+| `mnd` | Material neutral dark  | —                                               | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                            |
+| `mal` | Material light         | —                                               | Hidden Saturation 40 `Primary` with a `mtl` preset, hidden Complementary and Error branches each with a `mtl` preset, and a `mnl` preset |
+| `mad` | Material dark          | —                                               | Same structure with `mtd` and `mnd` presets                                                                                              |
+| `sch` | Schemist theme         | accents, semantics, neutrals (all `true`)       | The enabled sections: Triad left `Secondary` and right `Tertiary`, each with a `stt` preset; a `smp` preset; a `ntl` preset              |
 
-Groups can contain groups, which are ungrouped in turn (§5.4).
+Presets can contain presets, which are expanded in turn (§5.4).
 
 Param kinds: `range` (integer slider), `color` (color picker,
 §11.3), `boolean` (toggle button, used by Harmonies and Schemist
@@ -297,16 +298,16 @@ each spans a whole row of the options form.
 
 ## 7. Presets
 
-Defined in `src/lib/definitions/presets/`, listed in `index.ts`.
-A preset is `{label, description?, nodes: PresetNode[]}`;
-applying it adds its nodes as children of the selected node. `$`
-in tokens refers to the parent's name.
+Presets (§5.4, §6) are defined in `src/lib/definitions/presets/`.
+Applying one adds a node of its type as a child of the selected
+node. `$` in tokens refers to the parent's name.
 
-Every preset is a single group of the same name (§6), listed in
-this order: States, Split complementary, Triad, Tetrad, Semantic
-colors, Semantic color pairs, Scale, Neutral, Harmonies, Rainbow,
-Material tones light and dark, Material neutral light and dark,
-Material light and dark, Schemist theme.
+`index.ts` lists them in display order: States, Split
+complementary, Triad, Tetrad, Semantic colors, Semantic color
+pairs, Scale, Neutral, Harmonies, Rainbow, Material tones light
+and dark, Material neutral light and dark, Material light and
+dark, Schemist theme. `definitions/nodes/index.ts` registers them
+in `defs` from that list.
 
 `src/lib/definitions/presets/presets.test.ts` snapshots the
 colors and names of every preset, which guards them against
@@ -531,28 +532,28 @@ compressing links is recorded in
 
 Each node shows its color and name, then actions:
 
-| Action     | Tooltip                                      | Effect                                                                    |
-| ---------- | -------------------------------------------- | ------------------------------------------------------------------------- |
-| Remove     | Remove this color and all of its derivatives | Not available on the root                                                 |
-| Visibility | Don't compare this color                     | Toggles `isHidden`                                                        |
-| Info       | Show color info                              | Hex, RGB, HSL and LCH values; name and hex of each color of a group       |
-| Options    | Tune this color                              | Parameter fields; open by default on the root only                        |
-| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root nor on groups |
-| Ungroup    | Turn into separate colors                    | Calls `ungroup` (§5.4); groups only, in place of Swap, not on the root    |
-| Add        | Add matching colors                          | Opens the child picker; not on groups                                     |
+| Action     | Tooltip                                      | Effect                                                                       |
+| ---------- | -------------------------------------------- | ---------------------------------------------------------------------------- |
+| Remove     | Remove this color and all of its derivatives | Not available on the root                                                    |
+| Visibility | Don't compare this color                     | Toggles `isHidden`                                                           |
+| Info       | Show color info                              | Hex, RGB, HSL and LCH values; name and hex of each color of a preset         |
+| Options    | Tune this color                              | Parameter fields; open by default on the root only                           |
+| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root nor on presets   |
+| Expand     | Turn into separate colors                    | Calls `expandPreset` (§5.4); presets only, in place of Swap, not on the root |
+| Add        | Add matching colors                          | Opens the child picker; not on presets                                       |
 
 Unavailable actions are hidden but keep their space, so buttons
 stay aligned across nodes.
 
 - The name is editable in place (Enter or blur commits). The hint
   reads "Insert parent color name with $." on child nodes, and
-  "Leave empty to use the parent's name." on groups.
+  "Leave empty to use the parent's name." on presets.
 - A root without children shows a "Start by adding matching
-  colors" call to action, unless it is a group.
-- A group's color bar shows its colors top to bottom, and fades
-  when the group is hidden.
+  colors" call to action, unless it is a preset.
+- A preset's color bar shows its colors top to bottom, and fades
+  when the preset is hidden.
 - Range fields show a gradient previewing the parameter's effect,
-  except on groups.
+  except on presets.
 
 ### 11.3 Color field
 
@@ -567,9 +568,9 @@ typed in.
 ### 11.4 Child picker
 
 A modal with two lists, each item previewed on the current color:
-**Color palettes** (presets, §7, previewed with `evaluateTree`,
-generated colors of groups included) and **Single colors** (node
-types, in `defList` order, §6).
+**Color palettes** (presets, §7, previewed with `evaluateTree`
+from their default args) and **Single colors** (node types, in
+`defList` order, §6).
 
 When changing a color's type, the modal is titled "Change color
 type" and only lists single colors, previewed on the parent's

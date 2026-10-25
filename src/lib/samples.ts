@@ -68,7 +68,7 @@ export const paramSamples = (
 		paramSample(def, args, paramName, color, i / (count - 1))
 	);
 
-// Visible colors of a preset, generated colors of groups
+// Visible colors of a tree, generated colors of presets
 // included.
 export const presetSamples = (
 	nodes: PresetNode[],

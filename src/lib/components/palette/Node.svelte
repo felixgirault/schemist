@@ -4,12 +4,12 @@
 	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
-	import {parseTree, ungroup} from '#lib/presets.js';
+	import {expandPreset} from '#lib/presets.js';
 	import {features} from '#lib/stores/features.svelte.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
 		createNode,
-		isGroupDef
+		isPresetDef
 	} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
 	import {discreteGradient} from '#lib/utils/css.js';
@@ -28,10 +28,10 @@
 	const optionsId = $derived(`${id}-options`);
 	const hasParent = $derived(!!parent);
 	const hasOptions = $derived(!!def.params.length);
-	const isGroup = $derived(isGroupDef(def));
-	// A group shows its colors, top to bottom.
+	const isPreset = $derived(isPresetDef(def));
+	// A preset shows its colors, top to bottom.
 	const outputStyle = $derived(
-		isGroup
+		isPreset
 			? `--outputs: ${discreteGradient(
 					Object.values(node.generated).map(
 						([color]) => color
@@ -46,7 +46,7 @@
 	let isPickingType = $state(false);
 
 	let hasHint = $derived(
-		!hasParent && !isGroup && !node.children.length
+		!hasParent && !isPreset && !node.children.length
 	);
 
 	const handleTokenFocus: EventHandler<
@@ -79,7 +79,7 @@
 </script>
 
 <article class:isHidden={node.isHidden}>
-	<div class="output" class:isGroup style={outputStyle}></div>
+	<div class="output" class:isPreset style={outputStyle}></div>
 
 	<div class="self">
 		<header>
@@ -106,7 +106,7 @@
 							Insert parent color name with $.
 							<br />
 						{/if}
-						{#if isGroup}
+						{#if isPreset}
 							Leave empty to use the parent's name.
 						{:else}
 							Leave empty to guess a name.
@@ -130,7 +130,7 @@
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
 				isSwappable={hasParent}
-				{isGroup}
+				{isPreset}
 				bind:isHidden={node.isHidden}
 				{hasOptions}
 				{hasHint}
@@ -140,7 +140,7 @@
 				onSwap={() => {
 					isPickingType = true;
 				}}
-				onUngroup={() => ungroup(node)}
+				onExpand={() => expandPreset(node)}
 				onRemove={() => node.destroy()}
 			/>
 		</header>
@@ -174,15 +174,9 @@
 	>
 		<ChildPicker
 			color={node.output[0]}
+			hasPresets
 			onAddNode={(type) => {
 				node.addChild(createNode(type));
-				isPickingChild = false;
-			}}
-			onAddPreset={(preset) => {
-				preset.nodes.forEach((tree) => {
-					node.addChild(parseTree(tree));
-				});
-
 				isPickingChild = false;
 			}}
 		/>
@@ -289,12 +283,12 @@
 		);
 	}
 
-	.output.isGroup {
+	.output.isPreset {
 		background: var(--outputs);
 	}
 
 	/* Stripes can't be drawn in several colors. */
-	.isHidden > .output.isGroup {
+	.isHidden > .output.isPreset {
 		opacity: 0.25;
 	}
 

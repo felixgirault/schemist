@@ -1,3 +1,4 @@
+import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 import harmonies from './harmonies';
 import materialDark from './materialDark';
 import materialLight from './materialLight';
@@ -34,4 +35,4 @@ export default [
 	materialLight,
 	materialDark,
 	schemist
-];
+] as PresetDef[];

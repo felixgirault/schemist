@@ -11,7 +11,7 @@
 		formatSchemistToHex
 	} from '#lib/color/formatting.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {isGroupDef} from '#lib/stores/nodes.svelte.js';
+	import {isPresetDef} from '#lib/stores/nodes.svelte.js';
 
 	interface Props {
 		id: string;
@@ -20,7 +20,7 @@
 
 	let {id, node}: Props = $props();
 
-	let isGroup = $derived(isGroupDef(node.def));
+	let isPreset = $derived(isPresetDef(node.def));
 	let hex = $derived(formatSchemistToHex(node.output[0]));
 	let rgb = $derived(schemistToRgb(node.output[0]));
 	let hsl = $derived(schemistToHsl(node.output[0]));
@@ -28,7 +28,7 @@
 </script>
 
 <section {id} popover class="form">
-	{#if isGroup}
+	{#if isPreset}
 		<table class="table--small">
 			<thead>
 				<tr>

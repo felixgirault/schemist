@@ -4,7 +4,7 @@
 	import RangeField from '#lib/components/forms/RangeField.svelte';
 	import {paramSamples} from '#lib/samples.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {isGroupDef} from '#lib/stores/nodes.svelte.js';
+	import {isPresetDef} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
@@ -35,8 +35,8 @@
 				unit={param.unit}
 				min={param.min}
 				max={param.max}
-				gradient={isGroupDef(def)
-					? // Groups output several colors, see ADR 4.
+				gradient={isPresetDef(def)
+					? // Presets output several colors, see ADR 4.
 						'transparent'
 					: (def.samples === 'continuous'
 							? continuousGradient

@@ -2,7 +2,7 @@ import type defs from '#lib/definitions/nodes/index.js';
 import type {Args, Node} from '#lib/stores/nodes.svelte.js';
 import {
 	createNode,
-	isGroupDef,
+	isPresetDef,
 	withIds
 } from '#lib/stores/nodes.svelte.js';
 
@@ -16,12 +16,6 @@ export type PresetNode = {
 	isHidden?: boolean;
 };
 
-export type Preset = {
-	label: string;
-	description?: string;
-	nodes: PresetNode[];
-};
-
 export const parseTree = (preset: PresetNode) => {
 	const {id, type, isHidden, token, args, children} = preset;
 	const node = createNode(type, isHidden, token, id);
@@ -30,8 +24,8 @@ export const parseTree = (preset: PresetNode) => {
 		Object.assign(node.args, args);
 	}
 
-	// Groups generate their colors, and can't have children.
-	if (children && !isGroupDef(node.def)) {
+	// Presets generate their colors, and can't have children.
+	if (children && !isPresetDef(node.def)) {
 		children.forEach((childPreset) => {
 			node.addChild(parseTree(childPreset));
 		});
@@ -46,19 +40,19 @@ const hideTree = (tree: PresetNode): PresetNode => ({
 	children: tree.children?.map(hideTree)
 });
 
-// Replaces a group with the plain nodes it builds, in a single
+// Replaces a preset with the plain nodes it builds, in a single
 // change. They keep the ids of the colors they generated, see
 // ADR 4.
-export const ungroup = (group: Node) => {
-	const {def, args, token, isHidden} = group;
+export const expandPreset = (preset: Node) => {
+	const {def, args, token, isHidden} = preset;
 
-	if (!group.parent || !isGroupDef(def)) {
+	if (!preset.parent || !isPresetDef(def)) {
 		return;
 	}
 
-	const trees = withIds(def.build(args), group.id).map(
+	const trees = withIds(def.build(args), preset.id).map(
 		(tree) => {
-			// `$` referred to the group, which is going away.
+			// `$` referred to the preset, which is going away.
 			const named =
 				token && tree.token
 					? {...tree, token: tree.token.replace('$', token)}
@@ -68,7 +62,7 @@ export const ungroup = (group: Node) => {
 		}
 	);
 
-	group.replaceWith(trees.map(parseTree));
+	preset.replaceWith(trees.map(parseTree));
 };
 
 export const serializeTree = (node: Node) => {
