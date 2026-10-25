@@ -115,15 +115,15 @@ Left split complementary): `lsc`, `rnb`, `hrm` and `ntl`.
 Every other preset becomes parametric too, so that any preset is
 inserted as a single node:
 
-| Preset                    | Params                                    |
-| ------------------------- | ----------------------------------------- |
-| States                    | amount % 0–50 (10), shared by both colors |
-| Schemist theme            | accents, semantics, neutrals (all `true`) |
-| Split complementary       | —                                         |
-| Triad, Tetrad             | —                                         |
-| Semantic colors and pairs | —                                         |
-| Material tones, neutral   | — (light and dark stay separate presets)  |
-| Material light, dark      | —                                         |
+| Preset                    | Params                                                |
+| ------------------------- | ----------------------------------------------------- |
+| States                    | amount % 0–50 (10), shared by both colors             |
+| Schemist theme            | secondary, tertiary, semantics, neutrals (all `true`) |
+| Split complementary       | —                                                     |
+| Triad, Tetrad             | —                                                     |
+| Semantic colors and pairs | —                                                     |
+| Material tones, neutral   | — (light and dark stay separate presets)              |
+| Material light, dark      | —                                                     |
 
 Presets without params still gather their colors into one node,
 which can be removed, hidden or expanded at once.

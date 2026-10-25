@@ -54,7 +54,7 @@ exports[`pack node Saturation 1`] = `"0@0122x32@s,,amount"`;
 
 exports[`pack node Scale 1`] = `"0@01229@lsc,,steps"`;
 
-exports[`pack node Schemist theme 1`] = `"0@016213141@sch,,accents,semantics,neutrals"`;
+exports[`pack node Schemist theme 1`] = `"0@01821314151@sch,,secondary,tertiary,semantics,neutrals"`;
 
 exports[`pack node Semantic color pairs 1`] = `"0@010@smp,"`;
 

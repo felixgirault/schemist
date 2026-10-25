@@ -269,25 +269,25 @@ previews (`single`, `discrete`, `continuous`) and
 Presets (§5.4, §7) are node types too. They are registered in
 `defs`, but not in `defList`:
 
-| Type  | Label                  | Params (min–max, default)                       | Generates                                                                                                                                |
-| ----- | ---------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `stt` | States                 | amount % 0–50 (10)                              | Highlight `$ light` and Shadow `$ dark` of `amount`                                                                                      |
-| `spc` | Split complementary    | —                                               | `scl` `Left $ complementary`, `scr` `Right $ complementary`                                                                              |
-| `trd` | Triad                  | —                                               | `trl` `Left $ triad`, `trr` `Right $ triad`                                                                                              |
-| `ttd` | Tetrad                 | —                                               | `ttl` `Left $ tetrad`, `ttr` `Right $ tetrad`                                                                                            |
-| `sem` | Semantic colors        | —                                               | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                                    |
-| `smp` | Semantic color pairs   | —                                               | Semantic colors, each with a Contrasting child `On $`                                                                                    |
-| `lsc` | Scale                  | steps 1–10 (9)                                  | `steps` Lightness nodes of `round(100 × i / (steps + 1))`%, `i` in 1…steps, i.e. without black and white                                 |
-| `ntl` | Neutral                | saturation % 0–100 (5)                          | Hidden Saturation `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                                   |
-| `hrm` | Harmonies              | tetrad, triad, split complementary (all `true`) | The enabled harmonies, left ones then right ones                                                                                         |
-| `rnb` | Rainbow                | count 1–23 (11)                                 | `count` Hue nodes of `round(360 × i / (count + 1))`°, `i` in 1…count                                                                     |
-| `mtl` | Material tones light   | —                                               | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                                      |
-| `mtd` | Material tones dark    | —                                               | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                                       |
-| `mnl` | Material neutral light | —                                               | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline                     |
-| `mnd` | Material neutral dark  | —                                               | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                            |
-| `mal` | Material light         | —                                               | Hidden Saturation 40 `Primary` with a `mtl` preset, hidden Complementary and Error branches each with a `mtl` preset, and a `mnl` preset |
-| `mad` | Material dark          | —                                               | Same structure with `mtd` and `mnd` presets                                                                                              |
-| `sch` | Schemist theme         | accents, semantics, neutrals (all `true`)       | The enabled sections: Triad left `Secondary` and right `Tertiary`, each with a `stt` preset; a `smp` preset; a `ntl` preset              |
+| Type  | Label                  | Params (min–max, default)                             | Generates                                                                                                                                |
+| ----- | ---------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `stt` | States                 | amount % 0–50 (10)                                    | Highlight `$ light` and Shadow `$ dark` of `amount`                                                                                      |
+| `spc` | Split complementary    | —                                                     | `scl` `Left $ complementary`, `scr` `Right $ complementary`                                                                              |
+| `trd` | Triad                  | —                                                     | `trl` `Left $ triad`, `trr` `Right $ triad`                                                                                              |
+| `ttd` | Tetrad                 | —                                                     | `ttl` `Left $ tetrad`, `ttr` `Right $ tetrad`                                                                                            |
+| `sem` | Semantic colors        | —                                                     | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                                    |
+| `smp` | Semantic color pairs   | —                                                     | Semantic colors, each with a Contrasting child `On $`                                                                                    |
+| `lsc` | Scale                  | steps 1–10 (9)                                        | `steps` Lightness nodes of `round(100 × i / (steps + 1))`%, `i` in 1…steps, i.e. without black and white                                 |
+| `ntl` | Neutral                | saturation % 0–100 (5)                                | Hidden Saturation `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                                   |
+| `hrm` | Harmonies              | tetrad, triad, split complementary (all `true`)       | The enabled harmonies, left ones then right ones                                                                                         |
+| `rnb` | Rainbow                | count 1–23 (11)                                       | `count` Hue nodes of `round(360 × i / (count + 1))`°, `i` in 1…count                                                                     |
+| `mtl` | Material tones light   | —                                                     | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                                      |
+| `mtd` | Material tones dark    | —                                                     | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                                       |
+| `mnl` | Material neutral light | —                                                     | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline                     |
+| `mnd` | Material neutral dark  | —                                                     | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                            |
+| `mal` | Material light         | —                                                     | Hidden Saturation 40 `Primary` with a `mtl` preset, hidden Complementary and Error branches each with a `mtl` preset, and a `mnl` preset |
+| `mad` | Material dark          | —                                                     | Same structure with `mtd` and `mnd` presets                                                                                              |
+| `sch` | Schemist theme         | secondary, tertiary, semantics, neutrals (all `true`) | The enabled sections: Triad left `Secondary`, Triad right `Tertiary`, each with a `stt` preset; a `smp` preset; a `ntl` preset           |
 
 Presets can contain presets, which are expanded in turn (§5.4).
 

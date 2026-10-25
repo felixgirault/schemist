@@ -12,8 +12,14 @@ export default {
 	params: [
 		{
 			type: 'boolean',
-			name: 'accents',
-			label: 'Secondary & tertiary',
+			name: 'secondary',
+			label: 'Secondary',
+			default: true
+		},
+		{
+			type: 'boolean',
+			name: 'tertiary',
+			label: 'Tertiary',
 			default: true
 		},
 		{
@@ -35,15 +41,19 @@ export default {
 	},
 	// States, semantic pairs and neutrals are presets of their own,
 	// which can be expanded in turn.
-	build({accents, semantics, neutrals}) {
+	build({secondary, tertiary, semantics, neutrals}) {
 		return [
-			...(accents
+			...(secondary
 				? [
 						{
 							type: triadLeft.type,
 							token: 'Secondary',
 							children: [{type: states.type}]
-						},
+						}
+					]
+				: []),
+			...(tertiary
+				? [
 						{
 							type: triadRight.type,
 							token: 'Tertiary',

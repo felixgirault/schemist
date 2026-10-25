@@ -43,8 +43,25 @@ test('schemist theme sections can be left out', () => {
 	const sample = (args: Record<string, boolean>) =>
 		presetSamples([{type: 'sch', args}], color);
 
-	expect(sample({accents: false, semantics: false})).toEqual(
-		presetSamples([{type: 'ntl'}], color)
+	expect(
+		sample({
+			secondary: false,
+			tertiary: false,
+			semantics: false
+		})
+	).toEqual(presetSamples([{type: 'ntl'}], color));
+
+	expect(
+		sample({
+			secondary: false,
+			semantics: false,
+			neutrals: false
+		})
+	).toEqual(
+		presetSamples(
+			[{type: 'trr', children: [{type: 'stt'}]}],
+			color
+		)
 	);
 
 	expect(sample({semantics: false, neutrals: false})).toEqual(
