@@ -131,7 +131,6 @@ exports[`preset Rainbow 1`] = `
 exports[`preset Scale 1`] = `
 [
   "#cc9933 Brand",
-  "#000000 Black",
   "#1f1402 Noir mystique",
   "#3c2b07 Secret passage",
   "#5a410f Pineapple",
@@ -141,7 +140,6 @@ exports[`preset Scale 1`] = `
   "#d6a139 Curry",
   "#f1bd5e Fizzy peach",
   "#fcdead Such a peach",
-  "#ffffff White",
 ]
 `;
 

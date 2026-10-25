@@ -265,10 +265,35 @@ previews (`single`, `discrete`, `continuous`) and
 | `h`   | Hue                       | degrees 0–360 (180)                                        | Hue + degrees                          |
 | `clr` | Custom color              | color (`#ffc208`)                                          | The color argument, ignoring the input |
 
+Groups (§5.4) are registered in `defs` but not in `defList`, and
+are offered through presets:
+
+| Type  | Label                  | Params (min–max, default)                       | Generates                                                                                                                             |
+| ----- | ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `stt` | States                 | amount % 0–50 (10)                              | Highlight `$ light` and Shadow `$ dark` of `amount`                                                                                   |
+| `spc` | Split complementary    | —                                               | `scl` `Left $ complementary`, `scr` `Right $ complementary`                                                                           |
+| `trd` | Triad                  | —                                               | `trl` `Left $ triad`, `trr` `Right $ triad`                                                                                           |
+| `ttd` | Tetrad                 | —                                               | `ttl` `Left $ tetrad`, `ttr` `Right $ tetrad`                                                                                         |
+| `sem` | Semantic colors        | —                                               | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                                 |
+| `smp` | Semantic color pairs   | —                                               | Semantic colors, each with a Contrasting child `On $`                                                                                 |
+| `lsc` | Scale                  | steps 1–10 (9)                                  | `steps` Lightness nodes of `round(100 × i / (steps + 1))`%, `i` in 1…steps, i.e. without black and white                              |
+| `ntl` | Neutral                | saturation % 0–100 (5)                          | Hidden Saturation `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                                |
+| `hrm` | Harmonies              | tetrad, triad, split complementary (all `true`) | The enabled harmonies, left ones then right ones                                                                                      |
+| `rnb` | Rainbow                | count 1–23 (11)                                 | `count` Hue nodes of `round(360 × i / (count + 1))`°, `i` in 1…count                                                                  |
+| `mtl` | Material tones light   | —                                               | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                                   |
+| `mtd` | Material tones dark    | —                                               | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                                    |
+| `mnl` | Material neutral light | —                                               | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline                  |
+| `mnd` | Material neutral dark  | —                                               | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                         |
+| `mal` | Material light         | —                                               | Hidden Saturation 40 `Primary` with a `mtl` group, hidden Complementary and Error branches each with a `mtl` group, and a `mnl` group |
+| `mad` | Material dark          | —                                               | Same structure with `mtd` and `mnd` groups                                                                                            |
+| `sch` | Schemist theme         | accents, semantics, neutrals (all `true`)       | The enabled sections: Triad left `Secondary` and right `Tertiary`, each with a `stt` group; a `smp` group; a `ntl` group              |
+
+Groups can contain groups, which are ungrouped in turn (§5.4).
+
 Param kinds: `range` (integer slider), `color` (color picker,
-§11.3), `boolean` (toggle button, built like the color blindness
-filters and spanning a whole row of the options form; no current
-type uses it).
+§11.3), `boolean` (toggle button, used by Harmonies and Schemist
+theme). Toggles are built like the color blindness filters, and
+each spans a whole row of the options form.
 
 ## 7. Presets
 
@@ -277,25 +302,15 @@ A preset is `{label, description?, nodes: PresetNode[]}`;
 applying it adds its nodes as children of the selected node. `$`
 in tokens refers to the parent's name.
 
-| Preset                 | Nodes                                                                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| States                 | Highlight `$ light`, Shadow `$ dark`                                                                                          |
-| Split complementary    | `scl`, `scr`                                                                                                                  |
-| Triad                  | `trl`, `trr`                                                                                                                  |
-| Tetrad                 | `ttl`, `ttr`                                                                                                                  |
-| Semantic colors        | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                         |
-| Semantic color pairs   | Semantic colors, each with a Contrasting child `On $`                                                                         |
-| Scale                  | Lightness 0, 10, …, 100                                                                                                       |
-| Neutral                | Hidden Saturation 5 `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                      |
-| Harmonies              | Left tetrad, left triad, split complementaries, right triad, right tetrad                                                     |
-| Rainbow                | Analogous steps 1–11                                                                                                          |
-| Material tones light   | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                           |
-| Material tones dark    | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                            |
-| Material neutral light | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline          |
-| Material neutral dark  | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                 |
-| Material light         | Hidden Saturation 40 `Primary` with light tones, hidden Complementary and Error branches with light tones, and light neutrals |
-| Material dark          | Same structure with dark tones and dark neutrals                                                                              |
-| Schemist theme         | Triad left `Secondary` and right `Tertiary` with States, Semantic color pairs, Neutral                                        |
+Every preset is a single group of the same name (§6), listed in
+this order: States, Split complementary, Triad, Tetrad, Semantic
+colors, Semantic color pairs, Scale, Neutral, Harmonies, Rainbow,
+Material tones light and dark, Material neutral light and dark,
+Material light and dark, Schemist theme.
+
+`src/lib/definitions/presets/presets.test.ts` snapshots the
+colors and names of every preset, which guards them against
+changes in the way they are built.
 
 ## 8. Application state
 

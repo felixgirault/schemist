@@ -1,17 +1,8 @@
-import contrasting from '#lib/definitions/nodes/contrasting.js';
+import semanticPairs from '#lib/definitions/nodes/semanticPairs.js';
 import type {Preset} from '#lib/presets.js';
-import semantics from './semantics';
 
 export default {
 	label: 'Semantic color pairs',
 	description: '',
-	nodes: semantics.nodes.map((node) => ({
-		...node,
-		children: [
-			{
-				type: contrasting.type,
-				token: 'On $'
-			}
-		]
-	}))
+	nodes: [{type: semanticPairs.type}]
 } satisfies Preset;

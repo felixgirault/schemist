@@ -3,7 +3,12 @@ import defs from '#lib/definitions/nodes/index.js';
 import {parseTree} from '#lib/presets.js';
 import {expect, test} from 'vitest';
 import type {NodeOutput} from './nodes.svelte';
-import {evaluateTree, remapArgs, withIds} from './nodes.svelte';
+import {
+	collectOutputs,
+	evaluateTree,
+	remapArgs,
+	withIds
+} from './nodes.svelte';
 
 test('setType keeps the node and its subtree', () => {
 	const tree = parseTree({
@@ -127,4 +132,66 @@ test('evaluateTree skips hidden nodes but not their children', () => {
 	expect(outputs).toEqual({
 		'n1.1': [defs.l.apply(grey, {amount: 20}), 'Dark Grey Red']
 	});
+});
+
+test('groups output their generated colors', () => {
+	const tree = parseTree({
+		type: 'clr',
+		token: 'Brand',
+		children: [{type: 'lsc', args: {steps: 3}}]
+	});
+
+	const [group] = tree.children;
+	const outputs = collectOutputs(tree);
+
+	expect(Object.keys(outputs)).toEqual([
+		tree.id,
+		`${group.id}.0`,
+		`${group.id}.1`,
+		`${group.id}.2`
+	]);
+
+	expect(outputs[`${group.id}.1`][0]).toEqual(
+		defs.l.apply(tree.output[0], {amount: 50})
+	);
+
+	group.args.steps = 2;
+	expect(Object.keys(collectOutputs(tree))).toHaveLength(3);
+
+	group.isHidden = true;
+	expect(Object.keys(collectOutputs(tree))).toEqual([tree.id]);
+});
+
+test('groups lend their name to their colors', () => {
+	const tree = parseTree({
+		type: 'clr',
+		token: 'Brand',
+		children: [
+			{type: 'hrm', args: {tetrad: false, triad: false}}
+		]
+	});
+
+	const [group] = tree.children;
+	const names = () =>
+		Object.values(group.generated).map(([, name]) => name);
+
+	expect(names()).toEqual([
+		'Left Brand complementary',
+		'Right Brand complementary'
+	]);
+
+	group.token = 'Accent';
+	expect(names()).toEqual([
+		'Left Accent complementary',
+		'Right Accent complementary'
+	]);
+});
+
+test('groups drop children', () => {
+	const tree = parseTree({
+		type: 'lsc',
+		children: [{type: 'l'}]
+	});
+
+	expect(tree.children).toEqual([]);
 });

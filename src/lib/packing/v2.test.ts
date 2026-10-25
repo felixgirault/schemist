@@ -25,6 +25,24 @@ test('colors are packed losslessly', () => {
 	expect(unpack(pack(tree))).toMatchObject(tree);
 });
 
+test('groups are packed with their args', () => {
+	const tree = {
+		type: color.type,
+		children: [
+			{type: 'lsc', args: {steps: 5}},
+			{
+				type: 'hrm',
+				args: {tetrad: false, triad: true, split: false}
+			}
+		]
+	};
+
+	expect(unpack(pack(tree))).toMatchObject(tree);
+	expect(outputHexes(unpack(pack(tree)))).toEqual(
+		outputHexes(tree)
+	);
+});
+
 test.each(Object.values(presets))(
 	'preset $label yields the same colors once unpacked',
 	({nodes}) => {
