@@ -71,37 +71,3 @@ exports[`pack node Tetrad 1`] = `"0@010@ttd,"`;
 exports[`pack node Triad 1`] = `"0@010@trd,"`;
 
 exports[`pack node Warning 1`] = `"0@010@wrn,"`;
-
-exports[`pack preset Harmonies 1`] = `"1@410,012230@clr,,color,ff0000,hrm"`;
-
-exports[`pack preset Material dark 1`] = `"1@410,012230@clr,,color,ff0000,mad"`;
-
-exports[`pack preset Material light 1`] = `"1@410,012230@clr,,color,ff0000,mal"`;
-
-exports[`pack preset Material neutral dark 1`] = `"1@410,012230@clr,,color,ff0000,mnd"`;
-
-exports[`pack preset Material neutral light 1`] = `"1@410,012230@clr,,color,ff0000,mnl"`;
-
-exports[`pack preset Material tones dark 1`] = `"1@410,012230@clr,,color,ff0000,mtd"`;
-
-exports[`pack preset Material tones light 1`] = `"1@410,012230@clr,,color,ff0000,mtl"`;
-
-exports[`pack preset Neutral 1`] = `"1@410,012230@clr,,color,ff0000,ntl"`;
-
-exports[`pack preset Rainbow 1`] = `"1@410,012230@clr,,color,ff0000,rnb"`;
-
-exports[`pack preset Scale 1`] = `"1@410,012230@clr,,color,ff0000,lsc"`;
-
-exports[`pack preset Schemist theme 1`] = `"1@410,012230@clr,,color,ff0000,sch"`;
-
-exports[`pack preset Semantic color pairs 1`] = `"1@410,012230@clr,,color,ff0000,smp"`;
-
-exports[`pack preset Semantic colors 1`] = `"1@410,012230@clr,,color,ff0000,sem"`;
-
-exports[`pack preset Split complementary 1`] = `"1@410,012230@clr,,color,ff0000,spc"`;
-
-exports[`pack preset States 1`] = `"1@410,012230@clr,,color,ff0000,stt"`;
-
-exports[`pack preset Tetrad 1`] = `"1@410,012230@clr,,color,ff0000,ttd"`;
-
-exports[`pack preset Triad 1`] = `"1@410,012230@clr,,color,ff0000,trd"`;

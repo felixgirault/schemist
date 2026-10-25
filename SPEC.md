@@ -631,12 +631,13 @@ but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
 
 Unit tests cover utils, color parsing, color deficiency
 simulation, the highlight temperature, packing (snapshots of
-every node type and preset, round trips, lossless colors and
-backward compatibility), permalinks (tokens with special
+every node type, presets included, round trips, lossless colors
+and backward compatibility), permalinks (tokens with special
 characters), tree serialization (ids), the undo history and the
-initial palette source (link, storage, random). There are no
-component or end-to-end tests. CI runs the unit tests only (not
-`check`, `lint` or `build`).
+initial palette source (link, storage, random), and the colors
+and names of every preset (snapshots). There are no component or
+end-to-end tests. CI runs the unit tests only (not `check`,
+`lint` or `build`).
 
 ## 13. Known issues and limits
 
