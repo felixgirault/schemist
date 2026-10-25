@@ -25,10 +25,6 @@
 	const hasParent = $derived(!!parent);
 	const hasOptions = $derived(!!def.params.length);
 
-	let isInfoOpen = $state(false);
-	// only the initial state depends on the node, then the user toggles it
-	// svelte-ignore state_referenced_locally
-	let areOptionsOpen = $state(!hasParent);
 	let isEditingToken = $state(false);
 	let isPickingChild = $state(false);
 
@@ -68,7 +64,7 @@
 		style="--output: {formatSchemist(node.output[0])};"
 	></div>
 
-	<div class="self" class:open={areOptionsOpen}>
+	<div class="self">
 		<header>
 			<div class="title">
 				<h3 class="name">
@@ -113,8 +109,6 @@
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
 				bind:isHidden={node.isHidden}
-				bind:isInfoOpen
-				bind:areOptionsOpen
 				{hasOptions}
 				{hasHint}
 				onPick={() => {
@@ -126,11 +120,9 @@
 			/>
 		</header>
 
-		{#if isInfoOpen}
-			<NodeInfo id={infoId} {node} />
-		{/if}
+		<NodeInfo id={infoId} {node} />
 
-		{#if hasOptions && areOptionsOpen}
+		{#if hasOptions}
 			<NodeOptions id={optionsId} {node} />
 		{/if}
 	</div>

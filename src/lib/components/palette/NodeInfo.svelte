@@ -25,7 +25,7 @@
 	let lch = $derived(schemistToLch(node.output[0]));
 </script>
 
-<section {id} class="form">
+<section {id} popover class="form">
 	<table class="table--small">
 		<thead>
 			<tr>
@@ -79,10 +79,6 @@
 </section>
 
 <style>
-	section {
-		margin-top: 0.5rem;
-	}
-
 	table {
 		margin-bottom: 0;
 	}

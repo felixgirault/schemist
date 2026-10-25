@@ -12,8 +12,6 @@
 		isHiddenId: string;
 		isRemovable: boolean;
 		isHidden: boolean;
-		isInfoOpen: boolean;
-		areOptionsOpen: boolean;
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
@@ -26,8 +24,6 @@
 		isHiddenId,
 		isRemovable,
 		isHidden = $bindable(),
-		isInfoOpen = $bindable(),
-		areOptionsOpen = $bindable(),
 		hasOptions,
 		hasHint,
 		onPick,
@@ -68,11 +64,7 @@
 		class="button button--icon"
 		type="button"
 		title="Show color info"
-		aria-controls={infoId}
-		aria-expanded={isInfoOpen}
-		onclick={() => {
-			isInfoOpen = !isInfoOpen;
-		}}
+		popovertarget={infoId}
 	>
 		<InfoIcon />
 	</button>
@@ -81,12 +73,8 @@
 		class="button button--icon"
 		type="button"
 		title="Tune this color"
-		aria-controls={optionsId}
-		aria-expanded={areOptionsOpen}
+		popovertarget={optionsId}
 		disabled={!hasOptions}
-		onclick={() => {
-			areOptionsOpen = !areOptionsOpen;
-		}}
 	>
 		<OptionsIcon />
 	</button>

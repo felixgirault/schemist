@@ -22,6 +22,7 @@
 
 <form
 	{id}
+	popover
 	class="form input-grid"
 	onsubmit={(event) => event.preventDefault()}
 >
@@ -58,8 +59,3 @@
 	{/each}
 </form>
 
-<style>
-	form {
-		margin-top: 0.5rem;
-	}
-</style>
