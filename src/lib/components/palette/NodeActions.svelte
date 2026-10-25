@@ -3,6 +3,7 @@
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
 	import SwapIcon from '#lib/components/icons/SwapIcon.svelte';
+	import UngroupIcon from '#lib/components/icons/UngroupIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';
@@ -13,11 +14,14 @@
 		isHiddenId: string;
 		isRemovable: boolean;
 		isSwappable: boolean;
+		// Groups can be ungrouped, but can't have children.
+		isGroup: boolean;
 		isHidden: boolean;
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
 		onSwap: () => void;
+		onUngroup: () => void;
 		onRemove: () => void;
 	}
 
@@ -27,11 +31,13 @@
 		isHiddenId,
 		isRemovable,
 		isSwappable,
+		isGroup,
 		isHidden = $bindable(),
 		hasOptions,
 		hasHint,
 		onPick,
 		onSwap,
+		onUngroup,
 		onRemove
 	}: Props = $props();
 
@@ -84,20 +90,33 @@
 		<OptionsIcon />
 	</button>
 
-	<button
-		class="button button--icon"
-		type="button"
-		title="Change this color's type"
-		disabled={!isSwappable}
-		onclick={onSwap}
-	>
-		<SwapIcon />
-	</button>
+	{#if isGroup}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Turn into separate colors"
+			disabled={!isRemovable}
+			onclick={onUngroup}
+		>
+			<UngroupIcon />
+		</button>
+	{:else}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Change this color's type"
+			disabled={!isSwappable}
+			onclick={onSwap}
+		>
+			<SwapIcon />
+		</button>
+	{/if}
 
 	<button
 		class="button button--icon button--hint"
 		type="button"
 		title="Add matching colors"
+		disabled={isGroup}
 		onclick={onPick}
 	>
 		<AddIcon />

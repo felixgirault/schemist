@@ -4,11 +4,15 @@
 	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
-	import {parseTree} from '#lib/presets.js';
+	import {parseTree, ungroup} from '#lib/presets.js';
 	import {features} from '#lib/stores/features.svelte.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {createNode} from '#lib/stores/nodes.svelte.js';
+	import {
+		createNode,
+		isGroupDef
+	} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
+	import {discreteGradient} from '#lib/utils/css.js';
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
@@ -24,12 +28,26 @@
 	const optionsId = $derived(`${id}-options`);
 	const hasParent = $derived(!!parent);
 	const hasOptions = $derived(!!def.params.length);
+	const isGroup = $derived(isGroupDef(def));
+	// A group shows its colors, top to bottom.
+	const outputStyle = $derived(
+		isGroup
+			? `--outputs: ${discreteGradient(
+					Object.values(node.generated).map(
+						([color]) => color
+					),
+					180
+				)};`
+			: `--output: ${formatSchemist(node.output[0])};`
+	);
 
 	let isEditingToken = $state(false);
 	let isPickingChild = $state(false);
 	let isPickingType = $state(false);
 
-	let hasHint = $derived(!hasParent && !node.children.length);
+	let hasHint = $derived(
+		!hasParent && !isGroup && !node.children.length
+	);
 
 	const handleTokenFocus: EventHandler<
 		FocusEvent,
@@ -61,10 +79,7 @@
 </script>
 
 <article class:isHidden={node.isHidden}>
-	<div
-		class="output"
-		style="--output: {formatSchemist(node.output[0])};"
-	></div>
+	<div class="output" class:isGroup style={outputStyle}></div>
 
 	<div class="self">
 		<header>
@@ -91,7 +106,11 @@
 							Insert parent color name with $.
 							<br />
 						{/if}
-						Leave empty to guess a name.
+						{#if isGroup}
+							Leave empty to use the parent's name.
+						{:else}
+							Leave empty to guess a name.
+						{/if}
 					</p>
 				{/if}
 
@@ -111,6 +130,7 @@
 				isHiddenId="{id}-check"
 				isRemovable={hasParent}
 				isSwappable={hasParent}
+				{isGroup}
 				bind:isHidden={node.isHidden}
 				{hasOptions}
 				{hasHint}
@@ -120,6 +140,7 @@
 				onSwap={() => {
 					isPickingType = true;
 				}}
+				onUngroup={() => ungroup(node)}
 				onRemove={() => node.destroy()}
 			/>
 		</header>
@@ -266,6 +287,15 @@
 			transparent 0 0.5ch,
 			var(--output) 0.5ch calc(0.5ch + 1px)
 		);
+	}
+
+	.output.isGroup {
+		background: var(--outputs);
+	}
+
+	/* Stripes can't be drawn in several colors. */
+	.isHidden > .output.isGroup {
+		opacity: 0.25;
 	}
 
 	.children {

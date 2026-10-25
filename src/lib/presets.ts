@@ -1,6 +1,10 @@
 import type defs from '#lib/definitions/nodes/index.js';
 import type {Args, Node} from '#lib/stores/nodes.svelte.js';
-import {createNode} from '#lib/stores/nodes.svelte.js';
+import {
+	createNode,
+	isGroupDef,
+	withIds
+} from '#lib/stores/nodes.svelte.js';
 
 export type PresetNode = {
 	// Only set when serializing a tree, to restore it as is.
@@ -26,13 +30,45 @@ export const parseTree = (preset: PresetNode) => {
 		Object.assign(node.args, args);
 	}
 
-	if (children) {
+	// Groups generate their colors, and can't have children.
+	if (children && !isGroupDef(node.def)) {
 		children.forEach((childPreset) => {
 			node.addChild(parseTree(childPreset));
 		});
 	}
 
 	return node;
+};
+
+const hideTree = (tree: PresetNode): PresetNode => ({
+	...tree,
+	isHidden: true,
+	children: tree.children?.map(hideTree)
+});
+
+// Replaces a group with the plain nodes it builds, in a single
+// change. They keep the ids of the colors they generated, see
+// ADR 4.
+export const ungroup = (group: Node) => {
+	const {def, args, token, isHidden} = group;
+
+	if (!group.parent || !isGroupDef(def)) {
+		return;
+	}
+
+	const trees = withIds(def.build(args), group.id).map(
+		(tree) => {
+			// `$` referred to the group, which is going away.
+			const named =
+				token && tree.token
+					? {...tree, token: tree.token.replace('$', token)}
+					: tree;
+
+			return isHidden ? hideTree(named) : named;
+		}
+	);
+
+	group.replaceWith(trees.map(parseTree));
 };
 
 export const serializeTree = (node: Node) => {

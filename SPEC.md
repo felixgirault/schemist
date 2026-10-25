@@ -163,22 +163,25 @@ Numbers are rounded to a `precision` (decimals, default 3).
 
 A class with reactive fields:
 
-| Field      | Kind     | Description                                                              |
-| ---------- | -------- | ------------------------------------------------------------------------ |
-| `id`       | readonly | `n<uid>`, unique per session                                             |
-| `def`      | raw      | Node type definition (§6), replaced by `setType`                         |
-| `token`    | state    | Name template (§4.4), `''` for an automatic name                         |
-| `isHidden` | state    | Excluded from combinations and exports, still drawn in the tree          |
-| `args`     | state    | Parameter values, initialized from the type's defaults                   |
-| `children` | state    | Child nodes, ordered                                                     |
-| `parent`   | state    | Parent node, `undefined` for the root                                    |
-| `input`    | derived  | `parent.output`, or `[white, '']` for the root                           |
-| `output`   | derived  | `[def.apply(input color, args), generateName(token, color, input name)]` |
+| Field       | Kind     | Description                                                              |
+| ----------- | -------- | ------------------------------------------------------------------------ |
+| `id`        | readonly | `n<uid>`, unique per session                                             |
+| `def`       | raw      | Node type definition (§6), replaced by `setType`                         |
+| `token`     | state    | Name template (§4.4), `''` for an automatic name                         |
+| `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree          |
+| `args`      | state    | Parameter values, initialized from the type's defaults                   |
+| `children`  | state    | Child nodes, ordered                                                     |
+| `parent`    | state    | Parent node, `undefined` for the root                                    |
+| `input`     | derived  | `parent.output`, or `[white, '']` for the root                           |
+| `output`    | derived  | `[def.apply(input color, args), generateName(token, color, input name)]` |
+| `generated` | derived  | Colors of a group (§5.4), `{}` for other nodes                           |
 
 Operations: `addChild(child)` (detaches it from its previous
 parent first), `removeChild(child)`, `destroy()` (removes the
 node and its subtree from its parent), `setType(type)` (changes
-the definition, keeping the id, token, visibility and children).
+the definition, keeping the id, token, visibility and children),
+`replaceWith(nodes)` (puts nodes in place of this one among its
+siblings).
 
 `setType` remaps args with `remapArgs`: an arg is kept when the
 new type has a param with the same name, kind and range, and
@@ -190,15 +193,46 @@ Shadow and Lightness ↔ Saturation keep all their args.
 `collectOutputs(root)` walks the tree depth-first, parent before
 children, and returns `{[id]: [color, name]}` for every
 **visible** node. Children of a hidden node are still collected.
+A group is replaced by its generated colors, which are all left
+out when the group is hidden.
+
+`evaluateTree(PresetNode[], input)` computes the same record from
+a plain tree, without `Node`s. Picker previews and groups use it.
 
 ### 5.3 Tree serialization (`#lib/presets.ts`)
 
 `PresetNode = {id?, type, token?, args?, children?, isHidden?}`
 is the plain form of a tree, used by presets, permalinks and
 history snapshots. `parseTree(PresetNode) → Node` merges given
-`args` over the type defaults and reuses `id` when set;
-`serializeTree(Node) → PresetNode` includes ids and omits empty
-tokens, args and children. Permalinks don't store ids.
+`args` over the type defaults, reuses `id` when set, and drops
+the children of groups; `serializeTree(Node) → PresetNode`
+includes ids and omits empty tokens, args and children.
+Permalinks don't store ids.
+
+### 5.4 Groups
+
+A group is a node whose colors are generated (ADR 4). Its
+definition (`GroupDef`) adds `build(args) → PresetNode[]` to a
+regular one, and its `apply` returns the input unchanged.
+
+- The tree returned by `build` is evaluated on the group's
+  output. It is derived, never stored: permalinks, storage and
+  history only hold the group's type and args.
+- Template nodes get ids `<group id>.<index>`, depth-first
+  (`withIds`), which key the generated colors in outputs.
+- A group is named after its token, or after its parent when the
+  token is empty, so that `$` in the tokens of its colors refers
+  to it.
+- A group has no children.
+- A template can contain groups. Their colors get ids
+  `<group id>.<index>.<index>`, and so on.
+- `ungroup(group)` replaces the group with
+  `parseTree(build(args))`, in a single change. The new nodes
+  keep the ids of the generated colors, so combination filters
+  carry over. `$` in their tokens is replaced by the group's
+  token if any, and they are all hidden if the group was. Groups
+  of the template become group nodes, which can be ungrouped in
+  turn. The root can't be ungrouped.
 
 ## 6. Node types
 
@@ -232,7 +266,9 @@ previews (`single`, `discrete`, `continuous`) and
 | `clr` | Custom color              | color (`#ffc208`)                                          | The color argument, ignoring the input |
 
 Param kinds: `range` (integer slider), `color` (color picker,
-§11.3), `boolean` (checkbox; no current type uses it).
+§11.3), `boolean` (toggle button, built like the color blindness
+filters and spanning a whole row of the options form; no current
+type uses it).
 
 ## 7. Presets
 
@@ -480,20 +516,28 @@ compressing links is recorded in
 
 Each node shows its color and name, then actions:
 
-| Action     | Tooltip                                      | Effect                                                      |
-| ---------- | -------------------------------------------- | ----------------------------------------------------------- |
-| Remove     | Remove this color and all of its derivatives | Not available on the root                                   |
-| Visibility | Don't compare this color                     | Toggles `isHidden`                                          |
-| Info       | Show color info                              | Hex, RGB, HSL and LCH values                                |
-| Options    | Tune this color                              | Parameter fields; open by default on the root only          |
-| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root |
-| Add        | Add matching colors                          | Opens the child picker                                      |
+| Action     | Tooltip                                      | Effect                                                                    |
+| ---------- | -------------------------------------------- | ------------------------------------------------------------------------- |
+| Remove     | Remove this color and all of its derivatives | Not available on the root                                                 |
+| Visibility | Don't compare this color                     | Toggles `isHidden`                                                        |
+| Info       | Show color info                              | Hex, RGB, HSL and LCH values; name and hex of each color of a group       |
+| Options    | Tune this color                              | Parameter fields; open by default on the root only                        |
+| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root nor on groups |
+| Ungroup    | Turn into separate colors                    | Calls `ungroup` (§5.4); groups only, in place of Swap, not on the root    |
+| Add        | Add matching colors                          | Opens the child picker; not on groups                                     |
+
+Unavailable actions are hidden but keep their space, so buttons
+stay aligned across nodes.
 
 - The name is editable in place (Enter or blur commits). The hint
-  reads "Insert parent color name with $." on child nodes.
+  reads "Insert parent color name with $." on child nodes, and
+  "Leave empty to use the parent's name." on groups.
 - A root without children shows a "Start by adding matching
-  colors" call to action.
-- Range fields show a gradient previewing the parameter's effect.
+  colors" call to action, unless it is a group.
+- A group's color bar shows its colors top to bottom, and fades
+  when the group is hidden.
+- Range fields show a gradient previewing the parameter's effect,
+  except on groups.
 
 ### 11.3 Color field
 
@@ -508,7 +552,8 @@ typed in.
 ### 11.4 Child picker
 
 A modal with two lists, each item previewed on the current color:
-**Color palettes** (presets, §7) and **Single colors** (node
+**Color palettes** (presets, §7, previewed with `evaluateTree`,
+generated colors of groups included) and **Single colors** (node
 types, in `defList` order, §6).
 
 When changing a color's type, the modal is titled "Change color

@@ -1,0 +1,227 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`preset Harmonies 1`] = `
+[
+  "#cc9933 Brand",
+  "#ef70b0 Left Brand tetrad",
+  "#d379e5 Left Brand triad",
+  "#a391f5 Left Brand complementary",
+  "#43b0df Right Brand complementary",
+  "#36b7be Right Brand triad",
+  "#40bb98 Right Brand tetrad",
+]
+`;
+
+exports[`preset Material dark 1`] = `
+[
+  "#cc9933 Brand",
+  "#dac49e Primary",
+  "#372c19 On Primary",
+  "#524329 Primary container",
+  "#ede1cc On Primary container",
+  "#b7c8e4 Complementary",
+  "#202e46 On Complementary",
+  "#334666 Complementary container",
+  "#dbe3f2 On Complementary container",
+  "#e3bcba Error",
+  "#432424 On Error",
+  "#633838 Error container",
+  "#f2dddc On Error container",
+  "#181613 Surface",
+  "#e5e2de On surface",
+  "#4a453e Surface variant",
+  "#cbc6bd On surface variant",
+  "#979085 Outline",
+]
+`;
+
+exports[`preset Material light 1`] = `
+[
+  "#cc9933 Brand",
+  "#6e5b3a Primary",
+  "#ffffff On Primary",
+  "#ede1cc Primary container",
+  "#1c150a On Primary container",
+  "#465e87 Complementary",
+  "#ffffff On Complementary",
+  "#dbe3f2 Complementary container",
+  "#0e1625 On Complementary container",
+  "#824d4c Error",
+  "#ffffff On Error",
+  "#f2dddc Error container",
+  "#231010 On Error container",
+  "#fcfcfc Surface",
+  "#181613 On surface",
+  "#e5e2de Surface variant",
+  "#4a453e On surface variant",
+  "#7d766b Outline",
+]
+`;
+
+exports[`preset Material neutral dark 1`] = `
+[
+  "#cc9933 Brand",
+  "#181613 Surface",
+  "#e5e2de On surface",
+  "#4a453e Surface variant",
+  "#cbc6bd On surface variant",
+  "#979085 Outline",
+]
+`;
+
+exports[`preset Material neutral light 1`] = `
+[
+  "#cc9933 Brand",
+  "#fcfcfc Surface",
+  "#181613 On surface",
+  "#e5e2de Surface variant",
+  "#4a453e On surface variant",
+  "#7d766b Outline",
+]
+`;
+
+exports[`preset Material tones dark 1`] = `
+[
+  "#cc9933 Brand",
+  "#f1bd5e Brand",
+  "#3c2b07 On Brand",
+  "#5a410f Brand container",
+  "#fcdead On Brand container",
+]
+`;
+
+exports[`preset Material tones light 1`] = `
+[
+  "#cc9933 Brand",
+  "#785817 Brand",
+  "#ffffff On Brand",
+  "#fcdead Brand container",
+  "#1f1402 On Brand container",
+]
+`;
+
+exports[`preset Neutral 1`] = `
+[
+  "#cc9933 Brand",
+  "#f9f9f9 Neutral white",
+  "#d6d4d1 Neutral light",
+  "#7a7771 Neutral",
+  "#242220 Neutral dark",
+  "#020201 Neutral black",
+]
+`;
+
+exports[`preset Rainbow 1`] = `
+[
+  "#cc9933 Brand",
+  "#a7aa33 Martian",
+  "#68ba59 Lost golfer",
+  "#40bb98 Macau",
+  "#36b7be Glassmith",
+  "#43b0df Thalassophile",
+  "#74a2f2 Fennel flower",
+  "#a391f5 Cold lips",
+  "#d379e5 Fake love",
+  "#ef70b0 Pop that gum",
+  "#f1797a Salmon poké bowl",
+  "#e98547 Flamenco",
+]
+`;
+
+exports[`preset Scale 1`] = `
+[
+  "#cc9933 Brand",
+  "#000000 Black",
+  "#1f1402 Noir mystique",
+  "#3c2b07 Secret passage",
+  "#5a410f Pineapple",
+  "#785817 Coffee adept",
+  "#977020 Puma",
+  "#b6882a Gothic gold",
+  "#d6a139 Curry",
+  "#f1bd5e Fizzy peach",
+  "#fcdead Such a peach",
+  "#ffffff White",
+]
+`;
+
+exports[`preset Schemist theme 1`] = `
+[
+  "#cc9933 Brand",
+  "#d379e5 Secondary",
+  "#e4a2ed Secondary light",
+  "#be51d6 Secondary dark",
+  "#36b7be Tertiary",
+  "#49d4da Tertiary light",
+  "#2b99a1 Tertiary dark",
+  "#58aaed Info",
+  "#042036 On Info",
+  "#68ba59 Success",
+  "#10240c On Success",
+  "#e98547 Warning",
+  "#321503 On Warning",
+  "#f1797a Error",
+  "#3b0a0e On Error",
+  "#f9f9f9 Neutral white",
+  "#d6d4d1 Neutral light",
+  "#7a7771 Neutral",
+  "#242220 Neutral dark",
+  "#020201 Neutral black",
+]
+`;
+
+exports[`preset Semantic color pairs 1`] = `
+[
+  "#cc9933 Brand",
+  "#58aaed Info",
+  "#042036 On Info",
+  "#68ba59 Success",
+  "#10240c On Success",
+  "#e98547 Warning",
+  "#321503 On Warning",
+  "#f1797a Error",
+  "#3b0a0e On Error",
+]
+`;
+
+exports[`preset Semantic colors 1`] = `
+[
+  "#cc9933 Brand",
+  "#58aaed Info",
+  "#68ba59 Success",
+  "#e98547 Warning",
+  "#f1797a Error",
+]
+`;
+
+exports[`preset Split complementary 1`] = `
+[
+  "#cc9933 Brand",
+  "#a391f5 Left Brand complementary",
+  "#43b0df Right Brand complementary",
+]
+`;
+
+exports[`preset States 1`] = `
+[
+  "#cc9933 Brand",
+  "#eab44d Brand light",
+  "#ae7f27 Brand dark",
+]
+`;
+
+exports[`preset Tetrad 1`] = `
+[
+  "#cc9933 Brand",
+  "#ef70b0 Left Brand tetrad",
+  "#40bb98 Right Brand tetrad",
+]
+`;
+
+exports[`preset Triad 1`] = `
+[
+  "#cc9933 Brand",
+  "#d379e5 Left Brand triad",
+  "#36b7be Right Brand triad",
+]
+`;
