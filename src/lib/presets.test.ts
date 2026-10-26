@@ -1,8 +1,14 @@
 import {pack, unpack} from '#lib/packing/index.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
+import {collectOutputs} from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
 import type {PresetNode} from './presets';
-import {changedArg, parseTree, serializeTree} from './presets';
+import {
+	changedArg,
+	parseTree,
+	serializeTree,
+	expandPreset
+} from './presets';
 
 test('serialized trees are restored with the same ids', () => {
 	const tree = parseTree({
@@ -90,4 +96,104 @@ test('keeps changed types in permalinks', () => {
 	expect(child.type).toBe('s');
 	expect(child.args).toEqual({amount: 50});
 	expect(child.children).toHaveLength(1);
+});
+
+test('a preset arg change can merge with the next one', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'lsc'}]
+	});
+	const previous = snapshot(tree);
+	const [preset] = tree.children;
+
+	preset.args.steps = 5;
+	expect(changedArg(previous, snapshot(tree))).toBe(
+		`${preset.id}.steps`
+	);
+});
+
+test('expandPreset puts the generated nodes in place of the preset', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [
+			{type: 'l'},
+			{type: 'lsc', args: {steps: 3}},
+			{type: 'h'}
+		]
+	});
+	const [first, preset, last] = tree.children;
+	const outputs = collectOutputs(tree);
+	const previous = snapshot(tree);
+
+	expandPreset(preset);
+
+	expect(tree.children.map(({id}) => id)).toEqual([
+		first.id,
+		`${preset.id}.0`,
+		`${preset.id}.1`,
+		`${preset.id}.2`,
+		last.id
+	]);
+
+	expect(tree.children[1].parent).toBe(tree);
+	expect(preset.parent).toBeUndefined();
+	expect(collectOutputs(tree)).toEqual(outputs);
+
+	// Structural change, so it is a step of its own.
+	expect(changedArg(previous, snapshot(tree))).toBeUndefined();
+});
+
+test('expandPreset keeps the name and visibility of the preset', () => {
+	const tree = parseTree({
+		type: 'clr',
+		token: 'Brand',
+		children: [
+			{
+				type: 'hrm',
+				token: 'Accent',
+				isHidden: true,
+				args: {tetrad: false, triad: false}
+			}
+		]
+	});
+
+	expandPreset(tree.children[0]);
+
+	expect(
+		tree.children.map(({token, isHidden}) => [token, isHidden])
+	).toEqual([
+		['Left Accent complementary', true],
+		['Right Accent complementary', true]
+	]);
+});
+
+test('expandPreset ignores other nodes', () => {
+	const tree = parseTree({
+		type: 'lsc',
+		children: [{type: 'l'}]
+	});
+
+	expandPreset(tree);
+	expect(tree.def.type).toBe('lsc');
+});
+
+test('expandPreset turns nested presets into presets', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'mal'}]
+	});
+	const outputs = collectOutputs(tree);
+
+	expandPreset(tree.children[0]);
+
+	const [primary] = tree.children;
+	expect(primary.children.map(({def}) => def.type)).toEqual([
+		'mtl',
+		'cmp',
+		'neg',
+		'mnl'
+	]);
+
+	// Nested colors keep their ids, e.g. `n1.1.0`.
+	expect(collectOutputs(tree)).toEqual(outputs);
 });

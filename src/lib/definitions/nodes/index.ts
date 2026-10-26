@@ -1,3 +1,4 @@
+import presets from '#lib/definitions/presets/index.js';
 import type {NodeDef} from '#lib/stores/nodes.svelte.js';
 import analogous from './analogous';
 import color from './color';
@@ -19,7 +20,8 @@ import triadLeft from './triadLeft';
 import triadRight from './triadRight';
 import warning from './warning';
 
-export default {
+// Typed explicitly, as presets build trees of these types.
+const defs: Record<string, NodeDef> = {
 	[analogous.type]: analogous,
 	[complementary.type]: complementary,
 	[contrasting.type]: contrasting,
@@ -38,8 +40,14 @@ export default {
 	[tetradRight.type]: tetradRight,
 	[triadLeft.type]: triadLeft,
 	[triadRight.type]: triadRight,
-	[warning.type]: warning
+	[warning.type]: warning,
+	// Presets, listed in their own module rather than in `defList`.
+	...Object.fromEntries(
+		presets.map((preset) => [preset.type, preset])
+	)
 };
+
+export default defs;
 
 export const defList = [
 	analogous,

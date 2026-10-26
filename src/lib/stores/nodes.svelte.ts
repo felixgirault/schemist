@@ -3,6 +3,7 @@ import nearestColor from '#lib/color/nearest.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import defs from '#lib/definitions/nodes/index.js';
+import type {PresetNode} from '#lib/presets.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
 import {sentenceCase} from '#lib/utils/strings.js';
@@ -48,6 +49,15 @@ export type NodeDef = {
 	samples: SampleType;
 	apply: (color: SchemistColor, args: Args) => SchemistColor;
 };
+
+// A node whose colors are generated from a template tree, see
+// ADR 4. Its own `apply` leaves the input unchanged.
+export type PresetDef = NodeDef & {
+	build: (args: Args) => PresetNode[];
+};
+
+export const isPresetDef = (def: NodeDef): def is PresetDef =>
+	'build' in def;
 
 export type NodeOutput = [color: SchemistColor, name: string];
 export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
@@ -98,6 +108,77 @@ export const generateName = (
 			: token
 		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
+// A preset is named after its parent unless it has a token, so
+// that `$` in the tokens of its colors still makes sense.
+const applyDef = (
+	def: NodeDef,
+	args: Args,
+	token: string,
+	[color, name]: NodeOutput
+): NodeOutput => {
+	const output = def.apply(color, args);
+
+	return [
+		output,
+		isPresetDef(def) && !token
+			? name
+			: generateName(token, output, name)
+	];
+};
+
+// Gives ids to template nodes, depth-first, so that generated
+// colors keep them once expanded.
+export const withIds = (
+	nodes: PresetNode[],
+	prefix: string,
+	counter = {next: 0}
+): PresetNode[] =>
+	nodes.map(({children, ...node}) => ({
+		...node,
+		id: `${prefix}.${counter.next++}`,
+		...(children && {
+			children: withIds(children, prefix, counter)
+		})
+	}));
+
+// Outputs of all visible nodes of a tree, in tree order, with
+// presets replaced by their colors.
+export const evaluateTree = (
+	nodes: PresetNode[],
+	input: NodeOutput,
+	outputs: NodeOutputRecord = {}
+) => {
+	nodes.forEach(
+		({id, type, token = '', args, isHidden, children}) => {
+			const def = defs[type];
+			const nodeArgs = {...defaultArgs(def), ...args};
+			const output = applyDef(def, nodeArgs, token, input);
+
+			if (isPresetDef(def)) {
+				if (!isHidden) {
+					evaluateTree(
+						withIds(def.build(nodeArgs), id!),
+						output,
+						outputs
+					);
+				}
+
+				return;
+			}
+
+			if (!isHidden) {
+				outputs[id!] = output;
+			}
+
+			if (children) {
+				evaluateTree(children, output, outputs);
+			}
+		}
+	);
+
+	return outputs;
+};
+
 const defaultInput: NodeOutput = [parseColor('#fff')[1]!, ''];
 
 export class Node {
@@ -112,15 +193,18 @@ export class Node {
 	input: NodeOutput = $derived(
 		this.parent?.output ?? defaultInput
 	);
-	output: NodeOutput = $derived.by(() => {
-		const color = this.def.apply(this.input[0], this.args);
-		const name = generateName(
-			this.token,
-			color,
-			this.input[1]
-		);
-		return [color, name];
-	});
+	output: NodeOutput = $derived(
+		applyDef(this.def, this.args, this.token, this.input)
+	);
+	// Colors of a preset, keyed by `<preset id>.<index>`.
+	generated: NodeOutputRecord = $derived.by(() =>
+		isPresetDef(this.def)
+			? evaluateTree(
+					withIds(this.def.build(this.args), this.id),
+					this.output
+				)
+			: {}
+	);
 
 	constructor(
 		type: keyof typeof defs,
@@ -161,6 +245,30 @@ export class Node {
 	destroy() {
 		this.parent?.removeChild(this);
 	}
+
+	// Puts the given nodes in place of this one among its
+	// siblings.
+	replaceWith(nodes: Node[]) {
+		const parent = this.parent;
+
+		if (!parent) {
+			return;
+		}
+
+		nodes.forEach((node) => {
+			node.parent?.removeChild(node);
+			node.parent = parent;
+		});
+
+		const i = parent.children.indexOf(this);
+		parent.children = [
+			...parent.children.slice(0, i),
+			...nodes,
+			...parent.children.slice(i + 1)
+		];
+
+		this.parent = undefined;
+	}
 }
 
 export const createNode = (
@@ -170,12 +278,17 @@ export const createNode = (
 	id?: string
 ) => new Node(type, isHidden, token, id);
 
-// Outputs of all visible nodes, in tree order.
+// Outputs of all visible nodes, in tree order, with presets
+// replaced by their colors.
 export const collectOutputs = (
 	node: Node,
 	outputs: NodeOutputRecord = {}
 ) => {
-	if (!node.isHidden) {
+	if (isPresetDef(node.def)) {
+		if (!node.isHidden) {
+			Object.assign(outputs, node.generated);
+		}
+	} else if (!node.isHidden) {
 		outputs[node.id] = node.output;
 	}
 

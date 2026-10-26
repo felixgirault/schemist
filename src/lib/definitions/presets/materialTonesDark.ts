@@ -1,38 +1,28 @@
 import lightness from '#lib/definitions/nodes/lightness.js';
-import type {Preset} from '#lib/presets.js';
+import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+
+const tones = [
+	['$', 80],
+	['On $', 20],
+	['$ container', 30],
+	['On $ container', 90]
+] as const;
 
 // @see https://m3.material.io/styles/color/the-color-system/tokens
 export default {
+	type: 'mtd',
 	label: 'Material tones dark',
 	description: 'Tone variations for dark themes',
-	nodes: [
-		{
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return tones.map(([token, amount]) => ({
 			type: lightness.type,
-			token: '$',
-			args: {
-				amount: 80
-			}
-		},
-		{
-			type: lightness.type,
-			token: 'On $',
-			args: {
-				amount: 20
-			}
-		},
-		{
-			type: lightness.type,
-			token: '$ container',
-			args: {
-				amount: 30
-			}
-		},
-		{
-			type: lightness.type,
-			token: 'On $ container',
-			args: {
-				amount: 90
-			}
-		}
-	]
-} satisfies Preset;
+			token,
+			args: {amount}
+		}));
+	}
+} satisfies PresetDef;

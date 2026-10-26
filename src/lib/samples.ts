@@ -1,9 +1,12 @@
-import defs from '#lib/definitions/nodes/index.js';
 import type {PresetNode} from '#lib/presets.js';
 import type {
 	Args,
 	NodeDef,
 	Param
+} from '#lib/stores/nodes.svelte.js';
+import {
+	evaluateTree,
+	withIds
 } from '#lib/stores/nodes.svelte.js';
 import {range} from '#lib/utils/generators.js';
 import {interval} from '#lib/utils/math.js';
@@ -65,37 +68,12 @@ export const paramSamples = (
 		paramSample(def, args, paramName, color, i / (count - 1))
 	);
 
-export const presetSample = (
-	def: NodeDef,
-	color: SchemistColor,
-	args?: Args
-) =>
-	def.apply(
-		color,
-		Object.fromEntries(
-			def.params.map(({name, default: d}) => [
-				name,
-				args && name in args ? args[name] : d
-			])
-		)
-	);
-
+// Visible colors of a tree, generated colors of presets
+// included.
 export const presetSamples = (
 	nodes: PresetNode[],
 	color: SchemistColor
 ) =>
-	nodes.flatMap(({type, args, children, isHidden}) => {
-		const def = defs[type];
-		const sample = presetSample(def, color, args);
-		const samples: SchemistColor[] = [];
-
-		if (!isHidden) {
-			samples.push(sample);
-		}
-
-		if (children) {
-			samples.push(...presetSamples(children, sample));
-		}
-
-		return samples;
-	});
+	Object.values(
+		evaluateTree(withIds(nodes, 'sample'), [color, ''])
+	).map(([sample]) => sample);

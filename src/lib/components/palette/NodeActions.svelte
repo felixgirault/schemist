@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AddIcon from '#lib/components/icons/AddIcon.svelte';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import ExpandIcon from '#lib/components/icons/ExpandIcon.svelte';
 	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
 	import SwapIcon from '#lib/components/icons/SwapIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
@@ -13,11 +14,14 @@
 		isHiddenId: string;
 		isRemovable: boolean;
 		isSwappable: boolean;
+		// Presets can be expanded, but can't have children.
+		isPreset: boolean;
 		isHidden: boolean;
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
 		onSwap: () => void;
+		onExpand: () => void;
 		onRemove: () => void;
 	}
 
@@ -27,11 +31,13 @@
 		isHiddenId,
 		isRemovable,
 		isSwappable,
+		isPreset,
 		isHidden = $bindable(),
 		hasOptions,
 		hasHint,
 		onPick,
 		onSwap,
+		onExpand,
 		onRemove
 	}: Props = $props();
 
@@ -84,20 +90,33 @@
 		<OptionsIcon />
 	</button>
 
-	<button
-		class="button button--icon"
-		type="button"
-		title="Change this color's type"
-		disabled={!isSwappable}
-		onclick={onSwap}
-	>
-		<SwapIcon />
-	</button>
+	{#if isPreset}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Turn into separate colors"
+			disabled={!isRemovable}
+			onclick={onExpand}
+		>
+			<ExpandIcon />
+		</button>
+	{:else}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Change this color's type"
+			disabled={!isSwappable}
+			onclick={onSwap}
+		>
+			<SwapIcon />
+		</button>
+	{/if}
 
 	<button
 		class="button button--icon button--hint"
 		type="button"
 		title="Add matching colors"
+		disabled={isPreset}
 		onclick={onPick}
 	>
 		<AddIcon />
