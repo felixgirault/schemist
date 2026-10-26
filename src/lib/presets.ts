@@ -19,6 +19,15 @@ export type PresetNode = {
 	isHidden?: boolean;
 };
 
+// A tree whose ids are all set, once serialized or numbered.
+export type IdentifiedPresetNode = Omit<
+	PresetNode,
+	'id' | 'children'
+> & {
+	id: string;
+	children?: IdentifiedPresetNode[];
+};
+
 export const parseTree = (preset: PresetNode) => {
 	const {id, type, isHidden, token, args, children} = preset;
 	const node = createNode(type, isHidden, token, id);
@@ -70,7 +79,7 @@ export const expandPreset = (preset: Node) => {
 
 export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
-	const data: PresetNode = {
+	const data: IdentifiedPresetNode = {
 		id: node.id,
 		type: node.def.type,
 		isHidden: node.isHidden

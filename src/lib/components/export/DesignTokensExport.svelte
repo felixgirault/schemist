@@ -25,9 +25,9 @@
 
 	let json = $derived({
 		'Colors': {
-			'$description': `Build with Schemist (${permalink(
-				palette.root
-			)})`,
+			'$description': palette.root
+				? `Build with Schemist (${permalink(palette.root)})`
+				: 'Build with Schemist',
 			...tokens
 		}
 	});

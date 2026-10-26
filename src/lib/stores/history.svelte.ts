@@ -1,20 +1,24 @@
 import {pack} from '#lib/packing/index.js';
 import {storePalette} from '#lib/palette.js';
-import type {PresetNode} from '#lib/presets.js';
+import type {
+	IdentifiedPresetNode,
+	PresetNode
+} from '#lib/presets.js';
 import {
 	changedArg,
 	parseTree,
 	serializeTree
 } from '#lib/presets.js';
 import {presetQuery} from '#lib/routing.js';
+import type {Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {debounce} from '#lib/utils/functions.js';
 import {History} from '#lib/utils/history.svelte.js';
 import {goto} from '$app/navigation';
 import {untrack} from 'svelte';
 
-const read = () =>
-	$state.snapshot(serializeTree(palette.root)) as PresetNode;
+const read = (root: Node) =>
+	$state.snapshot(serializeTree(root));
 
 const syncUrl = (snapshot: PresetNode) =>
 	goto(location.pathname + presetQuery(snapshot), {
@@ -31,7 +35,7 @@ const persist = debounce((snapshot: PresetNode) => {
 }, 300);
 
 // Every change of the palette is recorded, see ADR 2.
-export const history = new History<PresetNode>({
+export const history = new History<IdentifiedPresetNode>({
 	restore: (snapshot) => {
 		palette.root = parseTree(snapshot);
 	},
@@ -41,8 +45,8 @@ export const history = new History<PresetNode>({
 
 // The URL shows the palette right away, but storage only changes
 // on edits, so opening a link keeps the stored palette.
-export const startHistory = () => {
-	const snapshot = read();
+export const startHistory = (root: Node) => {
+	const snapshot = read(root);
 	history.reset(snapshot);
 	syncUrl(snapshot);
 };
@@ -50,7 +54,7 @@ export const startHistory = () => {
 $effect.root(() => {
 	$effect(() => {
 		if (palette.root) {
-			const snapshot = read();
+			const snapshot = read(palette.root);
 			untrack(() => history.record(snapshot));
 		}
 	});

@@ -11,8 +11,9 @@ import {
 import {clamp} from '#lib/utils/math.js';
 
 class Palette {
-	// set when the palette mounts, before anything reads it
-	root = $state<Node>(undefined!);
+	// Set when the palette mounts, as it is read from the URL or
+	// storage.
+	root = $state<Node>();
 	outputs = $derived(
 		this.root ? collectOutputs(this.root) : {}
 	);

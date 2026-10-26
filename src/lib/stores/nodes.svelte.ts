@@ -3,7 +3,10 @@ import nearestColor from '#lib/color/nearest.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import defs from '#lib/definitions/nodes/index.js';
-import type {PresetNode} from '#lib/presets.js';
+import type {
+	IdentifiedPresetNode,
+	PresetNode
+} from '#lib/presets.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
 import {sentenceCase} from '#lib/utils/strings.js';
@@ -198,7 +201,7 @@ export const withIds = (
 	nodes: PresetNode[],
 	prefix: string,
 	counter = {next: 0}
-): PresetNode[] =>
+): IdentifiedPresetNode[] =>
 	nodes.map(({children, ...node}) => ({
 		...node,
 		id: `${prefix}.${counter.next++}`,
@@ -210,7 +213,7 @@ export const withIds = (
 // Outputs of all visible nodes of a tree, in tree order, with
 // presets replaced by their colors.
 export const evaluateTree = (
-	nodes: PresetNode[],
+	nodes: IdentifiedPresetNode[],
 	input: NodeOutput,
 	outputs: NodeOutputRecord = {}
 ) => {
@@ -223,7 +226,7 @@ export const evaluateTree = (
 			if (isPresetDef(def)) {
 				if (!isHidden) {
 					evaluateTree(
-						withIds(def.build(nodeArgs), id!),
+						withIds(def.build(nodeArgs), id),
 						output,
 						outputs
 					);
@@ -233,7 +236,7 @@ export const evaluateTree = (
 			}
 
 			if (!isHidden) {
-				outputs[id!] = output;
+				outputs[id] = output;
 			}
 
 			if (children) {

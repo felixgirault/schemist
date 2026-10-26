@@ -112,9 +112,10 @@ to them narrow on the param type.
   `tree.ts`. "Preset" only refers to parametric presets.
 - `withIds` and `serializeTree` return nodes whose ids are set,
   recursively, so `evaluateTree` needs no assertion.
-- `parseTree` validates what it gets, as it is fed by URLs and
-  storage: unknown types throw, and only args matching a param of
-  the type are kept.
+- Unpacking validates what it gets, as it is the only way in from
+  URLs and storage: unknown types throw, and only args of known
+  params with valid values are kept. Trees built in code are
+  checked by the compiler instead.
 - `palette.root` is typed `Node | undefined`.
 
 ### Layers
@@ -155,8 +156,8 @@ to them narrow on the param type.
 1. `NodeType` and the typed registry.
 2. Typed arguments, starting with a prototype of `defineNode` on
    two definitions to check that the registry accepts them.
-3. Ids typed after `withIds` and `serializeTree`, validation in
-   `parseTree`, and an optional `palette.root`.
+3. Ids typed after `withIds` and `serializeTree`, validation of
+   unpacked trees, and an optional `palette.root`.
 4. Rename `PresetNode` and `presets.ts`.
 5. Move domain code to `#lib/model/`, and the history effect to
    `startHistory`.
