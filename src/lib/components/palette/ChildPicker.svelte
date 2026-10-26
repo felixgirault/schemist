@@ -10,6 +10,7 @@
 		sample,
 		samples
 	} from '#lib/samples.js';
+	import type {NodeType} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
@@ -18,10 +19,10 @@
 	interface Props {
 		// Color on which samples are computed.
 		color: SchemistColor;
-		selectedType?: string;
+		selectedType?: NodeType;
 		// Presets can't replace a type, see ADR 4.
 		hasPresets?: boolean;
-		onAddNode: (type: string) => void;
+		onAddNode: (type: NodeType) => void;
 	}
 
 	let {color, selectedType, hasPresets, onAddNode}: Props =

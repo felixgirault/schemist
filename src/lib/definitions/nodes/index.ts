@@ -1,5 +1,9 @@
-import presets from '#lib/definitions/presets/index.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {presetDefs} from '#lib/definitions/presets/index.js';
+import type {
+	ColorType,
+	NodeDef,
+	NodeType
+} from '#lib/stores/nodes.svelte.js';
 import analogous from './analogous';
 import color from './color';
 import complementary from './complementary';
@@ -20,8 +24,8 @@ import triadLeft from './triadLeft';
 import triadRight from './triadRight';
 import warning from './warning';
 
-// Typed explicitly, as presets build trees of these types.
-const defs: Record<string, NodeDef> = {
+// Typed against the list of types, so that none is missing.
+const colorDefs: {[T in ColorType]: NodeDef & {type: T}} = {
 	[analogous.type]: analogous,
 	[complementary.type]: complementary,
 	[contrasting.type]: contrasting,
@@ -40,12 +44,17 @@ const defs: Record<string, NodeDef> = {
 	[tetradRight.type]: tetradRight,
 	[triadLeft.type]: triadLeft,
 	[triadRight.type]: triadRight,
-	[warning.type]: warning,
-	// Presets, listed in their own module rather than in `defList`.
-	...Object.fromEntries(
-		presets.map((preset) => [preset.type, preset])
-	)
+	[warning.type]: warning
 };
+
+// Presets are listed in their own module rather than in `defList`.
+const defs: {[T in NodeType]: NodeDef} = {
+	...colorDefs,
+	...presetDefs
+};
+
+export const isNodeType = (type: string): type is NodeType =>
+	Object.hasOwn(defs, type);
 
 export default defs;
 

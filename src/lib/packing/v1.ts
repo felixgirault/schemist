@@ -1,7 +1,7 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import defs from '#lib/definitions/nodes/index.js';
+import defs, {isNodeType} from '#lib/definitions/nodes/index.js';
 import type {PresetNode} from '#lib/presets.js';
 import type {Args, Param} from '#lib/stores/nodes.svelte.js';
 
@@ -156,6 +156,11 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 			.map((v) => parseInt(v, 16));
 
 		const type = index[data.shift() as number];
+
+		if (!isNodeType(type)) {
+			throw new Error(`Unknown node type \`${type}\`.`);
+		}
+
 		const token = index[data.shift() as number];
 		const argCount = data.shift() as number;
 		const argEntries: [number, number][] = [];

@@ -8,6 +8,50 @@ import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
 import {sentenceCase} from '#lib/utils/strings.js';
 
+// Codes of node types, which are stored in permalinks, so they
+// must never change.
+export type ColorType =
+	| 'anl'
+	| 'clr'
+	| 'cmp'
+	| 'ctr'
+	| 'h'
+	| 'hlt'
+	| 'inf'
+	| 'l'
+	| 'neg'
+	| 'pos'
+	| 's'
+	| 'scl'
+	| 'scr'
+	| 'sdw'
+	| 'trl'
+	| 'trr'
+	| 'ttl'
+	| 'ttr'
+	| 'wrn';
+
+export type PresetType =
+	| 'hrm'
+	| 'lsc'
+	| 'mad'
+	| 'mal'
+	| 'mnd'
+	| 'mnl'
+	| 'mtd'
+	| 'mtl'
+	| 'ntl'
+	| 'rnb'
+	| 'sch'
+	| 'smp'
+	| 'sem'
+	| 'spc'
+	| 'stt'
+	| 'trd'
+	| 'ttd';
+
+export type NodeType = ColorType | PresetType;
+
 export type SampleType = 'single' | 'discrete' | 'continuous';
 
 export type BooleanParam = {
@@ -41,7 +85,7 @@ export type Args = {
 };
 
 export type NodeDef = {
-	type: string;
+	type: NodeType;
 	label: string;
 	argsLabel?: (args: Args) => string;
 	description?: string;
@@ -53,6 +97,7 @@ export type NodeDef = {
 // A node whose colors are generated from a template tree, see
 // ADR 4. Its own `apply` leaves the input unchanged.
 export type PresetDef = NodeDef & {
+	type: PresetType;
 	build: (args: Args) => PresetNode[];
 };
 
@@ -207,7 +252,7 @@ export class Node {
 	);
 
 	constructor(
-		type: keyof typeof defs,
+		type: NodeType,
 		isHidden = false,
 		token = '',
 		id = `n${uid()}`
@@ -221,7 +266,7 @@ export class Node {
 
 	// Keeps the id, token, visibility and children, so that the
 	// change is recorded as a single history step.
-	setType(type: keyof typeof defs) {
+	setType(type: NodeType) {
 		const def = defs[type];
 		this.args = remapArgs(this.def, def, this.args);
 		this.def = def;
@@ -272,7 +317,7 @@ export class Node {
 }
 
 export const createNode = (
-	type: keyof typeof defs,
+	type: NodeType,
 	isHidden = false,
 	token = '',
 	id?: string

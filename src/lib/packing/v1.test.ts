@@ -43,3 +43,9 @@ test('unpack tokens packed before separators were escaped', () => {
 		args: {amount: 40}
 	});
 });
+
+test('refuse unknown node types', () => {
+	expect(() => unpack('0@0122x28@zzz,100%,amount')).toThrow(
+		'Unknown node type `zzz`.'
+	);
+});

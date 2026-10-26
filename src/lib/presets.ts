@@ -1,5 +1,8 @@
-import type defs from '#lib/definitions/nodes/index.js';
-import type {Args, Node} from '#lib/stores/nodes.svelte.js';
+import type {
+	Args,
+	Node,
+	NodeType
+} from '#lib/stores/nodes.svelte.js';
 import {
 	createNode,
 	isPresetDef,
@@ -9,7 +12,7 @@ import {
 export type PresetNode = {
 	// Only set when serializing a tree, to restore it as is.
 	id?: string;
-	type: keyof typeof defs;
+	type: NodeType;
 	token?: string;
 	args?: Args;
 	children?: PresetNode[];
@@ -69,7 +72,7 @@ export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
 	const data: PresetNode = {
 		id: node.id,
-		type: node.def.type as keyof typeof defs,
+		type: node.def.type,
 		isHidden: node.isHidden
 	};
 
