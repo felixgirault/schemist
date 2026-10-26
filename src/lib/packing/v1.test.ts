@@ -1,7 +1,7 @@
 import {parseColor} from '#lib/color/parsing.js';
+import defs from '#lib/definitions/index.js';
 import color from '#lib/definitions/nodes/color.js';
-import defs from '#lib/definitions/nodes/index.js';
-import {defaultArgs} from '#lib/stores/nodes.svelte.js';
+import {defaultArgs} from '#lib/model/definitions.js';
 import {expect, test} from 'vitest';
 import {pack, unpack} from './v1';
 
@@ -41,5 +41,21 @@ test('unpack tokens packed before separators were escaped', () => {
 		type: 'l',
 		token: '100%',
 		args: {amount: 40}
+	});
+});
+
+test('refuse unknown node types', () => {
+	expect(() => unpack('0@0122x28@zzz,100%,amount')).toThrow(
+		'Unknown node type `zzz`.'
+	);
+});
+
+test('drop args of unknown params', () => {
+	expect(unpack('0@0142x293x2a@l,100%,amount,foo')).toEqual({
+		type: 'l',
+		token: '100%',
+		isHidden: false,
+		args: {amount: 41},
+		children: []
 	});
 });

@@ -1,4 +1,7 @@
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+import type {
+	PresetDef,
+	PresetType
+} from '#lib/model/definitions.js';
 import harmonies from './harmonies';
 import materialDark from './materialDark';
 import materialLight from './materialLight';
@@ -17,22 +20,27 @@ import states from './states';
 import tetrad from './tetrad';
 import triad from './triad';
 
-export default [
-	states,
-	splitComplementary,
-	triad,
-	tetrad,
-	semantics,
-	semanticPairs,
-	scale,
-	neutral,
-	harmonies,
-	rainbow,
-	materialTonesLight,
-	materialTonesDark,
-	materialNeutralLight,
-	materialNeutralDark,
-	materialLight,
-	materialDark,
-	schemist
-] as PresetDef[];
+// In display order.
+export const presetDefs: {
+	[T in PresetType]: PresetDef & {type: T};
+} = {
+	[states.type]: states,
+	[splitComplementary.type]: splitComplementary,
+	[triad.type]: triad,
+	[tetrad.type]: tetrad,
+	[semantics.type]: semantics,
+	[semanticPairs.type]: semanticPairs,
+	[scale.type]: scale,
+	[neutral.type]: neutral,
+	[harmonies.type]: harmonies,
+	[rainbow.type]: rainbow,
+	[materialTonesLight.type]: materialTonesLight,
+	[materialTonesDark.type]: materialTonesDark,
+	[materialNeutralLight.type]: materialNeutralLight,
+	[materialNeutralDark.type]: materialNeutralDark,
+	[materialLight.type]: materialLight,
+	[materialDark.type]: materialDark,
+	[schemist.type]: schemist
+};
+
+export default Object.values(presetDefs);

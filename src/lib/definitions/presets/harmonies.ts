@@ -1,9 +1,9 @@
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+import {definePreset} from '#lib/model/definitions.js';
 import splitComplementary from './splitComplementary';
 import tetrad from './tetrad';
 import triad from './triad';
 
-export default {
+export default definePreset({
 	type: 'hrm',
 	label: 'Harmonies',
 	description: 'Color harmonies of your choice',
@@ -41,7 +41,7 @@ export default {
 				[args.split, splitComplementary]
 			] as const
 		).flatMap(([isEnabled, preset]) =>
-			isEnabled ? [preset.build()] : []
+			isEnabled ? [preset.build({})] : []
 		);
 
 		return [
@@ -49,4 +49,4 @@ export default {
 			...pairs.reverse().map(([, right]) => right)
 		];
 	}
-} satisfies PresetDef;
+});

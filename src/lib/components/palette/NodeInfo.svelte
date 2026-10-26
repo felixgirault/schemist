@@ -10,8 +10,8 @@
 		formatRgb,
 		formatSchemistToHex
 	} from '#lib/color/formatting.js';
+	import {isPresetDef} from '#lib/model/definitions.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {isPresetDef} from '#lib/stores/nodes.svelte.js';
 
 	interface Props {
 		id: string;
@@ -21,10 +21,10 @@
 	let {id, node}: Props = $props();
 
 	let isPreset = $derived(isPresetDef(node.def));
-	let hex = $derived(formatSchemistToHex(node.output[0]));
-	let rgb = $derived(schemistToRgb(node.output[0]));
-	let hsl = $derived(schemistToHsl(node.output[0]));
-	let lch = $derived(schemistToLch(node.output[0]));
+	let hex = $derived(formatSchemistToHex(node.output.color));
+	let rgb = $derived(schemistToRgb(node.output.color));
+	let hsl = $derived(schemistToHsl(node.output.color));
+	let lch = $derived(schemistToLch(node.output.color));
 </script>
 
 <section {id} popover class="form">
@@ -38,7 +38,7 @@
 			</thead>
 
 			<tbody>
-				{#each Object.entries(node.generated) as [colorId, [color, name]] (colorId)}
+				{#each Object.entries(node.generated) as [colorId, { color, name }] (colorId)}
 					<tr>
 						<td>{name}</td>
 						<td>{formatSchemistToHex(color)}</td>

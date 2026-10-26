@@ -1,185 +1,29 @@
-import {formatSchemistToHex} from '#lib/color/formatting.js';
-import nearestColor from '#lib/color/nearest.js';
-import {parseColor} from '#lib/color/parsing.js';
-import type {SchemistColor} from '#lib/color/types.js';
-import defs from '#lib/definitions/nodes/index.js';
-import type {PresetNode} from '#lib/presets.js';
+import defs from '#lib/definitions/index.js';
+import type {
+	Args,
+	NodeDef,
+	NodeType
+} from '#lib/model/definitions.js';
+import {
+	defaultArgs,
+	isPresetDef,
+	remapArgs
+} from '#lib/model/definitions.js';
+import type {
+	IdentifiedNodeData,
+	NodeData,
+	NodeOutput,
+	NodeOutputRecord
+} from '#lib/model/tree.js';
+import {
+	applyDef,
+	defaultInput,
+	evaluateTree,
+	hideTree,
+	withIds
+} from '#lib/model/tree.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
-import {sentenceCase} from '#lib/utils/strings.js';
-
-export type SampleType = 'single' | 'discrete' | 'continuous';
-
-export type BooleanParam = {
-	type: 'boolean';
-	name: string;
-	label: string;
-	default: boolean;
-};
-
-export type ColorParam = {
-	type: 'color';
-	name: string;
-	label: string;
-	default: SchemistColor;
-};
-
-export type RangeParam = {
-	type: 'range';
-	name: string;
-	label: string;
-	unit?: string;
-	min: number;
-	max: number;
-	default: number;
-};
-
-export type Param = BooleanParam | ColorParam | RangeParam;
-
-export type Args = {
-	[name: string]: any;
-};
-
-export type NodeDef = {
-	type: string;
-	label: string;
-	argsLabel?: (args: Args) => string;
-	description?: string;
-	params: Param[];
-	samples: SampleType;
-	apply: (color: SchemistColor, args: Args) => SchemistColor;
-};
-
-// A node whose colors are generated from a template tree, see
-// ADR 4. Its own `apply` leaves the input unchanged.
-export type PresetDef = NodeDef & {
-	build: (args: Args) => PresetNode[];
-};
-
-export const isPresetDef = (def: NodeDef): def is PresetDef =>
-	'build' in def;
-
-export type NodeOutput = [color: SchemistColor, name: string];
-export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
-
-export const defaultArgs = (def: NodeDef) =>
-	Object.fromEntries(
-		def.params.map(({name, default: d}) => [name, d])
-	);
-
-const isSameParam = (a: Param, b: Param) =>
-	a.type === b.type &&
-	(a.type !== 'range' ||
-		(b.type === 'range' &&
-			a.min === b.min &&
-			a.max === b.max));
-
-// Types share param names with different meanings (e.g. the
-// `amount` of a lightness or of a highlight), so args are only
-// kept when the new type has the exact same param, see ADR 3.
-export const remapArgs = (
-	from: NodeDef,
-	to: NodeDef,
-	args: Args
-): Args =>
-	Object.fromEntries(
-		to.params.map((param) => {
-			const previous = from.params.find(
-				({name}) => name === param.name
-			);
-
-			return [
-				param.name,
-				previous && isSameParam(previous, param)
-					? args[param.name]
-					: param.default
-			];
-		})
-	);
-
-export const generateName = (
-	token: string,
-	color: SchemistColor,
-	parentColorName?: string
-) =>
-	token
-		? parentColorName
-			? token.replace('$', parentColorName)
-			: token
-		: sentenceCase(nearestColor(formatSchemistToHex(color)));
-
-// A preset is named after its parent unless it has a token, so
-// that `$` in the tokens of its colors still makes sense.
-const applyDef = (
-	def: NodeDef,
-	args: Args,
-	token: string,
-	[color, name]: NodeOutput
-): NodeOutput => {
-	const output = def.apply(color, args);
-
-	return [
-		output,
-		isPresetDef(def) && !token
-			? name
-			: generateName(token, output, name)
-	];
-};
-
-// Gives ids to template nodes, depth-first, so that generated
-// colors keep them once expanded.
-export const withIds = (
-	nodes: PresetNode[],
-	prefix: string,
-	counter = {next: 0}
-): PresetNode[] =>
-	nodes.map(({children, ...node}) => ({
-		...node,
-		id: `${prefix}.${counter.next++}`,
-		...(children && {
-			children: withIds(children, prefix, counter)
-		})
-	}));
-
-// Outputs of all visible nodes of a tree, in tree order, with
-// presets replaced by their colors.
-export const evaluateTree = (
-	nodes: PresetNode[],
-	input: NodeOutput,
-	outputs: NodeOutputRecord = {}
-) => {
-	nodes.forEach(
-		({id, type, token = '', args, isHidden, children}) => {
-			const def = defs[type];
-			const nodeArgs = {...defaultArgs(def), ...args};
-			const output = applyDef(def, nodeArgs, token, input);
-
-			if (isPresetDef(def)) {
-				if (!isHidden) {
-					evaluateTree(
-						withIds(def.build(nodeArgs), id!),
-						output,
-						outputs
-					);
-				}
-
-				return;
-			}
-
-			if (!isHidden) {
-				outputs[id!] = output;
-			}
-
-			if (children) {
-				evaluateTree(children, output, outputs);
-			}
-		}
-	);
-
-	return outputs;
-};
-
-const defaultInput: NodeOutput = [parseColor('#fff')[1]!, ''];
 
 export class Node {
 	readonly id: string;
@@ -188,8 +32,10 @@ export class Node {
 	token = $state('');
 	isHidden = $state(false);
 	args: Args = $state({});
-	children: Node[] = $state([]);
-	parent?: Node = $state();
+	// Only changed through the tree methods, which keep both ends
+	// of a link in sync.
+	#children: Node[] = $state([]);
+	#parent?: Node = $state();
 	input: NodeOutput = $derived(
 		this.parent?.output ?? defaultInput
 	);
@@ -207,7 +53,7 @@ export class Node {
 	);
 
 	constructor(
-		type: keyof typeof defs,
+		type: NodeType,
 		isHidden = false,
 		token = '',
 		id = `n${uid()}`
@@ -219,60 +65,80 @@ export class Node {
 		this.args = defaultArgs(this.def);
 	}
 
+	get children(): readonly Node[] {
+		return this.#children;
+	}
+
+	get parent() {
+		return this.#parent;
+	}
+
 	// Keeps the id, token, visibility and children, so that the
 	// change is recorded as a single history step.
-	setType(type: keyof typeof defs) {
+	setType(type: NodeType) {
 		const def = defs[type];
+
+		// Presets generate their colors, and can't have children.
+		if (isPresetDef(def) && this.#children.length) {
+			throw new Error(
+				"A node with children can't be a preset."
+			);
+		}
+
 		this.args = remapArgs(this.def, def, this.args);
 		this.def = def;
 	}
 
 	addChild(child: Node) {
-		child.parent?.removeChild(child);
-		child.parent = this;
-		this.children.push(child);
+		if (isPresetDef(this.def)) {
+			throw new Error("A preset can't have children.");
+		}
+
+		child.#parent?.removeChild(child);
+		child.#parent = this;
+		this.#children.push(child);
 	}
 
 	removeChild(child: Node) {
-		const i = this.children.indexOf(child);
+		const i = this.#children.indexOf(child);
 
 		if (i >= 0) {
-			this.children = withoutIndex(this.children, i);
-			child.parent = undefined;
+			this.#children = withoutIndex(this.#children, i);
+			child.#parent = undefined;
 		}
 	}
 
 	destroy() {
-		this.parent?.removeChild(this);
+		this.#parent?.removeChild(this);
 	}
 
 	// Puts the given nodes in place of this one among its
 	// siblings.
 	replaceWith(nodes: Node[]) {
-		const parent = this.parent;
+		const parent = this.#parent;
 
 		if (!parent) {
 			return;
 		}
 
 		nodes.forEach((node) => {
-			node.parent?.removeChild(node);
-			node.parent = parent;
+			node.#parent?.removeChild(node);
+			node.#parent = parent;
 		});
 
-		const i = parent.children.indexOf(this);
-		parent.children = [
-			...parent.children.slice(0, i),
+		const i = parent.#children.indexOf(this);
+		parent.#children = [
+			...parent.#children.slice(0, i),
 			...nodes,
-			...parent.children.slice(i + 1)
+			...parent.#children.slice(i + 1)
 		];
 
-		this.parent = undefined;
+		this.#parent = undefined;
 	}
 }
 
 export const createNode = (
-	type: keyof typeof defs,
+	type: NodeType,
 	isHidden = false,
 	token = '',
 	id?: string
@@ -296,4 +162,70 @@ export const collectOutputs = (
 		collectOutputs(child, outputs)
 	);
 	return outputs;
+};
+
+export const parseTree = (data: NodeData) => {
+	const {id, type, isHidden, token, args, children} = data;
+	const node = createNode(type, isHidden, token, id);
+
+	if (args) {
+		Object.assign(node.args, args);
+	}
+
+	// Presets generate their colors, and can't have children.
+	if (children && !isPresetDef(node.def)) {
+		children.forEach((child) => {
+			node.addChild(parseTree(child));
+		});
+	}
+
+	return node;
+};
+
+// Replaces a preset with the plain nodes it builds, in a single
+// change. They keep the ids of the colors they generated, see
+// ADR 4.
+export const expandPreset = (preset: Node) => {
+	const {def, args, token, isHidden} = preset;
+
+	if (!preset.parent || !isPresetDef(def)) {
+		return;
+	}
+
+	const trees = withIds(def.build(args), preset.id).map(
+		(tree) => {
+			// `$` referred to the preset, which is going away.
+			const named =
+				token && tree.token
+					? {...tree, token: tree.token.replace('$', token)}
+					: tree;
+
+			return isHidden ? hideTree(named) : named;
+		}
+	);
+
+	preset.replaceWith(trees.map(parseTree));
+};
+
+export const serializeTree = (node: Node) => {
+	const {token, args, children} = node;
+	const data: IdentifiedNodeData = {
+		id: node.id,
+		type: node.def.type,
+		isHidden: node.isHidden
+	};
+
+	if (token) {
+		data.token = token;
+	}
+
+	if (Object.keys(args).length) {
+		data.args = args;
+	}
+
+	if (children.length) {
+		data.children = children.map(serializeTree);
+	}
+
+	return data;
 };

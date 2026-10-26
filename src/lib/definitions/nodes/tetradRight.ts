@@ -1,7 +1,7 @@
 import {rotateHue} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/model/definitions.js';
 
-export default {
+export default defineNode({
 	type: 'ttr',
 	label: 'Right tetrad',
 	description: '',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return rotateHue(color, 90);
 	}
-} satisfies NodeDef;
+});

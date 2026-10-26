@@ -4,12 +4,12 @@
 	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
-	import {expandPreset} from '#lib/presets.js';
+	import {isPresetDef} from '#lib/model/definitions.js';
 	import {features} from '#lib/stores/features.svelte.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
 		createNode,
-		isPresetDef
+		expandPreset
 	} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
 	import {discreteGradient} from '#lib/utils/css.js';
@@ -34,11 +34,11 @@
 		isPreset
 			? `--outputs: ${discreteGradient(
 					Object.values(node.generated).map(
-						([color]) => color
+						({color}) => color
 					),
 					180
 				)};`
-			: `--output: ${formatSchemist(node.output[0])};`
+			: `--output: ${formatSchemist(node.output.color)};`
 	);
 
 	let isEditingToken = $state(false);
@@ -62,7 +62,7 @@
 		HTMLDivElement
 	> = ({currentTarget}) => {
 		node.token = currentTarget.innerText;
-		currentTarget.innerText = node.output[1];
+		currentTarget.innerText = node.output.name;
 		isEditingToken = false;
 	};
 
@@ -96,7 +96,7 @@
 						onblur={handleTokenBlur}
 						onkeydown={handleTokenKey}
 					>
-						{node.output[1]}
+						{node.output.name}
 					</div>
 				</h3>
 
@@ -165,7 +165,7 @@
 	<Modal
 		label="Select matching color"
 		overlayColor={overlayColor(
-			node.output[0],
+			node.output.color,
 			features.isDarkScheme
 		)}
 		onClose={() => {
@@ -173,7 +173,7 @@
 		}}
 	>
 		<ChildPicker
-			color={node.output[0]}
+			color={node.output.color}
 			hasPresets
 			onAddNode={(type) => {
 				node.addChild(createNode(type));
@@ -188,7 +188,7 @@
 	<Modal
 		label="Change color type"
 		overlayColor={overlayColor(
-			node.input[0],
+			node.input.color,
 			features.isDarkScheme
 		)}
 		onClose={() => {
@@ -196,7 +196,7 @@
 		}}
 	>
 		<ChildPicker
-			color={node.input[0]}
+			color={node.input.color}
 			selectedType={def.type}
 			onAddNode={(type) => {
 				node.setType(type);

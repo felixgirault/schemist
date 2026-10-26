@@ -1,11 +1,11 @@
 import triadLeft from '#lib/definitions/nodes/triadLeft.js';
 import triadRight from '#lib/definitions/nodes/triadRight.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+import {definePreset} from '#lib/model/definitions.js';
 import neutral from './neutral';
 import semanticPairs from './semanticPairs';
 import states from './states';
 
-export default {
+export default definePreset({
 	type: 'sch',
 	label: 'Schemist theme',
 	description: 'Accents, semantic colors and neutrals',
@@ -65,4 +65,4 @@ export default {
 			...(neutrals ? [{type: neutral.type}] : [])
 		];
 	}
-} satisfies PresetDef;
+});

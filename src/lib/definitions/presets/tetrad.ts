@@ -1,8 +1,8 @@
 import tetradLeft from '#lib/definitions/nodes/tetradLeft.js';
 import tetradRight from '#lib/definitions/nodes/tetradRight.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+import {definePreset} from '#lib/model/definitions.js';
 
-export default {
+export default definePreset({
 	type: 'ttd',
 	label: 'Tetrad',
 	description: 'Hues evenly spread in four',
@@ -17,4 +17,4 @@ export default {
 			{type: tetradRight.type, token: 'Right $ tetrad'}
 		];
 	}
-} satisfies PresetDef;
+});

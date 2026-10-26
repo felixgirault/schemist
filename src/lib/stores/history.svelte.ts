@@ -1,22 +1,26 @@
+import type {
+	IdentifiedNodeData,
+	NodeData
+} from '#lib/model/tree.js';
+import {changedArg} from '#lib/model/tree.js';
 import {pack} from '#lib/packing/index.js';
 import {storePalette} from '#lib/palette.js';
-import type {PresetNode} from '#lib/presets.js';
+import {presetQuery} from '#lib/routing.js';
+import type {Node} from '#lib/stores/nodes.svelte.js';
 import {
-	changedArg,
 	parseTree,
 	serializeTree
-} from '#lib/presets.js';
-import {presetQuery} from '#lib/routing.js';
+} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {debounce} from '#lib/utils/functions.js';
 import {History} from '#lib/utils/history.svelte.js';
 import {goto} from '$app/navigation';
 import {untrack} from 'svelte';
 
-const read = () =>
-	$state.snapshot(serializeTree(palette.root)) as PresetNode;
+const read = (root: Node) =>
+	$state.snapshot(serializeTree(root));
 
-const syncUrl = (snapshot: PresetNode) =>
+const syncUrl = (snapshot: NodeData) =>
 	goto(location.pathname + presetQuery(snapshot), {
 		replace: true,
 		shallow: true,
@@ -25,13 +29,13 @@ const syncUrl = (snapshot: PresetNode) =>
 
 // States change on every slider step, which is too often to
 // rewrite the URL.
-const persist = debounce((snapshot: PresetNode) => {
+const persist = debounce((snapshot: NodeData) => {
 	storePalette(pack(snapshot));
 	syncUrl(snapshot);
 }, 300);
 
 // Every change of the palette is recorded, see ADR 2.
-export const history = new History<PresetNode>({
+export const history = new History<IdentifiedNodeData>({
 	restore: (snapshot) => {
 		palette.root = parseTree(snapshot);
 	},
@@ -41,17 +45,18 @@ export const history = new History<PresetNode>({
 
 // The URL shows the palette right away, but storage only changes
 // on edits, so opening a link keeps the stored palette.
-export const startHistory = () => {
-	const snapshot = read();
+// Returns a function that stops recording.
+export const startHistory = (root: Node) => {
+	const snapshot = read(root);
 	history.reset(snapshot);
 	syncUrl(snapshot);
-};
 
-$effect.root(() => {
-	$effect(() => {
-		if (palette.root) {
-			const snapshot = read();
-			untrack(() => history.record(snapshot));
-		}
+	return $effect.root(() => {
+		$effect(() => {
+			if (palette.root) {
+				const snapshot = read(palette.root);
+				untrack(() => history.record(snapshot));
+			}
+		});
 	});
-});
+};

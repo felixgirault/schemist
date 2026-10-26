@@ -1,4 +1,4 @@
-import type {PresetNode} from '#lib/presets.js';
+import type {NodeData} from '#lib/model/tree.js';
 import type {ColorCodec} from './v1';
 import {pack as packV1, unpack as unpackV1} from './v1';
 
@@ -21,7 +21,7 @@ const preciseCodec: ColorCodec = {
 	}
 };
 
-export const pack = (node: PresetNode) =>
+export const pack = (node: NodeData) =>
 	packV1(node, preciseCodec);
 
 export const unpack = (data: string) =>

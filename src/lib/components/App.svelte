@@ -13,6 +13,10 @@
 
 	// The URL is always up to date, but copying it is handier.
 	const handleShare = async () => {
+		if (!palette.root) {
+			return;
+		}
+
 		try {
 			await navigator.clipboard.writeText(
 				permalink(palette.root)

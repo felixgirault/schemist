@@ -1,8 +1,8 @@
 import lightness from '#lib/definitions/nodes/lightness.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+import {definePreset} from '#lib/model/definitions.js';
 import {range} from '#lib/utils/generators.js';
 
-export default {
+export default definePreset({
 	type: 'lsc',
 	label: 'Scale',
 	argsLabel: ({steps}) => `${steps} steps`,
@@ -31,4 +31,4 @@ export default {
 			}
 		}));
 	}
-} satisfies PresetDef;
+});

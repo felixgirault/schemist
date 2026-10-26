@@ -1,6 +1,6 @@
 import {randomUsableColor} from '#lib/color/manipulation.js';
 import {unpack} from '#lib/packing/index.js';
-import {parseTree} from '#lib/presets.js';
+import {parseTree} from '#lib/stores/nodes.svelte.js';
 
 const StorageKey = 'palette';
 

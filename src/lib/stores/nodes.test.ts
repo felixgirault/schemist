@@ -1,13 +1,19 @@
-import {parseColor} from '#lib/color/parsing.js';
-import defs from '#lib/definitions/nodes/index.js';
-import {parseTree} from '#lib/presets.js';
+import defs from '#lib/definitions/index.js';
+import type {IdentifiedNodeData} from '#lib/model/tree.js';
+import {
+	changedArg,
+	defaultInput,
+	evaluateTree
+} from '#lib/model/tree.js';
+import {pack, unpack} from '#lib/packing/index.js';
 import {expect, test} from 'vitest';
-import type {NodeOutput} from './nodes.svelte';
+import type {Node} from './nodes.svelte';
 import {
 	collectOutputs,
-	evaluateTree,
-	remapArgs,
-	withIds
+	createNode,
+	expandPreset,
+	parseTree,
+	serializeTree
 } from './nodes.svelte';
 
 test('setType keeps the node and its subtree', () => {
@@ -47,91 +53,9 @@ test('setType updates the output', () => {
 	const [node] = tree.children;
 	node.setType('s');
 
-	expect(node.output[0]).toEqual(
-		defs.s.apply(tree.output[0], {amount: 20})
+	expect(node.output.color).toEqual(
+		defs.s.apply(tree.output.color, {amount: 20})
 	);
-});
-
-test('keeps args of identical params', () => {
-	expect(
-		remapArgs(defs.hlt, defs.sdw, {
-			amount: 30,
-			shift: 5,
-			temp: 600
-		})
-	).toEqual({amount: 30, shift: 5, temp: 600});
-
-	expect(remapArgs(defs.l, defs.s, {amount: 20})).toEqual({
-		amount: 20
-	});
-});
-
-test('resets args of params with another range or kind', () => {
-	// Same name, but 0-100 instead of 0-50.
-	expect(remapArgs(defs.l, defs.hlt, {amount: 80})).toEqual({
-		amount: 10,
-		shift: 15,
-		temp: 650
-	});
-
-	expect(remapArgs(defs.h, defs.anl, {degrees: 90})).toEqual({
-		steps: 1
-	});
-
-	expect(remapArgs(defs.l, defs.cmp, {amount: 80})).toEqual({});
-});
-
-test('withIds numbers template nodes depth-first', () => {
-	expect(
-		withIds(
-			[
-				{type: 's', children: [{type: 'l'}, {type: 'l'}]},
-				{type: 'h'}
-			],
-			'n1'
-		)
-	).toEqual([
-		{
-			type: 's',
-			id: 'n1.0',
-			children: [
-				{type: 'l', id: 'n1.1'},
-				{type: 'l', id: 'n1.2'}
-			]
-		},
-		{type: 'h', id: 'n1.3'}
-	]);
-});
-
-test('evaluateTree skips hidden nodes but not their children', () => {
-	const input: NodeOutput = [parseColor('#f00')[1]!, 'Red'];
-	const outputs = evaluateTree(
-		withIds(
-			[
-				{
-					type: 's',
-					token: 'Grey $',
-					isHidden: true,
-					args: {amount: 0},
-					children: [
-						{
-							type: 'l',
-							token: 'Dark $',
-							args: {amount: 20}
-						}
-					]
-				}
-			],
-			'n1'
-		),
-		input
-	);
-
-	const grey = defs.s.apply(input[0], {amount: 0});
-
-	expect(outputs).toEqual({
-		'n1.1': [defs.l.apply(grey, {amount: 20}), 'Dark Grey Red']
-	});
 });
 
 test('presets output their generated colors', () => {
@@ -151,8 +75,8 @@ test('presets output their generated colors', () => {
 		`${preset.id}.2`
 	]);
 
-	expect(outputs[`${preset.id}.1`][0]).toEqual(
-		defs.l.apply(tree.output[0], {amount: 50})
+	expect(outputs[`${preset.id}.1`].color).toEqual(
+		defs.l.apply(tree.output.color, {amount: 50})
 	);
 
 	preset.args.steps = 2;
@@ -173,7 +97,7 @@ test('presets lend their name to their colors', () => {
 
 	const [preset] = tree.children;
 	const names = () =>
-		Object.values(preset.generated).map(([, name]) => name);
+		Object.values(preset.generated).map(({name}) => name);
 
 	expect(names()).toEqual([
 		'Left Brand complementary',
@@ -194,4 +118,187 @@ test('presets drop children', () => {
 	});
 
 	expect(tree.children).toEqual([]);
+});
+
+test('presets refuse children', () => {
+	const preset = createNode('lsc');
+	expect(() => preset.addChild(createNode('l'))).toThrow();
+	expect(preset.children).toEqual([]);
+
+	const parent = parseTree({
+		type: 'clr',
+		children: [{type: 'l'}]
+	});
+	expect(() => parent.setType('lsc')).toThrow();
+	expect(parent.def).toBe(defs.clr);
+});
+
+// Outputs are computed both on live nodes and on serialized
+// trees, which must agree.
+test('collectOutputs matches evaluateTree', () => {
+	const tree = parseTree({
+		type: 'clr',
+		token: 'Brand',
+		children: [
+			{
+				type: 'l',
+				token: 'Dark $',
+				isHidden: true,
+				args: {amount: 20},
+				children: [{type: 'cmp'}]
+			},
+			{type: 'lsc', args: {steps: 3}},
+			{type: 'hrm', isHidden: true},
+			{type: 'sch', token: 'Theme'}
+		]
+	});
+
+	// Entries, so that the order is compared too.
+	const outputs = Object.entries(collectOutputs(tree));
+
+	expect(outputs.length).toBeGreaterThan(10);
+	expect(outputs).toEqual(
+		Object.entries(
+			evaluateTree([serializeTree(tree)], defaultInput)
+		)
+	);
+});
+
+test('serialized trees are restored with the same ids', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [
+			{
+				type: 'l',
+				token: 'Dark $',
+				isHidden: true,
+				args: {amount: 20}
+			}
+		]
+	});
+
+	const restored = parseTree(serializeTree(tree));
+
+	expect(serializeTree(restored)).toEqual(serializeTree(tree));
+	expect(restored.children[0].id).toBe(tree.children[0].id);
+});
+
+// Serialized trees share their args with the live tree.
+const snapshot = (tree: Node) =>
+	JSON.parse(
+		JSON.stringify(serializeTree(tree))
+	) as IdentifiedNodeData;
+
+test('keeps changed types in permalinks', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'l', children: [{type: 'cmp'}]}]
+	});
+
+	tree.children[0].setType('s');
+
+	const [child] = unpack(pack(snapshot(tree))).children!;
+	expect(child.type).toBe('s');
+	expect(child.args).toEqual({amount: 50});
+	expect(child.children).toHaveLength(1);
+});
+
+test('a preset arg change can merge with the next one', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'lsc'}]
+	});
+	const previous = snapshot(tree);
+	const [preset] = tree.children;
+
+	preset.args.steps = 5;
+	expect(changedArg(previous, snapshot(tree))).toBe(
+		`${preset.id}.steps`
+	);
+});
+
+test('expandPreset puts the generated nodes in place of the preset', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [
+			{type: 'l'},
+			{type: 'lsc', args: {steps: 3}},
+			{type: 'h'}
+		]
+	});
+	const [first, preset, last] = tree.children;
+	const outputs = collectOutputs(tree);
+	const previous = snapshot(tree);
+
+	expandPreset(preset);
+
+	expect(tree.children.map(({id}) => id)).toEqual([
+		first.id,
+		`${preset.id}.0`,
+		`${preset.id}.1`,
+		`${preset.id}.2`,
+		last.id
+	]);
+
+	expect(tree.children[1].parent).toBe(tree);
+	expect(preset.parent).toBeUndefined();
+	expect(collectOutputs(tree)).toEqual(outputs);
+
+	// Structural change, so it is a step of its own.
+	expect(changedArg(previous, snapshot(tree))).toBeUndefined();
+});
+
+test('expandPreset keeps the name and visibility of the preset', () => {
+	const tree = parseTree({
+		type: 'clr',
+		token: 'Brand',
+		children: [
+			{
+				type: 'hrm',
+				token: 'Accent',
+				isHidden: true,
+				args: {tetrad: false, triad: false}
+			}
+		]
+	});
+
+	expandPreset(tree.children[0]);
+
+	expect(
+		tree.children.map(({token, isHidden}) => [token, isHidden])
+	).toEqual([
+		['Left Accent complementary', true],
+		['Right Accent complementary', true]
+	]);
+});
+
+test('expandPreset ignores other nodes', () => {
+	const tree = parseTree({
+		type: 'lsc',
+		children: [{type: 'l'}]
+	});
+
+	expandPreset(tree);
+	expect(tree.def.type).toBe('lsc');
+});
+
+test('expandPreset turns nested presets into presets', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'mal'}]
+	});
+	const outputs = collectOutputs(tree);
+
+	expandPreset(tree.children[0]);
+
+	const [primary] = tree.children;
+	expect(primary.children.map(({def}) => def.type)).toEqual([
+		'mtl',
+		'cmp',
+		'neg',
+		'mnl'
+	]);
+
+	// Nested colors keep their ids, e.g. `n1.1.0`.
+	expect(collectOutputs(tree)).toEqual(outputs);
 });

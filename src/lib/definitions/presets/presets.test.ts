@@ -1,7 +1,9 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
-import {parseTree} from '#lib/presets.js';
-import {collectOutputs} from '#lib/stores/nodes.svelte.js';
+import {
+	collectOutputs,
+	parseTree
+} from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
 import presets from './index';
 
@@ -17,7 +19,7 @@ test.each(presets)('preset $label', ({type}) => {
 
 	expect(
 		Object.values(collectOutputs(tree)).map(
-			([color, name]) =>
+			({color, name}) =>
 				`${formatSchemistToHex(color)} ${name}`
 		)
 	).toMatchSnapshot();

@@ -2,9 +2,9 @@
 	import BooleanField from '#lib/components/forms/BooleanField.svelte';
 	import ColorField from '#lib/components/forms/ColorField.svelte';
 	import RangeField from '#lib/components/forms/RangeField.svelte';
+	import {argOf, isPresetDef} from '#lib/model/definitions.js';
 	import {paramSamples} from '#lib/samples.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {isPresetDef} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
@@ -45,19 +45,32 @@
 								def,
 								node.args,
 								param.name,
-								node.input[0],
+								node.input.color,
 								clamp(param.max - param.min, 15)
 							)
 						)}
-				bind:value={node.args[param.name]}
+				bind:value={
+					() => argOf(node.args, param),
+					(value) => (node.args[param.name] = value)
+				}
 			/>
-		{:else}
-			{@const SvelteComponent =
-				param.type === 'color' ? ColorField : BooleanField}
-			<SvelteComponent
+		{:else if param.type === 'color'}
+			<ColorField
 				id={nodeId}
 				{param}
-				bind:value={node.args[param.name]}
+				bind:value={
+					() => argOf(node.args, param),
+					(value) => (node.args[param.name] = value)
+				}
+			/>
+		{:else}
+			<BooleanField
+				id={nodeId}
+				{param}
+				bind:value={
+					() => argOf(node.args, param),
+					(value) => (node.args[param.name] = value)
+				}
 			/>
 		{/if}
 	{/each}

@@ -1,8 +1,8 @@
 import splitComplementaryLeft from '#lib/definitions/nodes/splitComplementaryLeft.js';
 import splitComplementaryRight from '#lib/definitions/nodes/splitComplementaryRight.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
+import {definePreset} from '#lib/model/definitions.js';
 
-export default {
+export default definePreset({
 	type: 'spc',
 	label: 'Split complementary',
 	description: 'Hues on each side of the complementary color',
@@ -23,4 +23,4 @@ export default {
 			}
 		];
 	}
-} satisfies PresetDef;
+});

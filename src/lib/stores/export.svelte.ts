@@ -1,16 +1,24 @@
 import type {ColorFormat} from '#lib/color/formatting.js';
-import type {Entry} from './combinations.svelte';
+import type {PaletteColor} from '#lib/stores/palette.svelte.js';
 
 export type ExportFormat = 'table' | 'tokens' | 'css' | 'sass';
 export type ExportCasing = 'dash' | 'camel';
-export interface ExportEntry extends Entry {
+export type ExportEntry = PaletteColor & {
 	cssColor: string;
-}
+};
 
-export const exportSettings = $state({
-	format: 'table' as ExportFormat,
-	colorFormat: 'hex' as ColorFormat,
-	casing: 'dash' as ExportCasing,
+export type ExportSettings = {
+	format: ExportFormat;
+	colorFormat: ColorFormat;
+	casing: ExportCasing;
+	precision: number;
+	prefix: string;
+};
+
+export const exportSettings = $state<ExportSettings>({
+	format: 'table',
+	colorFormat: 'hex',
+	casing: 'dash',
 	precision: 3,
 	prefix: ''
 });

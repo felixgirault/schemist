@@ -1,7 +1,7 @@
 import {rotateHue} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/model/definitions.js';
 
-export default {
+export default defineNode({
 	type: 'h',
 	label: 'Hue',
 	params: [
@@ -19,4 +19,4 @@ export default {
 	apply(color, {degrees}) {
 		return rotateHue(color, degrees);
 	}
-} satisfies NodeDef;
+});

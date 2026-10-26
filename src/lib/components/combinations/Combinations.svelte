@@ -6,15 +6,14 @@
 	import ContrastTypeFilter from '#lib/components/combinations/ContrastTypeFilter.svelte';
 	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 
 	const handlePreview = (uid: string) => {
 		combinations.previewedUid =
 			combinations.previewedUid === uid ? null : uid;
 	};
 
-	let colorCount = $derived(
-		combinations.colorEntries?.length || 0
-	);
+	let colorCount = $derived(palette.colors.length);
 </script>
 
 <div class="data-layout">

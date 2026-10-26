@@ -5,6 +5,7 @@
 	import Sample from '#lib/components/Sample.svelte';
 	import {defList as defs} from '#lib/definitions/nodes/index.js';
 	import presets from '#lib/definitions/presets/index.js';
+	import type {NodeType} from '#lib/model/definitions.js';
 	import {
 		presetSamples,
 		sample,
@@ -18,10 +19,10 @@
 	interface Props {
 		// Color on which samples are computed.
 		color: SchemistColor;
-		selectedType?: string;
+		selectedType?: NodeType;
 		// Presets can't replace a type, see ADR 4.
 		hasPresets?: boolean;
-		onAddNode: (type: string) => void;
+		onAddNode: (type: NodeType) => void;
 	}
 
 	let {color, selectedType, hasPresets, onAddNode}: Props =
