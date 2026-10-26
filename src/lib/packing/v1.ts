@@ -1,15 +1,35 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import defs from '#lib/definitions/nodes/index.js';
-import type {PresetNode} from '#lib/presets.js';
-import type {Args, Param} from '#lib/stores/nodes.svelte.js';
+import defs, {isNodeType} from '#lib/definitions/index.js';
+import type {Args, Param} from '#lib/model/definitions.js';
+import type {NodeData} from '#lib/model/tree.js';
 
-type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
+type IntermediateNodeData = Omit<NodeData, 'children'> & {
 	children: number[];
 };
 
-export const pack = (node: PresetNode): string => {
+export type ColorCodec = {
+	encode: (color: SchemistColor) => string;
+	decode: (data: string) => SchemistColor | undefined;
+};
+
+const hexCodec: ColorCodec = {
+	encode: (color) => formatSchemistToHex(color).substring(1),
+	decode: (data) => parseColor(`#${data}`)[1]
+};
+
+// Escapes the separators so tokens can contain them.
+const escapeEntry = (entry: string) =>
+	entry.replace(/[%,@]/g, encodeURIComponent);
+
+const unescapeEntry = (entry: string) =>
+	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
+
+export const pack = (
+	node: NodeData,
+	colorCodec = hexCodec
+): string => {
 	const packed: string[] = [];
 	// A Map keeps insertion order, unlike an object which lists
 	// integer-like keys first (see #8).
@@ -34,20 +54,18 @@ export const pack = (node: PresetNode): string => {
 				return value;
 			case 'color':
 				return indice(
-					formatSchemistToHex(
-						value as SchemistColor
-					).substring(1)
+					colorCodec.encode(value as SchemistColor)
 				);
 		}
 	};
 
-	const packArgs = (params: Param[], args: Args) =>
+	const packArgs = (params: readonly Param[], args: Args) =>
 		params.flatMap(({type, name}) => [
 			indice(name),
 			packValue(type, args[name])
 		]);
 
-	const packNode = (node: PresetNode): number => {
+	const packNode = (node: NodeData): number => {
 		const typeIndex = indice(node.type as string);
 		const tokenIndex = indice(node.token ?? '');
 		const hiddenFlag = node.isHidden ? '!' : '';
@@ -86,16 +104,16 @@ export const pack = (node: PresetNode): string => {
 	return [
 		rootIndex,
 		packed.join(','),
-		[...index.keys()].join(',')
+		[...index.keys()].map(escapeEntry).join(',')
 	].join('@');
 };
 
-export const unpack = (data: string) => {
+export const unpack = (data: string, colorCodec = hexCodec) => {
 	const [rootIndex, inlinePacked, inlineIndex] =
 		data.split('@');
 
 	const packed = inlinePacked.split(',');
-	const index = inlineIndex.split(',');
+	const index = inlineIndex.split(',').map(unescapeEntry);
 
 	const unpackValue = (type: Param['type'], value: number) => {
 		switch (type) {
@@ -104,27 +122,35 @@ export const unpack = (data: string) => {
 			case 'range':
 				return value;
 			case 'color':
-				return parseColor(`#${index[value]}`)[1];
+				return colorCodec.decode(index[value]);
 		}
 	};
 
 	const unpackArgs = (
-		params: Param[],
+		params: readonly Param[],
 		args: [number, number][]
 	): Args => {
 		const paramTypes = Object.fromEntries(
 			params.map(({type, name}) => [name, type])
 		);
 
+		// Args of unknown params are dropped, so their defaults
+		// apply.
 		return Object.fromEntries(
-			args.map(([k, v]) => {
+			args.flatMap(([k, v]) => {
 				const name = index[k];
-				return [name, unpackValue(paramTypes[name], v)];
+				const type = Object.hasOwn(paramTypes, name)
+					? paramTypes[name]
+					: undefined;
+				const value = type && unpackValue(type, v);
+				return value === undefined ? [] : [[name, value]];
 			})
 		);
 	};
 
-	const unpackData = (packedData: string) => {
+	const unpackData = (
+		packedData: string
+	): IntermediateNodeData => {
 		const matches = packedData.match(
 			/y[0-9a-f]{3}|x[0-9a-f]{2}|[0-9a-f]/gi
 		);
@@ -138,6 +164,11 @@ export const unpack = (data: string) => {
 			.map((v) => parseInt(v, 16));
 
 		const type = index[data.shift() as number];
+
+		if (!isNodeType(type)) {
+			throw new Error(`Unknown node type \`${type}\`.`);
+		}
+
 		const token = index[data.shift() as number];
 		const argCount = data.shift() as number;
 		const argEntries: [number, number][] = [];
@@ -155,7 +186,7 @@ export const unpack = (data: string) => {
 			isHidden: packedData.startsWith('!'),
 			args: unpackArgs(defs[type].params, argEntries),
 			children: data
-		} as IntermediatePresetNode;
+		};
 	};
 
 	const nodes = packed.map(unpackData);
@@ -166,7 +197,7 @@ export const unpack = (data: string) => {
 		isHidden,
 		args,
 		children
-	}: IntermediatePresetNode): PresetNode => ({
+	}: IntermediateNodeData): NodeData => ({
 		type,
 		token,
 		isHidden,

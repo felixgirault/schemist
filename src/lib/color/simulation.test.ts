@@ -1,5 +1,6 @@
 import {expect, test} from 'vitest';
 import {wcag3Contrast} from './contrast';
+import {formatRgbToHex} from './formatting';
 import {
 	simulateDeuteranomaly,
 	simulateProtanomaly,
@@ -28,3 +29,23 @@ test.each([
 		expect(wcag3Contrast(bg, fg)).toBeGreaterThan(80);
 	}
 );
+
+// Machado et al. matrices apply to linear RGB.
+test.each([
+	['protanomaly', simulateProtanomaly, '#6d5f00'],
+	['deuteranomaly', simulateDeuteranomaly, '#a39000'],
+	['tritanomaly', simulateTritanomaly, '#ff000f']
+] as const)('%s of red', (_, simulate, hex) => {
+	expect(formatRgbToHex(simulate({r: 255, g: 0, b: 0}))).toBe(
+		hex
+	);
+});
+
+test.each([
+	simulateProtanomaly,
+	simulateDeuteranomaly,
+	simulateTritanomaly
+])('keeps grays', (simulate) => {
+	const gray = {r: 128, g: 128, b: 128};
+	expect(formatRgbToHex(simulate(gray))).toBe('#808080');
+});

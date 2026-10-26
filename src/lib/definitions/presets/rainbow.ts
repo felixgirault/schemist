@@ -1,14 +1,34 @@
-import analogous from '#lib/definitions/nodes/analogous.js';
-import type {Preset} from '#lib/presets.js';
+import hue from '#lib/definitions/nodes/hue.js';
+import {definePreset} from '#lib/model/definitions.js';
 import {range} from '#lib/utils/generators.js';
 
-export default {
+export default definePreset({
+	type: 'rnb',
 	label: 'Rainbow',
-	description: 'Every analogous colors',
-	nodes: range(11).map((steps) => ({
-		type: analogous.type,
-		args: {
-			steps: steps + 1
+	argsLabel: ({count}) => `${count} colors`,
+	description: 'Hues evenly spread around the color wheel',
+	params: [
+		{
+			type: 'range',
+			name: 'count',
+			label: 'Colors',
+			min: 1,
+			max: 23,
+			default: 11
 		}
-	}))
-} satisfies Preset;
+	],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	// Hue nodes rather than analogous ones, whose 30° steps can't
+	// spread any count of colors.
+	build({count}) {
+		return range(count).map((i) => ({
+			type: hue.type,
+			args: {
+				degrees: Math.round((360 * (i + 1)) / (count + 1))
+			}
+		}));
+	}
+});

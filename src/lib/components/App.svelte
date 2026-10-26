@@ -5,14 +5,62 @@
 	import Palette from '#lib/components/Palette.svelte';
 	import {permalink} from '#lib/routing.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import {history} from '#lib/stores/history.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
 	let isShowingExport = $state(false);
+	let shareStatus = $state('');
 
-	const handleShare = () => {
-		window.location.assign(permalink(palette.root));
+	// The URL is always up to date, but copying it is handier.
+	const handleShare = async () => {
+		if (!palette.root) {
+			return;
+		}
+
+		try {
+			await navigator.clipboard.writeText(
+				permalink(palette.root)
+			);
+			shareStatus = 'Link copied';
+		} catch {
+			shareStatus = 'Copy the link from the address bar';
+		}
+
+		setTimeout(() => {
+			shareStatus = '';
+		}, 2000);
+	};
+
+	// Leaves native undo to text fields.
+	const isEditingText = (target: EventTarget | null) =>
+		target instanceof HTMLElement &&
+		(target.isContentEditable ||
+			target instanceof HTMLTextAreaElement ||
+			(target instanceof HTMLInputElement &&
+				!['range', 'checkbox', 'radio', 'button'].includes(
+					target.type
+				)));
+
+	const handleKey = (event: KeyboardEvent) => {
+		if (
+			!(event.ctrlKey || event.metaKey) ||
+			event.key.toLowerCase() !== 'z' ||
+			isEditingText(event.target)
+		) {
+			return;
+		}
+
+		event.preventDefault();
+
+		if (event.shiftKey) {
+			history.redo();
+		} else {
+			history.undo();
+		}
 	};
 </script>
+
+<svelte:window onkeydown={handleKey} />
 
 <!-- svelte-ignore a11y_no_redundant_roles -->
 <main role="main">
@@ -37,12 +85,32 @@
 
 				<button
 					class="button"
-					title="Get a permalink to this palette"
+					title="Copy a permalink to this palette"
 					onclick={handleShare}
 				>
 					Share
 				</button>
+
+				<button
+					class="button"
+					title="Undo (Ctrl+Z)"
+					disabled={!history.past.length}
+					onclick={() => history.undo()}
+				>
+					Undo
+				</button>
+
+				<button
+					class="button"
+					title="Redo (Ctrl+Shift+Z)"
+					disabled={!history.future.length}
+					onclick={() => history.redo()}
+				>
+					Redo
+				</button>
 			</div>
+
+			<p class="hint" role="status">{shareStatus}</p>
 		</footer>
 	</section>
 

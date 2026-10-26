@@ -1,4 +1,7 @@
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import type {
+	ColorType,
+	NodeDef
+} from '#lib/model/definitions.js';
 import analogous from './analogous';
 import color from './color';
 import complementary from './complementary';
@@ -19,27 +22,29 @@ import triadLeft from './triadLeft';
 import triadRight from './triadRight';
 import warning from './warning';
 
-export default {
-	[analogous.type]: analogous,
-	[complementary.type]: complementary,
-	[contrasting.type]: contrasting,
-	[highlight.type]: highlight,
-	[hue.type]: hue,
-	[informative.type]: informative,
-	[lightness.type]: lightness,
-	[negative.type]: negative,
-	[color.type]: color,
-	[positive.type]: positive,
-	[saturation.type]: saturation,
-	[shadow.type]: shadow,
-	[splitComplementaryLeft.type]: splitComplementaryLeft,
-	[splitComplementaryRight.type]: splitComplementaryRight,
-	[tetradLeft.type]: tetradLeft,
-	[tetradRight.type]: tetradRight,
-	[triadLeft.type]: triadLeft,
-	[triadRight.type]: triadRight,
-	[warning.type]: warning
-};
+// Typed against the list of types, so that none is missing.
+export const colorDefs: {[T in ColorType]: NodeDef & {type: T}} =
+	{
+		[analogous.type]: analogous,
+		[complementary.type]: complementary,
+		[contrasting.type]: contrasting,
+		[highlight.type]: highlight,
+		[hue.type]: hue,
+		[informative.type]: informative,
+		[lightness.type]: lightness,
+		[negative.type]: negative,
+		[color.type]: color,
+		[positive.type]: positive,
+		[saturation.type]: saturation,
+		[shadow.type]: shadow,
+		[splitComplementaryLeft.type]: splitComplementaryLeft,
+		[splitComplementaryRight.type]: splitComplementaryRight,
+		[tetradLeft.type]: tetradLeft,
+		[tetradRight.type]: tetradRight,
+		[triadLeft.type]: triadLeft,
+		[triadRight.type]: triadRight,
+		[warning.type]: warning
+	};
 
 export const defList = [
 	analogous,

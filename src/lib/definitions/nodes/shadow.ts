@@ -1,7 +1,7 @@
 import {shadowColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/model/definitions.js';
 
-export default {
+export default defineNode({
 	type: 'sdw',
 	label: 'Shadow',
 	argsLabel: ({amount}) => `${amount}%`,
@@ -38,4 +38,4 @@ export default {
 	apply(color, {amount, shift, temp}) {
 		return shadowColor(color, amount, shift, temp * 10);
 	}
-} satisfies NodeDef;
+});

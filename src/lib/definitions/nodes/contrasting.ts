@@ -1,7 +1,7 @@
 import {contrastingColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/model/definitions.js';
 
-export default {
+export default defineNode({
 	type: 'ctr',
 	label: 'Contrasting',
 	description:
@@ -21,4 +21,4 @@ export default {
 	apply(color, {amount}) {
 		return contrastingColor(color, amount);
 	}
-} satisfies NodeDef;
+});

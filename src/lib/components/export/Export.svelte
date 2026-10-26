@@ -2,13 +2,13 @@
 	import {formatSchemistTo} from '#lib/color/formatting.js';
 	import TableExport from '#lib/components/export/TableExport.svelte';
 	import VariablesExport from '#lib/components/export/VariablesExport.svelte';
-	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {type ExportEntry} from '#lib/stores/export.svelte.js';
 	import {exportSettings} from '#lib/stores/export.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
 	const entries: ExportEntry[] = $derived(
-		combinations.colorEntries.map(({color, ...entry}) => ({
+		palette.colors.map(({color, ...entry}) => ({
 			...entry,
 			color,
 			cssColor: formatSchemistTo(
@@ -213,9 +213,7 @@
 		{#if exportSettings.format === 'table'}
 			<TableExport {entries} />
 		{:else if exportSettings.format === 'tokens'}
-			<DesignTokensExport
-				entries={combinations.colorEntries}
-			/>
+			<DesignTokensExport entries={palette.colors} />
 		{:else}
 			<VariablesExport
 				{entries}

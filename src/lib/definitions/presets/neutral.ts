@@ -1,56 +1,49 @@
 import lightness from '#lib/definitions/nodes/lightness.js';
 import saturation from '#lib/definitions/nodes/saturation.js';
-import type {Preset} from '#lib/presets.js';
+import {definePreset} from '#lib/model/definitions.js';
 
-export default {
+const levels = [
+	['Neutral white', 98],
+	['Neutral light', 85],
+	['Neutral', 50],
+	['Neutral dark', 15],
+	['Neutral black', 2]
+] as const;
+
+export default definePreset({
+	type: 'ntl',
 	label: 'Neutral',
+	argsLabel: ({amount}) => `${amount}%`,
 	description:
 		'Desaturated color with various lightness levels',
-	nodes: [
+	params: [
 		{
-			type: saturation.type,
-			isHidden: true,
-			token: 'Desaturated $',
-			args: {
-				amount: 5
-			},
-			children: [
-				{
-					type: lightness.type,
-					token: 'Neutral white',
-					args: {
-						amount: 98
-					}
-				},
-				{
-					type: lightness.type,
-					token: 'Neutral light',
-					args: {
-						amount: 85
-					}
-				},
-				{
-					type: lightness.type,
-					token: 'Neutral',
-					args: {
-						amount: 50
-					}
-				},
-				{
-					type: lightness.type,
-					token: 'Neutral dark',
-					args: {
-						amount: 15
-					}
-				},
-				{
-					type: lightness.type,
-					token: 'Neutral black',
-					args: {
-						amount: 2
-					}
-				}
-			]
+			type: 'range',
+			name: 'amount',
+			label: 'Saturation',
+			unit: '%',
+			min: 0,
+			max: 100,
+			default: 5
 		}
-	]
-} satisfies Preset;
+	],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build({amount}) {
+		return [
+			{
+				type: saturation.type,
+				isHidden: true,
+				token: 'Desaturated $',
+				args: {amount},
+				children: levels.map(([token, level]) => ({
+					type: lightness.type,
+					token,
+					args: {amount: level}
+				}))
+			}
+		];
+	}
+});

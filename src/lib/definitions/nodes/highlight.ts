@@ -1,7 +1,7 @@
 import {highlightColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/model/definitions.js';
 
-export default {
+export default defineNode({
 	type: 'hlt',
 	label: 'Highlight',
 	argsLabel: ({amount}) => `${amount}%`,
@@ -36,6 +36,6 @@ export default {
 	],
 	samples: 'continuous',
 	apply(color, {amount, shift, temp}) {
-		return highlightColor(color, amount, shift, temp * 100);
+		return highlightColor(color, amount, shift, temp * 10);
 	}
-} satisfies NodeDef;
+});

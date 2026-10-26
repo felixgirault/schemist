@@ -1,7 +1,7 @@
 import {greenishColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/model/definitions.js';
 
-export default {
+export default defineNode({
 	type: 'pos',
 	label: 'Positive',
 	description: 'A greenish color to convey positiveness',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return greenishColor(color);
 	}
-} satisfies NodeDef;
+});

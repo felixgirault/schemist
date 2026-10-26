@@ -1,7 +1,9 @@
 <script lang="ts">
 	import AddIcon from '#lib/components/icons/AddIcon.svelte';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import ExpandIcon from '#lib/components/icons/ExpandIcon.svelte';
 	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
+	import SwapIcon from '#lib/components/icons/SwapIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';
@@ -11,12 +13,15 @@
 		optionsId: string;
 		isHiddenId: string;
 		isRemovable: boolean;
+		isSwappable: boolean;
+		// Presets can be expanded, but can't have children.
+		isPreset: boolean;
 		isHidden: boolean;
-		isInfoOpen: boolean;
-		areOptionsOpen: boolean;
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
+		onSwap: () => void;
+		onExpand: () => void;
 		onRemove: () => void;
 	}
 
@@ -25,12 +30,14 @@
 		optionsId,
 		isHiddenId,
 		isRemovable,
+		isSwappable,
+		isPreset,
 		isHidden = $bindable(),
-		isInfoOpen = $bindable(),
-		areOptionsOpen = $bindable(),
 		hasOptions,
 		hasHint,
 		onPick,
+		onSwap,
+		onExpand,
 		onRemove
 	}: Props = $props();
 
@@ -68,11 +75,7 @@
 		class="button button--icon"
 		type="button"
 		title="Show color info"
-		aria-controls={infoId}
-		aria-expanded={isInfoOpen}
-		onclick={() => {
-			isInfoOpen = !isInfoOpen;
-		}}
+		popovertarget={infoId}
 	>
 		<InfoIcon />
 	</button>
@@ -81,20 +84,39 @@
 		class="button button--icon"
 		type="button"
 		title="Tune this color"
-		aria-controls={optionsId}
-		aria-expanded={areOptionsOpen}
+		popovertarget={optionsId}
 		disabled={!hasOptions}
-		onclick={() => {
-			areOptionsOpen = !areOptionsOpen;
-		}}
 	>
 		<OptionsIcon />
 	</button>
+
+	{#if isPreset}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Turn into separate colors"
+			disabled={!isRemovable}
+			onclick={onExpand}
+		>
+			<ExpandIcon />
+		</button>
+	{:else}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Change this color's type"
+			disabled={!isSwappable}
+			onclick={onSwap}
+		>
+			<SwapIcon />
+		</button>
+	{/if}
 
 	<button
 		class="button button--icon button--hint"
 		type="button"
 		title="Add matching colors"
+		disabled={isPreset}
 		onclick={onPick}
 	>
 		<AddIcon />

@@ -37,7 +37,9 @@
 	);
 
 	let code = $derived(
-		`/* @see ${permalink(palette.root)} */\n${variables}`
+		palette.root
+			? `/* @see ${permalink(palette.root)} */\n${variables}`
+			: variables
 	);
 </script>
 

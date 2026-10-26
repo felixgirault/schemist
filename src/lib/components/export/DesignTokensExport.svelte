@@ -1,12 +1,12 @@
 <script lang="ts">
 	import {formatSchemistToHex} from '#lib/color/formatting.js';
 	import {permalink} from '#lib/routing.js';
-	import type {Entry} from '#lib/stores/combinations.svelte.js';
+	import type {PaletteColor} from '#lib/stores/palette.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import CodeArea from './CodeArea.svelte';
 
 	interface Props {
-		entries: Entry[];
+		entries: PaletteColor[];
 	}
 
 	let {entries}: Props = $props();
@@ -25,9 +25,9 @@
 
 	let json = $derived({
 		'Colors': {
-			'$description': `Build with Schemist (${permalink(
-				palette.root
-			)})`,
+			'$description': palette.root
+				? `Build with Schemist (${permalink(palette.root)})`
+				: 'Build with Schemist',
 			...tokens
 		}
 	});
