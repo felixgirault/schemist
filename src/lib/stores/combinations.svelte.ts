@@ -15,10 +15,8 @@ import {
 	simulateTritanomaly
 } from '#lib/color/simulation.js';
 import type {RgbColor} from '#lib/color/types.js';
-import type {
-	Node,
-	NodeOutput
-} from '#lib/stores/nodes.svelte.js';
+import type {NodeOutput} from '#lib/model/tree.js';
+import type {Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
 
@@ -71,7 +69,7 @@ class Combinations {
 	}
 
 	colorEntries = $derived(
-		Object.entries(palette.debouncedOutputs).map(
+		Object.entries(palette.settledOutputs).map(
 			([id, output]): Entry => ({
 				id,
 				color: output[0],

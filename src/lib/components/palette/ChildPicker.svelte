@@ -5,12 +5,12 @@
 	import Sample from '#lib/components/Sample.svelte';
 	import {defList as defs} from '#lib/definitions/nodes/index.js';
 	import presets from '#lib/definitions/presets/index.js';
+	import type {NodeType} from '#lib/model/definitions.js';
 	import {
 		presetSamples,
 		sample,
 		samples
 	} from '#lib/samples.js';
-	import type {NodeType} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient

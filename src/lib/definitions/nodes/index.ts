@@ -3,7 +3,7 @@ import type {
 	ColorType,
 	NodeDef,
 	NodeType
-} from '#lib/stores/nodes.svelte.js';
+} from '#lib/model/definitions.js';
 import analogous from './analogous';
 import color from './color';
 import complementary from './complementary';

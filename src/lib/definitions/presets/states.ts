@@ -1,6 +1,6 @@
-import {definePreset} from '#lib/definitions/define.js';
 import highlight from '#lib/definitions/nodes/highlight.js';
 import shadow from '#lib/definitions/nodes/shadow.js';
+import {definePreset} from '#lib/model/definitions.js';
 
 export default definePreset({
 	type: 'stt',

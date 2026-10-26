@@ -1,8 +1,6 @@
 import {parseColor} from '#lib/color/parsing.js';
-import type {
-	Node,
-	NodeOutputRecord
-} from '#lib/stores/nodes.svelte.js';
+import type {NodeOutputRecord} from '#lib/model/tree.js';
+import type {Node} from '#lib/stores/nodes.svelte.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
 import {
 	debounce,
@@ -24,18 +22,20 @@ class Palette {
 	// This allows for a snappy feel on single updates while
 	// keeping reasonable performance on fast recurring ones
 	// (i.e. when the user drags a range input).
-	debouncedOutputs: NodeOutputRecord = $state.raw({});
+	// Nodes show their own outputs right away, while combinations
+	// and exports, which cost more, follow these.
+	settledOutputs: NodeOutputRecord = $state.raw({});
 
 	rootColor = $derived(
-		(this.root && this.debouncedOutputs[this.root.id]?.[0]) ??
-			Object.values(this.debouncedOutputs).shift()?.[0] ??
+		(this.root && this.settledOutputs[this.root.id]?.[0]) ??
+			Object.values(this.settledOutputs).shift()?.[0] ??
 			parseColor('#feffff')[1]! // not fully white so there is a hue to pick up
 	);
 
 	constructor() {
 		const update = debounce(
 			(outputs: NodeOutputRecord) => {
-				this.debouncedOutputs = outputs;
+				this.settledOutputs = outputs;
 			},
 			withElapsedTime(
 				(time) => 10 + clamp(400 - time, 400) / 2

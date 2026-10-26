@@ -1,8 +1,8 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import color from '#lib/definitions/nodes/color.js';
+import {argOf} from '#lib/model/definitions.js';
 import {pack} from '#lib/packing/index.js';
-import {argOf} from '#lib/stores/nodes.svelte.js';
 import {afterEach, expect, test, vi} from 'vitest';
 import {getRootNode} from './palette';
 

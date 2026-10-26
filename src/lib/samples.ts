@@ -2,12 +2,9 @@ import type {
 	Args,
 	NodeDef,
 	Param
-} from '#lib/stores/nodes.svelte.js';
-import {
-	evaluateTree,
-	withIds
-} from '#lib/stores/nodes.svelte.js';
-import type {NodeData} from '#lib/tree.js';
+} from '#lib/model/definitions.js';
+import type {NodeData} from '#lib/model/tree.js';
+import {evaluateTree, withIds} from '#lib/model/tree.js';
 import {range} from '#lib/utils/generators.js';
 import {interval} from '#lib/utils/math.js';
 import type {SchemistColor} from './color/types';

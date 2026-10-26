@@ -1,6 +1,6 @@
-import {definePreset} from '#lib/definitions/define.js';
 import splitComplementaryLeft from '#lib/definitions/nodes/splitComplementaryLeft.js';
 import splitComplementaryRight from '#lib/definitions/nodes/splitComplementaryRight.js';
+import {definePreset} from '#lib/model/definitions.js';
 
 export default definePreset({
 	type: 'spc',

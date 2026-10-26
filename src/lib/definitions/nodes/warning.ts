@@ -1,5 +1,5 @@
 import {orangeishColor} from '#lib/color/manipulation.js';
-import {defineNode} from '#lib/definitions/define.js';
+import {defineNode} from '#lib/model/definitions.js';
 
 export default defineNode({
 	type: 'wrn',

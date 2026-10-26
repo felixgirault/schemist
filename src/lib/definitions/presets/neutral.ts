@@ -1,6 +1,6 @@
-import {definePreset} from '#lib/definitions/define.js';
 import lightness from '#lib/definitions/nodes/lightness.js';
 import saturation from '#lib/definitions/nodes/saturation.js';
+import {definePreset} from '#lib/model/definitions.js';
 
 const levels = [
 	['Neutral white', 98],

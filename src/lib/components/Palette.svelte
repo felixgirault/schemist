@@ -7,7 +7,7 @@
 
 	onMount(() => {
 		palette.root = getRootNode();
-		startHistory(palette.root);
+		return startHistory(palette.root);
 	});
 </script>
 

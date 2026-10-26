@@ -1,7 +1,7 @@
+import type {NodeData} from '#lib/model/tree.js';
 import {pack} from '#lib/packing/index.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
-import type {NodeData} from '#lib/tree.js';
-import {serializeTree} from '#lib/tree.js';
+import {serializeTree} from '#lib/stores/nodes.svelte.js';
 
 // encodeURI keeps the link readable, but leaves characters that
 // are meaningful in a query string.

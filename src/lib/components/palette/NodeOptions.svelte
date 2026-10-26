@@ -2,12 +2,9 @@
 	import BooleanField from '#lib/components/forms/BooleanField.svelte';
 	import ColorField from '#lib/components/forms/ColorField.svelte';
 	import RangeField from '#lib/components/forms/RangeField.svelte';
+	import {argOf, isPresetDef} from '#lib/model/definitions.js';
 	import {paramSamples} from '#lib/samples.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {
-		argOf,
-		isPresetDef
-	} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient

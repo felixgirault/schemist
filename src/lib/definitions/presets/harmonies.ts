@@ -1,4 +1,4 @@
-import {definePreset} from '#lib/definitions/define.js';
+import {definePreset} from '#lib/model/definitions.js';
 import splitComplementary from './splitComplementary';
 import tetrad from './tetrad';
 import triad from './triad';

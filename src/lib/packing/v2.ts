@@ -1,4 +1,4 @@
-import type {NodeData} from '#lib/tree.js';
+import type {NodeData} from '#lib/model/tree.js';
 import type {ColorCodec} from './v1';
 import {pack as packV1, unpack as unpackV1} from './v1';
 

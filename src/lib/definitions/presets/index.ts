@@ -1,7 +1,7 @@
 import type {
 	PresetDef,
 	PresetType
-} from '#lib/stores/nodes.svelte.js';
+} from '#lib/model/definitions.js';
 import harmonies from './harmonies';
 import materialDark from './materialDark';
 import materialLight from './materialLight';

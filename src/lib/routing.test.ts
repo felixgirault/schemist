@@ -1,5 +1,5 @@
 import {unpack} from '#lib/packing/index.js';
-import {parseTree} from '#lib/tree.js';
+import {parseTree} from '#lib/stores/nodes.svelte.js';
 import {expect, test, vi} from 'vitest';
 import {permalink} from './routing';
 

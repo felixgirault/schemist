@@ -122,10 +122,11 @@ to them narrow on the param type.
 
 - Domain types and pure functions (`Param`, `NodeDef`,
   `NodeData`, `evaluateTree`, `withIds`, `remapArgs`,
-  `generateName`, tree serialization) move to `#lib/model/`,
-  without runes. Definitions import from there.
-- `#lib/stores/` only holds reactive state: the `Node` class and
-  the stores.
+  `generateName`, `changedArg`) move to `#lib/model/`, without
+  runes. Definitions import from there.
+- `#lib/stores/` only holds reactive state: the `Node` class,
+  with the conversions between nodes and `NodeData` as they
+  create nodes, and the stores.
 - `startHistory` sets up the history effect and returns its
   cleanup, instead of a module-level `$effect.root`.
 - `debouncedOutputs` becomes `settledOutputs`, which says why it

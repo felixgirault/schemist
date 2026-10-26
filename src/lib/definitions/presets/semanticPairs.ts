@@ -1,5 +1,5 @@
-import {definePreset} from '#lib/definitions/define.js';
 import contrasting from '#lib/definitions/nodes/contrasting.js';
+import {definePreset} from '#lib/model/definitions.js';
 import semantics from './semantics';
 
 export default definePreset({

@@ -1,6 +1,6 @@
-import {definePreset} from '#lib/definitions/define.js';
 import tetradLeft from '#lib/definitions/nodes/tetradLeft.js';
 import tetradRight from '#lib/definitions/nodes/tetradRight.js';
+import {definePreset} from '#lib/model/definitions.js';
 
 export default definePreset({
 	type: 'ttd',

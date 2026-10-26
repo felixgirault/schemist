@@ -10,8 +10,8 @@
 		formatRgb,
 		formatSchemistToHex
 	} from '#lib/color/formatting.js';
+	import {isPresetDef} from '#lib/model/definitions.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
-	import {isPresetDef} from '#lib/stores/nodes.svelte.js';
 
 	interface Props {
 		id: string;

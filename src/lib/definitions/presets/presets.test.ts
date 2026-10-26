@@ -1,7 +1,9 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
-import {collectOutputs} from '#lib/stores/nodes.svelte.js';
-import {parseTree} from '#lib/tree.js';
+import {
+	collectOutputs,
+	parseTree
+} from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
 import presets from './index';
 

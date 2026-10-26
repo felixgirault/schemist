@@ -2,8 +2,8 @@ import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import defs, {isNodeType} from '#lib/definitions/nodes/index.js';
-import type {Args, Param} from '#lib/stores/nodes.svelte.js';
-import type {NodeData} from '#lib/tree.js';
+import type {Args, Param} from '#lib/model/definitions.js';
+import type {NodeData} from '#lib/model/tree.js';
 
 type IntermediateNodeData = Omit<NodeData, 'children'> & {
 	children: number[];

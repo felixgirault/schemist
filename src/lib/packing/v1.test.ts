@@ -1,7 +1,7 @@
 import {parseColor} from '#lib/color/parsing.js';
 import color from '#lib/definitions/nodes/color.js';
 import defs from '#lib/definitions/nodes/index.js';
-import {defaultArgs} from '#lib/stores/nodes.svelte.js';
+import {defaultArgs} from '#lib/model/definitions.js';
 import {expect, test} from 'vitest';
 import {pack, unpack} from './v1';
 

@@ -1,5 +1,5 @@
-import {definePreset} from '#lib/definitions/define.js';
 import lightness from '#lib/definitions/nodes/lightness.js';
+import {definePreset} from '#lib/model/definitions.js';
 
 const tones = [
 	['$', 80],

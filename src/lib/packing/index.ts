@@ -1,4 +1,4 @@
-import type {NodeData} from '#lib/tree.js';
+import type {NodeData} from '#lib/model/tree.js';
 import {unpack as unpackV1} from './v1';
 import {pack as packV2, unpack as unpackV2} from './v2';
 

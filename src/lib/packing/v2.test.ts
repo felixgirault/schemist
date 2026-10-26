@@ -2,9 +2,11 @@ import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {randomUsableColor} from '#lib/color/manipulation.js';
 import color from '#lib/definitions/nodes/color.js';
 import presets from '#lib/definitions/presets/index.js';
-import {collectOutputs} from '#lib/stores/nodes.svelte.js';
-import type {NodeData} from '#lib/tree.js';
-import {parseTree} from '#lib/tree.js';
+import type {NodeData} from '#lib/model/tree.js';
+import {
+	collectOutputs,
+	parseTree
+} from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
 import {
 	pack as packVersioned,

@@ -1,4 +1,4 @@
-import {defineNode} from '#lib/definitions/define.js';
+import {defineNode} from '#lib/model/definitions.js';
 import {defaultThemeColor} from '#lib/style.js';
 
 export default defineNode({
