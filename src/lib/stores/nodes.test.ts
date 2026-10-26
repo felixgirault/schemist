@@ -2,10 +2,16 @@ import {parseColor} from '#lib/color/parsing.js';
 import defs from '#lib/definitions/nodes/index.js';
 import {remapArgs} from '#lib/model/definitions.js';
 import type {NodeOutput} from '#lib/model/tree.js';
-import {evaluateTree, withIds} from '#lib/model/tree.js';
+import {
+	defaultInput,
+	evaluateTree,
+	withIds
+} from '#lib/model/tree.js';
 import {
 	collectOutputs,
-	parseTree
+	createNode,
+	parseTree,
+	serializeTree
 } from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
 
@@ -193,4 +199,48 @@ test('presets drop children', () => {
 	});
 
 	expect(tree.children).toEqual([]);
+});
+
+test('presets refuse children', () => {
+	const preset = createNode('lsc');
+	expect(() => preset.addChild(createNode('l'))).toThrow();
+	expect(preset.children).toEqual([]);
+
+	const parent = parseTree({
+		type: 'clr',
+		children: [{type: 'l'}]
+	});
+	expect(() => parent.setType('lsc')).toThrow();
+	expect(parent.def).toBe(defs.clr);
+});
+
+// Outputs are computed both on live nodes and on serialized
+// trees, which must agree.
+test('collectOutputs matches evaluateTree', () => {
+	const tree = parseTree({
+		type: 'clr',
+		token: 'Brand',
+		children: [
+			{
+				type: 'l',
+				token: 'Dark $',
+				isHidden: true,
+				args: {amount: 20},
+				children: [{type: 'cmp'}]
+			},
+			{type: 'lsc', args: {steps: 3}},
+			{type: 'hrm', isHidden: true},
+			{type: 'sch', token: 'Theme'}
+		]
+	});
+
+	// Entries, so that the order is compared too.
+	const outputs = Object.entries(collectOutputs(tree));
+
+	expect(outputs.length).toBeGreaterThan(10);
+	expect(outputs).toEqual(
+		Object.entries(
+			evaluateTree([serializeTree(tree)], defaultInput)
+		)
+	);
 });

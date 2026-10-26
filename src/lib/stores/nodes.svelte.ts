@@ -32,8 +32,10 @@ export class Node {
 	token = $state('');
 	isHidden = $state(false);
 	args: Args = $state({});
-	children: Node[] = $state([]);
-	parent?: Node = $state();
+	// Only changed through the tree methods, which keep both ends
+	// of a link in sync.
+	#children: Node[] = $state([]);
+	#parent?: Node = $state();
 	input: NodeOutput = $derived(
 		this.parent?.output ?? defaultInput
 	);
@@ -63,55 +65,75 @@ export class Node {
 		this.args = defaultArgs(this.def);
 	}
 
+	get children(): readonly Node[] {
+		return this.#children;
+	}
+
+	get parent() {
+		return this.#parent;
+	}
+
 	// Keeps the id, token, visibility and children, so that the
 	// change is recorded as a single history step.
 	setType(type: NodeType) {
 		const def = defs[type];
+
+		// Presets generate their colors, and can't have children.
+		if (isPresetDef(def) && this.#children.length) {
+			throw new Error(
+				"A node with children can't be a preset."
+			);
+		}
+
 		this.args = remapArgs(this.def, def, this.args);
 		this.def = def;
 	}
 
 	addChild(child: Node) {
-		child.parent?.removeChild(child);
-		child.parent = this;
-		this.children.push(child);
+		if (isPresetDef(this.def)) {
+			throw new Error("A preset can't have children.");
+		}
+
+		child.#parent?.removeChild(child);
+		child.#parent = this;
+		this.#children.push(child);
 	}
 
 	removeChild(child: Node) {
-		const i = this.children.indexOf(child);
+		const i = this.#children.indexOf(child);
 
 		if (i >= 0) {
-			this.children = withoutIndex(this.children, i);
-			child.parent = undefined;
+			this.#children = withoutIndex(this.#children, i);
+			child.#parent = undefined;
 		}
 	}
 
 	destroy() {
-		this.parent?.removeChild(this);
+		this.#parent?.removeChild(this);
 	}
 
 	// Puts the given nodes in place of this one among its
 	// siblings.
 	replaceWith(nodes: Node[]) {
-		const parent = this.parent;
+		const parent = this.#parent;
 
 		if (!parent) {
 			return;
 		}
 
 		nodes.forEach((node) => {
-			node.parent?.removeChild(node);
-			node.parent = parent;
+			node.#parent?.removeChild(node);
+			node.#parent = parent;
 		});
 
-		const i = parent.children.indexOf(this);
-		parent.children = [
-			...parent.children.slice(0, i),
+		const i = parent.#children.indexOf(this);
+		parent.#children = [
+			...parent.#children.slice(0, i),
 			...nodes,
-			...parent.children.slice(i + 1)
+			...parent.#children.slice(i + 1)
 		];
 
-		this.parent = undefined;
+		this.#parent = undefined;
 	}
 }
 
