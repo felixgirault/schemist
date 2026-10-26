@@ -1,8 +1,6 @@
-import {presetDefs} from '#lib/definitions/presets/index.js';
 import type {
 	ColorType,
-	NodeDef,
-	NodeType
+	NodeDef
 } from '#lib/model/definitions.js';
 import analogous from './analogous';
 import color from './color';
@@ -25,38 +23,28 @@ import triadRight from './triadRight';
 import warning from './warning';
 
 // Typed against the list of types, so that none is missing.
-const colorDefs: {[T in ColorType]: NodeDef & {type: T}} = {
-	[analogous.type]: analogous,
-	[complementary.type]: complementary,
-	[contrasting.type]: contrasting,
-	[highlight.type]: highlight,
-	[hue.type]: hue,
-	[informative.type]: informative,
-	[lightness.type]: lightness,
-	[negative.type]: negative,
-	[color.type]: color,
-	[positive.type]: positive,
-	[saturation.type]: saturation,
-	[shadow.type]: shadow,
-	[splitComplementaryLeft.type]: splitComplementaryLeft,
-	[splitComplementaryRight.type]: splitComplementaryRight,
-	[tetradLeft.type]: tetradLeft,
-	[tetradRight.type]: tetradRight,
-	[triadLeft.type]: triadLeft,
-	[triadRight.type]: triadRight,
-	[warning.type]: warning
-};
-
-// Presets are listed in their own module rather than in `defList`.
-const defs: {[T in NodeType]: NodeDef} = {
-	...colorDefs,
-	...presetDefs
-};
-
-export const isNodeType = (type: string): type is NodeType =>
-	Object.hasOwn(defs, type);
-
-export default defs;
+export const colorDefs: {[T in ColorType]: NodeDef & {type: T}} =
+	{
+		[analogous.type]: analogous,
+		[complementary.type]: complementary,
+		[contrasting.type]: contrasting,
+		[highlight.type]: highlight,
+		[hue.type]: hue,
+		[informative.type]: informative,
+		[lightness.type]: lightness,
+		[negative.type]: negative,
+		[color.type]: color,
+		[positive.type]: positive,
+		[saturation.type]: saturation,
+		[shadow.type]: shadow,
+		[splitComplementaryLeft.type]: splitComplementaryLeft,
+		[splitComplementaryRight.type]: splitComplementaryRight,
+		[tetradLeft.type]: tetradLeft,
+		[tetradRight.type]: tetradRight,
+		[triadLeft.type]: triadLeft,
+		[triadRight.type]: triadRight,
+		[warning.type]: warning
+	};
 
 export const defList = [
 	analogous,

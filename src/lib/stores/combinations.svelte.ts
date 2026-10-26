@@ -4,27 +4,16 @@ import type {
 } from '#lib/color/contrast.js';
 import {
 	Wcag2Level,
-	equivalence,
-	wcag2Contrast,
-	wcag2Grade,
-	wcag3Contrast,
-	wcag3Grade
+	contrastMetrics,
+	equivalence
 } from '#lib/color/contrast.js';
-import {
-	simulateDeuteranomaly,
-	simulateProtanomaly,
-	simulateTritanomaly
-} from '#lib/color/simulation.js';
+import type {BlindnessType} from '#lib/color/simulation.js';
+import {simulations} from '#lib/color/simulation.js';
 import type {RgbColor} from '#lib/color/types.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import type {PaletteColor} from '#lib/stores/palette.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
-
-export type BlindnessType =
-	| 'protanomaly'
-	| 'deuteranomaly'
-	| 'tritanomaly';
 
 export type CombinationContrast = {
 	bg: RgbColor;
@@ -45,26 +34,6 @@ export type Combination = {
 	minGrade: ContrastGrade;
 	contrast: CombinationContrast;
 	simulatedContrasts: SimulatedContrast[];
-};
-
-const contrastFns: Record<
-	ContrastType,
-	{
-		level: (bg: RgbColor, fg: RgbColor) => number;
-		grade: (level: number) => ContrastGrade;
-	}
-> = {
-	wcag2: {level: wcag2Contrast, grade: wcag2Grade},
-	wcag3: {level: wcag3Contrast, grade: wcag3Grade}
-};
-
-const simulations: Record<
-	BlindnessType,
-	(color: RgbColor) => RgbColor
-> = {
-	protanomaly: simulateProtanomaly,
-	deuteranomaly: simulateDeuteranomaly,
-	tritanomaly: simulateTritanomaly
 };
 
 class Combinations {
@@ -128,7 +97,7 @@ class Combinations {
 
 	all = $derived.by(() => {
 		const {level: levelFn, grade: gradeFn} =
-			contrastFns[this.contrastType];
+			contrastMetrics[this.contrastType];
 
 		return this.#colorPairs.map(
 			([bgOutput, fgOutput]): Combination => {

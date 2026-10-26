@@ -2,7 +2,7 @@ import {formatSchemistToHex} from '#lib/color/formatting.js';
 import nearestColor from '#lib/color/nearest.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import defs from '#lib/definitions/nodes/index.js';
+import defs from '#lib/definitions/index.js';
 import type {
 	Args,
 	NodeDef,

@@ -1,7 +1,7 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import defs, {isNodeType} from '#lib/definitions/nodes/index.js';
+import defs, {isNodeType} from '#lib/definitions/index.js';
 import type {Args, Param} from '#lib/model/definitions.js';
 import type {NodeData} from '#lib/model/tree.js';
 

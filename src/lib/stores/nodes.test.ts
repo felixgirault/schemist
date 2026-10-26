@@ -1,4 +1,4 @@
-import defs from '#lib/definitions/nodes/index.js';
+import defs from '#lib/definitions/index.js';
 import type {IdentifiedNodeData} from '#lib/model/tree.js';
 import {
 	changedArg,

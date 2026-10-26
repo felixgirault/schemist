@@ -97,3 +97,15 @@ export const wcag3Contrast = (bg: RgbColor, fg: RgbColor) => {
 		) as number
 	);
 };
+
+// Functions of each contrast type, see SPEC §9.2.
+export const contrastMetrics: Record<
+	ContrastType,
+	{
+		level: (bg: RgbColor, fg: RgbColor) => number;
+		grade: (level: number) => ContrastGrade;
+	}
+> = {
+	wcag2: {level: wcag2Contrast, grade: wcag2Grade},
+	wcag3: {level: wcag3Contrast, grade: wcag3Grade}
+};

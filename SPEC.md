@@ -64,6 +64,7 @@ src/
   lib/
     color/                 Color model, conversions, parsing, formatting,
                            manipulation, contrast, simulation, naming
+    definitions/index.ts   `defs`, every node type by code, presets included (§6)
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§5.4, §7)
     model/                 Domain types and pure functions, without runes:
@@ -244,12 +245,13 @@ regular one, and its `apply` returns the input unchanged.
 
 ## 6. Node types
 
-Defined in `src/lib/definitions/nodes/`, registered in `index.ts`
-(`defs` by type, `defList` for display order). A definition has a
-short `type` code (used in permalinks), a `label`, an optional
-`description` and `argsLabel`, `params`, a `samples` style for
-previews (`single`, `discrete`, `continuous`) and
-`apply(color, args)`.
+Defined in `src/lib/definitions/nodes/`, listed in its `index.ts`
+(`colorDefs` by type, `defList` for display order).
+`src/lib/definitions/index.ts` merges them with presets into
+`defs`. A definition has a short `type` code (used in
+permalinks), a `label`, an optional `description` and
+`argsLabel`, `params`, a `samples` style for previews (`single`,
+`discrete`, `continuous`) and `apply(color, args)`.
 
 Type codes are listed in the `ColorType` and `PresetType` unions
 (`#lib/model/definitions.ts`), and `defs` must have exactly one
@@ -320,8 +322,8 @@ node. `$` in tokens refers to the parent's name.
 complementary, Triad, Tetrad, Semantic colors, Semantic color
 pairs, Scale, Neutral, Harmonies, Rainbow, Material tones light
 and dark, Material neutral light and dark, Material light and
-dark, Schemist theme. `definitions/nodes/index.ts` registers them
-in `defs` from that list.
+dark, Schemist theme, keyed by type in `presetDefs`.
+`definitions/index.ts` merges them into `defs`.
 
 `src/lib/definitions/presets/presets.test.ts` snapshots the
 colors and names of every preset, which guards them against

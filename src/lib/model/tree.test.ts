@@ -1,5 +1,5 @@
 import {parseColor} from '#lib/color/parsing.js';
-import defs from '#lib/definitions/nodes/index.js';
+import defs from '#lib/definitions/index.js';
 import {expect, test} from 'vitest';
 import type {IdentifiedNodeData, NodeOutput} from './tree';
 import {changedArg, evaluateTree, withIds} from './tree';

@@ -59,3 +59,17 @@ const simulate = (m: Matrix) => (color: RgbColor) => {
 export const simulateProtanomaly = simulate(protanomaly);
 export const simulateDeuteranomaly = simulate(deuteranomaly);
 export const simulateTritanomaly = simulate(tritanomaly);
+
+export type BlindnessType =
+	| 'protanomaly'
+	| 'deuteranomaly'
+	| 'tritanomaly';
+
+export const simulations: Record<
+	BlindnessType,
+	(color: RgbColor) => RgbColor
+> = {
+	protanomaly: simulateProtanomaly,
+	deuteranomaly: simulateDeuteranomaly,
+	tritanomaly: simulateTritanomaly
+};

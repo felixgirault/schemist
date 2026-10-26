@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {BlindnessType} from '#lib/stores/combinations.svelte.js';
+	import type {BlindnessType} from '#lib/color/simulation.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 
 	const entries: [string, BlindnessType][] = [
