@@ -80,25 +80,46 @@ export type RangeParam = {
 
 export type Param = BooleanParam | ColorParam | RangeParam;
 
-export type Args = {
-	[name: string]: any;
+export type ParamValue<P extends Param = Param> =
+	P extends RangeParam
+		? number
+		: P extends BooleanParam
+			? boolean
+			: SchemistColor;
+
+// Args of a list of params, keyed by their names.
+export type ArgsOf<P extends readonly Param[]> = {
+	[K in P[number] as K['name']]: ParamValue<K>;
 };
 
-export type NodeDef = {
+export type Args = Record<string, ParamValue>;
+
+// Args hold values of the kind of their param, as they start
+// from defaults and are only set by fields of that kind.
+export const argOf = <P extends Param>(args: Args, param: P) =>
+	args[param.name] as ParamValue<P>;
+
+// Methods rather than function properties, so that definitions of
+// any params fit `NodeDef` (methods are bivariant).
+export type NodeDef<
+	P extends readonly Param[] = readonly Param[]
+> = {
 	type: NodeType;
 	label: string;
-	argsLabel?: (args: Args) => string;
+	argsLabel?(args: ArgsOf<P>): string;
 	description?: string;
-	params: Param[];
+	params: P;
 	samples: SampleType;
-	apply: (color: SchemistColor, args: Args) => SchemistColor;
+	apply(color: SchemistColor, args: ArgsOf<P>): SchemistColor;
 };
 
 // A node whose colors are generated from a template tree, see
 // ADR 4. Its own `apply` leaves the input unchanged.
-export type PresetDef = NodeDef & {
+export type PresetDef<
+	P extends readonly Param[] = readonly Param[]
+> = NodeDef<P> & {
 	type: PresetType;
-	build: (args: Args) => PresetNode[];
+	build(args: ArgsOf<P>): PresetNode[];
 };
 
 export const isPresetDef = (def: NodeDef): def is PresetDef =>

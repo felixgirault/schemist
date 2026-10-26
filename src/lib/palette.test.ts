@@ -1,6 +1,8 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
+import color from '#lib/definitions/nodes/color.js';
 import {pack} from '#lib/packing/index.js';
+import {argOf} from '#lib/stores/nodes.svelte.js';
 import {afterEach, expect, test, vi} from 'vitest';
 import {getRootNode} from './palette';
 
@@ -15,7 +17,9 @@ const load = (preset: string | null, stored: string | null) => {
 	});
 
 	vi.stubGlobal('localStorage', {getItem: () => stored});
-	return formatSchemistToHex(getRootNode().args.color);
+	return formatSchemistToHex(
+		argOf(getRootNode().args, color.params[0])
+	);
 };
 
 afterEach(() => {

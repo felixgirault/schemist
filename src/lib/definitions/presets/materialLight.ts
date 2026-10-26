@@ -1,11 +1,11 @@
+import {definePreset} from '#lib/definitions/define.js';
 import complementary from '#lib/definitions/nodes/complementary.js';
 import negative from '#lib/definitions/nodes/negative.js';
 import saturation from '#lib/definitions/nodes/saturation.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 import materialNeutralLight from './materialNeutralLight';
 import materialTonesLight from './materialTonesLight';
 
-export default {
+export default definePreset({
 	type: 'mal',
 	label: 'Material light',
 	description:
@@ -43,4 +43,4 @@ export default {
 			}
 		];
 	}
-} satisfies PresetDef;
+});

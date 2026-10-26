@@ -1,8 +1,8 @@
+import {definePreset} from '#lib/definitions/define.js';
 import contrasting from '#lib/definitions/nodes/contrasting.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 import semantics from './semantics';
 
-export default {
+export default definePreset({
 	type: 'smp',
 	label: 'Semantic color pairs',
 	description: 'Semantic colors, each with a contrasting color',
@@ -12,9 +12,9 @@ export default {
 		return color;
 	},
 	build() {
-		return semantics.build().map((node) => ({
+		return semantics.build({}).map((node) => ({
 			...node,
 			children: [{type: contrasting.type, token: 'On $'}]
 		}));
 	}
-} satisfies PresetDef;
+});

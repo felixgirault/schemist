@@ -1,9 +1,12 @@
 <script lang="ts">
-	import type {Node, Param} from '#lib/stores/nodes.svelte.js';
+	import type {
+		BooleanParam,
+		Node
+	} from '#lib/stores/nodes.svelte.js';
 
 	interface Props {
 		id: Node['id'];
-		param: Param;
+		param: BooleanParam;
 		value: boolean;
 	}
 

@@ -1,10 +1,10 @@
+import {definePreset} from '#lib/definitions/define.js';
 import informative from '#lib/definitions/nodes/informative.js';
 import negative from '#lib/definitions/nodes/negative.js';
 import positive from '#lib/definitions/nodes/positive.js';
 import warning from '#lib/definitions/nodes/warning.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
-export default {
+export default definePreset({
 	type: 'sem',
 	label: 'Semantic colors',
 	description:
@@ -22,4 +22,4 @@ export default {
 			{type: negative.type, token: 'Error'}
 		];
 	}
-} satisfies PresetDef;
+});

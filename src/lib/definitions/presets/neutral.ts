@@ -1,6 +1,6 @@
+import {definePreset} from '#lib/definitions/define.js';
 import lightness from '#lib/definitions/nodes/lightness.js';
 import saturation from '#lib/definitions/nodes/saturation.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
 const levels = [
 	['Neutral white', 98],
@@ -10,7 +10,7 @@ const levels = [
 	['Neutral black', 2]
 ] as const;
 
-export default {
+export default definePreset({
 	type: 'ntl',
 	label: 'Neutral',
 	argsLabel: ({amount}) => `${amount}%`,
@@ -46,4 +46,4 @@ export default {
 			}
 		];
 	}
-} satisfies PresetDef;
+});

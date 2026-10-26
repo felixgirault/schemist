@@ -1,8 +1,8 @@
+import {definePreset} from '#lib/definitions/define.js';
 import triadLeft from '#lib/definitions/nodes/triadLeft.js';
 import triadRight from '#lib/definitions/nodes/triadRight.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
-export default {
+export default definePreset({
 	type: 'trd',
 	label: 'Triad',
 	description: 'Hues evenly spread in three',
@@ -17,4 +17,4 @@ export default {
 			{type: triadRight.type, token: 'Right $ triad'}
 		];
 	}
-} satisfies PresetDef;
+});

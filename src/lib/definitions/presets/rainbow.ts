@@ -1,8 +1,8 @@
+import {definePreset} from '#lib/definitions/define.js';
 import hue from '#lib/definitions/nodes/hue.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 import {range} from '#lib/utils/generators.js';
 
-export default {
+export default definePreset({
 	type: 'rnb',
 	label: 'Rainbow',
 	argsLabel: ({count}) => `${count} colors`,
@@ -31,4 +31,4 @@ export default {
 			}
 		}));
 	}
-} satisfies PresetDef;
+});

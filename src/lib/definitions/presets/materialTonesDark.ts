@@ -1,5 +1,5 @@
+import {definePreset} from '#lib/definitions/define.js';
 import lightness from '#lib/definitions/nodes/lightness.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
 const tones = [
 	['$', 80],
@@ -9,7 +9,7 @@ const tones = [
 ] as const;
 
 // @see https://m3.material.io/styles/color/the-color-system/tokens
-export default {
+export default definePreset({
 	type: 'mtd',
 	label: 'Material tones dark',
 	description: 'Tone variations for dark themes',
@@ -25,4 +25,4 @@ export default {
 			args: {amount}
 		}));
 	}
-} satisfies PresetDef;
+});

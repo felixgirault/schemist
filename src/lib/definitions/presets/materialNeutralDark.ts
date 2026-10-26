@@ -1,6 +1,6 @@
+import {definePreset} from '#lib/definitions/define.js';
 import lightness from '#lib/definitions/nodes/lightness.js';
 import saturation from '#lib/definitions/nodes/saturation.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
 const levels = [
 	['Surface', 10],
@@ -11,7 +11,7 @@ const levels = [
 ] as const;
 
 // @see https://m3.material.io/styles/color/the-color-system/tokens
-export default {
+export default definePreset({
 	type: 'mnd',
 	label: 'Material neutral dark',
 	description: 'Neutral variations for dark themes',
@@ -35,4 +35,4 @@ export default {
 			}
 		];
 	}
-} satisfies PresetDef;
+});

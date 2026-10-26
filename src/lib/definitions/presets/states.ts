@@ -1,8 +1,8 @@
+import {definePreset} from '#lib/definitions/define.js';
 import highlight from '#lib/definitions/nodes/highlight.js';
 import shadow from '#lib/definitions/nodes/shadow.js';
-import type {PresetDef} from '#lib/stores/nodes.svelte.js';
 
-export default {
+export default definePreset({
 	type: 'stt',
 	label: 'States',
 	argsLabel: ({amount}) => `${amount}%`,
@@ -32,4 +32,4 @@ export default {
 			{type: shadow.type, token: '$ dark', args: {amount}}
 		];
 	}
-} satisfies PresetDef;
+});

@@ -59,7 +59,7 @@ export const pack = (
 		}
 	};
 
-	const packArgs = (params: Param[], args: Args) =>
+	const packArgs = (params: readonly Param[], args: Args) =>
 		params.flatMap(({type, name}) => [
 			indice(name),
 			packValue(type, args[name])
@@ -127,17 +127,23 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 	};
 
 	const unpackArgs = (
-		params: Param[],
+		params: readonly Param[],
 		args: [number, number][]
 	): Args => {
 		const paramTypes = Object.fromEntries(
 			params.map(({type, name}) => [name, type])
 		);
 
+		// Args of unknown params are dropped, so their defaults
+		// apply.
 		return Object.fromEntries(
-			args.map(([k, v]) => {
+			args.flatMap(([k, v]) => {
 				const name = index[k];
-				return [name, unpackValue(paramTypes[name], v)];
+				const type = Object.hasOwn(paramTypes, name)
+					? paramTypes[name]
+					: undefined;
+				const value = type && unpackValue(type, v);
+				return value === undefined ? [] : [[name, value]];
 			})
 		);
 	};

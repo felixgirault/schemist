@@ -1,7 +1,7 @@
 import {reddishColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/definitions/define.js';
 
-export default {
+export default defineNode({
 	type: 'neg',
 	label: 'Negative',
 	description: 'A reddish color to convey negativeness',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return reddishColor(color);
 	}
-} satisfies NodeDef;
+});

@@ -1,7 +1,7 @@
 import {rotateHue} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/definitions/define.js';
 
-export default {
+export default defineNode({
 	type: 'cmp',
 	label: 'Complementary',
 	description: 'The opposite color',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return rotateHue(color, 180);
 	}
-} satisfies NodeDef;
+});

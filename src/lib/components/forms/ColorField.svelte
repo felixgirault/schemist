@@ -5,13 +5,16 @@
 	import HslColorField from '#lib/components/forms/HslColorField.svelte';
 	import LchColorField from '#lib/components/forms/LchColorField.svelte';
 	import RgbColorField from '#lib/components/forms/RgbColorField.svelte';
-	import type {Node, Param} from '#lib/stores/nodes.svelte.js';
+	import type {
+		ColorParam,
+		Node
+	} from '#lib/stores/nodes.svelte.js';
 
 	type InputFormat = 'css' | 'rgb' | 'hsl' | 'lch';
 
 	interface Props {
 		id: Node['id'];
-		param: Param;
+		param: ColorParam;
 		value: SchemistColor;
 	}
 

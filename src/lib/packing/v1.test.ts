@@ -49,3 +49,13 @@ test('refuse unknown node types', () => {
 		'Unknown node type `zzz`.'
 	);
 });
+
+test('drop args of unknown params', () => {
+	expect(unpack('0@0142x293x2a@l,100%,amount,foo')).toEqual({
+		type: 'l',
+		token: '100%',
+		isHidden: false,
+		args: {amount: 41},
+		children: []
+	});
+});

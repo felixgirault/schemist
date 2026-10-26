@@ -1,7 +1,7 @@
 import {blueishColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import {defineNode} from '#lib/definitions/define.js';
 
-export default {
+export default defineNode({
 	type: 'inf',
 	label: 'Informative',
 	description: 'A blueish color to convey information',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return blueishColor(color);
 	}
-} satisfies NodeDef;
+});
