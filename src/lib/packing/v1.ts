@@ -9,7 +9,27 @@ type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
 	children: number[];
 };
 
-export const pack = (node: PresetNode): string => {
+export type ColorCodec = {
+	encode: (color: SchemistColor) => string;
+	decode: (data: string) => SchemistColor | undefined;
+};
+
+const hexCodec: ColorCodec = {
+	encode: (color) => formatSchemistToHex(color).substring(1),
+	decode: (data) => parseColor(`#${data}`)[1]
+};
+
+// Escapes the separators so tokens can contain them.
+const escapeEntry = (entry: string) =>
+	entry.replace(/[%,@]/g, encodeURIComponent);
+
+const unescapeEntry = (entry: string) =>
+	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
+
+export const pack = (
+	node: PresetNode,
+	colorCodec = hexCodec
+): string => {
 	const packed: string[] = [];
 	// A Map keeps insertion order, unlike an object which lists
 	// integer-like keys first (see #8).
@@ -34,9 +54,7 @@ export const pack = (node: PresetNode): string => {
 				return value;
 			case 'color':
 				return indice(
-					formatSchemistToHex(
-						value as SchemistColor
-					).substring(1)
+					colorCodec.encode(value as SchemistColor)
 				);
 		}
 	};
@@ -86,16 +104,16 @@ export const pack = (node: PresetNode): string => {
 	return [
 		rootIndex,
 		packed.join(','),
-		[...index.keys()].join(',')
+		[...index.keys()].map(escapeEntry).join(',')
 	].join('@');
 };
 
-export const unpack = (data: string) => {
+export const unpack = (data: string, colorCodec = hexCodec) => {
 	const [rootIndex, inlinePacked, inlineIndex] =
 		data.split('@');
 
 	const packed = inlinePacked.split(',');
-	const index = inlineIndex.split(',');
+	const index = inlineIndex.split(',').map(unescapeEntry);
 
 	const unpackValue = (type: Param['type'], value: number) => {
 		switch (type) {
@@ -104,7 +122,7 @@ export const unpack = (data: string) => {
 			case 'range':
 				return value;
 			case 'color':
-				return parseColor(`#${index[value]}`)[1];
+				return colorCodec.decode(index[value]);
 		}
 	};
 

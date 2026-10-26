@@ -4,6 +4,7 @@
 	import RangeField from '#lib/components/forms/RangeField.svelte';
 	import {paramSamples} from '#lib/samples.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
+	import {isPresetDef} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
@@ -22,6 +23,7 @@
 
 <form
 	{id}
+	popover
 	class="form input-grid"
 	onsubmit={(event) => event.preventDefault()}
 >
@@ -33,17 +35,20 @@
 				unit={param.unit}
 				min={param.min}
 				max={param.max}
-				gradient={(def.samples === 'continuous'
-					? continuousGradient
-					: discreteGradient)(
-					paramSamples(
-						def,
-						node.args,
-						param.name,
-						node.input[0],
-						clamp(param.max - param.min, 15)
-					)
-				)}
+				gradient={isPresetDef(def)
+					? // Presets output several colors, see ADR 4.
+						'transparent'
+					: (def.samples === 'continuous'
+							? continuousGradient
+							: discreteGradient)(
+							paramSamples(
+								def,
+								node.args,
+								param.name,
+								node.input[0],
+								clamp(param.max - param.min, 15)
+							)
+						)}
 				bind:value={node.args[param.name]}
 			/>
 		{:else}
@@ -57,9 +62,3 @@
 		{/if}
 	{/each}
 </form>
-
-<style>
-	form {
-		margin-top: 0.5rem;
-	}
-</style>

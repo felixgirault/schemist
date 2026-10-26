@@ -112,12 +112,27 @@ class Combinations {
 			: this.sortedColors
 	);
 
-	#colorPairs = $derived(
-		this.#filteredColors.flatMap((color) =>
-			this.colorEntries
-				.filter((other) => color.id !== other.id)
-				.map((other): [Entry, Entry] => [color, other])
-		)
+	// background id => foreground id => selected
+	selected = $state<
+		Record<Node['id'], Record<Node['id'], boolean>>
+	>({});
+
+	#selectedPairs = $derived(
+		Object.entries(this.selected).flatMap(([bgId, fgs]) => {
+			const bg = this.#filteredColors.find(
+				({id}) => id === bgId
+			);
+			return Object.entries(fgs).flatMap(
+				([fgId, isSelected]) => {
+					const fg = this.colorEntries.find(
+						({id}) => id === fgId
+					);
+					return bg && fg && isSelected
+						? [[bg, fg] as [Entry, Entry]]
+						: [];
+				}
+			);
+		})
 	);
 
 	all = $derived.by(() => {
@@ -128,7 +143,7 @@ class Combinations {
 		const gradeFn =
 			this.contrastType === 'wcag2' ? wcag2Grade : wcag3Grade;
 
-		return this.#colorPairs.map(
+		return this.#selectedPairs.map(
 			([bgOutput, fgOutput]): Combination => {
 				const baseLevel = levelFn(
 					bgOutput.rgbColor,
