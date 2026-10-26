@@ -9,27 +9,27 @@ import {
 	withIds
 } from '#lib/stores/nodes.svelte.js';
 
-export type PresetNode = {
+export type NodeData = {
 	// Only set when serializing a tree, to restore it as is.
 	id?: string;
 	type: NodeType;
 	token?: string;
 	args?: Args;
-	children?: PresetNode[];
+	children?: NodeData[];
 	isHidden?: boolean;
 };
 
 // A tree whose ids are all set, once serialized or numbered.
-export type IdentifiedPresetNode = Omit<
-	PresetNode,
+export type IdentifiedNodeData = Omit<
+	NodeData,
 	'id' | 'children'
 > & {
 	id: string;
-	children?: IdentifiedPresetNode[];
+	children?: IdentifiedNodeData[];
 };
 
-export const parseTree = (preset: PresetNode) => {
-	const {id, type, isHidden, token, args, children} = preset;
+export const parseTree = (data: NodeData) => {
+	const {id, type, isHidden, token, args, children} = data;
 	const node = createNode(type, isHidden, token, id);
 
 	if (args) {
@@ -38,15 +38,15 @@ export const parseTree = (preset: PresetNode) => {
 
 	// Presets generate their colors, and can't have children.
 	if (children && !isPresetDef(node.def)) {
-		children.forEach((childPreset) => {
-			node.addChild(parseTree(childPreset));
+		children.forEach((child) => {
+			node.addChild(parseTree(child));
 		});
 	}
 
 	return node;
 };
 
-const hideTree = (tree: PresetNode): PresetNode => ({
+const hideTree = (tree: NodeData): NodeData => ({
 	...tree,
 	isHidden: true,
 	children: tree.children?.map(hideTree)
@@ -79,7 +79,7 @@ export const expandPreset = (preset: Node) => {
 
 export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
-	const data: IdentifiedPresetNode = {
+	const data: IdentifiedNodeData = {
 		id: node.id,
 		type: node.def.type,
 		isHidden: node.isHidden
@@ -101,22 +101,22 @@ export const serializeTree = (node: Node) => {
 };
 
 const flattenTree = (
-	tree: PresetNode,
-	nodes = new Map<string | undefined, PresetNode>()
+	tree: NodeData,
+	nodes = new Map<string | undefined, NodeData>()
 ) => {
 	nodes.set(tree.id, tree);
 	tree.children?.forEach((child) => flattenTree(child, nodes));
 	return nodes;
 };
 
-const childIds = ({children}: PresetNode) =>
+const childIds = ({children}: NodeData) =>
 	children?.map(({id}) => id).join() ?? '';
 
 // Names the only arg that differs between two serialized trees
 // (as `nodeId.argName`), or nothing if anything else changed.
 export const changedArg = (
-	previous: PresetNode,
-	next: PresetNode
+	previous: NodeData,
+	next: NodeData
 ) => {
 	const before = flattenTree(previous);
 	const after = flattenTree(next);

@@ -1,4 +1,3 @@
-import type {PresetNode} from '#lib/presets.js';
 import type {
 	Args,
 	NodeDef,
@@ -8,6 +7,7 @@ import {
 	evaluateTree,
 	withIds
 } from '#lib/stores/nodes.svelte.js';
+import type {NodeData} from '#lib/tree.js';
 import {range} from '#lib/utils/generators.js';
 import {interval} from '#lib/utils/math.js';
 import type {SchemistColor} from './color/types';
@@ -71,7 +71,7 @@ export const paramSamples = (
 // Visible colors of a tree, generated colors of presets
 // included.
 export const presetSamples = (
-	nodes: PresetNode[],
+	nodes: NodeData[],
 	color: SchemistColor
 ) =>
 	Object.values(

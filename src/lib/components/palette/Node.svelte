@@ -4,7 +4,6 @@
 	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
-	import {expandPreset} from '#lib/presets.js';
 	import {features} from '#lib/stores/features.svelte.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
@@ -12,6 +11,7 @@
 		isPresetDef
 	} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
+	import {expandPreset} from '#lib/tree.js';
 	import {discreteGradient} from '#lib/utils/css.js';
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';

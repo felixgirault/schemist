@@ -1,8 +1,8 @@
-import type {PresetNode} from '#lib/presets.js';
+import type {NodeData} from '#lib/tree.js';
 import {unpack as unpackV1} from './v1';
 import {pack as packV2, unpack as unpackV2} from './v2';
 
-export const pack = (node: PresetNode): string =>
+export const pack = (node: NodeData): string =>
 	`2@${packV2(node)}`;
 
 export const unpack = (data: string) => {

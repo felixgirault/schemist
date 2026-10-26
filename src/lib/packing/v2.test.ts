@@ -2,9 +2,9 @@ import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {randomUsableColor} from '#lib/color/manipulation.js';
 import color from '#lib/definitions/nodes/color.js';
 import presets from '#lib/definitions/presets/index.js';
-import type {PresetNode} from '#lib/presets.js';
-import {parseTree} from '#lib/presets.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
+import type {NodeData} from '#lib/tree.js';
+import {parseTree} from '#lib/tree.js';
 import {expect, test} from 'vitest';
 import {
 	pack as packVersioned,
@@ -27,7 +27,7 @@ test('colors are packed losslessly', () => {
 });
 
 test('presets are packed with their args', () => {
-	const tree: PresetNode = {
+	const tree: NodeData = {
 		type: color.type,
 		children: [
 			{type: 'lsc', args: {steps: 5}},

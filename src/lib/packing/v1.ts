@@ -2,10 +2,10 @@ import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import defs, {isNodeType} from '#lib/definitions/nodes/index.js';
-import type {PresetNode} from '#lib/presets.js';
 import type {Args, Param} from '#lib/stores/nodes.svelte.js';
+import type {NodeData} from '#lib/tree.js';
 
-type IntermediatePresetNode = Omit<PresetNode, 'children'> & {
+type IntermediateNodeData = Omit<NodeData, 'children'> & {
 	children: number[];
 };
 
@@ -27,7 +27,7 @@ const unescapeEntry = (entry: string) =>
 	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
 
 export const pack = (
-	node: PresetNode,
+	node: NodeData,
 	colorCodec = hexCodec
 ): string => {
 	const packed: string[] = [];
@@ -65,7 +65,7 @@ export const pack = (
 			packValue(type, args[name])
 		]);
 
-	const packNode = (node: PresetNode): number => {
+	const packNode = (node: NodeData): number => {
 		const typeIndex = indice(node.type as string);
 		const tokenIndex = indice(node.token ?? '');
 		const hiddenFlag = node.isHidden ? '!' : '';
@@ -148,7 +148,9 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 		);
 	};
 
-	const unpackData = (packedData: string) => {
+	const unpackData = (
+		packedData: string
+	): IntermediateNodeData => {
 		const matches = packedData.match(
 			/y[0-9a-f]{3}|x[0-9a-f]{2}|[0-9a-f]/gi
 		);
@@ -184,7 +186,7 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 			isHidden: packedData.startsWith('!'),
 			args: unpackArgs(defs[type].params, argEntries),
 			children: data
-		} as IntermediatePresetNode;
+		};
 	};
 
 	const nodes = packed.map(unpackData);
@@ -195,7 +197,7 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 		isHidden,
 		args,
 		children
-	}: IntermediatePresetNode): PresetNode => ({
+	}: IntermediateNodeData): NodeData => ({
 		type,
 		token,
 		isHidden,

@@ -3,10 +3,7 @@ import nearestColor from '#lib/color/nearest.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import defs from '#lib/definitions/nodes/index.js';
-import type {
-	IdentifiedPresetNode,
-	PresetNode
-} from '#lib/presets.js';
+import type {IdentifiedNodeData, NodeData} from '#lib/tree.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
 import {sentenceCase} from '#lib/utils/strings.js';
@@ -122,7 +119,7 @@ export type PresetDef<
 	P extends readonly Param[] = readonly Param[]
 > = NodeDef<P> & {
 	type: PresetType;
-	build(args: ArgsOf<P>): PresetNode[];
+	build(args: ArgsOf<P>): NodeData[];
 };
 
 export const isPresetDef = (def: NodeDef): def is PresetDef =>
@@ -198,10 +195,10 @@ const applyDef = (
 // Gives ids to template nodes, depth-first, so that generated
 // colors keep them once expanded.
 export const withIds = (
-	nodes: PresetNode[],
+	nodes: NodeData[],
 	prefix: string,
 	counter = {next: 0}
-): IdentifiedPresetNode[] =>
+): IdentifiedNodeData[] =>
 	nodes.map(({children, ...node}) => ({
 		...node,
 		id: `${prefix}.${counter.next++}`,
@@ -213,7 +210,7 @@ export const withIds = (
 // Outputs of all visible nodes of a tree, in tree order, with
 // presets replaced by their colors.
 export const evaluateTree = (
-	nodes: IdentifiedPresetNode[],
+	nodes: IdentifiedNodeData[],
 	input: NodeOutput,
 	outputs: NodeOutputRecord = {}
 ) => {

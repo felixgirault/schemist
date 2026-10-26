@@ -1,6 +1,6 @@
 import {parseColor} from '#lib/color/parsing.js';
 import defs from '#lib/definitions/nodes/index.js';
-import {parseTree} from '#lib/presets.js';
+import {parseTree} from '#lib/tree.js';
 import {expect, test} from 'vitest';
 import type {NodeOutput} from './nodes.svelte';
 import {

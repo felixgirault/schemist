@@ -1,11 +1,11 @@
 import {pack} from '#lib/packing/index.js';
-import type {PresetNode} from '#lib/presets.js';
-import {serializeTree} from '#lib/presets.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
+import type {NodeData} from '#lib/tree.js';
+import {serializeTree} from '#lib/tree.js';
 
 // encodeURI keeps the link readable, but leaves characters that
 // are meaningful in a query string.
-export const presetQuery = (tree: PresetNode) =>
+export const presetQuery = (tree: NodeData) =>
 	`?preset=${encodeURI(pack(tree)).replace(
 		/[&#+]/g,
 		encodeURIComponent

@@ -2,13 +2,13 @@ import {pack, unpack} from '#lib/packing/index.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
 import {expect, test} from 'vitest';
-import type {PresetNode} from './presets';
+import type {NodeData} from './tree';
 import {
 	changedArg,
 	parseTree,
 	serializeTree,
 	expandPreset
-} from './presets';
+} from './tree';
 
 test('serialized trees are restored with the same ids', () => {
 	const tree = parseTree({
@@ -31,7 +31,7 @@ test('serialized trees are restored with the same ids', () => {
 
 // Serialized trees share their args with the live tree.
 const snapshot = (tree: Node) =>
-	JSON.parse(JSON.stringify(serializeTree(tree))) as PresetNode;
+	JSON.parse(JSON.stringify(serializeTree(tree))) as NodeData;
 
 test('names the only arg changed between two trees', () => {
 	const tree = parseTree({
