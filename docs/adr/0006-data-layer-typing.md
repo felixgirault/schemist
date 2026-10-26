@@ -1,6 +1,6 @@
 # 6. Typing and layering of the data layer
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-26
 
 ## Context

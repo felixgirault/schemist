@@ -66,11 +66,13 @@ src/
                            manipulation, contrast, simulation, naming
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§5.4, §7)
-    stores/                Reactive state, `.svelte.ts` modules (§8)
+    model/                 Domain types and pure functions, without runes:
+                           definitions.ts (params, args, NodeDef, defineNode),
+                           tree.ts (NodeData, outputs, evaluateTree, changedArg)
+    stores/                Reactive state, `.svelte.ts` modules (§5.1, §8)
     packing/               Permalink encoding (§10)
     components/            UI (§11)
     utils/                 Generic helpers (arrays, css, math, strings, …)
-    presets.ts             parseTree / serializeTree (tree ⇄ PresetNode)
     palette.ts             getRootNode (initial tree from URL, storage or random)
     routing.ts             permalink(node)
     samples.ts             Color previews for pickers and sliders
@@ -163,25 +165,27 @@ Numbers are rounded to a `precision` (decimals, default 3).
 
 A class with reactive fields:
 
-| Field       | Kind     | Description                                                              |
-| ----------- | -------- | ------------------------------------------------------------------------ |
-| `id`        | readonly | `n<uid>`, unique per session                                             |
-| `def`       | raw      | Node type definition (§6), replaced by `setType`                         |
-| `token`     | state    | Name template (§4.4), `''` for an automatic name                         |
-| `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree          |
-| `args`      | state    | Parameter values, initialized from the type's defaults                   |
-| `children`  | state    | Child nodes, ordered                                                     |
-| `parent`    | state    | Parent node, `undefined` for the root                                    |
-| `input`     | derived  | `parent.output`, or `[white, '']` for the root                           |
-| `output`    | derived  | `[def.apply(input color, args), generateName(token, color, input name)]` |
-| `generated` | derived  | Colors of a preset (§5.4), `{}` for other nodes                          |
+| Field       | Kind     | Description                                                     |
+| ----------- | -------- | --------------------------------------------------------------- |
+| `id`        | readonly | `n<uid>`, unique per session                                    |
+| `def`       | raw      | Node type definition (§6), replaced by `setType`                |
+| `token`     | state    | Name template (§4.4), `''` for an automatic name                |
+| `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree |
+| `args`      | state    | Parameter values, initialized from the type's defaults          |
+| `children`  | state    | Child nodes, ordered, read only outside of the tree methods     |
+| `parent`    | state    | Parent node, `undefined` for the root, read only                |
+| `input`     | derived  | `parent.output`, or `{color: white, name: ''}` for the root     |
+| `output`    | derived  | `{color: def.apply(input.color, args), name: generateName(…)}`  |
+| `generated` | derived  | Colors of a preset (§5.4), `{}` for other nodes                 |
 
 Operations: `addChild(child)` (detaches it from its previous
 parent first), `removeChild(child)`, `destroy()` (removes the
 node and its subtree from its parent), `setType(type)` (changes
 the definition, keeping the id, token, visibility and children),
 `replaceWith(nodes)` (puts nodes in place of this one among its
-siblings).
+siblings). They keep `children` and `parent` in sync, and throw
+when adding a child to a preset, or making a preset of a node
+that has children.
 
 `setType` remaps args with `remapArgs`: an arg is kept when the
 new type has a param with the same name, kind and range, and
@@ -191,29 +195,32 @@ Shadow and Lightness ↔ Saturation keep all their args.
 ### 5.2 Outputs
 
 `collectOutputs(root)` walks the tree depth-first, parent before
-children, and returns `{[id]: [color, name]}` for every
+children, and returns `{[id]: {color, name}}` for every
 **visible** node. Children of a hidden node are still collected.
 A preset is replaced by its generated colors, which are all left
 out when the preset is hidden.
 
-`evaluateTree(PresetNode[], input)` computes the same record from
-a plain tree, without `Node`s. Picker previews and presets use
-it.
+`evaluateTree(IdentifiedNodeData[], input)`
+(`#lib/model/tree.ts`) computes the same record from a plain
+tree, without `Node`s. Picker previews and presets use it. A test
+checks that both agree.
 
-### 5.3 Tree serialization (`#lib/presets.ts`)
+### 5.3 Tree serialization (`#lib/stores/nodes.svelte.ts`)
 
-`PresetNode = {id?, type, token?, args?, children?, isHidden?}`
-is the plain form of a tree, used by presets, permalinks and
-history snapshots. `parseTree(PresetNode) → Node` merges given
-`args` over the type defaults, reuses `id` when set, and drops
-the children of presets; `serializeTree(Node) → PresetNode`
+`NodeData = {id?, type, token?, args?, children?, isHidden?}`
+(`#lib/model/tree.ts`) is the plain form of a tree, used by
+presets, permalinks and history snapshots. `IdentifiedNodeData`
+is the same with ids set everywhere, as returned by `withIds` and
+`serializeTree`. `parseTree(NodeData) → Node` merges given `args`
+over the type defaults, reuses `id` when set, and drops the
+children of presets; `serializeTree(Node) → IdentifiedNodeData`
 includes ids and omits empty tokens, args and children.
 Permalinks don't store ids.
 
 ### 5.4 Presets
 
 A preset is a node whose colors are generated (ADR 4). Its
-definition (`PresetDef`) adds `build(args) → PresetNode[]` to a
+definition (`PresetDef`) adds `build(args) → NodeData[]` to a
 regular one, and its `apply` returns the input unchanged.
 
 - The tree returned by `build` is evaluated on the preset's
@@ -243,6 +250,13 @@ short `type` code (used in permalinks), a `label`, an optional
 `description` and `argsLabel`, `params`, a `samples` style for
 previews (`single`, `discrete`, `continuous`) and
 `apply(color, args)`.
+
+Type codes are listed in the `ColorType` and `PresetType` unions
+(`#lib/model/definitions.ts`), and `defs` must have exactly one
+definition per code. Definitions are declared with `defineNode`
+(or `definePreset`), which types the args of `apply`, `argsLabel`
+and `build` after the params: a `range` gives a `number`, a
+`boolean` a `boolean`, a `color` a `SchemistColor`.
 
 | Type  | Label                     | Params (min–max, default)                                  | Result                                 |
 | ----- | ------------------------- | ---------------------------------------------------------- | -------------------------------------- |
@@ -320,31 +334,31 @@ each exporting a single reactive object.
 
 ### 8.1 `palette`
 
-| Member             | Description                                                                                         |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| `root`             | Root `Node`, set when the palette component mounts                                                  |
-| `outputs`          | `collectOutputs(root)`, updated synchronously                                                       |
-| `debouncedOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
-| `rootColor`        | Root's color in `debouncedOutputs`, else the first output, else `#feffff`                           |
+| Member           | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `root`           | Root `Node`, `undefined` until the palette component mounts                                         |
+| `outputs`        | `collectOutputs(root)`, updated synchronously                                                       |
+| `settledOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
+| `colors`         | `PaletteColor`s (`{id, name, color, rgbColor}`) from `settledOutputs`, in tree order                |
+| `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                             |
 
 The debounce keeps single edits snappy while throttling the
 expensive combination computations during slider drags.
 
 ### 8.2 `combinations`
 
-| Member                        | Description                                                                            |
-| ----------------------------- | -------------------------------------------------------------------------------------- |
-| `colorFilters`                | Node ids to restrict backgrounds to (empty = all)                                      |
-| `contrastType`                | `'wcag2'` (default) or `'wcag3'` (APCA); changing it converts `minLevel` (§9.3)        |
-| `minLevel`                    | Minimum contrast to list, default 0                                                    |
-| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                  |
-| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                     |
-| `previewedUid`                | Combination applied to the app theme, or `null`                                        |
-| `colorEntries`                | `{id, name, color, rgbColor}` from `palette.debouncedOutputs`, in tree order           |
-| `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root |
-| `all`                         | Every combination (§9.1)                                                               |
-| `filtered`                    | `all` with `minLevel ≥` the selected minimum                                           |
-| `previewed`                   | The combination matching `previewedUid`                                                |
+| Member                        | Description                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `colorFilters`                | Node ids to restrict backgrounds to (empty = all)                                               |
+| `contrastType`                | `'wcag2'` (default) or `'wcag3'` (APCA); changing it converts `minLevel` (§9.3)                 |
+| `minLevel`                    | Minimum contrast to list, default 0                                                             |
+| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                           |
+| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                              |
+| `previewedUid`                | Combination applied to the app theme, or `null`                                                 |
+| `sortedColors`                | `palette.colors` sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root |
+| `all`                         | Every combination (§9.1)                                                                        |
+| `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                    |
+| `previewed`                   | The combination matching `previewedUid`                                                         |
 
 ### 8.3 `features`
 
@@ -358,7 +372,7 @@ under `darkSchemeFeature` = `'1'` / `'0'`) and `colorInputFormat`
 `format` (`table` | `tokens` | `css` | `sass`, default `table`),
 `colorFormat` (default `hex`), `casing` (`dash` | `camel`,
 default `dash`), `precision` (default 3), `prefix` (default
-`''`).
+`''`), typed by `ExportSettings`.
 
 ### 8.5 `history`
 
@@ -368,12 +382,12 @@ Undo and redo of the palette tree, as decided in
 of snapshots (`serializeTree` of the root, with ids), capped at
 100 entries.
 
-| Method     | Effect                                                                                                                                                                                                              |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `reset()`  | Clears the stacks and takes the current tree as the committed state, without notifying. On palette mount, `startHistory()` calls it then syncs the URL, but not storage, so opening a link keeps the stored palette |
-| `commit()` | Pushes the last committed state to `past` and clears `future`, unless the tree is unchanged                                                                                                                         |
-| `undo()`   | Commits pending edits, then restores the last `past` snapshot                                                                                                                                                       |
-| `redo()`   | Commits pending edits, then restores the last `future` snapshot                                                                                                                                                     |
+| Method     | Effect                                                                                                                                                                                                                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reset()`  | Clears the stacks and takes the current tree as the committed state, without notifying. On palette mount, `startHistory(root)` calls it then syncs the URL, but not storage, so opening a link keeps the stored palette. It then records every change, until the function it returns is called |
+| `commit()` | Pushes the last committed state to `past` and clears `future`, unless the tree is unchanged                                                                                                                                                                                                    |
+| `undo()`   | Commits pending edits, then restores the last `past` snapshot                                                                                                                                                                                                                                  |
+| `redo()`   | Commits pending edits, then restores the last `future` snapshot                                                                                                                                                                                                                                |
 
 Restoring rebuilds the `Node` tree with the same ids, so node
 components update in place (open panels are kept).
@@ -463,6 +477,8 @@ by eye.
   stored in `localStorage`. If both are missing or invalid
   (errors are logged), the tree is a single Custom color node
   with a random usable color.
+- Unpacking rejects unknown type codes, and drops args of unknown
+  params and invalid colors, so that their defaults apply.
 - Exports embed the permalink (CSS/Sass comment, design tokens
   description).
 
