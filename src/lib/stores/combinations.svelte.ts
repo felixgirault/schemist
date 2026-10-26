@@ -28,6 +28,7 @@ export type SimulatedContrast = CombinationContrast & {
 
 export type Combination = {
 	uid: string;
+	bgId: Node['id'];
 	bgName: string;
 	fgName: string;
 	minLevel: number;
@@ -77,16 +78,8 @@ class Combinations {
 		return sorted.slice(pivot).concat(sorted.slice(0, pivot));
 	});
 
-	#filteredColors = $derived(
-		this.colorFilters.length
-			? this.sortedColors.filter(({id}) =>
-					this.colorFilters.includes(id)
-				)
-			: this.sortedColors
-	);
-
 	#colorPairs = $derived(
-		this.#filteredColors.flatMap((color) =>
+		this.sortedColors.flatMap((color) =>
 			palette.colors
 				.filter((other) => color.id !== other.id)
 				.map((other): [PaletteColor, PaletteColor] => [
@@ -137,6 +130,7 @@ class Combinations {
 
 				return {
 					uid: `${bgOutput.id}-${fgOutput.id}`,
+					bgId: bgOutput.id,
 					bgName: bgOutput.name,
 					fgName: fgOutput.name,
 					minLevel,
@@ -154,7 +148,12 @@ class Combinations {
 	});
 
 	filtered = $derived(
-		this.all.filter(({minLevel}) => minLevel >= this.minLevel)
+		this.all.filter(
+			({bgId, minLevel}) =>
+				minLevel >= this.minLevel &&
+				(!this.colorFilters.length ||
+					this.colorFilters.includes(bgId))
+		)
 	);
 
 	previewed = $derived(

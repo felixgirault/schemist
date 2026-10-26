@@ -1,18 +1,7 @@
 <script lang="ts">
-	import {
-		wcag2Contrast,
-		wcag2Grade,
-		wcag3Contrast,
-		wcag3Grade
-	} from '#lib/color/contrast.js';
 	import Combination from '#lib/components/combinations/Combination.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 
-	let isWcag2 = $derived(combinations.contrastType === 'wcag2');
-	let levelFn = $derived(
-		isWcag2 ? wcag2Contrast : wcag3Contrast
-	);
-	let gradeFn = $derived(isWcag2 ? wcag2Grade : wcag3Grade);
 	let colors = $derived(combinations.sortedColors);
 
 	const handlePreview = (uid: string) => {
@@ -20,40 +9,27 @@
 			combinations.previewedUid === uid ? null : uid;
 	};
 
-	// bg id => fg id => level, or null when the pair isn't shown
-	let levels = $derived(
+	// uid => combination, only for the pairs passing the filter
+	// (worst case across simulations, like the list view)
+	let shown = $derived(
 		Object.fromEntries(
-			colors.map((bg) => [
-				bg.id,
-				Object.fromEntries(
-					colors.map((fg) => {
-						const level =
-							bg.id === fg.id
-								? null
-								: levelFn(bg.rgbColor, fg.rgbColor);
-
-						return [
-							fg.id,
-							level !== null &&
-							level >= combinations.minLevel
-								? level
-								: null
-						];
-					})
+			combinations.all
+				.filter(
+					({minLevel}) => minLevel >= combinations.minLevel
 				)
-			])
+				.map((combination) => [combination.uid, combination])
 		)
 	);
 
 	let rows = $derived(
 		colors.filter((bg) =>
-			colors.some((fg) => levels[bg.id][fg.id] !== null)
+			colors.some((fg) => `${bg.id}-${fg.id}` in shown)
 		)
 	);
 
 	let columns = $derived(
 		colors.filter((fg) =>
-			colors.some((bg) => levels[bg.id][fg.id] !== null)
+			colors.some((bg) => `${bg.id}-${fg.id}` in shown)
 		)
 	);
 </script>
@@ -79,20 +55,32 @@
 					</th>
 
 					{#each columns as fg (fg.id)}
-						{@const level = levels[bg.id][fg.id]}
-						{#if level === null}
+						{@const combination =
+							shown[`${bg.id}-${fg.id}`]}
+						{#if !combination}
 							<td></td>
 						{:else}
-							<td>
+							{@const {
+								uid,
+								contrast,
+								minLevel,
+								minGrade
+							} = combination}
+							<td
+								class:degraded={minGrade !==
+									contrast.grade}
+								title={minGrade !== contrast.grade
+									? `${contrast.grade} without color blindness`
+									: undefined}
+							>
 								<Combination
-									uid="{bg.id}-{fg.id}"
+									{uid}
 									bgName={bg.name}
 									fgName={fg.name}
 									contrast={{
-										bg: bg.rgbColor,
-										fg: fg.rgbColor,
-										level,
-										grade: gradeFn(level)
+										...contrast,
+										level: minLevel,
+										grade: minGrade
 									}}
 									simulatedContrasts={[]}
 									onPreview={handlePreview}
@@ -145,6 +133,20 @@
 	}
 
 	td {
+		position: relative;
 		padding: 2px 2px 1px 1px;
+	}
+
+	/* the grade drops under one of the simulated deficiencies */
+	.degraded::after {
+		content: '';
+		position: absolute;
+		top: 6px;
+		right: 6px;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--fg);
+		outline: 1px solid var(--bg-hard);
 	}
 </style>
