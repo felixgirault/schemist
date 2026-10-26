@@ -79,7 +79,11 @@
 </script>
 
 <article class:isHidden={node.isHidden}>
-	<div class="output" class:isPreset style={outputStyle}></div>
+	<div
+		class="output outlined"
+		class:isPreset
+		style={outputStyle}
+	></div>
 
 	<div class="self">
 		<header>
