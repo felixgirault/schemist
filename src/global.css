@@ -3,6 +3,7 @@
 	--font-mono: 'Source', monospace;
 	--shadow: rgba(0, 0, 0, 0.05);
 	--radius: 0.5rem;
+	--radius--small: 0.25rem;
 	--hgap: 1rem;
 	--vgap: 1rem;
 }
@@ -332,6 +333,12 @@ input[type='range'] {
 	margin-bottom: 0.5rem;
 	font-size: 0.9rem;
 	font-style: italic;
+}
+
+.outlined {
+	outline: 1px solid
+		color-mix(in srgb, var(--fg) 10%, transparent);
+	outline-offset: -1px;
 }
 
 .elevated {

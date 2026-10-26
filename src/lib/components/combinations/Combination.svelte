@@ -2,7 +2,6 @@
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
 	import type {CombinationContrast} from '#lib/stores/combinations.svelte.js';
-	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {round} from '#lib/utils/math.js';
 
 	interface Props {
@@ -11,6 +10,7 @@
 		fgName: string;
 		contrast: CombinationContrast;
 		simulatedContrasts: CombinationContrast[];
+		isCompact?: boolean;
 		onPreview: (uid: string) => void;
 	}
 
@@ -20,14 +20,16 @@
 		fgName,
 		contrast,
 		simulatedContrasts,
-		onPreview
+		onPreview,
+		isCompact = false
 	}: Props = $props();
 
 	let hexFg = $derived(formatRgbToHex(contrast.fg));
 </script>
 
 <div
-	class="combination elevated"
+	class="combination outlined elevated"
+	class:combination--compact={isCompact}
 	style="background: {formatRgbToHex(
 		contrast.bg
 	)}; color: {hexFg};"
@@ -42,12 +44,11 @@
 		<p class="level level--withPreview">
 			<span>
 				<span class="grade">
-					{#if combinations.contrastType === 'wcag3'}
-						APCA
-					{/if}
 					{contrast.grade}
 				</span>
-				({round(contrast.level, 1)})
+				<span class="value">
+					({round(contrast.level, 1)})
+				</span>
 			</span>
 
 			<button
@@ -75,9 +76,6 @@
 					{' '}
 					<span class="level">
 						<span class="grade">
-							{#if combinations.contrastType === 'wcag3'}
-								APCA
-							{/if}
 							{grade}
 						</span>
 						({round(level, 1)})
@@ -93,6 +91,23 @@
 		overflow: hidden;
 		border-radius: var(--radius);
 		contain: style paint;
+	}
+
+	.combination--compact .colors,
+	.combination--compact .value {
+		display: none;
+	}
+
+	.combination--compact {
+		border-radius: var(--radius--small);
+	}
+
+	.combination--compact .inner {
+		padding: 0.5rem;
+	}
+
+	.combination--compact .grade {
+		font-size: 1rem;
 	}
 
 	.inner {
@@ -129,6 +144,7 @@
 	.grade {
 		font-size: 1.5rem;
 		font-weight: 900;
+		white-space: nowrap;
 	}
 
 	.simulation {
