@@ -45,7 +45,7 @@
 								def,
 								node.args,
 								param.name,
-								node.input[0],
+								node.input.color,
 								clamp(param.max - param.min, 15)
 							)
 						)}

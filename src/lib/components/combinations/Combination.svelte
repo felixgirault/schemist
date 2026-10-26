@@ -1,7 +1,10 @@
 <script lang="ts">
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
-	import type {CombinationContrast} from '#lib/stores/combinations.svelte.js';
+	import type {
+		CombinationContrast,
+		SimulatedContrast
+	} from '#lib/stores/combinations.svelte.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {round} from '#lib/utils/math.js';
 
@@ -10,7 +13,7 @@
 		bgName: string;
 		fgName: string;
 		contrast: CombinationContrast;
-		simulatedContrasts: CombinationContrast[];
+		simulatedContrasts: SimulatedContrast[];
 		onPreview: (uid: string) => void;
 	}
 

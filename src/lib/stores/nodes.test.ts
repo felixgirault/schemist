@@ -52,8 +52,8 @@ test('setType updates the output', () => {
 	const [node] = tree.children;
 	node.setType('s');
 
-	expect(node.output[0]).toEqual(
-		defs.s.apply(tree.output[0], {amount: 20})
+	expect(node.output.color).toEqual(
+		defs.s.apply(tree.output.color, {amount: 20})
 	);
 });
 
@@ -109,7 +109,10 @@ test('withIds numbers template nodes depth-first', () => {
 });
 
 test('evaluateTree skips hidden nodes but not their children', () => {
-	const input: NodeOutput = [parseColor('#f00')[1]!, 'Red'];
+	const input: NodeOutput = {
+		color: parseColor('#f00')[1]!,
+		name: 'Red'
+	};
 	const outputs = evaluateTree(
 		withIds(
 			[
@@ -132,10 +135,13 @@ test('evaluateTree skips hidden nodes but not their children', () => {
 		input
 	);
 
-	const grey = defs.s.apply(input[0], {amount: 0});
+	const grey = defs.s.apply(input.color, {amount: 0});
 
 	expect(outputs).toEqual({
-		'n1.1': [defs.l.apply(grey, {amount: 20}), 'Dark Grey Red']
+		'n1.1': {
+			color: defs.l.apply(grey, {amount: 20}),
+			name: 'Dark Grey Red'
+		}
 	});
 });
 
@@ -156,8 +162,8 @@ test('presets output their generated colors', () => {
 		`${preset.id}.2`
 	]);
 
-	expect(outputs[`${preset.id}.1`][0]).toEqual(
-		defs.l.apply(tree.output[0], {amount: 50})
+	expect(outputs[`${preset.id}.1`].color).toEqual(
+		defs.l.apply(tree.output.color, {amount: 50})
 	);
 
 	preset.args.steps = 2;
@@ -178,7 +184,7 @@ test('presets lend their name to their colors', () => {
 
 	const [preset] = tree.children;
 	const names = () =>
-		Object.values(preset.generated).map(([, name]) => name);
+		Object.values(preset.generated).map(({name}) => name);
 
 	expect(names()).toEqual([
 		'Left Brand complementary',

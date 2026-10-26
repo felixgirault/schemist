@@ -1,5 +1,10 @@
+import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
-import type {NodeOutputRecord} from '#lib/model/tree.js';
+import type {RgbColor} from '#lib/color/types.js';
+import type {
+	NodeOutput,
+	NodeOutputRecord
+} from '#lib/model/tree.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
 import {
@@ -7,6 +12,12 @@ import {
 	withElapsedTime
 } from '#lib/utils/functions.js';
 import {clamp} from '#lib/utils/math.js';
+
+// A color of the palette, as combined and exported.
+export type PaletteColor = NodeOutput & {
+	id: Node['id'];
+	rgbColor: RgbColor;
+};
 
 class Palette {
 	// Set when the palette mounts, as it is read from the URL or
@@ -26,9 +37,20 @@ class Palette {
 	// and exports, which cost more, follow these.
 	settledOutputs: NodeOutputRecord = $state.raw({});
 
+	colors = $derived(
+		Object.entries(this.settledOutputs).map(
+			([id, {color, name}]): PaletteColor => ({
+				id,
+				color,
+				name,
+				rgbColor: schemistToRgb(color)
+			})
+		)
+	);
+
 	rootColor = $derived(
-		(this.root && this.settledOutputs[this.root.id]?.[0]) ??
-			Object.values(this.settledOutputs).shift()?.[0] ??
+		(this.root && this.settledOutputs[this.root.id]?.color) ??
+			Object.values(this.settledOutputs).shift()?.color ??
 			parseColor('#feffff')[1]! // not fully white so there is a hue to pick up
 	);
 

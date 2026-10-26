@@ -1,44 +1,40 @@
-import type {ContrastType} from '#lib/color/contrast.js';
+import type {
+	ContrastGrade,
+	ContrastType
+} from '#lib/color/contrast.js';
 import {
 	Wcag2Level,
-	Wcag3Level,
 	equivalence,
 	wcag2Contrast,
 	wcag2Grade,
 	wcag3Contrast,
 	wcag3Grade
 } from '#lib/color/contrast.js';
-import {schemistToRgb} from '#lib/color/conversion.js';
 import {
 	simulateDeuteranomaly,
 	simulateProtanomaly,
 	simulateTritanomaly
 } from '#lib/color/simulation.js';
 import type {RgbColor} from '#lib/color/types.js';
-import type {NodeOutput} from '#lib/model/tree.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
+import type {PaletteColor} from '#lib/stores/palette.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
 
 export type BlindnessType =
-	| 'none'
 	| 'protanomaly'
 	| 'deuteranomaly'
 	| 'tritanomaly';
 
-export type Entry = {
-	id: Node['id'];
-	name: NodeOutput[1];
-	color: NodeOutput[0];
-	rgbColor: RgbColor;
-};
-
 export type CombinationContrast = {
-	type: BlindnessType;
 	bg: RgbColor;
 	fg: RgbColor;
 	level: number;
-	grade: string;
+	grade: ContrastGrade;
+};
+
+export type SimulatedContrast = CombinationContrast & {
+	type: BlindnessType;
 };
 
 export type Combination = {
@@ -46,9 +42,29 @@ export type Combination = {
 	bgName: string;
 	fgName: string;
 	minLevel: number;
-	minGrade: string;
+	minGrade: ContrastGrade;
 	contrast: CombinationContrast;
-	simulatedContrasts: CombinationContrast[];
+	simulatedContrasts: SimulatedContrast[];
+};
+
+const contrastFns: Record<
+	ContrastType,
+	{
+		level: (bg: RgbColor, fg: RgbColor) => number;
+		grade: (level: number) => ContrastGrade;
+	}
+> = {
+	wcag2: {level: wcag2Contrast, grade: wcag2Grade},
+	wcag3: {level: wcag3Contrast, grade: wcag3Grade}
+};
+
+const simulations: Record<
+	BlindnessType,
+	(color: RgbColor) => RgbColor
+> = {
+	protanomaly: simulateProtanomaly,
+	deuteranomaly: simulateDeuteranomaly,
+	tritanomaly: simulateTritanomaly
 };
 
 class Combinations {
@@ -68,22 +84,11 @@ class Combinations {
 		this.minLevel = equivalence(type, this.minLevel);
 	}
 
-	colorEntries = $derived(
-		Object.entries(palette.settledOutputs).map(
-			([id, output]): Entry => ({
-				id,
-				color: output[0],
-				rgbColor: schemistToRgb(output[0]),
-				name: output[1]
-			})
-		)
-	);
-
 	// sorts colors by hue and lightness
 	sortedColors = $derived.by(() => {
 		const root = palette.root;
-		const sorted = this.colorEntries
-			.map((output): [number, Entry] => {
+		const sorted = palette.colors
+			.map((output): [number, PaletteColor] => {
 				const {h, l} = output.color;
 				const weight =
 					Math.round(circular(h)) * 10 +
@@ -112,19 +117,18 @@ class Combinations {
 
 	#colorPairs = $derived(
 		this.#filteredColors.flatMap((color) =>
-			this.colorEntries
+			palette.colors
 				.filter((other) => color.id !== other.id)
-				.map((other): [Entry, Entry] => [color, other])
+				.map((other): [PaletteColor, PaletteColor] => [
+					color,
+					other
+				])
 		)
 	);
 
 	all = $derived.by(() => {
-		const levelFn =
-			this.contrastType === 'wcag2'
-				? wcag2Contrast
-				: wcag3Contrast;
-		const gradeFn =
-			this.contrastType === 'wcag2' ? wcag2Grade : wcag3Grade;
+		const {level: levelFn, grade: gradeFn} =
+			contrastFns[this.contrastType];
 
 		return this.#colorPairs.map(
 			([bgOutput, fgOutput]): Combination => {
@@ -136,17 +140,11 @@ class Combinations {
 				const baseGrade = gradeFn(baseLevel);
 
 				let minLevel = baseLevel;
-				let minGrade = baseGrade;
+				let minGrade: ContrastGrade = baseGrade;
 
 				const simulatedContrasts = this.blindnessTypes.map(
-					(type) => {
-						const simulate =
-							type === 'protanomaly'
-								? simulateProtanomaly
-								: type === 'deuteranomaly'
-									? simulateDeuteranomaly
-									: simulateTritanomaly;
-
+					(type): SimulatedContrast => {
+						const simulate = simulations[type];
 						const bg = simulate(bgOutput.rgbColor);
 						const fg = simulate(fgOutput.rgbColor);
 						const level = levelFn(bg, fg);
@@ -174,7 +172,6 @@ class Combinations {
 					minLevel,
 					minGrade,
 					contrast: {
-						type: 'none',
 						bg: bgOutput.rgbColor,
 						fg: fgOutput.rgbColor,
 						level: baseLevel,

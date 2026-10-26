@@ -15,8 +15,8 @@ import {
 import {pack, unpack} from './v2';
 
 const outputHexes = (tree: Parameters<typeof parseTree>[0]) =>
-	Object.values(collectOutputs(parseTree(tree))).map(([c]) =>
-		formatSchemistToHex(c)
+	Object.values(collectOutputs(parseTree(tree))).map(
+		({color}) => formatSchemistToHex(color)
 	);
 
 test('colors are packed losslessly', () => {

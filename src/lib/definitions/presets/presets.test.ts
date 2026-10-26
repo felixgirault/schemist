@@ -19,7 +19,7 @@ test.each(presets)('preset $label', ({type}) => {
 
 	expect(
 		Object.values(collectOutputs(tree)).map(
-			([color, name]) =>
+			({color, name}) =>
 				`${formatSchemistToHex(color)} ${name}`
 		)
 	).toMatchSnapshot();

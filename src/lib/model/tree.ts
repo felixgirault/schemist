@@ -33,7 +33,7 @@ export type IdentifiedNodeData = Omit<
 	children?: IdentifiedNodeData[];
 };
 
-export type NodeOutput = [color: SchemistColor, name: string];
+export type NodeOutput = {color: SchemistColor; name: string};
 export type NodeOutputRecord = Record<string, NodeOutput>;
 
 export const generateName = (
@@ -53,16 +53,17 @@ export const applyDef = (
 	def: NodeDef,
 	args: Args,
 	token: string,
-	[color, name]: NodeOutput
+	input: NodeOutput
 ): NodeOutput => {
-	const output = def.apply(color, args);
+	const color = def.apply(input.color, args);
 
-	return [
-		output,
-		isPresetDef(def) && !token
-			? name
-			: generateName(token, output, name)
-	];
+	return {
+		color,
+		name:
+			isPresetDef(def) && !token
+				? input.name
+				: generateName(token, color, input.name)
+	};
 };
 
 // Gives ids to template nodes, depth-first, so that generated
@@ -119,10 +120,10 @@ export const evaluateTree = (
 };
 
 // Input of the root.
-export const defaultInput: NodeOutput = [
-	parseColor('#fff')[1]!,
-	''
-];
+export const defaultInput: NodeOutput = {
+	color: parseColor('#fff')[1]!,
+	name: ''
+};
 
 // Hides a whole tree, e.g. to keep a hidden preset hidden once
 // expanded.

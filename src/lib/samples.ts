@@ -72,5 +72,5 @@ export const presetSamples = (
 	color: SchemistColor
 ) =>
 	Object.values(
-		evaluateTree(withIds(nodes, 'sample'), [color, ''])
-	).map(([sample]) => sample);
+		evaluateTree(withIds(nodes, 'sample'), {color, name: ''})
+	).map((output) => output.color);
