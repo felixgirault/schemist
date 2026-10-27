@@ -3,27 +3,31 @@
 </script>
 
 <fieldset>
-	<legend>View</legend>
+	<legend class="hidden">View</legend>
 
-	<div class="fieldset-fields">
-		<div class="button-list">
-			<input
-				class="button-trigger hidden"
-				id="view-grid"
-				type="radio"
-				value="grid"
-				bind:group={combinations.view}
-			/>
-			<label class="button" for="view-grid">Grid</label>
+	<div class="button-list">
+		<input
+			class="button-trigger hidden"
+			id="view-grid"
+			type="radio"
+			value="grid"
+			bind:group={combinations.view}
+		/>
+		<label class="button" for="view-grid">Grid</label>
 
-			<input
-				class="button-trigger hidden"
-				id="view-list"
-				type="radio"
-				value="list"
-				bind:group={combinations.view}
-			/>
-			<label class="button" for="view-list">List</label>
-		</div>
+		<input
+			class="button-trigger hidden"
+			id="view-list"
+			type="radio"
+			value="list"
+			bind:group={combinations.view}
+		/>
+		<label class="button" for="view-list">List</label>
 	</div>
 </fieldset>
+
+<style>
+	fieldset {
+		margin: 0;
+	}
+</style>

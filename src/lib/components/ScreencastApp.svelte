@@ -16,7 +16,8 @@
 <style>
 	:global(.header),
 	:global(section footer),
-	:global(.combinations .data-options),
+	:global(.palette .data-options),
+	:global(.combinations header fieldset),
 	:global(.list > p),
 	:global(.hint),
 	:global(.preview-button) {
@@ -30,9 +31,5 @@
 
 	:global(section) {
 		padding-block: calc(var(--vgap) * 0.5) !important;
-	}
-
-	:global(.combinations .data-layout) {
-		display: block;
 	}
 </style>

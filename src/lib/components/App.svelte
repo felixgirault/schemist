@@ -1,5 +1,10 @@
 <script lang="ts">
+	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
 	import Combinations from '#lib/components/combinations/Combinations.svelte';
+	import ContrastFilter from '#lib/components/combinations/ContrastFilter.svelte';
+	import ContrastTypeFilter from '#lib/components/combinations/ContrastTypeFilter.svelte';
+	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
+	import ViewFilter from '#lib/components/combinations/ViewFilter.svelte';
 	import Export from '#lib/components/export/Export.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
@@ -112,6 +117,15 @@
 
 			<p class="hint" role="status">{shareStatus}</p>
 		</footer>
+
+		{#if palette.colors.length > 1}
+			<div class="data-options form">
+				<ContrastTypeFilter />
+				<ContrastFilter />
+				<BlindnessFilter />
+				<LuminosityFilter />
+			</div>
+		{/if}
 	</section>
 
 	<section class="combinations">
@@ -122,6 +136,8 @@
 						.all.length})
 				</span>
 			</h2>
+
+			<ViewFilter />
 		</header>
 
 		<Combinations />
@@ -157,6 +173,14 @@
 		padding: var(--vgap) var(--hgap);
 	}
 
+	.combinations header {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
 	h2 span {
 		font-size: 1rem;
 		font-weight: normal;
@@ -164,5 +188,11 @@
 
 	footer {
 		margin-top: var(--vgap);
+	}
+
+	.data-options {
+		margin-top: var(--vgap);
+		animation: slide-up 250ms ease-out;
+		contain: layout;
 	}
 </style>
