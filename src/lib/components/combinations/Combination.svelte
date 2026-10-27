@@ -69,19 +69,26 @@
 			{#each simulatedContrasts as { type, bg, fg, level, grade }}
 				<li
 					class="simulation simulation--{type}"
+					title={type}
 					style="background: {formatRgbToHex(
 						bg
 					)}; color: {formatRgbToHex(fg)};"
 				>
 					<strong class="simulation-type">
-						{type}
+						{#if type === 'protanomaly'}
+							<abbr title="Protanomaly">Prot.</abbr>
+						{:else if type === 'deuteranomaly'}
+							<abbr title="Deuteranomaly">Deut.</abbr>
+						{:else if type === 'tritanomaly'}
+							<abbr title="Tritanomaly">Trit.</abbr>
+						{/if}
 					</strong>
 					{' '}
 					<span class="level">
 						<span class="grade">
 							{grade}
 						</span>
-						({round(level, 1)})
+						<span class="value">({round(level, 1)})</span>
 					</span>
 				</li>
 			{/each}
@@ -154,6 +161,8 @@
 		display: flex;
 		flex-direction: row-reverse;
 		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 0 1ch;
 		padding: 0.5rem 1rem;
 	}
 
@@ -169,6 +178,31 @@
 	.simulation .level {
 		line-height: 1rem;
 		font-size: 0.9rem;
+	}
+
+	.combination--compact ul {
+		display: flex;
+	}
+
+	.combination--compact .simulation {
+		flex: 1;
+		flex-direction: row;
+		padding: 0.25rem 0.5rem;
+	}
+
+	.combination--compact .simulation .level {
+		line-height: 1;
+		font-size: 0.5rem;
+	}
+
+	.combination--compact .simulation .level .grade {
+		font-size: 0.5rem;
+	}
+
+	.combination--compact .simulation-type {
+		line-height: 1;
+		font-size: 0.5rem;
+		font-weight: normal;
 	}
 
 	.simulation .level span {

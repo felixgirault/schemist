@@ -63,26 +63,15 @@
 							{@const {
 								uid,
 								contrast,
-								minLevel,
-								minGrade
+								simulatedContrasts
 							} = combination}
-							<td
-								class:degraded={minGrade !==
-									contrast.grade}
-								title={minGrade !== contrast.grade
-									? `${contrast.grade} without color blindness`
-									: undefined}
-							>
+							<td>
 								<Combination
 									{uid}
 									bgName={bg.name}
 									fgName={fg.name}
-									contrast={{
-										...contrast,
-										level: minLevel,
-										grade: minGrade
-									}}
-									simulatedContrasts={[]}
+									{contrast}
+									{simulatedContrasts}
 									onPreview={handlePreview}
 									isCompact
 								/>
@@ -133,20 +122,6 @@
 	}
 
 	td {
-		position: relative;
 		padding: 2px 2px 1px 1px;
-	}
-
-	/* the grade drops under one of the simulated deficiencies */
-	.degraded::after {
-		content: '';
-		position: absolute;
-		top: 6px;
-		right: 6px;
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--fg);
-		outline: 1px solid var(--bg-hard);
 	}
 </style>
