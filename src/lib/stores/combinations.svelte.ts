@@ -44,7 +44,7 @@ class Combinations {
 	blindnessTypes = $state<BlindnessType[]>([]);
 	isLuminosityAnalysisEnabled = $state(false);
 	previewedUid = $state<string | null>(null);
-	view = $state<'list' | 'grid'>('list');
+	view = $state<'grid' | 'list'>('grid');
 
 	get contrastType() {
 		return this.#contrastType;

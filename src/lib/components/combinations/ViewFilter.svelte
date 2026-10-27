@@ -9,21 +9,21 @@
 		<div class="button-list">
 			<input
 				class="button-trigger hidden"
-				id="view-list"
-				type="radio"
-				value="list"
-				bind:group={combinations.view}
-			/>
-			<label class="button" for="view-list">List</label>
-
-			<input
-				class="button-trigger hidden"
 				id="view-grid"
 				type="radio"
 				value="grid"
 				bind:group={combinations.view}
 			/>
 			<label class="button" for="view-grid">Grid</label>
+
+			<input
+				class="button-trigger hidden"
+				id="view-list"
+				type="radio"
+				value="list"
+				bind:group={combinations.view}
+			/>
+			<label class="button" for="view-list">List</label>
 		</div>
 	</div>
 </fieldset>
