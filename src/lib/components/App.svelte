@@ -159,13 +159,13 @@
 	@media screen and (min-width: 55rem) {
 		main {
 			display: grid;
-			grid-template-columns: 45ch 1fr;
+			grid-template-columns: 45ch minmax(0, 1fr);
 		}
 	}
 
 	@media screen and (min-width: 80rem) {
 		main {
-			grid-template-columns: 50ch 1fr;
+			grid-template-columns: 50ch minmax(0, 1fr);
 		}
 	}
 

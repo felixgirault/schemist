@@ -113,7 +113,11 @@
 	}
 
 	th[scope='row'] {
+		position: sticky;
+		left: 0;
+		z-index: 1;
 		max-width: 15ch;
+		background: var(--bg);
 		vertical-align: middle;
 		text-align: left;
 		text-overflow: ellipsis;
