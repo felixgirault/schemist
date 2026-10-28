@@ -21,4 +21,7 @@ export const toggleDarkScheme = (enabled: boolean) => {
 	}
 
 	localStorage.setItem(DarkSchemeFeature, enabled ? '1' : '0');
+	document.documentElement.dataset.theme = enabled
+		? 'dark'
+		: 'light';
 };

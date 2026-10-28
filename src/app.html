@@ -15,6 +15,24 @@
 			href="%sveltekit.assets%/fonts.css"
 		/>
 
+		<!-- Picks the theme before the first paint, as the prerendered page can't know it. Mirrors isDarkSchemeEnabled() in src/lib/features.ts. -->
+		<script>
+			try {
+				const stored = localStorage.getItem(
+					'darkSchemeFeature'
+				);
+				const isDark =
+					stored === null
+						? matchMedia('(prefers-color-scheme: dark)')
+								.matches
+						: !!parseInt(stored);
+
+				document.documentElement.dataset.theme = isDark
+					? 'dark'
+					: 'light';
+			} catch {}
+		</script>
+
 		%sveltekit.head%
 	</head>
 

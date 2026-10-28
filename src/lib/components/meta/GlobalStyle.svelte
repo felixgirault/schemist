@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {rgbToSchemist} from '#lib/color/conversion.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
-	import {features} from '#lib/stores/features.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {
 		defaultThemeColor,
@@ -11,11 +10,17 @@
 	import {styleTag} from '#lib/utils/css.js';
 	import '../../../global.css';
 
+	const themeColor = $derived(
+		palette.rootColor ?? defaultThemeColor
+	);
+
+	// Both themes are rendered so the prerendered page can
+	// switch to the dark one before hydration (see app.html).
 	const style = $derived(
-		styleTag(
-			':root',
-			combinations.previewed
-				? duoThemeStyle(
+		combinations.previewed
+			? styleTag(
+					':root',
+					duoThemeStyle(
 						rgbToSchemist(
 							combinations.previewed.contrast.bg
 						),
@@ -23,11 +28,12 @@
 							combinations.previewed.contrast.fg
 						)
 					)
-				: themeStyle(
-						palette.rootColor ?? defaultThemeColor,
-						features.isDarkScheme
+				)
+			: styleTag(':root', themeStyle(themeColor, false)) +
+					styleTag(
+						":root[data-theme='dark']",
+						themeStyle(themeColor, true)
 					)
-		)
 	);
 </script>
 
