@@ -2,19 +2,19 @@
 	import type {BlindnessType} from '#lib/color/simulation.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 
-	const entries: [string, BlindnessType][] = [
-		['Protanomaly', 'protanomaly'],
-		['Deuteranomaly', 'deuteranomaly'],
-		['Tritanomaly', 'tritanomaly']
+	const entries: [string, BlindnessType, string][] = [
+		['Deuteranomaly', 'deuteranomaly', 'red–green'],
+		['Protanomaly', 'protanomaly', 'red–green'],
+		['Tritanomaly', 'tritanomaly', 'blue–yellow']
 	];
 </script>
 
 <fieldset>
-	<legend>Color blindness simulation</legend>
+	<legend>Color vision deficiency simulation</legend>
 
 	<div class="fieldset-fields">
-		<div class="button-list button-list--stacked">
-			{#each entries as [label, type] (type)}
+		<div class="button-list">
+			{#each entries as [label, type, hint] (type)}
 				<input
 					class="button-trigger hidden"
 					id="blindness-{type}"
@@ -31,6 +31,7 @@
 					for="blindness-{type}"
 				>
 					{label}
+					<span>({hint})</span>
 				</label>
 			{/each}
 		</div>

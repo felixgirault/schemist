@@ -35,8 +35,7 @@
 			<h1>Schemist</h1>
 
 			<p class="baseline">
-				Build cohesive and accessible
-				<span>color schemes</span>
+				Cohesive and accessible color schemes
 			</p>
 		</header>
 
@@ -143,10 +142,6 @@
 			border-left: 1px solid var(--bg-neutral);
 			padding-left: 2rem;
 			font-size: 1rem;
-		}
-
-		.baseline span {
-			display: block;
 		}
 	}
 

@@ -219,7 +219,7 @@
 			'output self'
 			'output children';
 		column-gap: 0.75rem;
-		animation: slide-up 250ms ease-out;
+		animation: var(--animation-slide-up);
 		contain: style;
 	}
 
@@ -231,7 +231,7 @@
 
 	header {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		border-radius: var(--radius);
 		gap: 3ch;
 	}

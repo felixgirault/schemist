@@ -3,7 +3,7 @@
 </script>
 
 <fieldset>
-	<legend class="hidden">View</legend>
+	<legend>View</legend>
 
 	<div class="button-list">
 		<input

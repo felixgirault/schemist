@@ -1,6 +1,6 @@
 {
 	"name": "schemist",
-	"description": "Build cohesive and accessible color schemes.",
+	"description": "Cohesive and accessible color schemes.",
 	"author": "Félix Girault <felix.girault@gmail.com>",
 	"license": "MIT",
 	"version": "0.1.0",

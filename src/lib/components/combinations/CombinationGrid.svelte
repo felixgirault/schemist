@@ -92,6 +92,7 @@
 	table {
 		margin-top: -5ch;
 		margin-bottom: 0;
+		width: auto;
 	}
 
 	th {

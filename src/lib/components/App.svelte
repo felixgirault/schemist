@@ -1,40 +1,11 @@
 <script lang="ts">
-	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
 	import Combinations from '#lib/components/combinations/Combinations.svelte';
-	import ContrastFilter from '#lib/components/combinations/ContrastFilter.svelte';
-	import ContrastTypeFilter from '#lib/components/combinations/ContrastTypeFilter.svelte';
-	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
-	import ViewFilter from '#lib/components/combinations/ViewFilter.svelte';
-	import Export from '#lib/components/export/Export.svelte';
-	import Modal from '#lib/components/Modal.svelte';
+	import Filters from '#lib/components/combinations/Filters.svelte';
 	import Palette from '#lib/components/Palette.svelte';
-	import {permalink} from '#lib/routing.js';
+	import PaletteActions from '#lib/components/PaletteActions.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {history} from '#lib/stores/history.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
-
-	let isShowingExport = $state(false);
-	let shareStatus = $state('');
-
-	// The URL is always up to date, but copying it is handier.
-	const handleShare = async () => {
-		if (!palette.root) {
-			return;
-		}
-
-		try {
-			await navigator.clipboard.writeText(
-				permalink(palette.root)
-			);
-			shareStatus = 'Link copied';
-		} catch {
-			shareStatus = 'Copy the link from the address bar';
-		}
-
-		setTimeout(() => {
-			shareStatus = '';
-		}, 2000);
-	};
 
 	// Leaves native undo to text fields.
 	const isEditingText = (target: EventTarget | null) =>
@@ -75,57 +46,7 @@
 		</header>
 
 		<Palette />
-
-		<footer class="form">
-			<div class="button-list">
-				<button
-					class="button"
-					title="Export colors in various formats"
-					onclick={() => {
-						isShowingExport = true;
-					}}
-				>
-					Export
-				</button>
-
-				<button
-					class="button"
-					title="Copy a permalink to this palette"
-					onclick={handleShare}
-				>
-					Share
-				</button>
-
-				<button
-					class="button"
-					title="Undo (Ctrl+Z)"
-					disabled={!history.past.length}
-					onclick={() => history.undo()}
-				>
-					Undo
-				</button>
-
-				<button
-					class="button"
-					title="Redo (Ctrl+Shift+Z)"
-					disabled={!history.future.length}
-					onclick={() => history.redo()}
-				>
-					Redo
-				</button>
-			</div>
-
-			<p class="hint" role="status">{shareStatus}</p>
-		</footer>
-
-		{#if palette.colors.length > 1}
-			<div class="data-options form">
-				<ContrastTypeFilter />
-				<ContrastFilter />
-				<BlindnessFilter />
-				<LuminosityFilter />
-			</div>
-		{/if}
+		<PaletteActions />
 	</section>
 
 	<section class="combinations">
@@ -136,24 +57,15 @@
 						.all.length})
 				</span>
 			</h2>
-
-			<ViewFilter />
 		</header>
+
+		{#if palette.colors.length > 1}
+			<Filters />
+		{/if}
 
 		<Combinations />
 	</section>
 </main>
-
-{#if isShowingExport}
-	<Modal
-		label="Color values"
-		onClose={() => {
-			isShowingExport = false;
-		}}
-	>
-		<Export />
-	</Modal>
-{/if}
 
 <style>
 	@media screen and (min-width: 55rem) {
@@ -173,26 +85,8 @@
 		padding: var(--vgap) var(--hgap);
 	}
 
-	.combinations header {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 1rem;
-	}
-
 	h2 span {
 		font-size: 1rem;
 		font-weight: normal;
-	}
-
-	footer {
-		margin-top: var(--vgap);
-	}
-
-	.data-options {
-		margin-top: var(--vgap);
-		animation: slide-up 250ms ease-out;
-		contain: layout;
 	}
 </style>

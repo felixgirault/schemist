@@ -5,21 +5,18 @@
 	let entries = $derived(
 		combinations.contrastType === 'wcag2'
 			? [
-					['AAA', Wcag2Level.aaa],
+					['None', Wcag2Level.ko],
+					['AA18', Wcag2Level.aa18, 'large text'],
 					['AA', Wcag2Level.aa],
-					[
-						'AA18 <span>(large text)</span>',
-						Wcag2Level.aa18
-					],
-					['KO', Wcag2Level.ko]
+					['AAA', Wcag2Level.aaa]
 				]
 			: [
-					['All', Wcag3Level.all],
-					['Body text', Wcag3Level.body],
-					['Large text', Wcag3Level.large],
-					['Text ', Wcag3Level.text],
+					['None', Wcag3Level.ko],
 					['Non text', Wcag3Level.nonText],
-					['KO', Wcag3Level.ko]
+					['Text ', Wcag3Level.text],
+					['Large text', Wcag3Level.large],
+					['Body text', Wcag3Level.body],
+					['All', Wcag3Level.all]
 				]
 	);
 </script>
@@ -28,8 +25,8 @@
 	<legend>Minimum contrast level</legend>
 
 	<div class="fieldset-fields">
-		<div class="button-list button-list--stacked">
-			{#each entries as [label, value] (value)}
+		<div class="button-list">
+			{#each entries as [label, value, hint] (value)}
 				<input
 					class="button-trigger hidden"
 					id="grade-{value}"
@@ -47,17 +44,13 @@
 					{@html label}
 					<span>
 						{value}+
+
+						{#if hint}
+							({hint})
+						{/if}
 					</span>
 				</label>
 			{/each}
 		</div>
 	</div>
 </fieldset>
-
-<style>
-	label {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-</style>

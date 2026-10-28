@@ -15,9 +15,8 @@
 
 <style>
 	:global(.header),
-	:global(section footer),
-	:global(.palette .data-options),
-	:global(.combinations header fieldset),
+	:global(section aside),
+	:global(.combinations .filters),
 	:global(.list > p),
 	:global(.hint),
 	:global(.preview-button) {

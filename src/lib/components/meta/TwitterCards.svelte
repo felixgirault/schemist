@@ -3,6 +3,6 @@
 	<meta name="twitter:title" content="Schemist" />
 	<meta
 		name="twitter:description"
-		content="Build cohesive and accessible color schemes"
+		content="Cohesive and accessible color schemes"
 	/>
 </svelte:head>

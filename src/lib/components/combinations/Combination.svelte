@@ -49,7 +49,7 @@
 				<span class="grade">
 					{contrast.grade}
 				</span>
-				<span class="value">
+				<span class="value" class:hidden={isCompact}>
 					({round(contrast.level, 1)})
 				</span>
 			</span>
@@ -88,7 +88,9 @@
 						<span class="grade">
 							{grade}
 						</span>
-						<span class="value">({round(level, 1)})</span>
+						<span class="value" class:hidden={isCompact}>
+							({round(level, 1)})
+						</span>
 					</span>
 				</li>
 			{/each}
@@ -103,8 +105,7 @@
 		contain: style paint;
 	}
 
-	.combination--compact .colors,
-	.combination--compact .value {
+	.combination--compact .colors {
 		display: none;
 	}
 

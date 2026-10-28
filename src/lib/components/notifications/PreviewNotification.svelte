@@ -45,7 +45,7 @@
 		padding: 1rem;
 		background: var(--fg);
 		color: var(--bg);
-		animation: slide-up 250ms ease-out;
+		animation: var(--animation-slide-up);
 	}
 
 	.button {

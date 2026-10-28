@@ -2,10 +2,12 @@
 	--font-sans: 'Inter', sans-serif;
 	--font-mono: 'Source', monospace;
 	--shadow: rgba(0, 0, 0, 0.05);
+	--shadow--strong: rgba(0, 0, 0, 0.1);
 	--radius: 0.5rem;
 	--radius--small: 0.25rem;
 	--hgap: 1rem;
 	--vgap: 1rem;
+	--animation-slide-up: slide-up 150ms ease-out;
 }
 
 @media screen and (min-width: 30rem) {
@@ -26,12 +28,6 @@
 	}
 }
 
-@media screen and (min-height: 70rem) {
-	:root {
-		--vgap: 3rem;
-	}
-}
-
 * {
 	margin: 0;
 	padding: 0;
@@ -47,6 +43,7 @@ html {
 	font-feature-settings: 'tnum';
 	font-variant-numeric: tabular-nums;
 	scrollbar-color: var(--bg-soft);
+	scrollbar-gutter: stable;
 }
 
 html,
@@ -229,9 +226,10 @@ a.button {
 }
 
 .button span {
+	display: block;
 	font-family: var(--font-mono);
 	font-weight: normal;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 }
 
 .button-list {
@@ -253,7 +251,15 @@ fieldset {
 }
 
 legend {
-	margin-bottom: 0.5rem;
+	margin-bottom: 0.25rem;
+}
+
+label {
+	display: block;
+}
+
+label.button {
+	margin: 0;
 }
 
 input {
@@ -282,6 +288,8 @@ input[type='range'] {
 }
 
 .form {
+	border: 1px solid var(--bg-neutral);
+	border-bottom-width: 2px;
 	border-radius: var(--radius);
 	padding: 1rem;
 	background: var(--bg-soft);
@@ -289,7 +297,10 @@ input[type='range'] {
 }
 
 .form[popover] {
-	border: 1px solid var(--fg);
+	box-shadow:
+		0 0 0 0.4rem var(--bg),
+		0 0.5rem 3rem var(--bg),
+		0 1rem 3rem var(--bg);
 	color: var(--fg);
 	/* --bg-soft is translucent, so it needs an opaque backdrop */
 	background: linear-gradient(var(--bg-soft) 0 0) var(--bg);
@@ -345,16 +356,14 @@ input[type='range'] {
 	box-shadow:
 		0 0.1rem 0.5rem 0 var(--shadow),
 		0 0.5rem 2rem 0 var(--shadow);
-	transition: box-shadow ease-in 300ms;
+	transition: box-shadow ease-in 150ms;
 }
 
 .elevated:hover,
 .elevated:focus-within {
 	box-shadow:
-		0 0.1rem 0.5rem 0 var(--shadow),
-		0 0.5rem 2rem 0 var(--shadow),
-		0 0.1rem 0.5rem 0 var(--shadow),
-		0 0.5rem 2rem 0 var(--shadow);
+		0 0.1rem 0.5rem 0 var(--shadow--strong),
+		0 0.5rem 2rem 0 var(--shadow--strong);
 }
 
 .data-layout {
@@ -412,7 +421,7 @@ input[type='range'] {
 
 @keyframes slide-up {
 	0% {
-		transform: translate3d(0, 1rem, 0);
+		transform: translate3d(0, 0.5rem, 0);
 	}
 	100% {
 		transform: translate3d(0, 0, 0);
