@@ -64,8 +64,19 @@ class Palette {
 			)
 		);
 
+		// The first outputs are settled right away, so combinations
+		// render along with the palette instead of after the delay.
+		let isSettled = false;
+
 		$effect.root(() => {
-			$effect(() => update(this.outputs));
+			$effect(() => {
+				if (isSettled) {
+					update(this.outputs);
+				} else if (this.root) {
+					this.settledOutputs = this.outputs;
+					isSettled = true;
+				}
+			});
 		});
 	}
 }
