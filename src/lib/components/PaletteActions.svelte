@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Export from '#lib/components/export/Export.svelte';
-	import RedoIcon from '#lib/components/icons/RedoIcon.svelte';
-	import UndoIcon from '#lib/components/icons/UndoIcon.svelte';
+	import ExportIcon from '#lib/components/icons/export.svg?component';
+	import RedoIcon from '#lib/components/icons/redo.svg?component';
+	import ShareIcon from '#lib/components/icons/share.svg?component';
+	import UndoIcon from '#lib/components/icons/undo.svg?component';
 	import Modal from '#lib/components/Modal.svelte';
 	import {permalink} from '#lib/routing.js';
 	import {history} from '#lib/stores/history.svelte.js';
@@ -62,6 +64,7 @@
 				isShowingExport = true;
 			}}
 		>
+			<ExportIcon />
 			Export
 		</button>
 
@@ -70,6 +73,7 @@
 			title="Copy a permalink to this palette"
 			onclick={handleShare}
 		>
+			<ShareIcon />
 			Share
 		</button>
 	</div>

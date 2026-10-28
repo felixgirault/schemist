@@ -645,6 +645,38 @@ Outputs (visible colors, tree order):
 Variable names are split on spaces, stripped of every character
 but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
 
+### 11.9 Icons
+
+Icons are hand drawn SVG files in `components/icons/`, imported
+as components with a `?component` suffix
+(`import AddIcon from '#lib/components/icons/add.svg?component'`).
+A plugin in `vite.config.js` resolves them to a virtual
+`*.svg.svelte` module, adding `class="icon"` and `aria-hidden`.
+
+Files hold only a `viewBox` and shapes. The `.icon` rule in
+`global.css` provides everything else: 1rem size, no fill,
+`currentColor` stroke, `--icon-stroke-width` (2), round caps and
+joins.
+
+Style:
+
+- **Grid**: 16 × 16, displayed at 1rem so a unit is a pixel.
+  Shapes stay within 2–14 (stroke included), leaving a 2 px
+  margin.
+- **Strokes**: bold, 2 px, centered on whole coordinates so
+  horizontal and vertical lines land on pixels. Only curves and
+  diagonals fall between pixels. Other stroke widths blur.
+- **Right angles**: paths are straight segments meeting at right
+  angles where possible, rather than curves or arrowheads.
+- **Handle**: a ring of radius 2 (6 px wide with its stroke, 2 px
+  hole) marks where a path leads, in place of an arrowhead or a
+  dot. Lines connecting to it stop on its outline, 2 units from
+  its center, so they join its stroke without overlapping.
+- **Sizes**: symbols of the same family match (e.g. arm lengths).
+  Mirrored pairs are drawn mirrored, without transforms.
+- **Fills**: only for solid areas, set with `fill="currentColor"`.
+  A filled handle is a solid dot of the same size.
+
 ## 12. Testing
 
 Unit tests cover utils, color parsing, color deficiency

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import AddIcon from '#lib/components/icons/AddIcon.svelte';
-	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
-	import ExpandIcon from '#lib/components/icons/ExpandIcon.svelte';
-	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
-	import SwapIcon from '#lib/components/icons/SwapIcon.svelte';
-	import InfoIcon from '../icons/InfoIcon.svelte';
-	import OffIcon from '../icons/OffIcon.svelte';
-	import OnIcon from '../icons/OnIcon.svelte';
+	import AddIcon from '#lib/components/icons/add.svg?component';
+	import CloseIcon from '#lib/components/icons/close.svg?component';
+	import ExpandIcon from '#lib/components/icons/expand.svg?component';
+	import OptionsIcon from '#lib/components/icons/options.svg?component';
+	import SwapIcon from '#lib/components/icons/swap.svg?component';
+	import InfoIcon from '#lib/components/icons/info.svg?component';
+	import OffIcon from '#lib/components/icons/off.svg?component';
+	import OnIcon from '#lib/components/icons/on.svg?component';
 
 	interface Props {
 		infoId: string;

@@ -5,6 +5,7 @@
 	--shadow--strong: rgba(0, 0, 0, 0.1);
 	--radius: 0.5rem;
 	--radius--small: 0.25rem;
+	--icon-stroke-width: 2;
 	--hgap: 1rem;
 	--vgap: 1rem;
 	--animation-slide-up: slide-up 150ms ease-out;
@@ -208,6 +209,17 @@ a.button {
 	vertical-align: top;
 	width: 1rem;
 	height: 1rem;
+}
+
+/* Icons are drawn on a 16px grid, with lines on whole pixels */
+.icon {
+	width: 1rem;
+	height: 1rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: var(--icon-stroke-width);
+	stroke-linecap: round;
+	stroke-linejoin: round;
 }
 
 .button--small {

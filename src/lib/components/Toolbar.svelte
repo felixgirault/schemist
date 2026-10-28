@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Filters from '#lib/components/combinations/Filters.svelte';
-	import GitHubIcon from '#lib/components/icons/GitHubIcon.svelte';
-	import ThemeIcon from '#lib/components/icons/ThemeIcon.svelte';
+	import GitHubIcon from '#lib/components/icons/github.svg?component';
+	import ThemeIcon from '#lib/components/icons/theme.svg?component';
 	import PaletteActions from '#lib/components/PaletteActions.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {features} from '#lib/stores/features.svelte.js';

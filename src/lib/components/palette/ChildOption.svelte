@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
+	import CheckIcon from '#lib/components/icons/check.svg?component';
 
 	interface Props {
 		label: string;

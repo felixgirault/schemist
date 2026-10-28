@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import CloseIcon from '#lib/components/icons/close.svg?component';
 	import {
 		DialogContent,
 		DialogOverlay

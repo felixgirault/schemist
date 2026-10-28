@@ -1,4 +1,6 @@
 <script lang="ts">
+	import GridIcon from '#lib/components/icons/grid.svg?component';
+	import ListIcon from '#lib/components/icons/list.svg?component';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 </script>
 
@@ -13,7 +15,10 @@
 			value="grid"
 			bind:group={combinations.view}
 		/>
-		<label class="button" for="view-grid">Grid</label>
+		<label class="button" for="view-grid">
+			<GridIcon />
+			Grid
+		</label>
 
 		<input
 			class="button-trigger hidden"
@@ -22,6 +27,9 @@
 			value="list"
 			bind:group={combinations.view}
 		/>
-		<label class="button" for="view-list">List</label>
+		<label class="button" for="view-list">
+			<ListIcon />
+			List
+		</label>
 	</div>
 </fieldset>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {formatRgbToHex} from '#lib/color/formatting.js';
-	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
+	import PreviewIcon from '#lib/components/icons/preview.svg?component';
 	import type {
 		CombinationContrast,
 		SimulatedContrast
