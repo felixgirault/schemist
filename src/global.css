@@ -46,6 +46,13 @@ html {
 	scrollbar-gutter: stable;
 }
 
+/* The page itself doesn't scroll in the desktop layout */
+@media screen and (min-width: 55rem) {
+	html {
+		scrollbar-gutter: auto;
+	}
+}
+
 html,
 body {
 	min-height: 100%;
@@ -235,6 +242,27 @@ a.button {
 .button-list {
 	display: flex;
 	gap: 3px;
+}
+
+.select {
+	border: 0;
+	border-radius: var(--radius);
+	padding: 0.5rem;
+	box-shadow:
+		inset 0 0 0 1px var(--fg-light),
+		inset 0 -2px 0 0 var(--fg-light);
+	background: var(--bg-hard);
+	color: var(--fg);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.select:hover,
+.select:focus {
+	box-shadow:
+		0 0 0 1px var(--fg),
+		inset 0 0 0 1px var(--fg);
 }
 
 .button-list--stacked {

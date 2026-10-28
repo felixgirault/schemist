@@ -85,10 +85,7 @@
 </div>
 
 <style>
-	.grid {
-		overflow-x: auto;
-	}
-
+	/* The combinations section scrolls, so row headings stick to its edge */
 	table {
 		margin-top: -5ch;
 		margin-bottom: 0;

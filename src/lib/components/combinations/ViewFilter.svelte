@@ -3,7 +3,7 @@
 </script>
 
 <fieldset>
-	<legend>View</legend>
+	<legend class="hidden">View</legend>
 
 	<div class="button-list">
 		<input
@@ -25,9 +25,3 @@
 		<label class="button" for="view-list">List</label>
 	</div>
 </fieldset>
-
-<style>
-	fieldset {
-		margin: 0;
-	}
-</style>

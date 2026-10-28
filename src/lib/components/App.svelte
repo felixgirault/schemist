@@ -1,11 +1,8 @@
 <script lang="ts">
 	import Combinations from '#lib/components/combinations/Combinations.svelte';
-	import Filters from '#lib/components/combinations/Filters.svelte';
 	import Palette from '#lib/components/Palette.svelte';
-	import PaletteActions from '#lib/components/PaletteActions.svelte';
-	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import Toolbar from '#lib/components/Toolbar.svelte';
 	import {history} from '#lib/stores/history.svelte.js';
-	import {palette} from '#lib/stores/palette.svelte.js';
 
 	// Leaves native undo to text fields.
 	const isEditingText = (target: EventTarget | null) =>
@@ -38,40 +35,40 @@
 
 <svelte:window onkeydown={handleKey} />
 
+<Toolbar />
+
 <!-- svelte-ignore a11y_no_redundant_roles -->
 <main role="main">
 	<section class="palette">
-		<header>
-			<h2 class="h2">Palette</h2>
-		</header>
-
+		<h2 class="hidden">Palette</h2>
 		<Palette />
-		<PaletteActions />
 	</section>
 
 	<section class="combinations">
-		<header>
-			<h2 class="h2">
-				Combinations <span>
-					({combinations.filtered.length} / {combinations
-						.all.length})
-				</span>
-			</h2>
-		</header>
-
-		{#if palette.colors.length > 1}
-			<Filters />
-		{/if}
-
+		<h2 class="hidden">Combinations</h2>
 		<Combinations />
 	</section>
 </main>
 
 <style>
+	main {
+		flex-grow: 1;
+	}
+
 	@media screen and (min-width: 55rem) {
 		main {
 			display: grid;
 			grid-template-columns: 45ch minmax(0, 1fr);
+			min-height: 0;
+		}
+
+		section {
+			overflow: auto;
+			scrollbar-gutter: stable;
+		}
+
+		.palette {
+			border-right: 1px solid var(--bg-neutral);
 		}
 	}
 
@@ -85,8 +82,8 @@
 		padding: var(--vgap) var(--hgap);
 	}
 
-	h2 span {
-		font-size: 1rem;
-		font-weight: normal;
+	/* Lets the grid scroll sideways on small screens too */
+	.combinations {
+		overflow-x: auto;
 	}
 </style>

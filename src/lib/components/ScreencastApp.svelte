@@ -14,9 +14,7 @@
 <App />
 
 <style>
-	:global(.header),
-	:global(section aside),
-	:global(.combinations .filters),
+	:global(.toolbar),
 	:global(.list > p),
 	:global(.hint),
 	:global(.preview-button) {

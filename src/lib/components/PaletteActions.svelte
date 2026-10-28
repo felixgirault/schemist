@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Export from '#lib/components/export/Export.svelte';
+	import RedoIcon from '#lib/components/icons/RedoIcon.svelte';
+	import UndoIcon from '#lib/components/icons/UndoIcon.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import {permalink} from '#lib/routing.js';
 	import {history} from '#lib/stores/history.svelte.js';
@@ -29,7 +31,29 @@
 	};
 </script>
 
-<aside class="form">
+<div class="actions">
+	<div class="button-list">
+		<button
+			class="button button--icon"
+			title="Undo (Ctrl+Z)"
+			aria-label="Undo"
+			disabled={!history.past.length}
+			onclick={() => history.undo()}
+		>
+			<UndoIcon />
+		</button>
+
+		<button
+			class="button button--icon"
+			title="Redo (Ctrl+Shift+Z)"
+			aria-label="Redo"
+			disabled={!history.future.length}
+			onclick={() => history.redo()}
+		>
+			<RedoIcon />
+		</button>
+	</div>
+
 	<div class="button-list">
 		<button
 			class="button"
@@ -48,28 +72,10 @@
 		>
 			Share
 		</button>
-
-		<button
-			class="button"
-			title="Undo (Ctrl+Z)"
-			disabled={!history.past.length}
-			onclick={() => history.undo()}
-		>
-			Undo
-		</button>
-
-		<button
-			class="button"
-			title="Redo (Ctrl+Shift+Z)"
-			disabled={!history.future.length}
-			onclick={() => history.redo()}
-		>
-			Redo
-		</button>
 	</div>
 
-	<p class="hint" role="status">{shareStatus}</p>
-</aside>
+	<p class="status" role="status">{shareStatus}</p>
+</div>
 
 {#if isShowingExport}
 	<Modal
@@ -83,7 +89,24 @@
 {/if}
 
 <style>
-	aside {
-		margin-block-start: var(--vgap);
+	.actions {
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	/* Floats below the toolbar so it doesn't push controls around */
+	.status:not(:empty) {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		right: 0;
+		z-index: 2;
+		border-radius: var(--radius--small);
+		padding: 0.25rem 0.5rem;
+		background: var(--fg);
+		color: var(--bg);
+		white-space: nowrap;
+		animation: var(--animation-slide-up);
 	}
 </style>

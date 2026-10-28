@@ -138,9 +138,10 @@
 		position: relative;
 	}
 
+	/* Below the button, as the palette clips what overflows its top */
 	.hint {
 		position: absolute;
-		bottom: 2rem;
+		top: 2.5rem;
 		right: calc(-1 * var(--radius));
 		border-radius: var(--radius);
 		padding: 0.5rem;
@@ -153,7 +154,7 @@
 
 	.hint:after {
 		position: absolute;
-		bottom: -0.75rem;
+		top: -0.75rem;
 		right: var(--radius);
 		content: '';
 		display: block;
@@ -161,6 +162,6 @@
 		width: 0;
 		border-left: 0.75rem solid transparent;
 		border-right: 0.75rem solid transparent;
-		border-top: 1rem solid var(--fg);
+		border-bottom: 1rem solid var(--fg);
 	}
 </style>

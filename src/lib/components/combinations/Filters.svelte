@@ -6,23 +6,36 @@
 	import ViewFilter from '#lib/components/combinations/ViewFilter.svelte';
 </script>
 
-<div class="filters form">
+<div class="filters">
 	<ViewFilter />
-	<ContrastTypeFilter />
-	<ContrastFilter />
-	<BlindnessFilter />
-	<LuminosityFilter />
+
+	<div class="group">
+		<ContrastTypeFilter />
+		<ContrastFilter />
+	</div>
+
+	<div class="group">
+		<BlindnessFilter />
+		<LuminosityFilter />
+	</div>
 </div>
 
 <style>
-	.filters {
+	.filters,
+	.group {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: flex-start;
-		gap: 1rem 2rem;
-		margin-bottom: var(--vgap);
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.filters {
+		gap: 0.5rem 1rem;
 		animation: var(--animation-slide-up);
-		contain: layout;
+	}
+
+	.filters :global(fieldset) {
+		margin: 0;
 	}
 
 	.filters :global(.fieldset-fields) {

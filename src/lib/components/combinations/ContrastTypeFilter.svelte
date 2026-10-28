@@ -3,7 +3,7 @@
 </script>
 
 <fieldset>
-	<legend>Contrast type</legend>
+	<legend class="hidden">Contrast type</legend>
 
 	<div class="fieldset-fields">
 		<div class="button-list">
@@ -23,8 +23,8 @@
 				value={'wcag3'}
 				bind:group={combinations.contrastType}
 			/>
-			<label class="button" for="wcag3">
-				WCAG 3 <span>(APCA)</span>
+			<label class="button" for="wcag3" title="WCAG 3">
+				APCA
 			</label>
 		</div>
 	</div>
