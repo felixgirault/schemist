@@ -30,7 +30,7 @@
 					<legend>Format</legend>
 
 					<div class="fieldset-fields">
-						<div class="button-list">
+						<div class="button-list button-list--stacked">
 							<input
 								class="button-trigger hidden"
 								id="format-table"

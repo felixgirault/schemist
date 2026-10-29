@@ -38,7 +38,7 @@ export const duoThemeStyle = (
 		}),
 		'--bg-overlay': overlayColor(background, isDark),
 		'--fg': formatSchemist(foreground),
-		'--fg-light': formatSchemist({...foreground, a: 0.75})
+		'--fg-light': formatSchemist({...foreground, a: 0.6})
 	});
 };
 

@@ -6,7 +6,7 @@
 	let {code}: Props = $props();
 </script>
 
-<textarea class="elevated" rows="10" readonly>{code}</textarea>
+<textarea rows="10" readonly>{code}</textarea>
 
 <style>
 	textarea {

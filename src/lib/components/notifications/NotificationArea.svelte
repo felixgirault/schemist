@@ -17,7 +17,7 @@
 <style>
 	div {
 		position: fixed;
-		right: 1rem;
+		left: 1rem;
 		bottom: 1rem;
 		max-width: 40ch;
 		z-index: 1000;

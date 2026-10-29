@@ -31,7 +31,7 @@
 </script>
 
 <div
-	class="combination outlined elevated"
+	class="combination outlined"
 	class:combination--compact={isCompact}
 	style="background: {formatRgbToHex(
 		contrast.bg

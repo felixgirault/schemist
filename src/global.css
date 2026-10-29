@@ -29,6 +29,12 @@
 	}
 }
 
+@media screen and (min-height: 70rem) {
+	:root {
+		--vgap: 3rem;
+	}
+}
+
 * {
 	margin: 0;
 	padding: 0;
@@ -139,13 +145,14 @@ tbody tr:last-child td {
 }
 
 .button {
+	--border: var(--fg-light);
 	display: inline-block;
 	border: 0;
 	border-radius: var(--radius);
 	padding: 0.5rem;
 	box-shadow:
-		inset 0 0 0 1px var(--fg-light),
-		inset 0 -2px 0 0 var(--fg-light);
+		inset 0 0 0 1px var(--border),
+		inset 0 -2px 0 0 var(--border);
 	background: var(--bg-hard);
 	color: var(--fg);
 	font: inherit;
@@ -161,9 +168,7 @@ a.button {
 .button:hover,
 .button:focus,
 .button-trigger:focus + .button {
-	box-shadow:
-		0 0 0 1px var(--fg),
-		inset 0 0 0 1px var(--fg);
+	--border: var(--fg);
 	background: var(--bg-neutral);
 	color: var(--fg);
 }
@@ -186,18 +191,19 @@ a.button {
 .button--active:hover,
 .button--active:focus {
 	box-shadow:
-		0 0 0 1px var(--fg),
+		0 0 0 1px var(--border),
 		inset 0 0 0 1px var(--bg);
 }
 
 .button:disabled {
+	--border: var(--bg-neutral);
 	background: repeating-linear-gradient(
 		130deg,
 		transparent 0 0.3ch,
 		var(--bg-neutral) calc(0.3ch + 1px),
 		transparent calc(0.3ch + 2px)
 	);
-	opacity: 0.5;
+	color: var(--border);
 	cursor: default;
 }
 
@@ -211,7 +217,6 @@ a.button {
 	height: 1rem;
 }
 
-/* Icons are drawn on a 16px grid, with lines on whole pixels */
 .icon {
 	width: 1rem;
 	height: 1rem;
@@ -290,7 +295,8 @@ fieldset {
 	padding: 0 0.5rem;
 }
 
-legend {
+legend,
+.legend {
 	margin-bottom: 0.25rem;
 }
 
@@ -387,14 +393,19 @@ input[type='range'] {
 }
 
 .outlined {
-	outline: 1px solid
-		color-mix(in srgb, var(--fg) 10%, transparent);
-	outline-offset: -1px;
+	--outline-color: color-mix(
+		in srgb,
+		var(--fg) 10%,
+		transparent
+	);
+	box-shadow:
+		inset 0 0 0 1px var(--outline-color),
+		inset 0 -2px 0 0 var(--outline-color);
 }
 
 .elevated {
 	box-shadow:
-		0 0.1rem 0.5rem 0 var(--shadow),
+		0 0.2rem 0.25rem 0 var(--shadow),
 		0 0.5rem 2rem 0 var(--shadow);
 	transition: box-shadow ease-in 150ms;
 }
@@ -402,7 +413,7 @@ input[type='range'] {
 .elevated:hover,
 .elevated:focus-within {
 	box-shadow:
-		0 0.1rem 0.5rem 0 var(--shadow--strong),
+		0 0.2rem 0.25rem 0 var(--shadow--strong),
 		0 0.5rem 2rem 0 var(--shadow--strong);
 }
 
