@@ -5,7 +5,7 @@
 </script>
 
 <fieldset>
-	<legend class="hidden">View</legend>
+	<legend>View</legend>
 
 	<div class="button-list">
 		<input
@@ -15,9 +15,8 @@
 			value="grid"
 			bind:group={combinations.view}
 		/>
-		<label class="button" for="view-grid">
+		<label class="button" for="view-grid" title="Grid">
 			<GridIcon />
-			Grid
 		</label>
 
 		<input
@@ -27,9 +26,8 @@
 			value="list"
 			bind:group={combinations.view}
 		/>
-		<label class="button" for="view-list">
+		<label class="button" for="view-list" title="List">
 			<ListIcon />
-			List
 		</label>
 	</div>
 </fieldset>

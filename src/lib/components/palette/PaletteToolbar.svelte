@@ -5,12 +5,12 @@
 	import ShareIcon from '#lib/components/icons/share.svg?component';
 	import UndoIcon from '#lib/components/icons/undo.svg?component';
 	import Modal from '#lib/components/Modal.svelte';
+	import Toolbar from '#lib/components/Toolbar.svelte';
 	import {permalink} from '#lib/routing.js';
 	import {history} from '#lib/stores/history.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
 	let isShowingExport = $state(false);
-	let shareStatus = $state('');
 
 	// The URL is always up to date, but copying it is handier.
 	const handleShare = async () => {
@@ -22,18 +22,20 @@
 			await navigator.clipboard.writeText(
 				permalink(palette.root)
 			);
-			shareStatus = 'Link copied';
-		} catch {
-			shareStatus = 'Copy the link from the address bar';
-		}
 
-		setTimeout(() => {
-			shareStatus = '';
-		}, 2000);
+			alert('Link copied');
+		} catch {
+			alert('Copy the link from the address bar');
+		}
 	};
 </script>
 
-<div class="actions">
+<Toolbar>
+	<header class="brand">
+		<h1>Schemist</h1>
+		<p>Cohesive & accessible</p>
+	</header>
+
 	<div class="button-list">
 		<button
 			class="button button--icon"
@@ -65,7 +67,6 @@
 			}}
 		>
 			<ExportIcon />
-			Export
 		</button>
 
 		<button
@@ -74,12 +75,9 @@
 			onclick={handleShare}
 		>
 			<ShareIcon />
-			Share
 		</button>
 	</div>
-
-	<p class="status" role="status">{shareStatus}</p>
-</div>
+</Toolbar>
 
 {#if isShowingExport}
 	<Modal
@@ -93,24 +91,13 @@
 {/if}
 
 <style>
-	.actions {
-		position: relative;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
+	header {
+		margin-inline-end: auto;
 	}
 
-	/* Floats below the toolbar so it doesn't push controls around */
-	.status:not(:empty) {
-		position: absolute;
-		top: calc(100% + 0.5rem);
-		right: 0;
-		z-index: 2;
-		border-radius: var(--radius--small);
-		padding: 0.25rem 0.5rem;
-		background: var(--fg);
-		color: var(--bg);
-		white-space: nowrap;
-		animation: var(--animation-slide-up);
+	h1 {
+		font-size: 2rem;
+		font-weight: 900;
+		line-height: 1;
 	}
 </style>

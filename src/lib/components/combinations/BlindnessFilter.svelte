@@ -3,15 +3,16 @@
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 
 	const entries: [string, BlindnessType, string][] = [
-		['Deutan', 'deuteranomaly', 'Deuteranomaly (red–green)'],
-		['Protan', 'protanomaly', 'Protanomaly (red–green)'],
-		['Tritan', 'tritanomaly', 'Tritanomaly (blue–yellow)']
+		['Deut.', 'deuteranomaly', 'Deuteranomaly (red–green)'],
+		['Prot.', 'protanomaly', 'Protanomaly (red–green)'],
+		['Trit.', 'tritanomaly', 'Tritanomaly (blue–yellow)']
 	];
 </script>
 
 <fieldset>
-	<legend class="hidden">
-		Color vision deficiency simulation
+	<legend>
+		<abbr title="Color Vision Deficiency">CVD</abbr>
+		simulation
 	</legend>
 
 	<div class="fieldset-fields">
@@ -25,11 +26,7 @@
 					value={type}
 				/>
 
-				<label
-					class="button"
-					for="blindness-{type}"
-					title="Simulate {title}"
-				>
+				<label class="button" for="blindness-{type}" {title}>
 					{label}
 				</label>
 			{/each}

@@ -3,7 +3,7 @@
 </script>
 
 <fieldset>
-	<legend class="hidden">Contrast type</legend>
+	<legend>Contrast type</legend>
 
 	<div class="fieldset-fields">
 		<div class="button-list">

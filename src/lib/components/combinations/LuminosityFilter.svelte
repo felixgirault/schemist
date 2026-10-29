@@ -14,5 +14,5 @@
 	for="luminosity"
 	title="Show colors in grayscale so you can perceive lightness differences between them"
 >
-	Grayscale
+	Luminosity analysis
 </label>
