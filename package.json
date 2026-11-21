@@ -9,7 +9,7 @@
 		"start": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"cli:build": "vite build -c vite.cli.config.js",
+		"cli:build": "svelte-kit sync && vite build -c vite.cli.config.js",
 		"cli": "node build-cli/schemist.js",
 		"package": "svelte-kit package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

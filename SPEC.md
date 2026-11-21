@@ -37,16 +37,16 @@ Production URL: <https://schemist.fglt.fr>.
 
 Scripts:
 
-| Script              | Effect                                            |
-| ------------------- | ------------------------------------------------- |
-| `npm start`         | Dev server                                        |
-| `npm run build`     | Static build into `build/`                        |
-| `npm run check`     | `svelte-kit sync` + `svelte-check` (types)        |
-| `npm test`          | Unit tests                                        |
-| `npm run lint`      | `oxfmt --check`                                   |
-| `npm run format`    | `oxfmt` (writes)                                  |
-| `npm run cli:build` | Builds the CLI into `build-cli/schemist.js` (§14) |
-| `npm run cli`       | `node build-cli/schemist.js` (§14)                |
+| Script              | Effect                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| `npm start`         | Dev server                                                            |
+| `npm run build`     | Static build into `build/`                                            |
+| `npm run check`     | `svelte-kit sync` + `svelte-check` (types)                            |
+| `npm test`          | Unit tests                                                            |
+| `npm run lint`      | `oxfmt --check`                                                       |
+| `npm run format`    | `oxfmt` (writes)                                                      |
+| `npm run cli:build` | `svelte-kit sync` + builds the CLI into `build-cli/schemist.js` (§14) |
+| `npm run cli`       | `node build-cli/schemist.js` (§14)                                    |
 
 Kit configuration lives in `vite.config.js`
 (`sveltekit({adapter: adapter()})`); there is no
