@@ -127,7 +127,9 @@ const section = (c: GradedCase) => {
 				'Cost',
 				c.runs,
 				(m) => m.cost,
-				(v) => `$${fixed(v as number)}`
+				// Cheap runs (smoke) need the third decimal.
+				(v) =>
+					`$${(v as number).toFixed((v as number) < 0.1 ? 3 : 2)}`
 			),
 			metric('Turns', c.runs, (m) => m.turns),
 			metric(

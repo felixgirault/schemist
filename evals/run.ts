@@ -195,7 +195,8 @@ const statusOf = (
 		: 'ok';
 };
 
-const metaOf = (
+// The model is the one that answered, not the case's alias.
+export const metaOf = (
 	c: Case,
 	ref: string,
 	exit: Exit,
@@ -205,7 +206,9 @@ const metaOf = (
 	durationMs: exit.durationMs,
 	cost: result?.total_cost_usd,
 	turns: result?.num_turns,
-	model: c.model ?? Object.keys(result?.modelUsage ?? {})[0],
+	model:
+		Object.keys(result?.modelUsage ?? {}).join(', ') ||
+		c.model,
 	status: statusOf(exit, result)
 });
 

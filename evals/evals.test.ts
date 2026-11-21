@@ -18,10 +18,11 @@ import {createGrader} from './graders/index.ts';
 import type {GraderFile} from './graders/index.ts';
 import {parse as parseRegex} from './graders/regex.ts';
 import type {Context} from './graders/types.ts';
-import {gradeCase, score} from './report.ts';
+import {gradeCase, report, score} from './report.ts';
 import {
 	claudeArgs,
 	claudeEnv,
+	metaOf,
 	parseOptions,
 	prepareWorkspace
 } from './run.ts';
@@ -748,5 +749,58 @@ describe('the cases', () => {
 				})
 			)
 		).toBe(true);
+	});
+});
+
+describe('run meta', () => {
+	const c = {
+		name: 'x',
+		prompt: 'p',
+		runs: 1,
+		timeoutSeconds: 1,
+		model: 'haiku',
+		graders: []
+	};
+	const exit = {code: 0, signal: null, durationMs: 5};
+
+	test('takes the model that answered and the result figures', () => {
+		expect(
+			metaOf(c, 'sha', exit, {
+				total_cost_usd: 0.003,
+				num_turns: 5,
+				modelUsage: {'claude-haiku-5-5': {}}
+			})
+		).toEqual({
+			ref: 'sha',
+			durationMs: 5,
+			cost: 0.003,
+			turns: 5,
+			model: 'claude-haiku-5-5',
+			status: 'ok'
+		});
+	});
+
+	test('without a result, the case model and an error status', () => {
+		expect(metaOf(c, 'sha', {...exit, code: 1}).model).toBe(
+			'haiku'
+		);
+		expect(metaOf(c, 'sha', {...exit, code: 1}).status).toBe(
+			'error (exit 1)'
+		);
+		expect(
+			metaOf(c, 'sha', {
+				code: null,
+				signal: 'SIGTERM',
+				durationMs: 1
+			}).status
+		).toBe('killed (SIGTERM)');
+	});
+
+	test('the report shows cents of cheap runs', () => {
+		const graded = gradeCase('x', {}, [
+			{name: 'run-1', meta: {cost: 0.0028}, results: {}}
+		]);
+
+		expect(report([graded])).toContain('| Cost |  | $0.003 |');
 	});
 });
