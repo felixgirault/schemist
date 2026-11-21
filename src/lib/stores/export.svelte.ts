@@ -1,11 +1,8 @@
 import type {ColorFormat} from '#lib/color/formatting.js';
-import type {Entry} from '#lib/core/evaluate.js';
-
-export type ExportFormat = 'table' | 'tokens' | 'css' | 'sass';
-export type ExportCasing = 'dash' | 'camel';
-export interface ExportEntry extends Entry {
-	cssColor: string;
-}
+import type {
+	ExportCasing,
+	ExportFormat
+} from '#lib/core/export.js';
 
 export const exportSettings = $state({
 	format: 'table' as ExportFormat,

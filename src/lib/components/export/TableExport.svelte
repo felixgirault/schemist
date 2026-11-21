@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Sample from '#lib/components/Sample.svelte';
-	import type {ExportEntry} from '#lib/stores/export.svelte.js';
+	import type {ExportEntry} from '#lib/core/export.js';
 
 	interface Props {
 		entries: ExportEntry[];

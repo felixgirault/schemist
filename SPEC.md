@@ -68,6 +68,7 @@ src/
                            Args, NodeOutput, PresetNode, Preset,
                            defaultArgs, generateName (no runes)
     core/contrast.ts       combine(entries, …) → combinations (§9.1)
+    core/export.ts         toExportEntries, exportVariables, exportTokens (§11.8)
     core/evaluate.ts       evaluate(PresetNode) → entries, store-free
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
@@ -316,6 +317,9 @@ under `darkSchemeFeature` = `'1'` / `'0'`) and `colorInputFormat`
 default `dash`), `precision` (default 3), `prefix` (default
 `''`).
 
+The `ExportFormat`, `ExportCasing` and `ExportEntry` types live
+in `#lib/core/export.ts`.
+
 None of this state is persisted except the dark scheme.
 
 ## 9. Contrast and accessibility
@@ -502,7 +506,9 @@ with a red channel of 0, 128 and 255) with Lightness 20, 70 and
 | Prefix       | CSS, Sass           | Free text, prepended to names   |
 | Precision    | HSL/LCH, not tokens | Decimals                        |
 
-Outputs (visible colors, tree order):
+Outputs (visible colors, tree order). The formatting lives in
+`#lib/core/export.ts` (`toExportEntries`, `exportVariables`,
+`exportTokens`); the components only wire it to the stores:
 
 - **Table**: swatch, name, value.
 - **Design tokens**: JSON
