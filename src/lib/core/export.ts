@@ -67,95 +67,135 @@ const tokenPath = (name: string) => {
 	return path.length ? path : [name];
 };
 
-// Nests tokens under `Colors` along their name's path. A path
-// shared by several colors gets ` (2)`, ` (3)`... on its last
-// segment, in tree order. A token that is also the prefix of
-// other paths stays flat under its full name. Both are returned
-// in `conflicts`, so no color is dropped. Prefixes are computed
-// on all paths before placing anything, so the result doesn't
-// depend on whether the group or the token comes first.
-export const exportTokens = (entries: Entry[], link: string) => {
-	const used = new Set<string>();
-	const repeated = new Set<string>();
-	const flagged = new Set<string>();
-	const items = entries.map(({name, color}) => {
-		const path = tokenPath(name);
-		const last = path.pop()!;
-		const base = [...path, last].join('\0');
-		let flatName = name;
-		let key = base;
+// Segments hold no slash, so joining on one is unambiguous.
+const pathKey = (path: string[]) => path.join('/');
 
-		for (let n = 2; used.has(key); n++) {
-			repeated.add(base);
-			flatName = `${name} (${n})`;
-			key = [...path, `${last} (${n})`].join('\0');
+const repeatedKeys = (keys: string[]) =>
+	new Set(keys.filter((key, i) => keys.indexOf(key) !== i));
+
+// The second and later colors of a path get ` (2)`, ` (3)`... on
+// its last segment, in tree order.
+const withUniquePaths = (paths: string[][]) => {
+	const taken = new Set<string>();
+
+	return paths.map((path) => {
+		const last = path.at(-1)!;
+		let unique = path;
+
+		for (let n = 2; taken.has(pathKey(unique)); n++) {
+			unique = [...path.slice(0, -1), `${last} (${n})`];
 		}
 
-		used.add(key);
-		const parts = key.split('\0');
-		return {
-			name,
-			base,
-			flatName,
-			path: parts,
-			token: {
-				'$type': 'color',
-				'$value': formatSchemistToHex(color)
-			} as Token
-		};
-	});
+		taken.add(pathKey(unique));
 
-	// Repeated paths are conflicts from their first color too.
-	items.forEach(({name, base}) => {
-		if (repeated.has(base)) flagged.add(name);
+		return unique;
 	});
+};
 
-	const groups = new Set(
-		items.flatMap(({path}) =>
+// Keys of the paths that hold other paths.
+const groupKeys = (paths: string[][]) =>
+	new Set(
+		paths.flatMap((path) =>
 			path
 				.slice(0, -1)
-				.map((_, i) => path.slice(0, i + 1).join('\0'))
+				.map((_, i) => pathKey(path.slice(0, i + 1)))
 		)
 	);
+
+// `$` segments would read as DTCG properties (`$value`, `$type`).
+const hasReservedSegment = (path: string[]) =>
+	path.some((segment) => segment.startsWith('$'));
+
+const flatKey = (name: string) =>
+	name.replace(/(^|[/.])\$/g, '$1') || name;
+
+const nestToken = (
+	colors: TokenGroup,
+	path: string[],
+	token: Token
+) => {
+	const group = path
+		.slice(0, -1)
+		.reduce(
+			(parent, segment) =>
+				(parent[segment] ??= {}) as TokenGroup,
+			colors
+		);
+
+	group[path.at(-1)!] = token;
+};
+
+const placeFlatToken = (
+	colors: TokenGroup,
+	key: string,
+	token: Token
+) => {
+	let free = key;
+
+	for (let n = 2; free in colors; n++) {
+		free = `${key} (${n})`;
+	}
+
+	colors[free] = token;
+};
+
+// A token's final path, and why it can't be nested, if so.
+const toTokenItems = (entries: Entry[]) => {
+	const paths = entries.map(({name}) => tokenPath(name));
+	const repeated = repeatedKeys(paths.map(pathKey));
+	const uniquePaths = withUniquePaths(paths);
+	const groups = groupKeys(
+		uniquePaths.filter((path) => !hasReservedSegment(path))
+	);
+
+	return entries.map(({name, color}, i) => ({
+		name,
+		path: uniquePaths[i],
+		token: {
+			'$type': 'color',
+			'$value': formatSchemistToHex(color)
+		} as Token,
+		isRepeated: repeated.has(pathKey(paths[i])),
+		isFlat:
+			hasReservedSegment(uniquePaths[i]) ||
+			groups.has(pathKey(uniquePaths[i]))
+	}));
+};
+
+const conflictNames = (
+	items: ReturnType<typeof toTokenItems>
+) => [
+	...new Set(
+		items
+			.filter(({isFlat, isRepeated}) => isFlat || isRepeated)
+			.map(({name}) => name)
+	)
+];
+
+// Nests tokens under `Colors` along their name's path. Tokens that
+// can't be nested stay flat under their name, and all of them are
+// returned in `conflicts`, so no color is dropped. Group paths are
+// known before placing anything, so the result doesn't depend on
+// whether a group or its token comes first in the tree.
+export const exportTokens = (entries: Entry[], link: string) => {
+	const items = toTokenItems(entries);
 	const colors: TokenGroup = {
 		'$description': `Build with Schemist (${link})`
 	};
-	const flat: typeof items = [];
 
-	items.forEach((item) => {
-		if (groups.has(item.path.join('\0'))) {
-			flagged.add(item.name);
-			flat.push(item);
-			return;
-		}
-
-		const group = item.path
-			.slice(0, -1)
-			.reduce<TokenGroup>(
-				(parent, segment) =>
-					(parent[segment] ??= {}) as TokenGroup,
-				colors
-			);
-		group[item.path.at(-1)!] = item.token;
-	});
-
-	flat.forEach(({flatName, token}) => {
-		let key = flatName;
-		for (let n = 2; key in colors; n++) {
-			key = `${flatName} (${n})`;
-		}
-		colors[key] = token;
-	});
+	items
+		.filter(({isFlat}) => !isFlat)
+		.forEach(({path, token}) =>
+			nestToken(colors, path, token)
+		);
+	items
+		.filter(({isFlat}) => isFlat)
+		.forEach(({name, token}) =>
+			placeFlatToken(colors, flatKey(name), token)
+		);
 
 	return {
 		json: JSON.stringify({'Colors': colors}, null, 2),
-		// In tree order.
-		conflicts: [
-			...new Set(
-				items
-					.map(({name}) => name)
-					.filter((n) => flagged.has(n))
-			)
-		]
+		conflicts: conflictNames(items)
 	};
 };

@@ -149,3 +149,42 @@ test('a suffixed name never overwrites an existing one', () => {
 	);
 	expect(Object.values(colors)).toHaveLength(3);
 });
+
+// A `$` in a token stands for the parent's name, so only a root
+// node can hold one as is.
+const runRoots = (...nodes: PresetNode[]) => {
+	const {json, conflicts} = exportTokens(
+		nodes.flatMap((node) => evaluate(node)),
+		'https://schemist.test'
+	);
+	const {Colors} = JSON.parse(json);
+	delete Colors.$description;
+	return {colors: Colors, conflicts};
+};
+
+test('names with $ segments stay flat without the $', () => {
+	const {colors, conflicts} = runRoots(
+		named('$description/x', '#111111'),
+		named('a/$value', '#222222'),
+		named('$x', '#333333')
+	);
+	expect(colors).toEqual({
+		'description/x': token('#111111'),
+		'a/value': token('#222222'),
+		x: token('#333333')
+	});
+	expect(conflicts).toEqual([
+		'$description/x',
+		'a/$value',
+		'$x'
+	]);
+});
+
+test('a $ name does not turn its parent into a group', () => {
+	expect(
+		runRoots(
+			named('a', '#111111'),
+			named('a/$value', '#222222')
+		).colors
+	).toEqual({a: token('#111111'), 'a/value': token('#222222')});
+});
