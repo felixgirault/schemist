@@ -1,5 +1,5 @@
 import {expect, test} from 'vitest';
-import {run} from './commands.js';
+import {run, truncate} from './commands.js';
 import {UsageError} from './errors.js';
 
 const tree = JSON.stringify({
@@ -209,4 +209,28 @@ test.each([
 ])('eval rejects %j', (args, message) => {
 	expect(() => exec('eval', '-', ...args)).toThrow(UsageError);
 	expect(() => exec('eval', '-', ...args)).toThrow(message);
+});
+
+test('truncate never rounds up past a threshold', () => {
+	expect(truncate(4.496)).toBe(4.49);
+	expect(truncate(2.9999)).toBe(2.99);
+	expect(truncate(4.5)).toBe(4.5);
+	expect(truncate(0)).toBe(0);
+});
+
+test('eval --pair rejects names shared by several colors', () => {
+	const twins = JSON.stringify({
+		type: 'clr',
+		children: [
+			{type: 'cmp', token: 'X'},
+			{type: 'trl', token: 'X'}
+		]
+	});
+	const attempt = () =>
+		run(['eval', '-', '--pair', 'X/Root'], () => twins);
+
+	expect(attempt).toThrow(UsageError);
+	expect(attempt).toThrow(
+		'--pair "X/Root": "X" names 2 colors, give them distinct tokens'
+	);
 });

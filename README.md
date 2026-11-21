@@ -104,7 +104,7 @@ $ npm run cli -- eval palette.json --contrast apca \
     {
       "bg": "Brand text",
       "fg": "Brand light",
-      "level": 89.22,
+      "level": 89.21,
       "grade": "5",
       "minLevel": 88.24,
       "minGrade": "5",
@@ -131,7 +131,7 @@ $ npm run cli -- export palette.json --format css --prefix color
 `--min <level>` (hides combinations whose worst level is below)
 and `--pair 'fg/bg'`, repeatable, to get only the pairs you care
 about, in that order (`\/` stands for a `/` in a name). Levels
-are rounded to 2 decimals. `export` takes `--color-format`,
+are truncated to 2 decimals. `export` takes `--color-format`,
 `--casing`, `--prefix` and `--precision`. Both take `--origin`
 for the permalink.
 

@@ -1,13 +1,13 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {combine} from '#lib/core/contrast.js';
 import {evaluate} from '#lib/core/evaluate.js';
-import {round} from '#lib/utils/math.js';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {build} from 'vite';
 import {afterAll, beforeAll, expect, test} from 'vitest';
+import {truncate} from './commands.js';
 import {parseTreeJson} from './tree.js';
 
 // Runs the built CLI under plain Node: it crashes on runes if a
@@ -58,7 +58,7 @@ test('eval matches the core', () => {
 			({bgName, fgName, contrast}) => ({
 				bg: bgName,
 				fg: fgName,
-				level: round(contrast.level, 2),
+				level: truncate(contrast.level),
 				grade: contrast.grade
 			})
 		)

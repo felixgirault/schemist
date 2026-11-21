@@ -14,7 +14,6 @@ import {
 } from '#lib/core/export.js';
 import type {ExportCasing} from '#lib/core/export.js';
 import {permalink} from '#lib/routing.js';
-import {round} from '#lib/utils/math.js';
 import {parseArgs} from 'node:util';
 import {UsageError} from './errors.js';
 import {parsePair} from './pair.js';
@@ -107,6 +106,11 @@ const parse = (argv: string[]) => {
 		throw new UsageError((error as Error).message);
 	}
 };
+
+// Two decimals, never rounded up: 4.496 must not read as the 4.5 AA
+// threshold.
+export const truncate = (level: number) =>
+	Math.floor(level * 100) / 100;
 
 // Keeps the combinations of the given [fg, bg] pairs, in that order;
 // all of them when there are no pairs.
@@ -212,9 +216,17 @@ export const run = (
 		const pair = parsePair(value);
 
 		for (const name of pair) {
-			if (!names.includes(name)) {
+			const count = names.filter((n) => n === name).length;
+
+			if (!count) {
 				throw new UsageError(
 					`--pair "${value}": unknown color "${name}"`
+				);
+			}
+
+			if (count > 1) {
+				throw new UsageError(
+					`--pair "${value}": "${name}" names ${count} colors, give them distinct tokens`
 				);
 			}
 		}
@@ -252,16 +264,16 @@ export const run = (
 			}) => ({
 				bg: bgName,
 				fg: fgName,
-				level: round(contrast.level, 2),
+				level: truncate(contrast.level),
 				grade: contrast.grade,
 				...(blindness.length && {
-					minLevel: round(minLevel, 2),
+					minLevel: truncate(minLevel),
 					minGrade
 				}),
 				simulated: simulatedContrasts.map(
 					({type, level, grade}) => ({
 						type,
-						level: round(level, 2),
+						level: truncate(level),
 						grade
 					})
 				)
