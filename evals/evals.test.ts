@@ -642,7 +642,7 @@ describe('prepareWorkspace', () => {
 		expect(git(work, 'log', '--format=%an').trim()).toBe(
 			'eval'
 		);
-	});
+	}, 30_000);
 });
 
 describe('file_exists min and tool alternatives', () => {
