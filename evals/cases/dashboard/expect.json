@@ -1,0 +1,162 @@
+{
+	"trees": ["out/light.json", "out/dark.json"],
+	"pairs": [
+		{
+			"fg": "text/body",
+			"bg": "bg/page",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "text/body",
+			"bg": "bg/surface",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "text/body",
+			"bg": "bg/raised",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "text/secondary",
+			"bg": "bg/page",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "text/secondary",
+			"bg": "bg/surface",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "text/secondary",
+			"bg": "bg/raised",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "button/primary/label",
+			"bg": "button/primary/bg",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "button/primary/label",
+			"bg": "button/primary/bg-hover",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "button/primary/label",
+			"bg": "button/primary/bg-pressed",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "button/secondary/label",
+			"bg": "button/secondary/bg",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "button/secondary/label",
+			"bg": "button/secondary/bg-hover",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "button/secondary/label",
+			"bg": "button/secondary/bg-pressed",
+			"wcag2": 4.5
+		},
+		{"fg": "status/info/text", "bg": "bg/page", "wcag2": 4.5},
+		{
+			"fg": "status/info/text",
+			"bg": "bg/surface",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/info/text",
+			"bg": "bg/raised",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/info/subtle-text",
+			"bg": "status/info/subtle-bg",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/success/text",
+			"bg": "bg/page",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/success/text",
+			"bg": "bg/surface",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/success/text",
+			"bg": "bg/raised",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/success/subtle-text",
+			"bg": "status/success/subtle-bg",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/warning/text",
+			"bg": "bg/page",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/warning/text",
+			"bg": "bg/surface",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/warning/text",
+			"bg": "bg/raised",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/warning/subtle-text",
+			"bg": "status/warning/subtle-bg",
+			"wcag2": 4.5
+		},
+		{"fg": "status/error/text", "bg": "bg/page", "wcag2": 4.5},
+		{
+			"fg": "status/error/text",
+			"bg": "bg/surface",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/error/text",
+			"bg": "bg/raised",
+			"wcag2": 4.5
+		},
+		{
+			"fg": "status/error/subtle-text",
+			"bg": "status/error/subtle-bg",
+			"wcag2": 4.5
+		},
+		{"fg": "border/input", "bg": "bg/page", "wcag2": 3},
+		{"fg": "border/input", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "border/input", "bg": "bg/raised", "wcag2": 3},
+		{"fg": "focus/ring", "bg": "bg/page", "wcag2": 3},
+		{"fg": "focus/ring", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "focus/ring", "bg": "bg/raised", "wcag2": 3},
+		{"fg": "chart/1", "bg": "bg/page", "wcag2": 3},
+		{"fg": "chart/1", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "chart/2", "bg": "bg/page", "wcag2": 3},
+		{"fg": "chart/2", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "chart/3", "bg": "bg/page", "wcag2": 3},
+		{"fg": "chart/3", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "chart/4", "bg": "bg/page", "wcag2": 3},
+		{"fg": "chart/4", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "chart/5", "bg": "bg/page", "wcag2": 3},
+		{"fg": "chart/5", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "chart/6", "bg": "bg/page", "wcag2": 3},
+		{"fg": "chart/6", "bg": "bg/surface", "wcag2": 3}
+	],
+	"hex": ["#be7ef3", "#1fb5a0"]
+}

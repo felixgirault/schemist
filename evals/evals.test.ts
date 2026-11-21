@@ -629,3 +629,124 @@ describe('prepareWorkspace', () => {
 		);
 	});
 });
+
+describe('file_exists min and tool alternatives', () => {
+	test('min counts the matching files', () => {
+		const exists = (min: number) =>
+			grade(
+				grader('file_exists', {
+					path: 'out/{light,dark}.json',
+					min
+				}),
+				context(1)
+			).pass;
+
+		expect(exists(2)).toBe(true);
+		expect(exists(3)).toBe(false);
+		expect(
+			grade(
+				grader('file_exists', {
+					path: 'out/{light,dark}.json',
+					min: 2
+				}),
+				context(2)
+			).pass
+		).toBe(false);
+	});
+
+	test('tool lists alternatives with |', () => {
+		const used = (tool: string) =>
+			grade(
+				grader('tool_used', {
+					tool,
+					input_match: 'blindness'
+				}),
+				context(1, {
+					transcript: readFileSync(
+						join(dir(1), 'transcript.jsonl'),
+						'utf8'
+					)
+				})
+			).pass;
+
+		expect(used('Write|Bash')).toBe(true);
+		expect(used('Write|Edit')).toBe(false);
+	});
+});
+
+describe('the cases', () => {
+	const casesRoot = join(import.meta.dirname, 'cases');
+
+	test.each(['smoke', 'website', 'dashboard'])(
+		'%s loads',
+		(name) => {
+			const c = loadCase(join(casesRoot, name));
+
+			expect(c.graders.length).toBeGreaterThan(0);
+			expect(c.prompt).not.toBe('');
+		}
+	);
+
+	// What the agent writes, as in a transcript.
+	const writes = (tool: string, input: object) =>
+		JSON.stringify({
+			message: {
+				content: [{type: 'tool_use', name: tool, input}]
+			}
+		});
+
+	const ownMath = (transcript: string) =>
+		grade(
+			loadCase(join(casesRoot, 'website')).graders.find(
+				(g) => g.name === 'no-own-contrast-math'
+			)!,
+			context(1, {transcript})
+		).pass;
+
+	test('own contrast math is flagged, in commands and files', () => {
+		const formula =
+			'const L = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;';
+		const ratio = 'const ratio = (a + 0.05) / (b + 0.05);';
+
+		expect(
+			ownMath(
+				writes('Write', {
+					file_path: 'c.js',
+					content: formula
+				})
+			)
+		).toBe(false);
+		expect(
+			ownMath(writes('Bash', {command: `node -e "${ratio}"`}))
+		).toBe(false);
+		expect(
+			ownMath(
+				writes('Edit', {new_string: 'relativeLuminance(x)'})
+			)
+		).toBe(false);
+	});
+
+	test('reading the core, culori and chart distances are fine', () => {
+		const reads = JSON.stringify({
+			message: {
+				content: [
+					{
+						type: 'tool_result',
+						content:
+							'const L = 0.2126 * r + 0.7152 * g; // contrast.ts'
+					}
+				]
+			}
+		});
+
+		expect(ownMath(reads)).toBe(true);
+		expect(
+			ownMath(
+				writes('Bash', {
+					command:
+						'node -e "import(\'culori\').then(c => console.log(c.differenceCiede2000()(a, b), c.wcagLuminance(h)))"'
+				})
+			)
+		).toBe(true);
+	});
+});

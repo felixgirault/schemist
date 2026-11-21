@@ -3,7 +3,8 @@ import {toolCalls} from '../transcript.ts';
 import type {Context, Result} from './types.ts';
 
 // Passes when the agent made between `min` (default 1) and `max`
-// calls to `tool` whose JSON-encoded input matches `input_match`.
+// calls to `tool` (or to any of several, as `Write|Edit`) whose
+// JSON-encoded input matches `input_match`.
 //
 //   type: tool_used
 //   tool: Bash
@@ -32,7 +33,7 @@ export const run = (
 ): Result => {
 	const count = toolCalls(transcript).filter(
 		(call) =>
-			call.name === tool &&
+			tool.split('|').includes(call.name) &&
 			inputMatch.test(JSON.stringify(call.input))
 	).length;
 

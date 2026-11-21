@@ -45,6 +45,20 @@ change its own grade. The code is TypeScript run directly by Node
 (type stripping, hence the `.ts` extensions in imports) and
 checked by `npm run check`.
 
+## Cases
+
+- `smoke`: a canary on haiku (about $0.05): builds the CLI and
+  writes `types` to a file. Run it first to check the harness and
+  the environment.
+- `website`: "generate a color scheme for a basic website, light
+  and dark", from a base color.
+- `dashboard`: a rebrand with brand hex values, AAA body text,
+  states, status colors and a color blind safe chart palette.
+
+Prompts are kept verbatim (not reformatted), followed by an
+output contract: where to write files and which token names to
+use, so that graders know where to look.
+
 ## How graders work
 
 A grader is a Markdown file in `cases/<name>/graders/`: flat
@@ -56,12 +70,12 @@ missing or mistyped setting, invalid regular expression) are
 reported when the case is loaded, before any paid run. Each type
 lives in `graders/<type>.ts`, with its settings and an example.
 
-| Type          | Passes when                                                                         | Example                                                                |
-| ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `tool_used`   | `tool` was called `min` (default 1) to `max` times, input matching a regex          | `tool: Bash`, `input_match: --blindness`                               |
-| `regex`       | `pattern` is found in the transcript or in a file (not found with `expect: absent`) | `target: file`, `path: out/light.json`, `pattern: #be7ef3`, `flags: i` |
-| `file_exists` | a file matches the glob `path`, relative to the run directory                       | `path: out/*.json`                                                     |
-| `check`       | every tree and pair of the case's `expect.json` is valid and meets its targets      | no settings                                                            |
+| Type          | Passes when                                                                                   | Example                                                                |
+| ------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `tool_used`   | `tool` (or `Write\|Edit`) was called `min` (default 1) to `max` times, input matching a regex | `tool: Bash`, `input_match: --blindness`                               |
+| `regex`       | `pattern` is found in the transcript or in a file (not found with `expect: absent`)           | `target: file`, `path: out/light.json`, `pattern: #be7ef3`, `flags: i` |
+| `file_exists` | `min` (default 1) files match the glob `path`, relative to the run directory                  | `path: out/{light,dark}.json`, `min: 2`                                |
+| `check`       | every tree and pair of the case's `expect.json` is valid and meets its targets                | no settings                                                            |
 
 `check` re-checks the agent's trees with the CLI built from the
 ref, not with what the agent claims. For each tree of

@@ -48,6 +48,7 @@
 		".env",
 		".env.*",
 		"!.env.example",
+		"/evals/cases/*/prompt.md",
 		"pnpm-lock.yaml",
 		"package-lock.json",
 		"yarn.lock"
