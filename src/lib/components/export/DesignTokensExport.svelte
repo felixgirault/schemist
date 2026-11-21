@@ -10,9 +10,33 @@
 
 	let {entries}: Props = $props();
 
-	let code = $derived(
-		exportTokens(entries, palette.permalink).json
+	let exported = $derived(
+		exportTokens(entries, palette.permalink)
+	);
+
+	let conflictNotice = $derived(
+		`Some names were exported flat or renamed to avoid conflicts: ${exported.conflicts.map((name) => `"${name}"`).join(', ')}.`
 	);
 </script>
 
-<CodeArea {code} />
+<div>
+	{#if exported.conflicts.length}
+		<p class="hint" id="tokens-conflicts">
+			{conflictNotice}
+		</p>
+	{/if}
+
+	<CodeArea
+		code={exported.json}
+		describedby={exported.conflicts.length
+			? 'tokens-conflicts'
+			: undefined}
+	/>
+</div>
+
+<style>
+	div {
+		display: flex;
+		flex-direction: column;
+	}
+</style>

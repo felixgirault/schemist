@@ -43,3 +43,34 @@ test('export tokens with separators and duplicate names', () => {
 	expect(code).toContain('#222222');
 	expect(code).toMatchSnapshot();
 });
+
+const notice = (html: string) =>
+	html.match(/<p class="hint"[^>]*>([\s\S]*?)<\/p>/)?.[1];
+
+test('the tokens export lists conflicting names in a notice', () => {
+	const html = render(Export).body;
+
+	expect(notice(html)).toBe(
+		'Some names were exported flat or renamed to avoid conflicts: "button/primary/bg", "button.primary.bg", "button/primary", "brand".'
+	);
+	expect(html).toContain('aria-describedby="tokens-conflicts"');
+});
+
+test('there is no notice without conflicts or for css', () => {
+	loadPalette(
+		rootTree('#3b82f6', [
+			named('button/primary/bg', '#ff0000'),
+			named('button/primary/fg', '#00ff00')
+		])
+	);
+	expect(notice(render(Export).body)).toBeUndefined();
+
+	exportSettings.format = 'css';
+	loadPalette(
+		rootTree('#3b82f6', [
+			named('brand', '#111111'),
+			named('brand', '#222222')
+		])
+	);
+	expect(notice(render(Export).body)).toBeUndefined();
+});

@@ -534,7 +534,10 @@ Outputs (visible colors, tree order). The formatting lives in
   with the leading `$` of each part stripped. A flat key already
   taken gets ` (2)`... as well. `exportTokens` returns
   `{json, conflicts}`, `conflicts` being the names involved, in
-  tree order (the app lists them in a notice, ADR 2).
+  tree order. When there are some, the tokens export shows a
+  one-line notice above the code (`.hint`, linked to the code by
+  `aria-describedby`) listing them in quotes; no notice otherwise
+  or for other formats.
 - **CSS**: `/* @see <permalink> */` then `--<name>: <value>;`
   lines.
 - **Sass**: same with `$<name>: <value>;`.
