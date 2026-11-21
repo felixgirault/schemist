@@ -13,6 +13,14 @@ export interface ExportEntry extends Entry {
 	cssColor: string;
 }
 
+export const defaultExportSettings = {
+	format: 'table' as ExportFormat,
+	colorFormat: 'hex' as ColorFormat,
+	casing: 'dash' as ExportCasing,
+	precision: 3,
+	prefix: ''
+};
+
 export type VariablesOptions = {
 	format: ExportFormat;
 	casing: ExportCasing;
