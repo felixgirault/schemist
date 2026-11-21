@@ -2,7 +2,7 @@ import {existsSync, readdirSync, readFileSync} from 'node:fs';
 import {basename, join} from 'node:path';
 import {parseFrontMatter} from './frontmatter.ts';
 import type {Scalar} from './frontmatter.ts';
-import {types} from './graders.ts';
+import {prepare} from './graders.ts';
 import type {Expect, Grader} from './graders.ts';
 
 export type Case = {
@@ -37,8 +37,8 @@ export const loadGrader = (path: string): Grader => {
 	const {data, body} = parseFrontMatter(read(path));
 	const {type, weight, ...fields} = data;
 
-	if (typeof type !== 'string' || !types[type])
-		throw new Error(`${name}: unknown grader type "${type}"`);
+	if (typeof type !== 'string')
+		throw new Error(`${name}: "type" is required`);
 
 	if (
 		weight !== undefined &&
@@ -48,13 +48,13 @@ export const loadGrader = (path: string): Grader => {
 			`${name}: weight must be a positive number`
 		);
 
-	return {
+	return prepare({
 		name,
 		type,
 		weight: (weight as number) ?? 1,
 		description: body,
 		fields
-	};
+	});
 };
 
 export const loadCase = (dir: string): Case => {

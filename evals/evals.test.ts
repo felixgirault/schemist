@@ -1,13 +1,28 @@
-import {readFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync
+} from 'node:fs';
+import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {describe, expect, test} from 'vitest';
+import {afterAll, describe, expect, test} from 'vitest';
 import {run} from '../src/cli/commands.ts';
 import {loadCase, loadGrader} from './cases.ts';
 import {parseFrontMatter} from './frontmatter.ts';
 import {gradeDir} from './grade.ts';
-import {grade} from './graders.ts';
+import {events, grade, prepare} from './graders.ts';
 import type {Cli, Context, Grader} from './graders.ts';
 import {gradeCase, score} from './report.ts';
+import {
+	claudeArgs,
+	claudeEnv,
+	parseOptions,
+	prepareWorkspace
+} from './run.ts';
 
 const fixtures = join(import.meta.dirname, 'fixtures');
 const cases = join(fixtures, 'cases');
@@ -350,6 +365,258 @@ describe('scoring and report', () => {
 					'- run-3, palette: out/dark.json: border/input on background/page, apca 36.91 < 45'
 				].join('\n')
 			].join('\n\n')}\n`
+		);
+	});
+});
+
+describe('grader fields', () => {
+	const load = (type: string, fields: Grader['fields']) =>
+		prepare(grader(type, fields));
+
+	test.each([
+		['tool_used', {}, '"tool" is required'],
+		[
+			'tool_used',
+			{tool: 'Bash', min: 'x'},
+			'"min" must be a number'
+		],
+		['regex', {pattern: 'a'}, '"target" is required'],
+		['regex', {target: 'dir', pattern: 'a'}, 'trace or file'],
+		[
+			'regex',
+			{target: 'file', pattern: 'a'},
+			'"path" is required'
+		],
+		['regex', {target: 'trace'}, '"pattern" is required'],
+		[
+			'regex',
+			{target: 'trace', pattern: 'a', expect: 'no'},
+			'present or absent'
+		],
+		['file_exists', {}, '"path" is required']
+	])('%s %j is rejected', (type, fields, message) => {
+		expect(() => load(type, fields)).toThrow(message);
+	});
+
+	test('an invalid pattern names the grader and the field', () => {
+		expect(() =>
+			load('regex', {target: 'trace', pattern: '('})
+		).toThrow(/regex: invalid "pattern"/);
+		expect(() =>
+			load('tool_used', {tool: 'Bash', input_match: '['})
+		).toThrow(/tool_used: invalid "input_match"/);
+		expect(() =>
+			load('regex', {
+				target: 'trace',
+				pattern: 'a',
+				flags: 'zz'
+			})
+		).toThrow(/invalid "pattern"/);
+	});
+
+	test('valid graders get their pattern compiled once', () => {
+		expect(
+			load('regex', {
+				target: 'trace',
+				pattern: 'a+',
+				flags: 'i'
+			}).regex
+		).toEqual(/a+/i);
+		expect(load('check', {}).regex).toBeUndefined();
+	});
+});
+
+test('pair names escape backslashes before slashes', () => {
+	const seen: string[][] = [];
+	const spy: Cli = (args, tree) => {
+		seen.push(args);
+		return cli(args, tree);
+	};
+	const tree = JSON.stringify({
+		type: 'clr',
+		token: 'a\\',
+		args: {color: '#000000'},
+		children: [{type: 'l', token: 'b/c', args: {amount: 100}}]
+	});
+	const root = mkdtempSync(
+		join(tmpdir(), 'schemist-eval-test-')
+	);
+
+	try {
+		writeFileSync(join(root, 't.json'), tree);
+		grade(grader('check'), {
+			dir: root,
+			transcript: '',
+			cli: spy,
+			expect: {
+				trees: ['t.json'],
+				pairs: [{fg: 'b/c', bg: 'a\\', wcag2: 1}]
+			}
+		});
+	} finally {
+		rmSync(root, {recursive: true});
+	}
+
+	expect(seen.flat()).toContain('b\\/c/a\\\\');
+});
+
+test('events skips lines that are not JSON', () => {
+	expect(events('{"a":1}\n\nnope\n{"b":2}\n')).toEqual([
+		{a: 1},
+		{b: 2}
+	]);
+});
+
+describe('runner', () => {
+	test('options default and validate', () => {
+		expect(parseOptions([])).toEqual({
+			cases: undefined,
+			runs: undefined,
+			jobs: 1,
+			ref: 'HEAD'
+		});
+		expect(
+			parseOptions([
+				'--case',
+				'a',
+				'--case',
+				'b',
+				'--runs',
+				'2',
+				'-j',
+				'8',
+				'--ref',
+				'main'
+			])
+		).toEqual({
+			cases: ['a', 'b'],
+			runs: 2,
+			jobs: 8,
+			ref: 'main'
+		});
+		expect(() => parseOptions(['-j', '0'])).toThrow('-j');
+		expect(() => parseOptions(['-j', '9'])).toThrow('-j');
+		expect(() => parseOptions(['--runs', '0'])).toThrow(
+			'--runs'
+		);
+		expect(() => parseOptions(['--runs', 'x'])).toThrow(
+			'--runs'
+		);
+	});
+
+	const c = {
+		name: 'x',
+		prompt: 'p',
+		runs: 3,
+		timeoutSeconds: 1,
+		graders: []
+	};
+
+	test('the command has every isolation flag of the README', () => {
+		const readme = readFileSync(
+			join(import.meta.dirname, 'README.md'),
+			'utf8'
+		);
+		const block = readme.match(
+			/Command that works:\n\n```sh\n([^`]+)```/
+		)![1];
+		const flags = block.match(/--[a-z-]+/g)!;
+
+		expect(flags).toContain('--setting-sources');
+		for (const flag of flags)
+			expect(claudeArgs(c)).toContain(flag);
+
+		const args = claudeArgs(c).join(' ');
+
+		expect(args).toContain('--setting-sources project');
+		expect(args).toContain('--strict-mcp-config');
+		expect(args).toContain('--output-format stream-json');
+		expect(args).toContain('--verbose');
+		expect(args).toContain('--permission-mode auto');
+	});
+
+	test('max turns and model are passed only when set', () => {
+		expect(claudeArgs(c)).not.toContain('--max-turns');
+		expect(claudeArgs(c)).not.toContain('--model');
+		expect(
+			claudeArgs({...c, maxTurns: 40, model: 'opus'}).join(
+				' '
+			)
+		).toContain('--max-turns 40 --model opus');
+	});
+
+	test('the environment disables auto memory', () => {
+		expect(claudeEnv({PATH: '/bin'})).toEqual({
+			PATH: '/bin',
+			CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1'
+		});
+	});
+});
+
+describe('prepareWorkspace', () => {
+	const tmp = mkdtempSync(
+		join(tmpdir(), 'schemist-eval-test-')
+	);
+	const repo = join(tmp, 'repo');
+	const work = join(tmp, 'work');
+	const git = (cwd: string, ...args: string[]) =>
+		execFileSync(
+			'git',
+			[
+				'-C',
+				cwd,
+				'-c',
+				'user.name=Someone',
+				'-c',
+				'user.email=someone@example.com',
+				...args
+			],
+			{encoding: 'utf8'}
+		);
+
+	afterAll(() => rmSync(tmp, {recursive: true, force: true}));
+
+	test('has the files but never the graders', () => {
+		for (const [path, text] of [
+			['README.md', 'hello'],
+			['src/a.ts', 'a'],
+			['evals/cases/x/expect.json', '{"secret":1}']
+		]) {
+			mkdirSync(join(repo, path, '..'), {recursive: true});
+			writeFileSync(join(repo, path), text);
+		}
+
+		git(repo, 'init', '-q');
+		git(repo, 'add', '-A');
+		git(repo, 'commit', '-q', '-m', 'Add evals');
+		writeFileSync(join(repo, 'evals/cases/x/prompt.md'), 'p');
+		git(repo, 'add', '-A');
+		git(repo, 'commit', '-q', '-m', 'More evals');
+
+		mkdirSync(work);
+		prepareWorkspace(
+			git(repo, 'rev-parse', 'HEAD').trim(),
+			work,
+			repo
+		);
+
+		expect(readFileSync(join(work, 'README.md'), 'utf8')).toBe(
+			'hello'
+		);
+		expect(existsSync(join(work, 'src/a.ts'))).toBe(true);
+		expect(existsSync(join(work, 'evals'))).toBe(false);
+
+		const log = git(work, 'log', '--all', '--stat');
+
+		expect(log).not.toContain('evals');
+		expect(log).not.toContain('More');
+		expect(
+			git(work, 'rev-list', '--all', '--count').trim()
+		).toBe('1');
+		expect(git(work, 'status')).not.toContain('evals');
+		expect(git(work, 'status', '--porcelain')).toBe('');
+		expect(git(work, 'log', '--format=%an').trim()).toBe(
+			'eval'
 		);
 	});
 });

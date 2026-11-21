@@ -14,6 +14,7 @@ import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {listCases, loadCase} from './cases.ts';
 import type {Case} from './cases.ts';
+import {events} from './graders.ts';
 import type {Meta} from './report.ts';
 
 export const root = join(import.meta.dirname, '..');
@@ -74,6 +75,53 @@ export const clone = (ref: string, dir: string) => {
 	execFileSync('git', ['-C', dir, 'checkout', '--quiet', ref]);
 };
 
+// Copies the commit into `dir` as a fresh one-commit repository,
+// without `evals/`, so that the agent cannot find the graders in the
+// files nor in the history. The tarball goes through memory, not a
+// shell pipe.
+export const prepareWorkspace = (
+	sha: string,
+	dir: string,
+	repo = root
+) => {
+	const tarball = execFileSync(
+		'git',
+		['-C', repo, 'archive', sha, '--', ':(exclude)evals'],
+		{maxBuffer: 1 << 30}
+	);
+	const git = (...args: string[]) =>
+		execFileSync(
+			'git',
+			[
+				'-C',
+				dir,
+				'-c',
+				'user.name=eval',
+				'-c',
+				'user.email=eval@example.invalid',
+				'-c',
+				'commit.gpgsign=false',
+				'-c',
+				'core.hooksPath=/dev/null',
+				...args
+			],
+			{stdio: 'ignore'}
+		);
+
+	execFileSync('tar', ['-x', '-C', dir], {input: tarball});
+	git('init', '-q', '-b', 'main');
+	git('add', '-A');
+	git('commit', '-q', '-m', 'Initial commit');
+};
+
+// The environment of the agent: the isolation of evals/README.md.
+export const claudeEnv = (
+	base: NodeJS.ProcessEnv = process.env
+) => ({
+	...base,
+	CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1'
+});
+
 // The isolated command of evals/README.md, plus the case's limits.
 // The prompt goes through stdin.
 export const claudeArgs = (c: Case) => [
@@ -90,19 +138,6 @@ export const claudeArgs = (c: Case) => [
 	...(c.model ? ['--model', c.model] : [])
 ];
 
-const readResult = (transcript: string) =>
-	transcript
-		.split('\n')
-		.filter(Boolean)
-		.flatMap((line) => {
-			try {
-				return [JSON.parse(line)];
-			} catch {
-				return [];
-			}
-		})
-		.findLast((event) => event.type === 'result');
-
 const runOne = async (c: Case, dir: string, ref: string) => {
 	mkdirSync(dir, {recursive: true});
 
@@ -111,20 +146,12 @@ const runOne = async (c: Case, dir: string, ref: string) => {
 	const meta: Meta = {ref};
 
 	try {
-		clone(ref, work);
-		// The agent must not read the graders.
-		rmSync(join(work, 'evals'), {
-			recursive: true,
-			force: true
-		});
+		prepareWorkspace(ref, work);
 
 		const started = Date.now();
 		const child = spawn('claude', claudeArgs(c), {
 			cwd: work,
-			env: {
-				...process.env,
-				CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1'
-			},
+			env: claudeEnv(),
 			stdio: [
 				'pipe',
 				openSync(transcript, 'w'),
@@ -148,9 +175,9 @@ const runOne = async (c: Case, dir: string, ref: string) => {
 			);
 		});
 
-		const result = readResult(
+		const result = events(
 			readFileSync(transcript, 'utf8')
-		);
+		).findLast((event) => event.type === 'result');
 
 		meta.durationMs = Date.now() - started;
 		meta.cost = result?.total_cost_usd;

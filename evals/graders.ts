@@ -8,6 +8,8 @@ export type Grader = {
 	weight: number;
 	description: string;
 	fields: Record<string, Scalar>;
+	// Compiled `input_match` or `pattern`, set by `prepare`.
+	regex?: RegExp;
 };
 
 export type PairExpect = {
@@ -52,19 +54,24 @@ export type Context = {
 	cli: Cli;
 };
 
-type ToolUse = {name: string; input: unknown};
-
-const toolUses = (transcript: string): ToolUse[] =>
+// The JSON lines of a transcript, skipping the ones that don't parse.
+export const events = (transcript: string) =>
 	transcript
 		.split('\n')
 		.filter(Boolean)
 		.flatMap((line) => {
 			try {
-				return JSON.parse(line).message?.content ?? [];
+				return [JSON.parse(line)];
 			} catch {
 				return [];
 			}
-		})
+		});
+
+const toolUses = (
+	transcript: string
+): {name: string; input: unknown}[] =>
+	events(transcript)
+		.flatMap((event) => event.message?.content ?? [])
 		.filter(
 			(block: {type?: string}) => block.type === 'tool_use'
 		);
@@ -89,14 +96,81 @@ const num = (grader: Grader, key: string) => {
 	return value;
 };
 
+const pattern = (
+	grader: Grader,
+	key: string,
+	flags?: string
+) => {
+	try {
+		return new RegExp(str(grader, key), flags);
+	} catch (error) {
+		throw new Error(
+			`${grader.name}: invalid "${key}": ${(error as Error).message}`
+		);
+	}
+};
+
+// Checks the fields of a grader and compiles its pattern, so that
+// typos show when the case is loaded, not after a paid run.
+export const prepare = (grader: Grader): Grader => {
+	const {fields} = grader;
+
+	switch (grader.type) {
+		case 'tool_used':
+			str(grader, 'tool');
+			num(grader, 'min');
+			num(grader, 'max');
+			return fields.input_match === undefined
+				? grader
+				: {...grader, regex: pattern(grader, 'input_match')};
+		case 'regex': {
+			const target = str(grader, 'target');
+
+			if (target !== 'trace' && target !== 'file')
+				throw new Error(
+					`${grader.name}: "target" must be trace or file`
+				);
+
+			if (target === 'file') str(grader, 'path');
+
+			if (
+				fields.expect !== undefined &&
+				fields.expect !== 'present' &&
+				fields.expect !== 'absent'
+			)
+				throw new Error(
+					`${grader.name}: "expect" must be present or absent`
+				);
+
+			if (fields.flags !== undefined) str(grader, 'flags');
+
+			return {
+				...grader,
+				regex: pattern(
+					grader,
+					'pattern',
+					fields.flags as string | undefined
+				)
+			};
+		}
+		case 'file_exists':
+			str(grader, 'path');
+			return grader;
+		case 'check':
+			return grader;
+		default:
+			throw new Error(
+				`${grader.name}: unknown grader type "${grader.type}"`
+			);
+	}
+};
+
 const toolUsed = (
 	grader: Grader,
 	{transcript}: Context
 ): Result => {
 	const tool = str(grader, 'tool');
-	const match = new RegExp(
-		(grader.fields.input_match as string | undefined) ?? ''
-	);
+	const match = grader.regex ?? /(?:)/;
 	const min = num(grader, 'min') ?? 1;
 	const max = num(grader, 'max');
 	const count = toolUses(transcript).filter(
@@ -111,17 +185,14 @@ const toolUsed = (
 	};
 };
 
-const regex = (
+const regexGrader = (
 	grader: Grader,
 	{dir, transcript}: Context
 ): Result => {
 	const target = str(grader, 'target');
 	const absent =
 		(grader.fields.expect ?? 'present') === 'absent';
-	const pattern = new RegExp(
-		str(grader, 'pattern'),
-		(grader.fields.flags as string | undefined) ?? ''
-	);
+	const regex = grader.regex!;
 	let text = '';
 
 	if (target === 'trace') text = transcript;
@@ -134,7 +205,7 @@ const regex = (
 			`${grader.name}: unknown target "${target}"`
 		);
 
-	return {pass: pattern.test(text) !== absent};
+	return {pass: regex.test(text) !== absent};
 };
 
 const fileExists = (grader: Grader, {dir}: Context): Result => {
@@ -148,7 +219,8 @@ type Eval = {
 	combinations: {fg: string; bg: string; minLevel: number}[];
 };
 
-const escape = (name: string) => name.replaceAll('/', '\\/');
+const escape = (name: string) =>
+	name.replaceAll('\\', '\\\\').replaceAll('/', '\\/');
 
 const blindness = [
 	'--blindness',
@@ -275,7 +347,7 @@ export const types: Record<
 	(grader: Grader, context: Context) => Result
 > = {
 	tool_used: toolUsed,
-	regex,
+	regex: regexGrader,
 	file_exists: fileExists,
 	check
 };
@@ -284,12 +356,7 @@ export const grade = (
 	grader: Grader,
 	context: Context
 ): Result => {
-	const run = types[grader.type];
+	const ready = grader.regex ? grader : prepare(grader);
 
-	if (!run)
-		throw new Error(
-			`${grader.name}: unknown grader type "${grader.type}"`
-		);
-
-	return run(grader, context);
+	return types[ready.type](ready, context);
 };
