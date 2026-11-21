@@ -1,8 +1,6 @@
 <script lang="ts">
 	import {formatSchemistToHex} from '#lib/color/formatting.js';
 	import type {Entry} from '#lib/core/evaluate.js';
-	import {serializeTree} from '#lib/presets.js';
-	import {permalink} from '#lib/routing.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import CodeArea from './CodeArea.svelte';
 
@@ -26,10 +24,7 @@
 
 	let json = $derived({
 		'Colors': {
-			'$description': `Build with Schemist (${permalink(
-				serializeTree(palette.root),
-				window.location.origin
-			)})`,
+			'$description': `Build with Schemist (${palette.permalink})`,
 			...tokens
 		}
 	});

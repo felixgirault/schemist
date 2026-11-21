@@ -279,6 +279,7 @@ each exporting a single reactive object.
 | `root`             | Root `Node`, set when the palette component mounts                                                  |
 | `outputs`          | `collectOutputs(root)`, updated synchronously                                                       |
 | `debouncedOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
+| `permalink`        | `permalink(serializeTree(root), window.location.origin)` (§10.1)                                    |
 | `rootColor`        | Root's color in `debouncedOutputs`, else the first output, else `#feffff`                           |
 
 The debounce keeps single edits snappy while throttling the
@@ -372,8 +373,8 @@ by eye.
 
 - `permalink(tree, origin)`, with `tree` a `PresetNode`
   (`serializeTree(root)` for a store node), =
-  `<origin>?preset=<encodeURI(pack(tree))>`. Callers pass
-  `window.location.origin`.
+  `<origin>?preset=<encodeURI(pack(tree))>`. `palette.permalink`
+  is the store's shortcut, using `window.location.origin`.
 - **Share** navigates to that URL (the address bar then holds the
   link; nothing is copied to the clipboard).
 - On load, `getRootNode()` unpacks `?preset=`. If it is missing

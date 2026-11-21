@@ -3,20 +3,13 @@
 	import Export from '#lib/components/export/Export.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
-	import {serializeTree} from '#lib/presets.js';
-	import {permalink} from '#lib/routing.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
 	let isShowingExport = $state(false);
 
 	const handleShare = () => {
-		window.location.assign(
-			permalink(
-				serializeTree(palette.root),
-				window.location.origin
-			)
-		);
+		window.location.assign(palette.permalink);
 	};
 </script>
 
