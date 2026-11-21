@@ -10,7 +10,9 @@
 
 	let {entries}: Props = $props();
 
-	let code = $derived(exportTokens(entries, palette.permalink));
+	let code = $derived(
+		exportTokens(entries, palette.permalink).json
+	);
 </script>
 
 <CodeArea {code} />

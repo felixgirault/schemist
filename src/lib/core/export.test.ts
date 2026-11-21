@@ -11,52 +11,141 @@ const named = (token: string, hex: string): PresetNode => ({
 });
 
 // Tokens under `Colors`, without the root, which has a generated name.
-const tokens = (...nodes: PresetNode[]) => {
-	const {Colors} = JSON.parse(
-		exportTokens(
-			evaluate(rootTree('#3b82f6', nodes)).slice(1),
-			'https://schemist.test'
-		)
+const run = (...nodes: PresetNode[]) => {
+	const {json, conflicts} = exportTokens(
+		evaluate(rootTree('#3b82f6', nodes)).slice(1),
+		'https://schemist.test'
 	);
+	const {Colors} = JSON.parse(json);
 	delete Colors.$description;
-	return Colors;
+	return {colors: Colors, conflicts};
 };
 
-// These characterize the flat output before names are nested.
+const tokens = (...nodes: PresetNode[]) => run(...nodes).colors;
 
-test('tokens keep slashes in the key', () => {
-	const colors = tokens(named('button/primary/bg', '#ff0000'));
-	expect(Object.keys(colors)).toEqual(['button/primary/bg']);
-	expect(colors).toMatchSnapshot();
+const token = (hex: string) => ({$type: 'color', $value: hex});
+
+test('slashes nest into groups', () => {
+	expect(tokens(named('button/primary/bg', '#ff0000'))).toEqual(
+		{
+			button: {primary: {bg: token('#ff0000')}}
+		}
+	);
 });
 
-test('tokens keep dots in the key', () => {
-	const colors = tokens(named('button.primary.bg', '#ff0000'));
-	expect(Object.keys(colors)).toEqual(['button.primary.bg']);
-	expect(colors).toMatchSnapshot();
+test('dots nest into groups', () => {
+	expect(tokens(named('button.primary.bg', '#ff0000'))).toEqual(
+		{
+			button: {primary: {bg: token('#ff0000')}}
+		}
+	);
 });
 
-test('tokens keep a token and its group prefix side by side', () => {
-	const colors = tokens(
+test('dots and slashes mix, and spaces stay in segments', () => {
+	expect(
+		tokens(named('Brand name/button.primary bg', '#ff0000'))
+	).toEqual({
+		'Brand name': {button: {'primary bg': token('#ff0000')}}
+	});
+});
+
+test('names without separators stay flat', () => {
+	const {colors, conflicts} = run(
+		named('Neutral white', '#ffffff')
+	);
+	expect(colors).toEqual({'Neutral white': token('#ffffff')});
+	expect(conflicts).toEqual([]);
+});
+
+test('deep names nest deep', () => {
+	expect(tokens(named('a/b/c/d/e', '#ff0000'))).toEqual({
+		a: {b: {c: {d: {e: token('#ff0000')}}}}
+	});
+});
+
+test('empty segments are dropped', () => {
+	const hexes = ['#ff0000', '#00ff00', '#0000ff'];
+	expect(
+		tokens(
+			named('a//b', hexes[0]),
+			named('/c', hexes[1]),
+			named('d/', hexes[2])
+		)
+	).toEqual({
+		a: {b: token(hexes[0])},
+		c: token(hexes[1]),
+		d: token(hexes[2])
+	});
+});
+
+test('a token that is a group prefix stays flat', () => {
+	const {colors, conflicts} = run(
 		named('button/primary', '#ff0000'),
 		named('button/primary/bg', '#00ff00')
 	);
-	expect(Object.keys(colors)).toEqual([
-		'button/primary',
-		'button/primary/bg'
-	]);
-	expect(colors).toMatchSnapshot();
+	expect(colors).toEqual({
+		button: {primary: {bg: token('#00ff00')}},
+		'button/primary': token('#ff0000')
+	});
+	expect(conflicts).toEqual(['button/primary']);
 });
 
-test('tokens lose a color when two share a name', () => {
-	const colors = tokens(
+test('group and token give the same output in either order', () => {
+	const token1 = named('button/primary', '#ff0000');
+	const token2 = named('button/primary/bg', '#00ff00');
+	const a = run(token1, token2);
+	const b = run(token2, token1);
+	expect(b.colors).toEqual(a.colors);
+	expect(b.conflicts).toEqual(['button/primary']);
+});
+
+test('a name that prefixes several tokens stays flat once', () => {
+	const {colors, conflicts} = run(
+		named('a', '#111111'),
+		named('a/b', '#222222'),
+		named('a/c/d', '#333333')
+	);
+	expect(colors).toEqual({
+		a: {b: token('#222222'), c: {d: token('#333333')}},
+		'a (2)': token('#111111')
+	});
+	expect(conflicts).toEqual(['a']);
+});
+
+test('tokens keep both colors when two share a name', () => {
+	const {colors, conflicts} = run(
 		named('brand', '#ff0000'),
 		named('brand', '#00ff00')
 	);
-	// Known loss: the red color is silently dropped, only the
-	// last one with the name is exported.
-	expect(Object.keys(colors)).toEqual(['brand']);
-	expect(colors.brand.$value).toBe('#00ff00');
-	expect(JSON.stringify(colors)).not.toContain('#ff0000');
+	expect(colors).toEqual({
+		brand: token('#ff0000'),
+		'brand (2)': token('#00ff00')
+	});
+	expect(conflicts).toEqual(['brand']);
 	expect(colors).toMatchSnapshot();
+});
+
+test('triple duplicates get increasing suffixes on the last segment', () => {
+	const {colors, conflicts} = run(
+		named('a/brand', '#111111'),
+		named('a.brand', '#222222'),
+		named('a/brand', '#333333')
+	);
+	expect(colors).toEqual({
+		a: {
+			brand: token('#111111'),
+			'brand (2)': token('#222222'),
+			'brand (3)': token('#333333')
+		}
+	});
+	expect(conflicts).toEqual(['a/brand', 'a.brand']);
+});
+
+test('a suffixed name never overwrites an existing one', () => {
+	const {colors} = run(
+		named('brand', '#111111'),
+		named('brand (2)', '#222222'),
+		named('brand', '#333333')
+	);
+	expect(Object.values(colors)).toHaveLength(3);
 });

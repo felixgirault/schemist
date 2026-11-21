@@ -8,21 +8,29 @@ exports[`export tokens with separators and duplicate names 1`] = `
       "$type": "color",
       "$value": "#3b82f6"
     },
-    "button/primary/bg": {
-      "$type": "color",
-      "$value": "#ff0000"
+    "button": {
+      "primary": {
+        "bg": {
+          "$type": "color",
+          "$value": "#ff0000"
+        },
+        "bg (2)": {
+          "$type": "color",
+          "$value": "#00ff00"
+        }
+      }
     },
-    "button.primary.bg": {
+    "brand": {
       "$type": "color",
-      "$value": "#00ff00"
+      "$value": "#111111"
+    },
+    "brand (2)": {
+      "$type": "color",
+      "$value": "#222222"
     },
     "button/primary": {
       "$type": "color",
       "$value": "#0000ff"
-    },
-    "brand": {
-      "$type": "color",
-      "$value": "#222222"
     }
   }
 }"

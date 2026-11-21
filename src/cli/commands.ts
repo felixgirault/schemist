@@ -165,7 +165,7 @@ export const run = (
 		]);
 
 		if (format === 'tokens') {
-			return exportTokens(entries, link);
+			return exportTokens(entries, link).json;
 		}
 
 		return exportVariables(

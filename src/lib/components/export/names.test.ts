@@ -32,14 +32,14 @@ afterAll(() => {
 	vi.unstubAllGlobals();
 });
 
-// Characterizes the flat tokens output for slash, dot, prefix
-// and duplicate names; the duplicate loses its first color.
+// Covers the nested tokens output for slash, dot, prefix
+// and duplicate names; the duplicate keeps both colors.
 test('export tokens with separators and duplicate names', () => {
 	const html = render(Export).body;
 	const code = html.match(
 		/<textarea[^>]*>([\s\S]*)<\/textarea>/
 	)![1];
-	expect(code).not.toContain('#111111');
+	expect(code).toContain('#111111');
 	expect(code).toContain('#222222');
 	expect(code).toMatchSnapshot();
 });
