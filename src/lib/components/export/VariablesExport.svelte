@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {serializeTree} from '#lib/presets.js';
 	import {permalink} from '#lib/routing.js';
 	import type {
 		ExportCasing,
@@ -37,7 +38,7 @@
 	);
 
 	let code = $derived(
-		`/* @see ${permalink(palette.root)} */\n${variables}`
+		`/* @see ${permalink(serializeTree(palette.root), window.location.origin)} */\n${variables}`
 	);
 </script>
 

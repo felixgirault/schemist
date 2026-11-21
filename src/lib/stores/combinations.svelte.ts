@@ -15,7 +15,7 @@ import {
 	simulateTritanomaly
 } from '#lib/color/simulation.js';
 import type {RgbColor} from '#lib/color/types.js';
-import type {NodeOutput} from '#lib/core/nodes.js';
+import type {Entry} from '#lib/core/evaluate.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
@@ -25,13 +25,6 @@ export type BlindnessType =
 	| 'protanomaly'
 	| 'deuteranomaly'
 	| 'tritanomaly';
-
-export type Entry = {
-	id: Node['id'];
-	name: NodeOutput[1];
-	color: NodeOutput[0];
-	rgbColor: RgbColor;
-};
 
 export type CombinationContrast = {
 	type: BlindnessType;

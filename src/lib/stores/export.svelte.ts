@@ -1,5 +1,5 @@
 import type {ColorFormat} from '#lib/color/formatting.js';
-import type {Entry} from './combinations.svelte';
+import type {Entry} from '#lib/core/evaluate.js';
 
 export type ExportFormat = 'table' | 'tokens' | 'css' | 'sass';
 export type ExportCasing = 'dash' | 'camel';

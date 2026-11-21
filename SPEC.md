@@ -67,6 +67,7 @@ src/
     core/nodes.ts          Pure types and helpers: NodeDef, Param,
                            Args, NodeOutput, PresetNode, Preset,
                            defaultArgs, generateName (no runes)
+    core/evaluate.ts       evaluate(PresetNode) → entries, store-free
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
     stores/                Reactive state, `.svelte.ts` modules (§8)
@@ -75,7 +76,7 @@ src/
     utils/                 Generic helpers (arrays, css, math, strings, …)
     presets.ts             parseTree / serializeTree (tree ⇄ PresetNode)
     palette.ts             getRootNode (initial tree from URL or random)
-    routing.ts             permalink(node)
+    routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
     features.ts            Dark scheme preference (localStorage)
@@ -189,6 +190,11 @@ node and its subtree from its parent).
 `collectOutputs(root)` walks the tree depth-first, parent before
 children, and returns `{[id]: [color, name]}` for every
 **visible** node. Children of a hidden node are still collected.
+
+`evaluate(PresetNode)` (`#lib/core/evaluate.ts`) computes the
+same visible outputs without the store, as
+`{id, name, color, rgbColor}` entries. Ids are depth-first
+indexes (`'0'`, `'1'`, …).
 
 ### 5.3 Tree serialization (`#lib/presets.ts`)
 
@@ -364,8 +370,10 @@ by eye.
 
 ### 10.1 Flow
 
-- `permalink(root)` =
-  `<origin>?preset=<encodeURI(pack(serializeTree(root)))>`.
+- `permalink(tree, origin)`, with `tree` a `PresetNode`
+  (`serializeTree(root)` for a store node), =
+  `<origin>?preset=<encodeURI(pack(tree))>`. Callers pass
+  `window.location.origin`.
 - **Share** navigates to that URL (the address bar then holds the
   link; nothing is copied to the clipboard).
 - On load, `getRootNode()` unpacks `?preset=`. If it is missing
@@ -510,8 +518,10 @@ and round trips). Characterization snapshots cover the outputs
 `combinations.all` (WCAG 2 and APCA, with and without
 simulations) and the CSS, Sass and design tokens exports. Export
 components are rendered server-side; there are no browser or
-end-to-end tests. CI runs the unit tests and `check` (not `lint`
-or `build`).
+end-to-end tests. Core tests assert that `evaluate` matches
+`collectOutputs` for every preset and that no file in `core/`
+reaches Svelte code through its runtime imports. CI runs the unit
+tests and `check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
