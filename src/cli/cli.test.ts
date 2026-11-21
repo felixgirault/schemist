@@ -1,6 +1,7 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {combine} from '#lib/core/contrast.js';
 import {evaluate} from '#lib/core/evaluate.js';
+import {round} from '#lib/utils/math.js';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -57,7 +58,7 @@ test('eval matches the core', () => {
 			({bgName, fgName, contrast}) => ({
 				bg: bgName,
 				fg: fgName,
-				level: contrast.level,
+				level: round(contrast.level, 2),
 				grade: contrast.grade
 			})
 		)

@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
-import {UsageError, run, usage} from './commands.js';
+import {run, usage} from './commands.js';
+import {UsageError} from './errors.js';
 
 try {
 	process.stdout.write(

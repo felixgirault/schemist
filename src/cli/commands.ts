@@ -1,6 +1,9 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import type {ColorFormat} from '#lib/color/formatting.js';
-import type {BlindnessType} from '#lib/core/contrast.js';
+import type {
+	BlindnessType,
+	Combination
+} from '#lib/core/contrast.js';
 import {combine} from '#lib/core/contrast.js';
 import {evaluate} from '#lib/core/evaluate.js';
 import {
@@ -11,14 +14,14 @@ import {
 } from '#lib/core/export.js';
 import type {ExportCasing} from '#lib/core/export.js';
 import {permalink} from '#lib/routing.js';
+import {round} from '#lib/utils/math.js';
 import {parseArgs} from 'node:util';
+import {UsageError} from './errors.js';
+import {parsePair} from './pair.js';
 import {parseTreeJson} from './tree.js';
 import {listPresets, listTypes} from './vocabulary.js';
 
 export const defaultOrigin = 'https://schemist.fglt.fr';
-
-// A mistake on the command line, which the usage text helps fixing.
-export class UsageError extends Error {}
 
 export const usage = `Usage: schemist <command> [options]
 
@@ -32,6 +35,8 @@ eval options:
   --contrast wcag2|apca       Contrast metric (default wcag2)
   --blindness a,b,c           protanomaly, deuteranomaly, tritanomaly
   --min <level>               Only combinations with a min level >= level
+  --pair 'fg/bg'              Only this pair, repeatable, in the given order
+                              (use \\/ for a "/" in a name)
 
 export options:
   --format css|sass|tokens    Required
@@ -94,13 +99,23 @@ const parse = (argv: string[]) => {
 				'casing': {type: 'string'},
 				'prefix': {type: 'string'},
 				'precision': {type: 'string'},
-				'origin': {type: 'string'}
+				'origin': {type: 'string'},
+				'pair': {type: 'string', multiple: true}
 			}
 		});
 	} catch (error) {
 		throw new UsageError((error as Error).message);
 	}
 };
+
+// Keeps the combinations of the given [fg, bg] pairs, in that order;
+// all of them when there are no pairs.
+const pick = (all: Combination[], pairs: [string, string][]) =>
+	pairs.length
+		? pairs.flatMap(([fg, bg]) =>
+				all.filter((c) => c.fgName === fg && c.bgName === bg)
+			)
+		: all;
 
 // Returns the text to print. `read` gives the content of a file path
 // or of stdin (`-`).
@@ -192,39 +207,66 @@ export const run = (
 				)
 		: [];
 	const min = number('min', values.min, 0);
+	const names = entries.map(({name}) => name);
+	const pairs = (values.pair ?? []).map((value) => {
+		const pair = parsePair(value);
+
+		for (const name of pair) {
+			if (!names.includes(name)) {
+				throw new UsageError(
+					`--pair "${value}": unknown color "${name}"`
+				);
+			}
+		}
+
+		if (pair[0] === pair[1]) {
+			throw new UsageError(
+				`--pair "${value}": a color is never combined with itself`
+			);
+		}
+
+		return pair;
+	});
 
 	return json({
 		colors: entries.map(({name, color}) => ({
 			name,
 			hex: formatSchemistToHex(color)
 		})),
-		combinations: combine(
-			entries,
-			entries,
-			contrast === 'apca' ? 'wcag3' : 'wcag2',
-			blindness as BlindnessType[]
-		)
-			.filter(({minLevel}) => minLevel >= min)
-			.map(
-				({
-					bgName,
-					fgName,
-					contrast,
-					simulatedContrasts
-				}) => ({
-					bg: bgName,
-					fg: fgName,
-					level: contrast.level,
-					grade: contrast.grade,
-					simulated: simulatedContrasts.map(
-						({type, level, grade}) => ({
-							type,
-							level,
-							grade
-						})
-					)
-				})
-			),
+		combinations: pick(
+			combine(
+				entries,
+				entries,
+				contrast === 'apca' ? 'wcag3' : 'wcag2',
+				blindness as BlindnessType[]
+			).filter(({minLevel}) => minLevel >= min),
+			pairs
+		).map(
+			({
+				bgName,
+				fgName,
+				contrast,
+				minLevel,
+				minGrade,
+				simulatedContrasts
+			}) => ({
+				bg: bgName,
+				fg: fgName,
+				level: round(contrast.level, 2),
+				grade: contrast.grade,
+				...(blindness.length && {
+					minLevel: round(minLevel, 2),
+					minGrade
+				}),
+				simulated: simulatedContrasts.map(
+					({type, level, grade}) => ({
+						type,
+						level: round(level, 2),
+						grade
+					})
+				)
+			})
+		),
 		permalink: link
 	});
 };

@@ -1,5 +1,6 @@
 import {expect, test} from 'vitest';
-import {UsageError, run} from './commands.js';
+import {run} from './commands.js';
+import {UsageError} from './errors.js';
 
 const tree = JSON.stringify({
 	type: 'clr',
@@ -124,4 +125,88 @@ test('only command line mistakes are usage errors', () => {
 	expect(() =>
 		run(['eval', '-'], () => '{"type":"x"}')
 	).not.toThrow(UsageError);
+});
+
+test('eval rounds levels to 2 decimals, filtering on the exact value', () => {
+	const {combinations} = JSON.parse(
+		exec('eval', '-', '--blindness', 'protanomaly')
+	);
+	const levels = combinations.flatMap(
+		({level, minLevel, simulated}: any) => [
+			level,
+			minLevel,
+			simulated[0].level
+		]
+	);
+
+	expect(
+		levels.every((n: number) => n === Number(n.toFixed(2)))
+	).toBe(true);
+	// 1.0885… rounds to 1.09 but is below 1.09
+	expect(
+		JSON.parse(exec('eval', '-', '--min', '1.09')).combinations
+			.length
+	).toBeLessThan(
+		JSON.parse(exec('eval', '-', '--min', '1.08')).combinations
+			.length
+	);
+});
+
+test('eval has minLevel and minGrade only with --blindness', () => {
+	const [plain] = JSON.parse(exec('eval', '-')).combinations;
+	const [simulated] = JSON.parse(
+		exec('eval', '-', '--blindness', 'protanomaly')
+	).combinations;
+
+	expect(plain).not.toHaveProperty('minLevel');
+	expect(plain).not.toHaveProperty('minGrade');
+	expect(simulated.minLevel).toBeLessThanOrEqual(
+		simulated.level
+	);
+	expect(simulated).toHaveProperty('minGrade');
+});
+
+test('eval --pair keeps the given pairs in order', () => {
+	const {combinations} = JSON.parse(
+		exec(
+			'eval',
+			'-',
+			'--pair',
+			'Success/Sky dancer',
+			'--pair',
+			'Falafel/Success'
+		)
+	);
+
+	expect(
+		combinations.map(({fg, bg}: any) => `${fg}/${bg}`)
+	).toEqual(['Success/Sky dancer', 'Falafel/Success']);
+	expect(
+		JSON.parse(
+			exec(
+				'eval',
+				'-',
+				'--pair',
+				'Success/Sky dancer',
+				'--min',
+				'5'
+			)
+		).combinations
+	).toEqual([]);
+});
+
+test.each([
+	[['--pair', 'Success'], '--pair "Success": expected fg/bg'],
+	[
+		['--pair', 'Nope/Success'],
+		'--pair "Nope/Success": unknown color "Nope"'
+	],
+	[['--pair', 'Success/Nope'], 'unknown color "Nope"'],
+	[
+		['--pair', 'Success/Success'],
+		'--pair "Success/Success": a color is never combined with itself'
+	]
+])('eval rejects %j', (args, message) => {
+	expect(() => exec('eval', '-', ...args)).toThrow(UsageError);
+	expect(() => exec('eval', '-', ...args)).toThrow(message);
 });

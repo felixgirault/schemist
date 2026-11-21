@@ -586,8 +586,16 @@ are parsed with `node:util` `parseArgs`.
 `eval` options: `--contrast wcag2|apca` (default `wcag2`; `apca`
 is the internal `wcag3`), `--blindness` (comma list of
 `protanomaly`, `deuteranomaly`, `tritanomaly`), `--min <level>`
-(default 0, keeps combinations whose `minLevel` is at least
-that). Combinations are computed over all visible colors.
+(default 0, keeps combinations whose unrounded `minLevel` is at
+least that), `--pair 'fg/bg'` (repeatable: keeps only those
+combinations, in the order given, after `--min`; `\/` and `\\`
+escape a `/` or `\` in a name; a value without exactly one
+unescaped `/`, with a name not in the palette, or with the same
+name on both sides is rejected naming it). Levels (`level`,
+simulated `level`, `minLevel`) are rounded to 2 decimals. With
+`--blindness`, each combination also has `minLevel` and
+`minGrade` (worst of base and simulated); without it they are
+omitted. Combinations are computed over all visible colors.
 `export` options: `--format css|sass|tokens` (required),
 `--color-format`, `--casing`, `--prefix`, `--precision`,
 defaulting to `defaultExportSettings` (`#lib/core/export.ts`).

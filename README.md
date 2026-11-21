@@ -91,7 +91,8 @@ problem, e.g. `root.children[2].args.amount`.
 ```
 
 ```sh
-$ npm run cli -- eval palette.json --contrast apca --min 60
+$ npm run cli -- eval palette.json --contrast apca \
+    --blindness protanomaly,deuteranomaly --pair 'Brand light/Brand text'
 {
   "colors": [
     {"name": "Brand", "hex": "#3b82f6"},
@@ -100,8 +101,18 @@ $ npm run cli -- eval palette.json --contrast apca --min 60
     {"name": "Accent", "hex": "#af7d0d"}
   ],
   "combinations": [
-    {"bg": "Brand text", "fg": "Brand light", "level": 89.2, "grade": "5", "simulated": []},
-    ...
+    {
+      "bg": "Brand text",
+      "fg": "Brand light",
+      "level": 89.22,
+      "grade": "5",
+      "minLevel": 88.24,
+      "minGrade": "5",
+      "simulated": [
+        {"type": "protanomaly", "level": 90.6, "grade": "5"},
+        {"type": "deuteranomaly", "level": 88.24, "grade": "5"}
+      ]
+    }
   ],
   "permalink": "https://schemist.fglt.fr?preset=1@3@4526x5a,..."
 }
@@ -115,16 +126,21 @@ $ npm run cli -- export palette.json --format css --prefix color
 ```
 
 `eval` takes `--contrast wcag2|apca`,
-`--blindness protanomaly,deuteranomaly,tritanomaly` and
-`--min <level>` (hides combinations below that level). `export`
-takes `--color-format`, `--casing`, `--prefix` and `--precision`.
-Both take `--origin` for the permalink.
+`--blindness protanomaly,deuteranomaly,tritanomaly` (adds
+`minLevel` and `minGrade`, the worst case with the simulations),
+`--min <level>` (hides combinations whose worst level is below)
+and `--pair 'fg/bg'`, repeatable, to get only the pairs you care
+about, in that order (`\/` stands for a `/` in a name). Levels
+are rounded to 2 decimals. `export` takes `--color-format`,
+`--casing`, `--prefix` and `--precision`. Both take `--origin`
+for the permalink.
 
 A good loop for an agent: read `types` and `presets`, write a
-tree, `eval` it, adjust colors until the combinations it needs
+tree, `eval` it with the `--pair`s it needs, adjust until they
 reach the wanted level, `export` it, and give the permalink back
-so the palette can be opened and tweaked in the app. See
-[SPEC.md](SPEC.md) (section 14) for details.
+so the palette can be opened and tweaked in the app. What you
+usually tune is the `amount` of Lightness (`l`) and Saturation
+(`s`) nodes. See [SPEC.md](SPEC.md) (section 14) for details.
 
 ## Kudos
 
