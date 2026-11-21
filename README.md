@@ -79,7 +79,9 @@ code):
 - `eval <tree.json|->`: colors, contrast combinations and a
   permalink.
 - `export <tree.json|-> --format css|sass|tokens`: the same text
-  as the app's export.
+  as the app's export. Token names with `/` or `.` nest in the
+  tokens export (`button/primary/bg` gives `button.primary.bg`
+  groups); conflicting names make it fail, so rename them.
 
 A tree is nodes with a `type`, optional `token` (the name, where
 `$` stands for the parent's name), `args`, `children` and

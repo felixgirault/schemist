@@ -81,6 +81,67 @@ test('export prints the text as is', () => {
 	).toHaveProperty('Colors.Success.$type', 'color');
 });
 
+const execTree = (tree: object, ...argv: string[]) =>
+	run(argv, () => JSON.stringify(tree));
+
+const conflictingTree = {
+	type: 'clr',
+	args: {color: '#3b82f6'},
+	children: [
+		{type: 'pos', token: 'button/primary'},
+		{type: 'neg', token: 'button/primary/bg'},
+		{type: 'wrn', token: 'brand'},
+		{type: 'inf', token: 'brand'}
+	]
+};
+
+test('export tokens fails on conflicting names', () => {
+	const exportTokens = () =>
+		execTree(
+			conflictingTree,
+			'export',
+			'-',
+			'--format',
+			'tokens'
+		);
+
+	expect(exportTokens).toThrow(
+		'tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them'
+	);
+	expect(exportTokens).not.toThrow(UsageError);
+});
+
+test('export tokens nests names without conflicts', () => {
+	const json = execTree(
+		{
+			type: 'clr',
+			args: {color: '#3b82f6'},
+			children: [{type: 'pos', token: 'button/primary/bg'}]
+		},
+		'export',
+		'-',
+		'--format',
+		'tokens'
+	);
+
+	expect(JSON.parse(json)).toHaveProperty(
+		'Colors.button.primary.bg.$type',
+		'color'
+	);
+});
+
+test('other exports and eval accept conflicting names', () => {
+	for (const argv of [
+		['export', '-', '--format', 'css'],
+		['export', '-', '--format', 'sass'],
+		['eval', '-']
+	]) {
+		expect(() =>
+			execTree(conflictingTree, ...argv)
+		).not.toThrow();
+	}
+});
+
 test.each([
 	[[], 'missing command'],
 	[['nope'], 'unknown command "nope"'],

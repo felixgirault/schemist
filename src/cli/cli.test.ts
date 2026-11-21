@@ -80,6 +80,27 @@ test('an invalid tree exits with an error naming the path', () => {
 	expect(stderr).toContain('root.children[0].args.amount');
 });
 
+test('a tokens export with conflicting names fails', () => {
+	const {status, stdout, stderr} = exec(
+		JSON.stringify({
+			type: 'clr',
+			children: [
+				{type: 'pos', token: 'brand'},
+				{type: 'neg', token: 'brand'}
+			]
+		}),
+		'export',
+		'-',
+		'--format',
+		'tokens'
+	);
+
+	expect(status).toBe(1);
+	expect(stdout).toBe('');
+	expect(stderr).toContain('tokens: conflicting names "brand"');
+	expect(stderr).not.toContain('Usage:');
+});
+
 test('usage is printed for command line errors only', () => {
 	expect(exec('{}', 'nope').stderr).toContain('Usage:');
 	expect(

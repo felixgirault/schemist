@@ -522,7 +522,19 @@ Outputs (visible colors, tree order). The formatting lives in
 - **Table**: swatch, name, value.
 - **Design tokens**: JSON
   `{"Colors": {"$description": "Build with Schemist (<permalink>)", "<name>": {"$type": "color", "$value": "#rrggbb"}}}`,
-  always hex.
+  always hex. Names are split on runs of `/` and `.` (empty parts
+  dropped, spaces kept) and nested as groups along that path:
+  `button/primary/bg` gives `Colors.button.primary.bg`; a name
+  without separators stays a direct key of `Colors`. No color is
+  dropped: a path used by several colors gets ` (2)`, ` (3)`...
+  on its last part, in tree order; a token that is also a group
+  (`button/primary` next to `button/primary/bg`) stays flat under
+  `Colors` with its full name as key; a name with a part starting
+  with `$` (which would read as a DTCG property) stays flat too,
+  with the leading `$` of each part stripped. A flat key already
+  taken gets ` (2)`... as well. `exportTokens` returns
+  `{json, conflicts}`, `conflicts` being the names involved, in
+  tree order (the app lists them in a notice, ADR 2).
 - **CSS**: `/* @see <permalink> */` then `--<name>: <value>;`
   lines.
 - **Sass**: same with `$<name>: <value>;`.
@@ -622,6 +634,11 @@ with `parseColor`, invalid ones rejected. Errors name the node
 path and the param, e.g.
 `root.children[2].args.amount: expected an integer between 0 and 100`.
 Usage text is printed only for command line errors.
+
+`export --format tokens` nests names split on `/` and `.`
+(§11.8). When `exportTokens` reports conflicts, it fails like a
+tree error (no usage text, exit code 1, nothing on stdout):
+`tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them`.
 
 ## 15. Agent evals
 
