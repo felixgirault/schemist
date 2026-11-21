@@ -1,6 +1,6 @@
 import {parseColor} from '#lib/color/parsing.js';
+import type {PresetNode} from '#lib/core/nodes.js';
 import color from '#lib/definitions/nodes/color.js';
-import type {PresetNode} from '#lib/presets.js';
 import {parseTree} from '#lib/presets.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 

@@ -1,6 +1,6 @@
+import type {Preset} from '#lib/core/nodes.js';
 import splitComplementaryLeft from '#lib/definitions/nodes/splitComplementaryLeft.js';
 import splitComplementaryRight from '#lib/definitions/nodes/splitComplementaryRight.js';
-import type {Preset} from '#lib/presets.js';
 
 export default {
 	label: 'Split complementary',

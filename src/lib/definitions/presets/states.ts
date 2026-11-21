@@ -1,6 +1,6 @@
+import type {Preset} from '#lib/core/nodes.js';
 import highlight from '#lib/definitions/nodes/highlight.js';
 import shadow from '#lib/definitions/nodes/shadow.js';
-import type {Preset} from '#lib/presets.js';
 
 export default {
 	label: 'States',

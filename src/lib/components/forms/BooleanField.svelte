@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type {Node, Param} from '#lib/stores/nodes.svelte.js';
+	import type {Param} from '#lib/core/nodes.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
 
 	interface Props {
 		id: Node['id'];

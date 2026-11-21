@@ -1,5 +1,5 @@
+import type {PresetNode} from '#lib/core/nodes.js';
 import presets from '#lib/definitions/presets/index.js';
-import type {PresetNode} from '#lib/presets.js';
 import type {BlindnessType} from '#lib/stores/combinations.svelte.js';
 import {combinations} from '#lib/stores/combinations.svelte.js';
 import {loadPalette, rootTree} from '#lib/testing/tree.js';

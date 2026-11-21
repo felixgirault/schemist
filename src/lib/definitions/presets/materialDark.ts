@@ -1,7 +1,7 @@
+import type {Preset} from '#lib/core/nodes.js';
 import complementary from '#lib/definitions/nodes/complementary.js';
 import negative from '#lib/definitions/nodes/negative.js';
 import saturation from '#lib/definitions/nodes/saturation.js';
-import type {Preset} from '#lib/presets.js';
 import materialNeutralDark from './materialNeutralDark';
 import materialTonesDark from './materialTonesDark';
 

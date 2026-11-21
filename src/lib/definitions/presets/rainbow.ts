@@ -1,5 +1,5 @@
+import type {Preset} from '#lib/core/nodes.js';
 import analogous from '#lib/definitions/nodes/analogous.js';
-import type {Preset} from '#lib/presets.js';
 import {range} from '#lib/utils/generators.js';
 
 export default {

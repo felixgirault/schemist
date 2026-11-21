@@ -64,6 +64,9 @@ src/
   lib/
     color/                 Color model, conversions, parsing, formatting,
                            manipulation, contrast, simulation, naming
+    core/nodes.ts          Pure types and helpers: NodeDef, Param,
+                           Args, NodeOutput, PresetNode, Preset,
+                           defaultArgs, generateName (no runes)
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
     stores/                Reactive state, `.svelte.ts` modules (§8)
@@ -178,6 +181,9 @@ Operations: `addChild(child)` (detaches it from its previous
 parent first), `removeChild(child)`, `destroy()` (removes the
 node and its subtree from its parent).
 
+`generateName` and the `NodeDef`, `Param`, `Args` and
+`NodeOutput` types live in `#lib/core/nodes.ts`.
+
 ### 5.2 Outputs
 
 `collectOutputs(root)` walks the tree depth-first, parent before
@@ -186,11 +192,12 @@ children, and returns `{[id]: [color, name]}` for every
 
 ### 5.3 Tree serialization (`#lib/presets.ts`)
 
-`PresetNode = {type, token?, args?, children?, isHidden?}` is the
-plain form of a tree, used by presets and permalinks.
-`parseTree(PresetNode) → Node` merges given `args` over the type
-defaults; `serializeTree(Node) → PresetNode` omits empty tokens,
-args and children.
+`PresetNode = {type, token?, args?, children?, isHidden?}`
+(`#lib/core/nodes.ts`) is the plain form of a tree, used by
+presets and permalinks. `parseTree(PresetNode) → Node` merges
+given `args` over the type defaults;
+`serializeTree(Node) → PresetNode` omits empty tokens, args and
+children.
 
 ## 6. Node types
 
@@ -199,7 +206,8 @@ Defined in `src/lib/definitions/nodes/`, registered in `index.ts`
 short `type` code (used in permalinks), a `label`, an optional
 `description` and `argsLabel`, `params`, a `samples` style for
 previews (`single`, `discrete`, `continuous`) and
-`apply(color, args)`.
+`apply(color, args)` (the `NodeDef` type, in
+`#lib/core/nodes.ts`).
 
 | Type  | Label                     | Params (min–max, default)                                  | Result                                 |
 | ----- | ------------------------- | ---------------------------------------------------------- | -------------------------------------- |
