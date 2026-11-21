@@ -51,6 +51,16 @@ runs), but its documentation
   and git state". Whether `npm ci` can reach the registry is not
   documented.
 
+A spike confirmed it. With a dummy plugin, a scaffold extracting
+the repo and `--allow-tools Bash Write Edit`, a haiku probe
+showed that the user's real home is hidden in the sandbox, so a
+Node installed under it (`~/n/bin`) is not found; that the
+workspace is read-only for shell commands, even with Write and
+Edit granted; and that the npm registry is denied unless granted.
+Getting through would need a system Node, a writable workspace
+and a network grant, and agents would still run in an environment
+much stricter than a real user's.
+
 Its format is reused, so that cases can move to it if custom-code
 graders arrive.
 
