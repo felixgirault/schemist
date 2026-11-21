@@ -150,7 +150,10 @@ at the end.
    components.
 5. Add the CLI, `vite.cli.config.js`, `cli:build` and `cli`
    scripts, `/build-cli` in `.gitignore`, with tests on argument
-   handling, color params and invalid trees.
+   handling, color params and invalid trees. Replace
+   `core/core.test.ts` (import-graph guard) with a test that runs
+   the built CLI once under plain Node, which crashes on runes if
+   a store leaks into core, then delete `core.test.ts`.
 6. Update the spec (core layout, CLI section) and the README (CLI
    usage for agents).
 
