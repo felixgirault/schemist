@@ -523,8 +523,10 @@ Outputs (visible colors, tree order). The formatting lives in
   lines.
 - **Sass**: same with `$<name>: <value>;`.
 
-Variable names are split on spaces, stripped of every character
-but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
+Variable names are split on runs of spaces and slashes (so
+`button/primary/bg` gives `button-primary-bg`), stripped of every
+character but `a-z A-Z 0-9 _ -`, then joined in the chosen
+casing.
 
 ## 12. Testing
 
