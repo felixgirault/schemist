@@ -172,7 +172,7 @@ export const run = (
 
 			if (conflicts.length) {
 				throw new Error(
-					`tokens: conflicting names ${conflicts.map((name) => `"${name}"`).join(', ')}: a name is both a token and a group, repeated, or has a part starting with $; rename them`
+					`tokens: conflicting names ${conflicts.map((name) => `"${name}"`).join(', ')}: a name is both a token and a group, repeated, or has a part starting with $; rename them or give them distinct tokens`
 				);
 			}
 

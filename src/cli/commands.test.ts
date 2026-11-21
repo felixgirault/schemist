@@ -106,7 +106,7 @@ test('export tokens fails on conflicting names', () => {
 		);
 
 	expect(exportTokens).toThrow(
-		'tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them'
+		'tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them or give them distinct tokens'
 	);
 	expect(exportTokens).not.toThrow(UsageError);
 });

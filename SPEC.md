@@ -638,7 +638,7 @@ Usage text is printed only for command line errors.
 `export --format tokens` nests names split on `/` and `.`
 (§11.8). When `exportTokens` reports conflicts, it fails like a
 tree error (no usage text, exit code 1, nothing on stdout):
-`tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them`.
+`tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them or give them distinct tokens`.
 
 ## 15. Agent evals
 
