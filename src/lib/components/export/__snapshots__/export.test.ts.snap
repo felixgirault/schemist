@@ -1,0 +1,65 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`css export, camel casing, prefix "brand" 1`] = `
+"/* @see https://schemist.test?preset=1@4@450,670,890,ab0,012230123@clr,,color,3b82f6,inf,Info,pos,Success,wrn,Warning,neg,Error */
+--brandSkyDancer: #3b82f6;
+--brandInfo: #168eda;
+--brandSuccess: #469e2e;
+--brandWarning: #d06410;
+--brandError: #f12e4b;"
+`;
+
+exports[`css export, dash casing, prefix "" 1`] = `
+"/* @see https://schemist.test?preset=1@4@450,670,890,ab0,012230123@clr,,color,3b82f6,inf,Info,pos,Success,wrn,Warning,neg,Error */
+--sky-dancer: #3b82f6;
+--info: #168eda;
+--success: #469e2e;
+--warning: #d06410;
+--error: #f12e4b;"
+`;
+
+exports[`design tokens export 1`] = `
+"{
+  "Colors": {
+    "$description": "Build with Schemist (https://schemist.test?preset=1@4@450,670,890,ab0,012230123@clr,,color,3b82f6,inf,Info,pos,Success,wrn,Warning,neg,Error)",
+    "Sky dancer": {
+      "$type": "color",
+      "$value": "#3b82f6"
+    },
+    "Info": {
+      "$type": "color",
+      "$value": "#168eda"
+    },
+    "Success": {
+      "$type": "color",
+      "$value": "#469e2e"
+    },
+    "Warning": {
+      "$type": "color",
+      "$value": "#d06410"
+    },
+    "Error": {
+      "$type": "color",
+      "$value": "#f12e4b"
+    }
+  }
+}"
+`;
+
+exports[`sass export, camel casing, prefix "brand" 1`] = `
+"/* @see https://schemist.test?preset=1@4@450,670,890,ab0,012230123@clr,,color,3b82f6,inf,Info,pos,Success,wrn,Warning,neg,Error */
+$brandSkyDancer: #3b82f6;
+$brandInfo: #168eda;
+$brandSuccess: #469e2e;
+$brandWarning: #d06410;
+$brandError: #f12e4b;"
+`;
+
+exports[`sass export, dash casing, prefix "" 1`] = `
+"/* @see https://schemist.test?preset=1@4@450,670,890,ab0,012230123@clr,,color,3b82f6,inf,Info,pos,Success,wrn,Warning,neg,Error */
+$sky-dancer: #3b82f6;
+$info: #168eda;
+$success: #469e2e;
+$warning: #d06410;
+$error: #f12e4b;"
+`;

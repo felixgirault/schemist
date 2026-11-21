@@ -497,8 +497,12 @@ but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
 
 Unit tests cover utils, color parsing, color deficiency
 simulation and packing (snapshots of every node type and preset,
-and round trips). There are no component or end-to-end tests. CI
-runs the unit tests only (not `check`, `lint` or `build`).
+and round trips). Characterization snapshots cover the outputs
+(hex values and names) of every preset under a few root colors,
+`combinations.all` (WCAG 2 and APCA, with and without
+simulations) and the CSS, Sass and design tokens exports. There
+are no component or end-to-end tests. CI runs the unit tests and
+`check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
