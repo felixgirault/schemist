@@ -17,9 +17,9 @@ cost that much, and `--ref` is the commit under test (default
 `HEAD`; uncommitted changes are not tested). Needs `claude`
 logged in, and network for `npm ci`.
 
-Cost, from the manual rounds: about $0.40 per `website` run and
-$1.20 to $1.50 per `dashboard` run, so a default round of both is
-about $5.
+Cost: on Sonnet, about $0.12 per `website` run and $0.45 per
+`dashboard` run, so a default round of both is about $2. On Opus
+(the manual rounds), about $0.40 and $1.20 to $1.50, so about $5.
 
 ## Files
 
@@ -61,6 +61,34 @@ checked by `npm run check`.
 Prompts are kept verbatim (not reformatted), followed by an
 output contract: where to write files and which token names to
 use, so that graders know where to look.
+
+## Baseline
+
+Sonnet 5.5, `--model sonnet -j 3`, `smoke` once, `website` and
+`dashboard` 3 times each.
+
+| Case        | Before (8d32dd7) | After (f68c0ce) |
+| ----------- | ---------------- | --------------- |
+| `smoke`     | 1.00             | 1.00            |
+| `website`   | 0.44             | 1.00            |
+| `dashboard` | 0.78             | 1.00            |
+| Cost        | $1.51            | $1.71           |
+
+Before, the README's agent loop started 91 lines into its CLI
+section, and every `website` agent read only the first 80 lines
+(`grep -A80`): they checked WCAG 2 alone, without simulations,
+and failed APCA on muted text and the color blind worst case on
+input borders. `dashboard` agents checked APCA because the prompt
+requires it, but 2 of 3 still missed status text and chart colors
+under simulation. Moving the loop to the top of the section, and
+into `AGENTS.md`, made every run check both metrics with
+`--blindness` and iterate until all pairs passed. (The "before"
+scores are re-graded with the fixed `apca` grader; the `website`
+contract also gained what each color is for between the rounds.)
+
+Scores at 1.00 mean the cases no longer separate good runs from
+bad ones on Sonnet: a regression shows as a drop, an improvement
+needs a harder case.
 
 ## How graders work
 
