@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tokens keep a token and its group prefix side by side 1`] = `
+{
+  "button/primary": {
+    "$type": "color",
+    "$value": "#ff0000",
+  },
+  "button/primary/bg": {
+    "$type": "color",
+    "$value": "#00ff00",
+  },
+}
+`;
+
+exports[`tokens keep dots in the key 1`] = `
+{
+  "button.primary.bg": {
+    "$type": "color",
+    "$value": "#ff0000",
+  },
+}
+`;
+
+exports[`tokens keep slashes in the key 1`] = `
+{
+  "button/primary/bg": {
+    "$type": "color",
+    "$value": "#ff0000",
+  },
+}
+`;
+
+exports[`tokens lose a color when two share a name 1`] = `
+{
+  "brand": {
+    "$type": "color",
+    "$value": "#00ff00",
+  },
+}
+`;
