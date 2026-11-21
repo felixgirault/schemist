@@ -53,12 +53,13 @@ The app keeps its reactive layer and calls the core:
   preview stay in the store.
 - Export components call the core formatters.
 - The three `permalink` callers (`App.svelte`,
-  `DesignTokensExport.svelte`, `VariablesExport.svelte`) pass
-  `serializeTree(palette.root)` and `window.location.origin`.
+  `DesignTokensExport.svelte`, `VariablesExport.svelte`) read
+  `palette.permalink`, which passes `serializeTree(root)` and
+  `window.location.origin`.
 
-A test imports every core module and evaluates a preset without
-Svelte, so runes cannot creep in. The existing packing snapshots
-guard node types and presets.
+The CLI build (step 5) proves the core runs under plain Node,
+without the Svelte compiler. The existing packing snapshots guard
+node types and presets.
 
 ### CLI
 
