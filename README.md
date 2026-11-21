@@ -136,11 +136,17 @@ are truncated to 2 decimals. `export` takes `--color-format`,
 for the permalink.
 
 A good loop for an agent: read `types` and `presets`, write a
-tree, `eval` it with the `--pair`s it needs, adjust until they
-reach the wanted level, `export` it, and give the permalink back
-so the palette can be opened and tweaked in the app. What you
-usually tune is the `amount` of Lightness (`l`) and Saturation
-(`s`) nodes. See [SPEC.md](SPEC.md) (section 14) for details.
+tree, then check it before exporting. `eval` the pairs the design
+uses (`--pair`) with both `--contrast wcag2` and
+`--contrast apca`, each with
+`--blindness protanomaly,deuteranomaly,tritanomaly`, and read
+`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
+text, and 3 for large text and non-text UI such as input borders
+and focus rings. What you usually tune is the `amount` of
+Lightness (`l`) and Saturation (`s`) nodes: adjust, re-run, and
+repeat until every pair passes. Then `export` it and give the
+permalinks back so the palettes can be opened and tweaked in the
+app. See [SPEC.md](SPEC.md) (section 14) for details.
 
 ## Kudos
 
