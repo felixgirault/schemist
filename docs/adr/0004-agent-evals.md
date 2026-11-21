@@ -188,7 +188,9 @@ question, settled by a spike in step 1.
    the harness is tested without paying for runs.
 3. The two cases from the manual rounds, `website` and
    `dashboard`, with their output contract and `expect.json`.
-4. The `llm` grader.
+4. The `llm` grader. Deferred: every recorded run was honest
+   about what it couldn't meet; revisit if a case shows
+   otherwise.
 5. One real round of both cases; commit its report as a baseline
    in `evals/README.md`.
 6. SPEC (evals section), README pointer, `.gitignore`.

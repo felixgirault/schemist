@@ -148,6 +148,10 @@ are truncated to 2 decimals. `export` takes `--color-format`,
 `--casing`, `--prefix` and `--precision`. Both take `--origin`
 for the permalink.
 
+Changing the CLI, its error messages or this section? Agents read
+them, so [evals/](evals/README.md) runs agents on real prompts
+and grades the result (it costs a few dollars).
+
 ## Kudos
 
 Schemist is build upon these fabulous projects and resources:
