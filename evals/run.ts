@@ -138,71 +138,114 @@ export const claudeArgs = (c: Case) => [
 	...(c.model ? ['--model', c.model] : [])
 ];
 
+type Exit = {
+	code: number | null;
+	signal: string | null;
+	durationMs: number;
+};
+
+// Runs claude in the workspace, with the prompt on stdin and the
+// transcript and stderr saved in `dir`.
+const runClaude = async (
+	c: Case,
+	workspace: string,
+	dir: string
+): Promise<Exit> => {
+	const started = Date.now();
+	const child = spawn('claude', claudeArgs(c), {
+		cwd: workspace,
+		env: claudeEnv(),
+		stdio: [
+			'pipe',
+			openSync(join(dir, 'transcript.jsonl'), 'w'),
+			openSync(join(dir, 'stderr.log'), 'w')
+		],
+		timeout: c.timeoutSeconds * 1000
+	});
+
+	child.stdin?.on('error', () => {});
+	child.stdin?.end(c.prompt);
+
+	return new Promise((resolve) => {
+		const exited = (
+			code: number | null,
+			signal: string | null
+		) =>
+			resolve({
+				code,
+				signal,
+				durationMs: Date.now() - started
+			});
+
+		child.on('error', (error) => exited(null, error.message));
+		child.on('close', exited);
+	});
+};
+
+const statusOf = (
+	{code, signal}: Exit,
+	result?: {is_error?: boolean}
+) => {
+	if (signal) {
+		return `killed (${signal})`;
+	}
+
+	return code || result?.is_error
+		? `error (exit ${code})`
+		: 'ok';
+};
+
+const metaOf = (
+	c: Case,
+	ref: string,
+	exit: Exit,
+	result?: Record<string, any>
+): Meta => ({
+	ref,
+	durationMs: exit.durationMs,
+	cost: result?.total_cost_usd,
+	turns: result?.num_turns,
+	model: c.model ?? Object.keys(result?.modelUsage ?? {})[0],
+	status: statusOf(exit, result)
+});
+
+const saveOutputs = (
+	workspace: string,
+	dir: string,
+	finalMessage = ''
+) => {
+	writeFileSync(join(dir, 'final.md'), `${finalMessage}\n`);
+
+	if (existsSync(join(workspace, 'out'))) {
+		cpSync(join(workspace, 'out'), join(dir, 'out'), {
+			recursive: true
+		});
+	}
+};
+
+// A run that fails is recorded in its meta.json, not thrown.
 const runOne = async (c: Case, dir: string, ref: string) => {
 	mkdirSync(dir, {recursive: true});
 
-	const work = mkdtempSync(join(tmpdir(), 'schemist-eval-'));
-	const transcript = join(dir, 'transcript.jsonl');
-	const meta: Meta = {ref};
+	const workspace = mkdtempSync(
+		join(tmpdir(), 'schemist-eval-')
+	);
+	let meta: Meta = {ref};
 
 	try {
-		prepareWorkspace(ref, work);
+		prepareWorkspace(ref, workspace);
 
-		const started = Date.now();
-		const child = spawn('claude', claudeArgs(c), {
-			cwd: work,
-			env: claudeEnv(),
-			stdio: [
-				'pipe',
-				openSync(transcript, 'w'),
-				openSync(join(dir, 'stderr.log'), 'w')
-			],
-			timeout: c.timeoutSeconds * 1000
-		});
-
-		child.stdin?.on('error', () => {});
-		child.stdin?.end(c.prompt);
-
-		const {code, signal} = await new Promise<{
-			code: number | null;
-			signal: string | null;
-		}>((resolve) => {
-			child.on('error', (error) =>
-				resolve({code: null, signal: error.message})
-			);
-			child.on('close', (code, signal) =>
-				resolve({code, signal})
-			);
-		});
-
+		const exit = await runClaude(c, workspace, dir);
 		const result = events(
-			readFileSync(transcript, 'utf8')
+			readFileSync(join(dir, 'transcript.jsonl'), 'utf8')
 		).findLast((event) => event.type === 'result');
 
-		meta.durationMs = Date.now() - started;
-		meta.cost = result?.total_cost_usd;
-		meta.turns = result?.num_turns;
-		meta.model =
-			c.model ?? Object.keys(result?.modelUsage ?? {})[0];
-		meta.status = signal
-			? `killed (${signal})`
-			: code || result?.is_error
-				? `error (exit ${code})`
-				: 'ok';
-
-		writeFileSync(
-			join(dir, 'final.md'),
-			`${result?.result ?? ''}\n`
-		);
-
-		if (existsSync(join(work, 'out')))
-			cpSync(join(work, 'out'), join(dir, 'out'), {
-				recursive: true
-			});
+		meta = metaOf(c, ref, exit, result);
+		saveOutputs(workspace, dir, result?.result);
 	} catch (error) {
 		meta.status = `error (${(error as Error).message})`;
 	} finally {
-		rmSync(work, {recursive: true, force: true});
+		rmSync(workspace, {recursive: true, force: true});
 		writeFileSync(
 			join(dir, 'meta.json'),
 			JSON.stringify(meta, null, '\t')
