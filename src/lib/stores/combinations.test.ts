@@ -1,4 +1,5 @@
 import presets from '#lib/definitions/presets/index.js';
+import type {PresetNode} from '#lib/presets.js';
 import type {BlindnessType} from '#lib/stores/combinations.svelte.js';
 import {combinations} from '#lib/stores/combinations.svelte.js';
 import {loadPalette, rootTree} from '#lib/testing/tree.js';
@@ -8,7 +9,7 @@ beforeAll(() => {
 	loadPalette(
 		rootTree(
 			'#3b82f6',
-			['Semantic color pairs', 'Neutral'].flatMap(
+			['Semantic color pairs', 'Neutral'].flatMap<PresetNode>(
 				(name) =>
 					presets.find(({label}) => label === name)!.nodes
 			)
