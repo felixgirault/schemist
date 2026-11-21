@@ -3,10 +3,13 @@
 const stripForbiddenChars = (text: string) =>
 	text.replaceAll(/[^a-zA-Z0-9_-]/g, '');
 
-// Slashes separate words too, as in design token names
-// (`button/primary/bg`).
+// Slashes and dots separate words too, as in design token names
+// (`button/primary/bg`, `button.primary.bg`).
 const words = (sentence: string) =>
-	sentence.split(/[ /]+/).map(stripForbiddenChars);
+	sentence
+		.split(/[ /.]+/)
+		.filter(Boolean)
+		.map(stripForbiddenChars);
 
 export const sentenceCase = (sentence: string) =>
 	sentence.charAt(0).toUpperCase() +

@@ -13,6 +13,10 @@ test('dashCase', () => {
 		'button-primary-bg-hover'
 	);
 	expect(dashCase('Primary / hover')).toBe('primary-hover');
+	expect(dashCase('button.primary.bg')).toBe(
+		'button-primary-bg'
+	);
+	expect(dashCase(' status/ ')).toBe('status');
 });
 
 test('camelCase', () => {
