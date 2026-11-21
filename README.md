@@ -52,6 +52,19 @@ as a JSON tree, read its colors and contrasts, export it, and
 hand back a permalink. It runs on the same code as the app, so
 results match.
 
+A good loop for an agent: read `types` and `presets`, write a
+tree, then check it before exporting. `eval` the pairs the design
+uses (`--pair`) with both `--contrast wcag2` and
+`--contrast apca`, each with
+`--blindness protanomaly,deuteranomaly,tritanomaly`, and read
+`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
+text, and 3 for large text and non-text UI such as input borders
+and focus rings. What you usually tune is the `amount` of
+Lightness (`l`) and Saturation (`s`) nodes: adjust, re-run, and
+repeat until every pair passes. Then `export` it and give the
+permalinks back so the palettes can be opened and tweaked in the
+app. See [SPEC.md](SPEC.md) (section 14) for details.
+
 ```sh
 npm ci
 npm run cli:build
@@ -134,19 +147,6 @@ about, in that order (`\/` stands for a `/` in a name). Levels
 are truncated to 2 decimals. `export` takes `--color-format`,
 `--casing`, `--prefix` and `--precision`. Both take `--origin`
 for the permalink.
-
-A good loop for an agent: read `types` and `presets`, write a
-tree, then check it before exporting. `eval` the pairs the design
-uses (`--pair`) with both `--contrast wcag2` and
-`--contrast apca`, each with
-`--blindness protanomaly,deuteranomaly,tritanomaly`, and read
-`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
-text, and 3 for large text and non-text UI such as input borders
-and focus rings. What you usually tune is the `amount` of
-Lightness (`l`) and Saturation (`s`) nodes: adjust, re-run, and
-repeat until every pair passes. Then `export` it and give the
-permalinks back so the palettes can be opened and tweaked in the
-app. See [SPEC.md](SPEC.md) (section 14) for details.
 
 ## Kudos
 
