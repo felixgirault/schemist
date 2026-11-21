@@ -67,12 +67,12 @@ src/
   lib/
     color/                 Color model, conversions, parsing, formatting,
                            manipulation, contrast, simulation, naming
-    core/nodes.ts          Pure types and helpers: NodeDef, Param,
-                           Args, NodeOutput, PresetNode, Preset,
-                           defaultArgs, generateName (no runes)
-    core/contrast.ts       combine(entries, …) → combinations (§9.1)
-    core/export.ts         toExportEntries, exportVariables, exportTokens (§11.8)
-    core/evaluate.ts       evaluate(PresetNode) → entries, store-free
+    core/                  Svelte-free logic, shared with the CLI (no runes):
+                           nodes.ts (NodeDef, Param, Args, NodeOutput,
+                           PresetNode, Preset, defaultArgs, generateName),
+                           evaluate.ts (evaluate(PresetNode) → entries),
+                           contrast.ts (combine, §9.1),
+                           export.ts (export formatters and defaults, §11.8)
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
     stores/                Reactive state, `.svelte.ts` modules (§8)
@@ -85,7 +85,9 @@ src/
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
     features.ts            Dark scheme preference (localStorage)
+    testing/               Fixtures shared by tests
 static/                    Fonts, favicon, favicon template, demo GIF
+vite.cli.config.js         CLI build (§14)
 ```
 
 ## 4. Color model
@@ -318,7 +320,7 @@ under `darkSchemeFeature` = `'1'` / `'0'`) and `colorInputFormat`
 `format` (`table` | `tokens` | `css` | `sass`, default `table`),
 `colorFormat` (default `hex`), `casing` (`dash` | `camel`,
 default `dash`), `precision` (default 3), `prefix` (default
-`''`).
+`''`), from `defaultExportSettings` (`#lib/core/export.ts`).
 
 The `ExportFormat`, `ExportCasing` and `ExportEntry` types live
 in `#lib/core/export.ts`.
