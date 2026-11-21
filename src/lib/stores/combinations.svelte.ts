@@ -1,48 +1,12 @@
 import type {ContrastType} from '#lib/color/contrast.js';
-import {
-	Wcag2Level,
-	Wcag3Level,
-	equivalence,
-	wcag2Contrast,
-	wcag2Grade,
-	wcag3Contrast,
-	wcag3Grade
-} from '#lib/color/contrast.js';
+import {Wcag2Level, equivalence} from '#lib/color/contrast.js';
 import {schemistToRgb} from '#lib/color/conversion.js';
-import {
-	simulateDeuteranomaly,
-	simulateProtanomaly,
-	simulateTritanomaly
-} from '#lib/color/simulation.js';
-import type {RgbColor} from '#lib/color/types.js';
+import type {BlindnessType} from '#lib/core/contrast.js';
+import {combine} from '#lib/core/contrast.js';
 import type {Entry} from '#lib/core/evaluate.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
-
-export type BlindnessType =
-	| 'none'
-	| 'protanomaly'
-	| 'deuteranomaly'
-	| 'tritanomaly';
-
-export type CombinationContrast = {
-	type: BlindnessType;
-	bg: RgbColor;
-	fg: RgbColor;
-	level: number;
-	grade: string;
-};
-
-export type Combination = {
-	uid: string;
-	bgName: string;
-	fgName: string;
-	minLevel: number;
-	minGrade: string;
-	contrast: CombinationContrast;
-	simulatedContrasts: CombinationContrast[];
-};
 
 class Combinations {
 	colorFilters = $state<Node['id'][]>([]);
@@ -103,81 +67,14 @@ class Combinations {
 			: this.sortedColors
 	);
 
-	#colorPairs = $derived(
-		this.#filteredColors.flatMap((color) =>
-			this.colorEntries
-				.filter((other) => color.id !== other.id)
-				.map((other): [Entry, Entry] => [color, other])
+	all = $derived(
+		combine(
+			this.#filteredColors,
+			this.colorEntries,
+			this.contrastType,
+			this.blindnessTypes
 		)
 	);
-
-	all = $derived.by(() => {
-		const levelFn =
-			this.contrastType === 'wcag2'
-				? wcag2Contrast
-				: wcag3Contrast;
-		const gradeFn =
-			this.contrastType === 'wcag2' ? wcag2Grade : wcag3Grade;
-
-		return this.#colorPairs.map(
-			([bgOutput, fgOutput]): Combination => {
-				const baseLevel = levelFn(
-					bgOutput.rgbColor,
-					fgOutput.rgbColor
-				);
-
-				const baseGrade = gradeFn(baseLevel);
-
-				let minLevel = baseLevel;
-				let minGrade = baseGrade;
-
-				const simulatedContrasts = this.blindnessTypes.map(
-					(type) => {
-						const simulate =
-							type === 'protanomaly'
-								? simulateProtanomaly
-								: type === 'deuteranomaly'
-									? simulateDeuteranomaly
-									: simulateTritanomaly;
-
-						const bg = simulate(bgOutput.rgbColor);
-						const fg = simulate(fgOutput.rgbColor);
-						const level = levelFn(bg, fg);
-						const grade = gradeFn(level);
-
-						if (level < minLevel) {
-							minLevel = level;
-							minGrade = grade;
-						}
-
-						return {
-							type,
-							bg,
-							fg,
-							level,
-							grade
-						};
-					}
-				);
-
-				return {
-					uid: `${bgOutput.id}-${fgOutput.id}`,
-					bgName: bgOutput.name,
-					fgName: fgOutput.name,
-					minLevel,
-					minGrade,
-					contrast: {
-						type: 'none',
-						bg: bgOutput.rgbColor,
-						fg: fgOutput.rgbColor,
-						level: baseLevel,
-						grade: baseGrade
-					},
-					simulatedContrasts
-				};
-			}
-		);
-	});
 
 	filtered = $derived(
 		this.all.filter(({minLevel}) => minLevel >= this.minLevel)

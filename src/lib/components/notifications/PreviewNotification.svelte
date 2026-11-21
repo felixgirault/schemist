@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {rgbToSchemist} from '#lib/color/conversion.js';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
-	import type {Combination} from '#lib/stores/combinations.svelte.js';
+	import type {Combination} from '#lib/core/contrast.js';
 	import {duoThemeStyle} from '#lib/style.js';
 
 	interface Props {

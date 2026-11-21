@@ -67,6 +67,7 @@ src/
     core/nodes.ts          Pure types and helpers: NodeDef, Param,
                            Args, NodeOutput, PresetNode, Preset,
                            defaultArgs, generateName (no runes)
+    core/contrast.ts       combine(entries, …) → combinations (§9.1)
     core/evaluate.ts       evaluate(PresetNode) → entries, store-free
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
@@ -297,7 +298,7 @@ expensive combination computations during slider drags.
 | `previewedUid`                | Combination applied to the app theme, or `null`                                        |
 | `colorEntries`                | `{id, name, color, rgbColor}` from `palette.debouncedOutputs`, in tree order           |
 | `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root |
-| `all`                         | Every combination (§9.1)                                                               |
+| `all`                         | `combine(...)` of the filtered colors (§9.1)                                           |
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                           |
 | `previewed`                   | The combination matching `previewedUid`                                                |
 
@@ -320,6 +321,10 @@ None of this state is persisted except the dark scheme.
 ## 9. Contrast and accessibility
 
 ### 9.1 Combinations
+
+Computed by `combine` (`#lib/core/contrast.ts`), which also holds
+the `Combination`, `CombinationContrast` and `BlindnessType`
+types.
 
 For each color in the filtered set (as background) and every
 other color (as foreground), one combination with
