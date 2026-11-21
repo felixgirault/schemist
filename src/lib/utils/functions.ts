@@ -4,7 +4,7 @@ export const debounce = <Fn extends (...args: any) => any>(
 	callback: Fn,
 	timeout: DebounceTimeout
 ) => {
-	let timer: number;
+	let timer: ReturnType<typeof setTimeout>;
 
 	return (...args: Parameters<Fn>) => {
 		clearTimeout(timer);

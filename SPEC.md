@@ -22,29 +22,31 @@ Production URL: <https://schemist.fglt.fr>.
 
 ## 2. Tech stack
 
-| Concern     | Choice                                                                            |
-| ----------- | --------------------------------------------------------------------------------- |
-| Framework   | SvelteKit 3, Svelte 5 (runes everywhere, no `svelte/store`)                       |
-| Build       | Vite 8, `@sveltejs/adapter-static`, every route prerendered                       |
-| Language    | TypeScript 6                                                                      |
-| Color math  | `culori` (tree-shaken `culori/fn` build)                                          |
-| Contrast    | `culori` `wcagContrast` (WCAG 2), `apca-w3` (APCA)                                |
-| Color names | `color-name-list` (`bestof` list) + `nearest-color`                               |
-| Dialogs     | `svelte-accessible-dialog`                                                        |
-| Tests       | Vitest 5 (`src/**/*.{test,spec}.{js,ts}`)                                         |
-| Formatting  | oxfmt (`.oxfmtrc.json`: tabs, width 3, 65 columns, single quotes, sorted imports) |
-| CI          | GitHub Actions, Node 24: `npm ci` then `npm test`, on `main` pushes and PRs       |
+| Concern     | Choice                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| Framework   | SvelteKit 3, Svelte 5 (runes everywhere, no `svelte/store`)                                  |
+| Build       | Vite 8, `@sveltejs/adapter-static`, every route prerendered                                  |
+| Language    | TypeScript 6                                                                                 |
+| Color math  | `culori` (tree-shaken `culori/fn` build)                                                     |
+| Contrast    | `culori` `wcagContrast` (WCAG 2), `apca-w3` (APCA)                                           |
+| Color names | `color-name-list` (`bestof` list) + `nearest-color`                                          |
+| Dialogs     | `svelte-accessible-dialog`                                                                   |
+| Tests       | Vitest 5 (`src/**/*.{test,spec}.{js,ts}`)                                                    |
+| Formatting  | oxfmt (`.oxfmtrc.json`: tabs, width 3, 65 columns, single quotes, sorted imports)            |
+| CI          | GitHub Actions, Node 24: `npm ci`, `npm test` then `npm run check`, on `main` pushes and PRs |
 
 Scripts:
 
-| Script           | Effect                                     |
-| ---------------- | ------------------------------------------ |
-| `npm start`      | Dev server                                 |
-| `npm run build`  | Static build into `build/`                 |
-| `npm run check`  | `svelte-kit sync` + `svelte-check` (types) |
-| `npm test`       | Unit tests                                 |
-| `npm run lint`   | `oxfmt --check`                            |
-| `npm run format` | `oxfmt` (writes)                           |
+| Script              | Effect                                            |
+| ------------------- | ------------------------------------------------- |
+| `npm start`         | Dev server                                        |
+| `npm run build`     | Static build into `build/`                        |
+| `npm run check`     | `svelte-kit sync` + `svelte-check` (types)        |
+| `npm test`          | Unit tests                                        |
+| `npm run lint`      | `oxfmt --check`                                   |
+| `npm run format`    | `oxfmt` (writes)                                  |
+| `npm run cli:build` | Builds the CLI into `build-cli/schemist.js` (§14) |
+| `npm run cli`       | `node build-cli/schemist.js` (§14)                |
 
 Kit configuration lives in `vite.config.js`
 (`sveltekit({adapter: adapter()})`); there is no
@@ -56,6 +58,7 @@ Kit configuration lives in `vite.config.js`
 src/
   app.html                 HTML shell (title, fonts.css, favicon)
   global.css               Global styles, consume theme variables (§11.6)
+  cli/                     Command-line interface (§14)
   routes/
     +layout.server.ts      prerender = true
     +layout.svelte         Wraps pages in Layout
@@ -530,10 +533,13 @@ and round trips). Characterization snapshots cover the outputs
 `combinations.all` (WCAG 2 and APCA, with and without
 simulations) and the CSS, Sass and design tokens exports. Export
 components are rendered server-side; there are no browser or
-end-to-end tests. Core tests assert that `evaluate` matches
-`collectOutputs` for every preset and that no file in `core/`
-reaches Svelte code through its runtime imports. CI runs the unit
-tests and `check` (not `lint` or `build`).
+end-to-end tests. A core test asserts that `evaluate` matches
+`collectOutputs` for every preset. CLI tests cover tree
+validation and argument handling, and build the CLI to run it
+under plain Node (it crashes on runes if a store leaks into
+`core/`), comparing `eval` with the core and checking that an
+invalid tree fails with its path. CI runs the unit tests and
+`check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
@@ -555,3 +561,41 @@ tests and `check` (not `lint` or `build`).
 - **`#lib` bare import** points to `src/lib/index.js`, which does
   not exist (only `#lib/*` is used).
 - **Alpha** is dropped by permalinks and design tokens.
+
+## 14. Command-line interface
+
+`src/cli/`, repo-local (not published), built by
+`vite.cli.config.js` (no SvelteKit plugin, `build.ssr`, all
+dependencies bundled) into the git-ignored
+`build-cli/schemist.js`. `npm run cli:build` builds it,
+`npm run cli -- <command>` runs it under Node. It only uses
+`#lib/core/` and the definitions, so it runs without Svelte.
+Output is JSON on stdout (`export` prints the text as is); errors
+go to stderr as `error: <message>` with exit code 1. Arguments
+are parsed with `node:util` `parseArgs`.
+
+| Command                            | Output                                                                                                                        |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `types`                            | Node types: `type`, `label`, `description`, `params` (`name`, `kind`, `min`, `max`, `unit`, `default`; color defaults as hex) |
+| `presets`                          | Presets: `label`, `description`, `nodes` (color args as hex)                                                                  |
+| `eval <tree.json\|->`              | `{colors: [{name, hex}], combinations: [{bg, fg, level, grade, simulated: [{type, level, grade}]}], permalink}`               |
+| `export <tree.json\|-> --format F` | CSS, Sass or design tokens text, as the app produces it                                                                       |
+
+`eval` options: `--contrast wcag2|apca` (default `wcag2`; `apca`
+is the internal `wcag3`), `--blindness` (comma list of
+`protanomaly`, `deuteranomaly`, `tritanomaly`), `--min <level>`
+(default 0, keeps combinations whose `minLevel` is at least
+that). Combinations are computed over all visible colors.
+`export` options: `--format css|sass|tokens` (required),
+`--color-format`, `--casing`, `--prefix`, `--precision`,
+defaulting to `defaultExportSettings` (`#lib/core/export.ts`).
+`--origin` (default `https://schemist.fglt.fr`) sets the
+permalink origin.
+
+Input is a `PresetNode` JSON tree (file path, or `-` for stdin),
+validated in `src/cli/tree.ts`: unknown keys, node types and
+params, non-numbers or numbers outside `min`–`max` for ranges,
+and non-booleans are rejected; color params are CSS color strings
+converted with `parseColor`, invalid ones rejected. Errors name
+the node path and the param, e.g.
+`root.children[2].args.amount: expected a number between 0 and 100`.
