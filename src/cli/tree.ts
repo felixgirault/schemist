@@ -1,5 +1,6 @@
 import {parseColor} from '#lib/color/parsing.js';
 import type {Param, PresetNode} from '#lib/core/nodes.js';
+import {defaultArgs} from '#lib/core/nodes.js';
 import defs from '#lib/definitions/nodes/index.js';
 
 const isObject = (
@@ -25,11 +26,12 @@ const validateArg = (
 	switch (param.type) {
 		case 'range':
 			if (
-				typeof value !== 'number' ||
-				!(value >= param.min && value <= param.max)
+				!Number.isInteger(value) ||
+				(value as number) < param.min ||
+				(value as number) > param.max
 			) {
 				throw new Error(
-					`${path}: expected a number between ${param.min} and ${param.max}`
+					`${path}: expected an integer between ${param.min} and ${param.max}`
 				);
 			}
 			return value;
@@ -81,6 +83,15 @@ const validateNode = (
 		if (typeof token !== 'string') {
 			throw new Error(`${path}.token: expected a string`);
 		}
+		// the permalink dictionary is comma and @ separated
+		const reserved = token.match(/[,@]/);
+
+		if (reserved) {
+			throw new Error(
+				`${path}.token: "${reserved[0]}" is not allowed, it breaks permalinks`
+			);
+		}
+
 		result.token = token;
 	}
 
@@ -96,7 +107,8 @@ const validateNode = (
 			throw new Error(`${path}.args: expected an object`);
 		}
 
-		result.args = {};
+		// packing needs every param, not only the given ones
+		result.args = {...defaultArgs(def)};
 
 		for (const [name, value] of Object.entries(args)) {
 			const param = def.params.find((p) => p.name === name);

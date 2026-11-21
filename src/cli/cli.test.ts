@@ -78,3 +78,25 @@ test('an invalid tree exits with an error naming the path', () => {
 	expect(stdout).toBe('');
 	expect(stderr).toContain('root.children[0].args.amount');
 });
+
+test('usage is printed for command line errors only', () => {
+	expect(exec('{}', 'nope').stderr).toContain('Usage:');
+	expect(
+		exec('{"type":"x"}', 'eval', '-').stderr
+	).not.toContain('Usage:');
+});
+
+test('a node with partial args gets a permalink', () => {
+	const {status, stdout} = exec(
+		JSON.stringify({
+			type: 'clr',
+			args: {color: '#3b82f6'},
+			children: [{type: 'hlt', args: {amount: 20}}]
+		}),
+		'eval',
+		'-'
+	);
+
+	expect(status).toBe(0);
+	expect(JSON.parse(stdout).permalink).toContain('?preset=');
+});

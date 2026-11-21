@@ -15,6 +15,11 @@ import {parseArgs} from 'node:util';
 import {parseTreeJson} from './tree.js';
 import {listPresets, listTypes} from './vocabulary.js';
 
+export const defaultOrigin = 'https://schemist.fglt.fr';
+
+// A mistake on the command line, which the usage text helps fixing.
+export class UsageError extends Error {}
+
 export const usage = `Usage: schemist <command> [options]
 
 Commands:
@@ -34,7 +39,7 @@ export options:
   --prefix <text>, --precision <digits>
 
 Common options:
-  --origin <url>              Permalink origin (default ${'https://schemist.fglt.fr'})
+  --origin <url>              Permalink origin (default ${defaultOrigin})
 `;
 
 const oneOf = <T extends string>(
@@ -46,7 +51,7 @@ const oneOf = <T extends string>(
 	if (value === undefined && fallback) return fallback;
 
 	if (!values.includes(value as T)) {
-		throw new Error(
+		throw new UsageError(
 			`--${name}: expected ${values.join(', ')}`
 		);
 	}
@@ -63,7 +68,7 @@ const number = (
 	const n = Number(value);
 
 	if (value.trim() === '' || !Number.isFinite(n)) {
-		throw new Error(`--${name}: expected a number`);
+		throw new UsageError(`--${name}: expected a number`);
 	}
 
 	return n;
@@ -75,41 +80,48 @@ const blindnessTypes = [
 	'tritanomaly'
 ] as const;
 
+const parse = (argv: string[]) => {
+	try {
+		return parseArgs({
+			args: argv,
+			allowPositionals: true,
+			options: {
+				'contrast': {type: 'string'},
+				'blindness': {type: 'string'},
+				'min': {type: 'string'},
+				'format': {type: 'string'},
+				'color-format': {type: 'string'},
+				'casing': {type: 'string'},
+				'prefix': {type: 'string'},
+				'precision': {type: 'string'},
+				'origin': {type: 'string'}
+			}
+		});
+	} catch (error) {
+		throw new UsageError((error as Error).message);
+	}
+};
+
 // Returns the text to print. `read` gives the content of a file path
 // or of stdin (`-`).
 export const run = (
 	argv: string[],
 	read: (path: string) => string
 ): string => {
-	const {values, positionals} = parseArgs({
-		args: argv,
-		allowPositionals: true,
-		options: {
-			'contrast': {type: 'string'},
-			'blindness': {type: 'string'},
-			'min': {type: 'string'},
-			'format': {type: 'string'},
-			'color-format': {type: 'string'},
-			'casing': {type: 'string'},
-			'prefix': {type: 'string'},
-			'precision': {type: 'string'},
-			'origin': {type: 'string'}
-		}
-	});
-
+	const {values, positionals} = parse(argv);
 	const [command, input, ...extra] = positionals;
 	const json = (data: unknown) => JSON.stringify(data, null, 2);
 
 	if (command === 'types' || command === 'presets') {
 		if (input)
-			throw new Error(`${command}: unexpected argument`);
+			throw new UsageError(`${command}: unexpected argument`);
 		return json(
 			command === 'types' ? listTypes() : listPresets()
 		);
 	}
 
 	if (command !== 'eval' && command !== 'export') {
-		throw new Error(
+		throw new UsageError(
 			command
 				? `unknown command "${command}"`
 				: 'missing command'
@@ -117,17 +129,14 @@ export const run = (
 	}
 
 	if (!input || extra.length) {
-		throw new Error(
+		throw new UsageError(
 			`${command}: expected one tree file, or - for stdin`
 		);
 	}
 
 	const tree = parseTreeJson(read(input));
 	const entries = evaluate(tree);
-	const link = permalink(
-		tree,
-		values.origin ?? 'https://schemist.fglt.fr'
-	);
+	const link = permalink(tree, values.origin ?? defaultOrigin);
 
 	if (command === 'export') {
 		const format = oneOf('format', values.format, [

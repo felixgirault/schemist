@@ -1,5 +1,5 @@
 import {readFileSync} from 'node:fs';
-import {run, usage} from './commands.js';
+import {UsageError, run, usage} from './commands.js';
 
 try {
 	process.stdout.write(
@@ -9,7 +9,7 @@ try {
 	);
 } catch (error) {
 	process.stderr.write(
-		`error: ${(error as Error).message}\n\n${usage}`
+		`error: ${(error as Error).message}\n${error instanceof UsageError ? `\n${usage}` : ''}`
 	);
 	process.exitCode = 1;
 }

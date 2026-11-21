@@ -1,5 +1,5 @@
 import {expect, test} from 'vitest';
-import {run} from './commands.js';
+import {UsageError, run} from './commands.js';
 
 const tree = JSON.stringify({
 	type: 'clr',
@@ -98,4 +98,30 @@ test.each([
 	[['types', 'x'], 'unexpected argument']
 ])('rejects %j', (argv, message) => {
 	expect(() => exec(...argv)).toThrow(message);
+});
+
+test('eval accepts nodes with partial args', () => {
+	const partial = JSON.stringify({
+		type: 'clr',
+		args: {color: '#3b82f6'},
+		children: [{type: 'hlt', args: {amount: 20}}]
+	});
+
+	expect(
+		JSON.parse(run(['eval', '-'], () => partial)).permalink
+	).toContain('?preset=');
+});
+
+test('only command line mistakes are usage errors', () => {
+	expect(() => exec('nope')).toThrow(UsageError);
+	expect(() => exec('eval', '-', '--nope')).toThrow(UsageError);
+	expect(() => run(['eval', '-'], () => '{')).not.toThrow(
+		UsageError
+	);
+	expect(() =>
+		run(['eval', '-'], () => '{"type":"x"}')
+	).toThrow(/^root\.type/);
+	expect(() =>
+		run(['eval', '-'], () => '{"type":"x"}')
+	).not.toThrow(UsageError);
 });

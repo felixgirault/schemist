@@ -35,11 +35,23 @@ test.each([
 	],
 	[
 		{type: 'ctr', args: {amount: 101}},
-		'root.args.amount: expected a number between 0 and 100'
+		'root.args.amount: expected an integer between 0 and 100'
 	],
 	[
 		{type: 'ctr', args: {amount: '50'}},
-		'root.args.amount: expected a number'
+		'root.args.amount: expected an integer'
+	],
+	[
+		{type: 'l', args: {amount: 33.3}},
+		'root.args.amount: expected an integer between 0 and 100'
+	],
+	[
+		{type: 'cmp', children: [{type: 'cmp', token: 'a, b'}]},
+		'root.children[0].token: "," is not allowed'
+	],
+	[
+		{type: 'cmp', token: 'a@b'},
+		'root.token: "@" is not allowed'
 	],
 	[
 		{type: 'clr', args: {color: 'blue-ish'}},
@@ -64,4 +76,10 @@ test.each([
 			typeof tree === 'string' ? tree : JSON.stringify(tree)
 		)
 	).toThrow(message);
+});
+
+test('fills missing args with the defaults', () => {
+	expect(parse({type: 'hlt', args: {amount: 20}}).args).toEqual(
+		{amount: 20, shift: 15, temp: 650}
+	);
 });

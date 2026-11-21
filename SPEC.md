@@ -594,8 +594,11 @@ permalink origin.
 
 Input is a `PresetNode` JSON tree (file path, or `-` for stdin),
 validated in `src/cli/tree.ts`: unknown keys, node types and
-params, non-numbers or numbers outside `min`–`max` for ranges,
-and non-booleans are rejected; color params are CSS color strings
-converted with `parseColor`, invalid ones rejected. Errors name
-the node path and the param, e.g.
-`root.children[2].args.amount: expected a number between 0 and 100`.
+params, non-integers or integers outside `min`–`max` for ranges,
+and non-booleans are rejected; tokens containing `,` or `@` are
+rejected too (they break permalinks, §13); missing args take the
+type's defaults; color params are CSS color strings converted
+with `parseColor`, invalid ones rejected. Errors name the node
+path and the param, e.g.
+`root.children[2].args.amount: expected an integer between 0 and 100`.
+Usage text is printed only for command line errors.
