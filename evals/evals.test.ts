@@ -24,7 +24,8 @@ import {
 	claudeEnv,
 	metaOf,
 	parseOptions,
-	prepareWorkspace
+	prepareWorkspace,
+	withModel
 } from './run.ts';
 import type {Cli} from './schemist.ts';
 import {settingsReader} from './settings.ts';
@@ -553,6 +554,19 @@ describe('runner', () => {
 				' '
 			)
 		).toContain('--max-turns 40 --model opus');
+	});
+
+	test('the model option replaces the case model', () => {
+		const {model} = parseOptions(['--model', 'sonnet']);
+
+		expect(
+			claudeArgs(
+				withModel({...c, model: 'opus'}, model)
+			).join(' ')
+		).toContain('--model sonnet');
+		expect(
+			claudeArgs(withModel({...c, model: 'opus'})).join(' ')
+		).toContain('--model opus');
 	});
 
 	test('the environment disables auto memory', () => {

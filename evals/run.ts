@@ -26,6 +26,10 @@ export type Options = {
 	runs?: number;
 	jobs: number;
 	ref: string;
+	// Replaces the model of every case.
+	model?: string;
+	// Stops launching runs once the runs so far cost this much.
+	maxCost?: number;
 };
 
 export const parseOptions = (argv: string[]): Options => {
@@ -35,7 +39,9 @@ export const parseOptions = (argv: string[]): Options => {
 			case: {type: 'string', multiple: true},
 			runs: {type: 'string'},
 			jobs: {type: 'string', short: 'j', default: '1'},
-			ref: {type: 'string', default: 'HEAD'}
+			ref: {type: 'string', default: 'HEAD'},
+			model: {type: 'string'},
+			'max-cost': {type: 'string'}
 		}
 	});
 	const jobs = Number(values.jobs);
@@ -54,11 +60,21 @@ export const parseOptions = (argv: string[]): Options => {
 	)
 		throw new Error('--runs: expected a positive integer');
 
+	const maxCost =
+		values['max-cost'] === undefined
+			? undefined
+			: Number(values['max-cost']);
+
+	if (maxCost !== undefined && !(maxCost > 0))
+		throw new Error('--max-cost: expected a positive number');
+
 	return {
 		cases: values.case,
 		runs,
 		jobs,
-		ref: values.ref as string
+		ref: values.ref as string,
+		model: values.model,
+		maxCost
 	};
 };
 
@@ -254,14 +270,23 @@ const runOne = async (c: Case, dir: string, ref: string) => {
 			JSON.stringify(meta, null, '\t')
 		);
 	}
+
+	return meta;
 };
+
+export const withModel = (c: Case, model?: string): Case => ({
+	...c,
+	model: model ?? c.model
+});
 
 // Runs the cases and returns the results directory.
 export const runAll = async ({
 	cases,
 	runs,
 	jobs,
-	ref
+	ref,
+	model,
+	maxCost
 }: Options) => {
 	const sha = execFileSync(
 		'git',
@@ -278,7 +303,7 @@ export const runAll = async ({
 			.replaceAll(':', '-')
 	);
 	const loaded = (cases ?? listCases(casesDir)).map((name) =>
-		loadCase(join(casesDir, name))
+		withModel(loadCase(join(casesDir, name)), model)
 	);
 	const queue = loaded.flatMap((c) =>
 		Array.from({length: runs ?? c.runs}, (_, i) => ({
@@ -287,12 +312,21 @@ export const runAll = async ({
 		}))
 	);
 
+	let spent = 0;
+
 	const worker = async () => {
 		for (let job = queue.shift(); job; job = queue.shift()) {
+			if (maxCost !== undefined && spent >= maxCost) {
+				console.error(
+					`skipping ${job.c.name}/${job.dir.split('/').pop()}: $${spent.toFixed(2)} spent`
+				);
+				continue;
+			}
+
 			console.error(
 				`running ${job.c.name}/${job.dir.split('/').pop()}`
 			);
-			await runOne(job.c, job.dir, sha);
+			spent += (await runOne(job.c, job.dir, sha)).cost ?? 0;
 		}
 	};
 

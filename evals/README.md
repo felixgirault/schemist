@@ -5,14 +5,17 @@ call the model on your account: run them by hand, never in CI.
 
 ```sh
 npm run eval -- [--case <name>] [--runs <n>] [-j <n>] [--ref <ref>]
+                [--model <alias>] [--max-cost <usd>]
 npm run eval:grade -- [<results dir>]   # re-grade, default: latest
 ```
 
 `--case` is repeatable (default: every case), `--runs` overrides
 the case's `runs` (default 3), `-j` runs up to 8 at once, and
-`--ref` is the commit under test (default `HEAD`; uncommitted
-changes are not tested). Needs `claude` logged in, and network
-for `npm ci`.
+`--model` replaces the model of every case for the round (e.g.
+`sonnet`), `--max-cost` stops launching runs once the runs so far
+cost that much, and `--ref` is the commit under test (default
+`HEAD`; uncommitted changes are not tested). Needs `claude`
+logged in, and network for `npm ci`.
 
 Cost, from the manual rounds: about $0.40 per `website` run and
 $1.20 to $1.50 per `dashboard` run, so a default round of both is
