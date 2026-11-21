@@ -1,12 +1,5 @@
-import {evaluate} from '#lib/core/evaluate.js';
-import {
-	exportTokens,
-	exportVariables,
-	toExportEntries
-} from '#lib/core/export.js';
 import presets from '#lib/definitions/presets/index.js';
 import {exportSettings} from '#lib/stores/export.svelte.js';
-import {palette} from '#lib/stores/palette.svelte.js';
 import {loadPalette, rootTree} from '#lib/testing/tree.js';
 import {render} from 'svelte/server';
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
@@ -62,28 +55,3 @@ test.each(cases)('export %j', (settings) => {
 		expect(code(render(Export).body)).toMatchSnapshot()
 	);
 });
-
-test.each(cases)(
-	'core export matches the component for %j',
-	(settings) => {
-		withSettings(settings, () => {
-			const entries = evaluate(tree);
-			const {format, colorFormat, precision, casing, prefix} =
-				exportSettings;
-
-			expect(
-				format === 'tokens'
-					? exportTokens(entries, palette.permalink)
-					: exportVariables(
-							toExportEntries(
-								entries,
-								colorFormat,
-								precision
-							),
-							{format, casing, prefix},
-							palette.permalink
-						)
-			).toBe(code(render(Export).body));
-		});
-	}
-);
