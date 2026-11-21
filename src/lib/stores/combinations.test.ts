@@ -2,15 +2,17 @@ import presets from '#lib/definitions/presets/index.js';
 import type {BlindnessType} from '#lib/stores/combinations.svelte.js';
 import {combinations} from '#lib/stores/combinations.svelte.js';
 import {loadPalette, rootTree} from '#lib/testing/tree.js';
-import {afterAll, beforeAll, expect, test, vi} from 'vitest';
+import {beforeAll, expect, test} from 'vitest';
 
 beforeAll(() => {
 	loadPalette(
-		rootTree('#3b82f6', [
-			...presets.find(
-				({label}) => label === 'Semantic colors'
-			)!.nodes
-		])
+		rootTree(
+			'#3b82f6',
+			['Semantic color pairs', 'Neutral'].flatMap(
+				(name) =>
+					presets.find(({label}) => label === name)!.nodes
+			)
+		)
 	);
 });
 
