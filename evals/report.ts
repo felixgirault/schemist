@@ -1,4 +1,4 @@
-import type {Result} from './graders.ts';
+import type {Result} from './graders/types.ts';
 
 export type Meta = {
 	cost?: number;

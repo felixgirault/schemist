@@ -10,11 +10,11 @@ import {
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {loadCase} from './cases.ts';
-import {grade} from './graders.ts';
-import type {Cli, Result} from './graders.ts';
+import type {Result} from './graders/types.ts';
 import {gradeCase, report} from './report.ts';
 import type {Meta} from './report.ts';
 import {casesDir, clone, resultsDir} from './run.ts';
+import type {Cli} from './schemist.ts';
 
 const dirs = (path: string) =>
 	readdirSync(path, {withFileTypes: true})
@@ -65,7 +65,7 @@ export const gradeDir = (
 						results: Object.fromEntries(
 							c.graders.map((g): [string, Result] => [
 								g.name,
-								grade(g, context)
+								g.run(context)
 							])
 						)
 					};

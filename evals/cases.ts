@@ -2,8 +2,9 @@ import {existsSync, readdirSync, readFileSync} from 'node:fs';
 import {basename, join} from 'node:path';
 import {parseFrontMatter} from './frontmatter.ts';
 import type {Scalar} from './frontmatter.ts';
-import {prepare} from './graders.ts';
-import type {Expect, Grader} from './graders.ts';
+import {createGrader} from './graders/index.ts';
+import type {Grader} from './graders/index.ts';
+import type {Expect} from './graders/types.ts';
 
 export type Case = {
 	name: string;
@@ -48,7 +49,7 @@ export const loadGrader = (path: string): Grader => {
 			`${name}: weight must be a positive number`
 		);
 
-	return prepare({
+	return createGrader({
 		name,
 		type,
 		weight: (weight as number) ?? 1,

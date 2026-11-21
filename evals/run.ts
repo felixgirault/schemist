@@ -14,8 +14,8 @@ import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {listCases, loadCase} from './cases.ts';
 import type {Case} from './cases.ts';
-import {events} from './graders.ts';
 import type {Meta} from './report.ts';
+import {events} from './transcript.ts';
 
 export const root = join(import.meta.dirname, '..');
 export const casesDir = join(import.meta.dirname, 'cases');

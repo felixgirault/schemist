@@ -23,8 +23,11 @@ about $5.
 ```
 evals/
   run.ts, grade.ts, eval.ts   Runner, grader, both in a row
-  cases.ts, graders.ts,       Case loading, the grader types,
-  report.ts, frontmatter.ts   scoring and report, front matter
+  cases.ts, report.ts         Case loading, scoring and report
+  frontmatter.ts, settings.ts Grader files: parsing and validation
+  graders/                    One file per grader type, and index.ts
+  schemist.ts, transcript.ts  The CLI as the graders call it, the
+                              events of a transcript
   evals.test.ts, fixtures/    Tests, on recorded runs (no model)
   cases/<name>/               prompt.md, expect.json, graders/*.md
   results/<timestamp>/        Git-ignored
@@ -34,25 +37,44 @@ evals/
     report.md
 ```
 
-Each run is a clone of the ref with `evals/` deleted, removed
-afterwards. The grader builds the CLI once from the same ref, in
-its own clone, so a run cannot change its own grade. The code is
-TypeScript run directly by Node (type stripping, hence the `.ts`
-extensions in imports) and checked by `npm run check`.
+Each run happens in a fresh one-commit repository holding the ref
+without `evals/`, removed afterwards: the agent finds the graders
+neither in the files nor in the history. The grader builds the
+CLI once from the same ref, in its own clone, so a run cannot
+change its own grade. The code is TypeScript run directly by Node
+(type stripping, hence the `.ts` extensions in imports) and
+checked by `npm run check`.
 
-A grader is a Markdown file with front matter (`type`, `weight`
-default 1, then the fields below) and a description as body:
+## How graders work
 
-| Type          | Fields                                                                            |
-| ------------- | --------------------------------------------------------------------------------- |
-| `tool_used`   | `tool`, `input_match` (regex on the JSON input), `min` (default 1), `max`         |
-| `regex`       | `target` (`trace` or `file`), `path` (file), `pattern`, `flags`, `expect: absent` |
-| `file_exists` | `path`, a glob relative to the run directory                                      |
-| `check`       | none: the case's `expect.json`, every pair in every tree, every hex in some tree  |
+A grader is a Markdown file in `cases/<name>/graders/`: flat
+`key: value` front matter between `---` lines (strings, quoted or
+not, numbers, booleans; anything else is an error), and a
+description as body. `type` is required and `weight` defaults to
+1; the other settings depend on the type. Mistakes (unknown type,
+missing or mistyped setting, invalid regular expression) are
+reported when the case is loaded, before any paid run. Each type
+lives in `graders/<type>.ts`, with its settings and an example.
 
-Front matter is flat `key: value` lines (strings, quoted or not,
-numbers, booleans); anything else is an error, as is an unknown
-type.
+| Type          | Passes when                                                                         | Example                                                                |
+| ------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `tool_used`   | `tool` was called `min` (default 1) to `max` times, input matching a regex          | `tool: Bash`, `input_match: --blindness`                               |
+| `regex`       | `pattern` is found in the transcript or in a file (not found with `expect: absent`) | `target: file`, `path: out/light.json`, `pattern: #be7ef3`, `flags: i` |
+| `file_exists` | a file matches the glob `path`, relative to the run directory                       | `path: out/*.json`                                                     |
+| `check`       | every tree and pair of the case's `expect.json` is valid and meets its targets      | no settings                                                            |
+
+`check` re-checks the agent's trees with the CLI built from the
+ref, not with what the agent claims. For each tree of
+`expect.json` it reads the colors, then asks for the level of
+each pair that has a `wcag2` or `apca` target, in the worst case
+of the three color blindness simulations. It fails when a tree is
+missing or invalid, a pair's token is missing, a pair is under
+its target in any tree, or an expected `hex` is in no tree. The
+report lists the problems and each failed pair with its level and
+target.
+
+A run's score is the weighted fraction of graders passed, a
+case's score the mean of its runs.
 
 ## Isolation
 

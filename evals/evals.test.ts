@@ -14,8 +14,10 @@ import {run} from '../src/cli/commands.ts';
 import {loadCase, loadGrader} from './cases.ts';
 import {parseFrontMatter} from './frontmatter.ts';
 import {gradeDir} from './grade.ts';
-import {events, grade, prepare} from './graders.ts';
-import type {Cli, Context, Grader} from './graders.ts';
+import {createGrader} from './graders/index.ts';
+import type {GraderFile} from './graders/index.ts';
+import {parse as parseRegex} from './graders/regex.ts';
+import type {Context} from './graders/types.ts';
 import {gradeCase, score} from './report.ts';
 import {
 	claudeArgs,
@@ -23,6 +25,9 @@ import {
 	parseOptions,
 	prepareWorkspace
 } from './run.ts';
+import type {Cli} from './schemist.ts';
+import {settingsReader} from './settings.ts';
+import {events} from './transcript.ts';
 
 const fixtures = join(import.meta.dirname, 'fixtures');
 const cases = join(fixtures, 'cases');
@@ -45,14 +50,18 @@ const context = (
 
 const grader = (
 	type: string,
-	fields: Grader['fields'] = {}
-): Grader => ({
-	name: type,
-	type,
-	weight: 1,
-	description: '',
-	fields
-});
+	fields: GraderFile['fields'] = {}
+) =>
+	createGrader({
+		name: type,
+		type,
+		weight: 1,
+		description: '',
+		fields
+	});
+
+const grade = (g: ReturnType<typeof grader>, c: Context) =>
+	g.run(c);
 
 describe('front matter', () => {
 	test('parses flat scalars', () => {
@@ -140,7 +149,7 @@ describe('tool_used', () => {
 	const transcript = (n: number) =>
 		readFileSync(join(dir(n), 'transcript.jsonl'), 'utf8');
 
-	const used = (n: number, fields: Grader['fields']) =>
+	const used = (n: number, fields: GraderFile['fields']) =>
 		grade(
 			grader('tool_used', {tool: 'Bash', ...fields}),
 			context(n, {transcript: transcript(n)})
@@ -170,7 +179,7 @@ describe('tool_used', () => {
 describe('regex', () => {
 	test('searches the trace, present or absent', () => {
 		const run2 = {transcript: 'import culori'};
-		const g = (fields: Grader['fields']) =>
+		const g = (fields: GraderFile['fields']) =>
 			grade(
 				grader('regex', {
 					target: 'trace',
@@ -370,8 +379,7 @@ describe('scoring and report', () => {
 });
 
 describe('grader fields', () => {
-	const load = (type: string, fields: Grader['fields']) =>
-		prepare(grader(type, fields));
+	const load = grader;
 
 	test.each([
 		['tool_used', {}, '"tool" is required'],
@@ -414,15 +422,16 @@ describe('grader fields', () => {
 		).toThrow(/invalid "pattern"/);
 	});
 
-	test('valid graders get their pattern compiled once', () => {
+	test('a pattern is compiled with its flags', () => {
 		expect(
-			load('regex', {
-				target: 'trace',
-				pattern: 'a+',
-				flags: 'i'
-			}).regex
+			parseRegex(
+				settingsReader('regex', {
+					target: 'trace',
+					pattern: 'a+',
+					flags: 'i'
+				})
+			).pattern
 		).toEqual(/a+/i);
-		expect(load('check', {}).regex).toBeUndefined();
 	});
 });
 
