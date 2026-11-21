@@ -165,3 +165,33 @@ at the end.
   is duplicated.
 - Existing limits carry over to the CLI: lossy permalinks, tokens
   with `,` or `@` breaking permalinks (SPEC §13).
+
+## Follow-up: `eval` output for agents
+
+Generating a light and dark website scheme with the CLI showed
+two problems:
+
+- `eval` is too verbose: a 10-color tree prints 90 pairs with
+  16-digit levels, and the agent needed its own script to pick
+  the dozen pairs it cared about and their worst case under
+  simulations.
+- The README does not say which args to tune when adjusting a
+  palette.
+
+Changes:
+
+- Levels in `eval` output are rounded to 2 decimals. `--min`
+  still filters on the unrounded value.
+- With `--blindness`, each combination also has `minLevel` and
+  `minGrade` (the worst of base and simulated levels, already
+  computed by `combine`).
+- `--pair 'fg/bg'`, repeatable, keeps only the listed pairs, in
+  the given order. Names are matched exactly; `\/` and `\\`
+  escape a `/` or `\` that is part of a name. A pair with no
+  unescaped `/`, more than one, or a name not in the palette is
+  rejected with a message naming it.
+- The README example and agent loop point at the args usually
+  tuned (`amount` of Lightness and Saturation nodes).
+
+Rejected: `--fg` / `--bg` lists, which avoid escaping but give
+the cross product of both lists rather than the pairs asked for.
