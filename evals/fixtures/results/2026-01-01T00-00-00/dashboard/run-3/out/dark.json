@@ -1,0 +1,367 @@
+{
+	"type": "clr",
+	"token": "button/primary/bg",
+	"args": {"color": "#be7ef3"},
+	"children": [
+		{
+			"type": "l",
+			"token": "button/primary/bg-hover",
+			"args": {"amount": 72}
+		},
+		{
+			"type": "l",
+			"token": "button/primary/bg-pressed",
+			"args": {"amount": 60}
+		},
+		{
+			"type": "s",
+			"token": "button/primary/label-tone",
+			"isHidden": true,
+			"args": {"amount": 80},
+			"children": [
+				{
+					"type": "l",
+					"token": "button/primary/label",
+					"args": {"amount": 10}
+				}
+			]
+		},
+		{
+			"type": "s",
+			"token": "neutral",
+			"isHidden": true,
+			"args": {"amount": 10},
+			"children": [
+				{
+					"type": "l",
+					"token": "background/page",
+					"args": {"amount": 8}
+				},
+				{
+					"type": "l",
+					"token": "background/surface",
+					"args": {"amount": 12}
+				},
+				{
+					"type": "l",
+					"token": "background/raised",
+					"args": {"amount": 16}
+				},
+				{
+					"type": "l",
+					"token": "text/body",
+					"args": {"amount": 60}
+				},
+				{
+					"type": "l",
+					"token": "text/secondary",
+					"args": {"amount": 86}
+				},
+				{
+					"type": "l",
+					"token": "text/disabled",
+					"args": {"amount": 50}
+				},
+				{
+					"type": "l",
+					"token": "border/divider",
+					"args": {"amount": 26}
+				},
+				{
+					"type": "l",
+					"token": "border/input",
+					"args": {"amount": 56}
+				}
+			]
+		},
+		{
+			"type": "s",
+			"token": "focus tone",
+			"isHidden": true,
+			"args": {"amount": 90},
+			"children": [
+				{
+					"type": "l",
+					"token": "focus/ring",
+					"args": {"amount": 72}
+				}
+			]
+		},
+		{
+			"type": "clr",
+			"token": "button/secondary/bg",
+			"args": {"color": "#1fb5a0"},
+			"children": [
+				{
+					"type": "l",
+					"token": "button/secondary/bg-hover",
+					"args": {"amount": 71}
+				},
+				{
+					"type": "l",
+					"token": "button/secondary/bg-pressed",
+					"args": {"amount": 59}
+				},
+				{
+					"type": "s",
+					"token": "button/secondary/label-tone",
+					"isHidden": true,
+					"args": {"amount": 80},
+					"children": [
+						{
+							"type": "l",
+							"token": "button/secondary/label",
+							"args": {"amount": 10}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "inf",
+			"token": "status/info",
+			"isHidden": true,
+			"children": [
+				{
+					"type": "s",
+					"token": "$ sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "status/info/text",
+							"args": {"amount": 72}
+						},
+						{
+							"type": "l",
+							"token": "status/info/subtle-bg",
+							"args": {"amount": 18}
+						},
+						{
+							"type": "l",
+							"token": "status/info/subtle-text",
+							"args": {"amount": 86}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "pos",
+			"token": "status/success",
+			"isHidden": true,
+			"children": [
+				{
+					"type": "s",
+					"token": "$ sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "status/success/text",
+							"args": {"amount": 72}
+						},
+						{
+							"type": "l",
+							"token": "status/success/subtle-bg",
+							"args": {"amount": 18}
+						},
+						{
+							"type": "l",
+							"token": "status/success/subtle-text",
+							"args": {"amount": 86}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "wrn",
+			"token": "status/warning",
+			"isHidden": true,
+			"children": [
+				{
+					"type": "s",
+					"token": "$ sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "status/warning/text",
+							"args": {"amount": 72}
+						},
+						{
+							"type": "l",
+							"token": "status/warning/subtle-bg",
+							"args": {"amount": 18}
+						},
+						{
+							"type": "l",
+							"token": "status/warning/subtle-text",
+							"args": {"amount": 86}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "neg",
+			"token": "status/error",
+			"isHidden": true,
+			"children": [
+				{
+					"type": "s",
+					"token": "$ sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "status/error/text",
+							"args": {"amount": 72}
+						},
+						{
+							"type": "l",
+							"token": "status/error/subtle-bg",
+							"args": {"amount": 18}
+						},
+						{
+							"type": "l",
+							"token": "status/error/subtle-text",
+							"args": {"amount": 86}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "h",
+			"token": "chart/1 hue",
+			"isHidden": true,
+			"args": {"degrees": 0},
+			"children": [
+				{
+					"type": "s",
+					"token": "chart/1 sat",
+					"isHidden": true,
+					"args": {"amount": 50},
+					"children": [
+						{
+							"type": "l",
+							"token": "chart/1",
+							"args": {"amount": 50}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "h",
+			"token": "chart/2 hue",
+			"isHidden": true,
+			"args": {"degrees": 234},
+			"children": [
+				{
+					"type": "s",
+					"token": "chart/2 sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "chart/2",
+							"args": {"amount": 54}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "h",
+			"token": "chart/3 hue",
+			"isHidden": true,
+			"args": {"degrees": 9},
+			"children": [
+				{
+					"type": "s",
+					"token": "chart/3 sat",
+					"isHidden": true,
+					"args": {"amount": 100},
+					"children": [
+						{
+							"type": "l",
+							"token": "chart/3",
+							"args": {"amount": 61}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "h",
+			"token": "chart/4 hue",
+			"isHidden": true,
+			"args": {"degrees": 153},
+			"children": [
+				{
+					"type": "s",
+					"token": "chart/4 sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "chart/4",
+							"args": {"amount": 50}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "h",
+			"token": "chart/5 hue",
+			"isHidden": true,
+			"args": {"degrees": 303},
+			"children": [
+				{
+					"type": "s",
+					"token": "chart/5 sat",
+					"isHidden": true,
+					"args": {"amount": 90},
+					"children": [
+						{
+							"type": "l",
+							"token": "chart/5",
+							"args": {"amount": 53}
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "h",
+			"token": "chart/6 hue",
+			"isHidden": true,
+			"args": {"degrees": 78},
+			"children": [
+				{
+					"type": "s",
+					"token": "chart/6 sat",
+					"isHidden": true,
+					"args": {"amount": 60},
+					"children": [
+						{
+							"type": "l",
+							"token": "chart/6",
+							"args": {"amount": 57}
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -59,8 +59,8 @@ graders arrive.
 ```
 evals/
   README.md            How to run, what it costs
-  run.mjs              Runs cases, collects results
-  grade.mjs            Grades collected runs
+  run.ts              Runs cases, collects results
+  grade.ts            Grades collected runs
   cases/
     website/
       prompt.md        Front matter + prompt
@@ -128,13 +128,13 @@ its runs.
 
 ### Running
 
-- `run.mjs` clones the ref under test (default: `HEAD`) once per
+- `run.ts` clones the ref under test (default: `HEAD`) once per
   run into a temporary directory, deletes `evals/` from the clone
   so the agent cannot read the graders, and runs
   `claude -p <prompt> --output-format stream-json` in it, with a
   timeout and up to `-j` runs at once. It keeps the transcript,
   the final message, `out/`, cost and turns.
-- `grade.mjs` builds the CLI once from the same ref, separately
+- `grade.ts` builds the CLI once from the same ref, separately
   from the runs, so that an agent changing the CLI cannot change
   its own grade, then grades every run and writes
   `results/<timestamp>/report.md`: a table per case of graders by
@@ -172,7 +172,7 @@ question, settled by a spike in step 1.
 1. Spike: run isolation with the user's login (temporary
    configuration directory, `--setting-sources`, …); record what
    works in `evals/README.md`.
-2. `run.mjs` and `grade.mjs` with `tool_used`, `regex`,
+2. `run.ts` and `grade.ts` with `tool_used`, `regex`,
    `file_exists` and `check`; unit tests for the grader logic on
    recorded transcripts and trees (from the manual rounds), so
    the harness is tested without paying for runs.

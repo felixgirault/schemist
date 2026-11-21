@@ -1,0 +1,18 @@
+{
+	"trees": ["out/light.json", "out/dark.json"],
+	"pairs": [
+		{
+			"fg": "text/body",
+			"bg": "background/page",
+			"wcag2": 7,
+			"apca": 75
+		},
+		{
+			"fg": "border/input",
+			"bg": "background/page",
+			"wcag2": 3,
+			"apca": 45
+		}
+	],
+	"hex": ["#be7ef3", "#1fb5a0"]
+}

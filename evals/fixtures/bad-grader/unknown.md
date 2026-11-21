@@ -1,0 +1,5 @@
+---
+type: nope
+---
+
+Unknown type.
