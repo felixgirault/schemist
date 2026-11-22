@@ -183,7 +183,7 @@
 		font-size: 0.9rem;
 	}
 
-	.simulation .level span {
+	.simulation .grade {
 		font-size: 1rem;
 		font-weight: bold;
 	}

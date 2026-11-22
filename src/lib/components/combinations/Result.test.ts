@@ -46,10 +46,10 @@ beforeAll(() => {
 const text = (html: string) =>
 	html.replace(/<!--.*?-->|<[^>]*>/g, '').replace(/\s+/g, ' ');
 
-test('shows each rule with its specimen and cards', () => {
+test('shows each rule with its cards', () => {
 	const html = text(render(Result).body);
 
-	expect(html).toContain('Black: Pack my box');
+	expect(html).not.toContain('Pack my box');
 	expect(html).toContain(
 		'Black &amp; White AAA (21) met APCA 5 (106) met'
 	);
@@ -65,7 +65,7 @@ test('shows the simulations in the cards, once', () => {
 	combinations.blindnessTypes = [];
 	expect(plain).toContain('protanomaly');
 	expect(plain).not.toContain('Without simulation');
-	expect(html.split('Pack my box').length).toBe(3);
+	expect(plain.split('Black &amp; White').length).toBe(2);
 });
 
 test('previews a pair the Colors filter leaves out', () => {

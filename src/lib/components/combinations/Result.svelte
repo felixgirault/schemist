@@ -18,19 +18,13 @@
 		difference: 'Difference'
 	};
 
-	// What each rule is shown as: a role among itself is a set of
-	// categories, Large text and UI a stroke and an outline, the rest
-	// (Body text, custom) text.
+	// A role among itself is a set of categories, shown side by side;
+	// other rules are cards, one per pair.
 	let sections = $derived(
 		palette.rules.map((rule) => ({
 			rule,
 			...combinations.describeRule(rule),
-			kind:
-				rule.bg === undefined
-					? ('categories' as const)
-					: rule.use === 'large'
-						? ('large' as const)
-						: ('text' as const),
+			isCategories: rule.bg === undefined,
 			checks: combinations.ruleChecks.get(rule.id) ?? []
 		}))
 	);
@@ -80,11 +74,6 @@
 			combinations.previewedUid === uid ? null : uid;
 	};
 
-	const surfaces = (checks: PairCheck[]) =>
-		[...Map.groupBy(checks, ({bg}) => bg.id).values()].map(
-			(group) => ({bg: group[0].bg, checks: group})
-		);
-
 	const colorsOf = (checks: PairCheck[]) => [
 		...new Map(
 			checks.flatMap(({fg, bg}) => [
@@ -124,49 +113,6 @@
 	</div>
 {/snippet}
 
-{#snippet specimen(checks: PairCheck[], kind: 'text' | 'large')}
-	{#each surfaces(checks) as surface (surface.bg.id)}
-		<div class="surface-block">
-			<h5 class="surface-name">{surface.bg.name}</h5>
-			<div
-				class="surface"
-				style="background: {formatRgbToHex(
-					surface.bg.rgbColor
-				)};"
-			>
-				{#each surface.checks as check (check.id)}
-					{@const fg = formatRgbToHex(check.fg.rgbColor)}
-					{#if kind === 'text'}
-						<p style="color: {fg};">
-							<strong>{check.fg.name}:</strong>
-							Pack my box with five dozen liquor jugs.
-						</p>
-					{:else}
-						<div class="large" style="color: {fg};">
-							<span
-								class="stroke"
-								style="border-color: {fg};"
-							>
-								Stroke
-							</span>
-							<span
-								class="outline"
-								style="outline-color: {fg};"
-							>
-								Outline
-							</span>
-							<span class="large-text">
-								{check.fg.name}
-							</span>
-						</div>
-					{/if}
-				{/each}
-			</div>
-			{@render cards(surface.checks)}
-		</div>
-	{/each}
-{/snippet}
-
 {#snippet categories(checks: PairCheck[])}
 	<ul class="swatches">
 		{#each colorsOf(checks) as color (color.id)}
@@ -199,17 +145,17 @@
 {#snippet group(
 	title: string,
 	checks: PairCheck[],
-	kind: 'text' | 'large' | 'categories'
+	isCategories = false
 )}
 	<section class="group">
 		<h3 class="h3">{title}</h3>
 
 		{#if !checks.length}
 			<p class="hint">No pair yet: add colors.</p>
-		{:else if kind === 'categories'}
+		{:else if isCategories}
 			{@render categories(checks)}
 		{:else}
-			{@render specimen(checks, kind)}
+			{@render cards(checks)}
 		{/if}
 	</section>
 {/snippet}
@@ -218,15 +164,18 @@
 	<div class="layout">
 		<div class="body">
 			<div class="results">
-				{#each sections as { rule, label, use, kind, checks } (rule.id)}
-					{@render group(`${label}, ${use}`, checks, kind)}
+				{#each sections as { rule, label, use, isCategories, checks } (rule.id)}
+					{@render group(
+						`${label}, ${use}`,
+						checks,
+						isCategories
+					)}
 				{/each}
 
 				{#if combinations.oneOffChecks.length}
 					{@render group(
 						'One-off pairs',
-						combinations.oneOffChecks,
-						'text'
+						combinations.oneOffChecks
 					)}
 				{/if}
 
@@ -288,59 +237,11 @@
 		gap: 1rem;
 	}
 
-	.surface-block {
-		display: grid;
-		gap: 0.5rem;
-	}
-
-	.surface-name {
-		font-size: 0.9rem;
-	}
-
-	.surface {
-		display: grid;
-		gap: 0.75rem;
-		padding: 1rem;
-		border: 1px solid var(--fg);
-		border-radius: var(--radius);
-	}
-
-	.surface p {
-		margin: 0;
-	}
-
 	.statuses {
 		margin: 0;
 		padding: 0;
 		list-style: none;
 		font-size: 0.9rem;
-	}
-
-	.large {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.stroke,
-	.outline {
-		padding: 0.25rem 0.75rem;
-		border-radius: var(--radius);
-	}
-
-	.stroke {
-		border: 2px solid;
-	}
-
-	.outline {
-		outline: 3px solid;
-		outline-offset: 2px;
-	}
-
-	.large-text {
-		font-size: 1.5rem;
-		font-weight: bold;
 	}
 
 	.swatches {
