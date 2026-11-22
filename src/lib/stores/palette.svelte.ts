@@ -74,7 +74,10 @@ class Palette {
 		const {origin} = window.location;
 
 		return this.root
-			? permalink(serializeTree(this.root, this.pairs), origin)
+			? permalink(
+					serializeTree(this.root, this.pairs),
+					origin
+				)
 			: origin;
 	}
 

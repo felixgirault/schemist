@@ -67,7 +67,8 @@ const expectSaved = () => {
 	const back = reload(root, palette.pairs);
 	const expected = palette.pairs.filter(({fg, bg}) =>
 		saved.some(
-			(p) => p.fg === fg.output.name && p.bg === bg.output.name
+			(p) =>
+				p.fg === fg.output.name && p.bg === bg.output.name
 		)
 	);
 

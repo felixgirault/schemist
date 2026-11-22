@@ -103,7 +103,10 @@ export const parseTree = (data: NodeData) => {
 };
 
 // `pairs` are the root's, saved by names.
-export const serializeTree = (node: Node, pairs?: NodePair[]) => {
+export const serializeTree = (
+	node: Node,
+	pairs?: NodePair[]
+) => {
 	const {token, args, children} = node;
 	const data: IdentifiedNodeData = {
 		id: node.id,

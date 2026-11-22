@@ -237,17 +237,17 @@ presets, permalinks, history snapshots and the CLI, with `type` a
 over the type defaults and reuses `id` when set;
 `serializeTree(Node, pairs?) → IdentifiedNodeData` (a tree whose
 ids are all set) includes ids, omits empty tokens, args and
-children, and writes the root's pairs (§8.1).
-Permalinks don't store ids. `changedArg` and `withIds` live in
+children, and writes the root's pairs (§8.1). Permalinks don't
+store ids. `changedArg` and `withIds` live in
 `#lib/core/tree.ts`.
 
 `validateTree(data, path, isRoot?)` (`#lib/core/tree.ts`, which
-also accepts the root's `pairs`) checks data from
-outside and returns a `NodeData`: unknown keys, node types and
-params, and invalid values are rejected naming their path. Color
-args are CSS strings, converted to colors. The CLI (§14)
-validates its input with it, and `unpack` (§10) validates what a
-permalink holds before building the tree.
+also accepts the root's `pairs`) checks data from outside and
+returns a `NodeData`: unknown keys, node types and params, and
+invalid values are rejected naming their path. Color args are CSS
+strings, converted to colors. The CLI (§14) validates its input
+with it, and `unpack` (§10) validates what a permalink holds
+before building the tree.
 
 ## 6. Node types
 
@@ -429,18 +429,26 @@ default `dash`), `precision` (default 3), `prefix` (default
 
 Undo and redo of the palette tree, see ADR 9. A generic `History`
 class (`#lib/utils/history.svelte.ts`) holds `past` and `future`
-stacks of snapshots (`serializeTree` of the root, with ids,
-frozen by `$state.snapshot`), capped at 100 entries.
+stacks of snapshots, capped at 100 entries. A snapshot is
+`{tree, pairs}`: the `serializeTree` of the root (with ids) and
+the declared pairs (§8.1) by node ids, frozen by
+`$state.snapshot`. Undoing rebuilds the nodes with `parseTree`,
+which keeps the ids, and maps the snapshot's pair ids onto the
+new nodes, so each state gets back exactly its own pairs.
+`setPair` is a change like any other. What goes to `localStorage`
+and to the URL is the packed palette of the snapshot, pairs
+included (by names, §10).
 
 `startHistory(root)` (`#lib/stores/history.svelte.ts`, called
-when the palette mounts) resets the history to the tree, syncs
-the URL and starts an effect that records every change of the
-tree, and returns a function that stops it. Changes made in the
-same tick form one change. A change starts a new step, unless it
-only touches one arg of one node (`changedArg`) and the previous
-change touched the same arg less than 1 s ago, so that a slider
-drag is one step. A step that ends where it started is dropped,
-as are identical consecutive snapshots.
+when the palette mounts, after `palette.storedPairs` is set)
+resets the history to the palette, syncs the URL and starts an
+effect that records every change of the tree or the pairs, and
+returns a function that stops it. Changes made in the same tick
+form one change. A change starts a new step, unless the pairs are
+unchanged and it only touches one arg of one node (`changedArg`)
+and the previous change touched the same arg less than 1 s ago,
+so that a slider drag is one step. A step that ends where it
+started is dropped, as are identical consecutive snapshots.
 
 | Member   | Effect                                                                                                                  |
 | -------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -615,12 +623,12 @@ colors differently (see values):
 <root>@<nodes>@<pairs>@<dictionary>
 ```
 
-| Part         | Content                                                                                                                                                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Part         | Content                                                                                                                                                                                   |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dictionary` | Comma-separated strings, in order of first use: type codes, tokens, param names, colors (v2: also pair names, targets and values). `%`, `,` and `@` are escaped as `%25`, `%2C` and `%40` |
-| `pairs`      | v2 only: comma-separated pair records, empty without pairs                                                                                                                               |
-| `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                                                                 |
-| `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                                                                      |
+| `pairs`      | v2 only: comma-separated pair records, empty without pairs                                                                                                                                |
+| `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                                                                   |
+| `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                                                                       |
 
 A node record is an optional `!` (hidden) followed by numbers,
 each written in hexadecimal: 1 digit as is, 2 digits prefixed
