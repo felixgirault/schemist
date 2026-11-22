@@ -177,6 +177,11 @@ truncated to 2 decimals. `export` takes `--color-format`,
 `--casing`, `--prefix` and `--precision`. Both take `--origin`
 for the permalink.
 
+Without `--pair`, `eval` also reports the tree's declared pairs:
+`pairs: [{fg, bg, targets, levels, pass}]`, `levels` being the
+worst case of each target with the simulations. A pair with a
+hidden color comes back with `hidden: true` and is not checked.
+
 Changing the CLI, its error messages or this section? Agents read
 them, so [evals/](evals/README.md) runs agents on real prompts
 and grades the result (it costs a few dollars).

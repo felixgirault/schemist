@@ -443,3 +443,43 @@ test('eval --pair finds hidden colors', () => {
 
 	expect(combinations).toHaveLength(1);
 });
+
+test('eval does not check declared pairs of hidden colors', () => {
+	const tree = JSON.stringify({
+		type: 'clr',
+		token: 'Bg',
+		children: [
+			{type: 'cmp', token: 'Hid', isHidden: true},
+			{type: 'cmp', token: 'Shown'}
+		],
+		pairs: [
+			{fg: 'Hid', bg: 'Bg', wcag2: 4.5},
+			{fg: 'Shown', bg: 'Bg', wcag2: 1}
+		]
+	});
+	const {pairs} = JSON.parse(run(['eval', '-'], () => tree));
+
+	expect(pairs[0]).toEqual({
+		fg: 'Hid',
+		bg: 'Bg',
+		targets: {wcag2: 4.5},
+		hidden: true
+	});
+	expect(pairs[1]).toMatchObject({fg: 'Shown', pass: true});
+});
+
+test('eval accepts a repeated --pair', () => {
+	const tree = JSON.stringify({
+		type: 'clr',
+		token: 'Bg',
+		children: [{type: 'cmp', token: 'Fg'}]
+	});
+	const {combinations} = JSON.parse(
+		run(
+			['eval', '-', '--pair', 'Fg/Bg', '--pair', 'Fg/Bg'],
+			() => tree
+		)
+	);
+
+	expect(combinations).toHaveLength(1);
+});

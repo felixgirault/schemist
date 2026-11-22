@@ -3,14 +3,14 @@
 - To generate or check color schemes, use the CLI documented in
   the "Command-line interface" section of README.md (setup:
   `npm ci`, then `npm run cli:build`).
-- Check every palette with `eval --pair` under both
-  `--contrast wcag2` and `--contrast apca`, each with
-  `--blindness protanomaly,deuteranomaly,tritanomaly`, and read
-  `minLevel`: aim for 4.5 and Lc 60 for body text, 3 for input
-  borders and focus rings, and iterate until every pair passes.
-  For categorical colors (chart series, tags), also check every
-  pair with `--difference` and aim for a `difference.minLevel` of
-  at least 10.
+- Declare the pairs the palette must meet in the tree's root
+  `pairs`, each with its targets: `wcag2` 4.5 and `apca` 60 for
+  body text, `wcag2` 3 for input borders and focus rings, and
+  `difference` 10 between categorical colors (chart series,
+  tags). Then `eval` the tree with
+  `--blindness protanomaly,deuteranomaly,tritanomaly`, read each
+  pair's `levels` and `pass`, and iterate until every pair
+  passes.
 - SPEC.md is the reference for the codebase.
 - Compatibility: permalinks already published (`?preset=` v1,
   also embedded in exports) must keep opening. A format change

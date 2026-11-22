@@ -962,8 +962,11 @@ declared pairs: `targets` as declared, `levels` the worst level
 of each target (base and `--blindness` simulations, truncated
 like the others) and `pass` whether every target is reached on
 its exact level. Each target is measured on its own, whatever
-`--contrast`. With `--pair`, the declared pairs are replaced by
-the given ones for that run and `pairs` is omitted.
+`--contrast`. A pair with a hidden color is not checked, as in
+the app (hidden colors are not exported): it comes as
+`{fg, bg, targets, hidden: true}`. With `--pair`, the declared
+pairs are replaced by the given ones for that run and `pairs` is
+omitted; a repeated `--pair` counts once.
 
 `export --format tokens` nests names split on `/` and `.`
 (§11.8). When `exportTokens` reports conflicts, it fails like a

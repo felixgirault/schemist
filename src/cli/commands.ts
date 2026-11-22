@@ -15,7 +15,11 @@ import {
 	toExportEntries
 } from '#lib/core/export.js';
 import type {ExportCasing} from '#lib/core/export.js';
-import {checkPair, resolvePairs} from '#lib/core/pairs.js';
+import {
+	checkPair,
+	resolvePairs,
+	targetNames
+} from '#lib/core/pairs.js';
 import {permalink} from '#lib/routing.js';
 import {parseArgs} from 'node:util';
 import {UsageError} from './errors.js';
@@ -251,10 +255,13 @@ export const run = (
 	const min = number('min', values.min, 0);
 	// --pair can name hidden colors, like declared pairs
 	const all = evaluate(tree, true);
-	const parsed = (values.pair ?? []).map(parsePair);
+	// a repeated --pair is the same pair, not one declared twice
+	const pairValues = [...new Set(values.pair ?? [])];
 	// the placeholder target is only there to pass the resolver
 	const {pairs: picked, errors} = resolvePairs(
-		parsed.map(([fg, bg]) => ({fg, bg, wcag2: 0})),
+		pairValues
+			.map(parsePair)
+			.map(([fg, bg]) => ({fg, bg, wcag2: 0})),
 		all
 	);
 
@@ -262,7 +269,7 @@ export const run = (
 		const {index, message} = errors[0];
 
 		throw new UsageError(
-			`--pair "${values.pair![index]}": ${message}`
+			`--pair "${pairValues[index]}": ${message}`
 		);
 	}
 
@@ -270,20 +277,54 @@ export const run = (
 		fg.name,
 		bg.name
 	]);
+	const visible = new Set(entries.map(({id}) => id));
 	const declared = values.pair
 		? []
-		: resolvePairs(tree.pairs ?? [], all).pairs.map(
-				(pair) => ({
-					fg: pair.fg.name,
-					bg: pair.bg.name,
-					checks: checkPair(
-						pair,
-						pair.fg.rgbColor,
-						pair.bg.rgbColor,
-						blindness as BlindnessType[]
-					)
-				})
-			);
+		: resolvePairs(tree.pairs ?? [], all).pairs.map((pair) => {
+				const fg = pair.fg.name;
+				const bg = pair.bg.name;
+
+				// hidden colors are not exported, so not checked, as in the app
+				if (
+					!visible.has(pair.fg.id) ||
+					!visible.has(pair.bg.id)
+				) {
+					return {
+						fg,
+						bg,
+						targets: Object.fromEntries(
+							targetNames
+								.filter(
+									(name) => pair[name] !== undefined
+								)
+								.map((name) => [name, pair[name]])
+						),
+						hidden: true
+					};
+				}
+
+				const checks = checkPair(
+					pair,
+					pair.fg.rgbColor,
+					pair.bg.rgbColor,
+					blindness as BlindnessType[]
+				);
+
+				return {
+					fg,
+					bg,
+					targets: Object.fromEntries(
+						checks.map(({target, goal}) => [target, goal])
+					),
+					levels: Object.fromEntries(
+						checks.map(({target, minLevel}) => [
+							target,
+							truncate(minLevel)
+						])
+					),
+					pass: checks.every(({pass}) => pass)
+				};
+			});
 
 	return json({
 		colors: entries.map(({name, color}) => ({
@@ -331,22 +372,7 @@ export const run = (
 				})
 			})
 		),
-		...(declared.length && {
-			pairs: declared.map(({fg, bg, checks}) => ({
-				fg,
-				bg,
-				targets: Object.fromEntries(
-					checks.map(({target, goal}) => [target, goal])
-				),
-				levels: Object.fromEntries(
-					checks.map(({target, minLevel}) => [
-						target,
-						truncate(minLevel)
-					])
-				),
-				pass: checks.every(({pass}) => pass)
-			}))
-		}),
+		...(declared.length && {pairs: declared}),
 		permalink: link
 	});
 };
