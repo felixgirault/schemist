@@ -256,6 +256,80 @@ test('eval --pair keeps the given pairs in order', () => {
 	).toEqual([]);
 });
 
+const redGreen = JSON.stringify({
+	type: 'clr',
+	token: 'Red',
+	args: {color: '#c83c3c'},
+	children: [
+		{type: 'clr', token: 'Green', args: {color: '#3c963c'}}
+	]
+});
+const pair = ['--pair', 'Red/Green'];
+
+test('eval --difference adds the difference of each pair', () => {
+	const [plain] = JSON.parse(
+		run(['eval', '-', ...pair], () => redGreen)
+	).combinations;
+	const [simulated] = JSON.parse(
+		run(
+			[
+				'eval',
+				'-',
+				'--difference',
+				'--blindness',
+				'deuteranomaly',
+				...pair
+			],
+			() => redGreen
+		)
+	).combinations;
+	const [base] = JSON.parse(
+		run(['eval', '-', '--difference', ...pair], () => redGreen)
+	).combinations;
+
+	expect(plain).not.toHaveProperty('difference');
+	expect(base.difference).toEqual({
+		level: expect.any(Number),
+		simulated: []
+	});
+	expect(simulated.difference.level).toBe(
+		base.difference.level
+	);
+	expect(simulated.difference.simulated).toEqual([
+		{type: 'deuteranomaly', level: expect.any(Number)}
+	]);
+	expect(simulated.difference.minLevel).toBe(
+		simulated.difference.simulated[0].level
+	);
+	expect(simulated.difference.minLevel).toBeLessThan(
+		simulated.difference.level
+	);
+});
+
+test('eval --difference truncates levels and leaves the rest as is', () => {
+	const {combinations} = JSON.parse(
+		exec(
+			'eval',
+			'-',
+			'--difference',
+			'--blindness',
+			'protanomaly'
+		)
+	);
+	const plain = JSON.parse(
+		exec('eval', '-', '--blindness', 'protanomaly')
+	).combinations;
+	const {level, minLevel, simulated} =
+		combinations[0].difference;
+
+	for (const n of [level, minLevel, simulated[0].level]) {
+		expect(n).toBe(Number(n.toFixed(2)));
+	}
+	expect(
+		combinations.map(({difference, ...rest}: any) => rest)
+	).toEqual(plain);
+});
+
 test.each([
 	[['--pair', 'Success'], '--pair "Success": expected fg/bg'],
 	[

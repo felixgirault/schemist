@@ -146,10 +146,11 @@ $ npm run cli -- export palette.json --format css --prefix color
 `minLevel` and `minGrade`, the worst case with the simulations),
 `--min <level>` (hides combinations whose worst level is below)
 and `--pair 'fg/bg'`, repeatable, to get only the pairs you care
-about, in that order (`\/` stands for a `/` in a name). Levels
-are truncated to 2 decimals. `export` takes `--color-format`,
-`--casing`, `--prefix` and `--precision`. Both take `--origin`
-for the permalink.
+about, in that order (`\/` stands for a `/` in a name).
+`--difference` adds the CIEDE2000 color difference of each pair
+(and of its simulations). Levels are truncated to 2 decimals.
+`export` takes `--color-format`, `--casing`, `--prefix` and
+`--precision`. Both take `--origin` for the permalink.
 
 Changing the CLI, its error messages or this section? Agents read
 them, so [evals/](evals/README.md) runs agents on real prompts

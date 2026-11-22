@@ -633,7 +633,11 @@ rejected naming it). Levels (`level`, simulated `level`,
 threshold (4.496 stays 4.49, not the 4.5 AA). With `--blindness`,
 each combination also has `minLevel` and `minGrade` (worst of
 base and simulated); without it they are omitted. Combinations
-are computed over all visible colors. `export` options:
+are computed over all visible colors. `--difference` adds
+`difference: {level, minLevel, simulated: [{type, level}]}` to
+each combination (§9.6; `minLevel` only with `--blindness`,
+levels truncated like the others; it never filters, `--min` still
+applies to contrast). `export` options:
 `--format css|sass|tokens` (required), `--color-format`,
 `--casing`, `--prefix`, `--precision`, defaulting to
 `defaultExportSettings` (`#lib/core/export.ts`). `--origin`
