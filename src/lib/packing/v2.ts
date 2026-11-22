@@ -1,9 +1,19 @@
-import type {NodeData} from '#lib/core/nodes.js';
+import type {NodeData, PresetPair} from '#lib/core/nodes.js';
+import {targetNames} from '#lib/core/pairs.js';
 import type {ColorCodec} from './v1';
-import {pack as packV1, unpack as unpackV1} from './v1';
+import {
+	decodeNumbers,
+	encodeNumbers,
+	pack as packV1,
+	unpack as unpackV1
+} from './v1';
 
-// Same as v1, but colors are stored at full precision instead
-// of being rounded to hex, so permalinks are lossless.
+// Version 1 with colors at full precision instead of hex, so
+// permalinks are lossless, and a section of pairs: the dictionary
+// indexes of the two names, then (target name, value) indexes,
+// values being dictionary strings since they are free numbers.
+// Names are only mapped to colors by `resolvePairs`, when the tree
+// is loaded.
 const preciseCodec: ColorCodec = {
 	encode: ({h, s, l}) => [h, s, l].join('_'),
 	decode: (data) => {
@@ -22,7 +32,51 @@ const preciseCodec: ColorCodec = {
 };
 
 export const pack = (node: NodeData) =>
-	packV1(node, preciseCodec);
+	packV1(node, preciseCodec, (indice) =>
+		(node.pairs ?? [])
+			.map((pair) =>
+				encodeNumbers([
+					indice(pair.fg),
+					indice(pair.bg),
+					...targetNames.flatMap((target) =>
+						pair[target] === undefined
+							? []
+							: [
+									indice(target),
+									indice(String(pair[target]))
+								]
+					)
+				])
+			)
+			.join(',')
+	);
 
 export const unpack = (data: string) =>
-	unpackV1(data, preciseCodec);
+	unpackV1(data, preciseCodec, (section, index) =>
+		section
+			? section.split(',').map((record): PresetPair => {
+					const [fg, bg, ...targets] =
+						decodeNumbers(record);
+					const pair: PresetPair = {
+						fg: index[fg],
+						bg: index[bg]
+					};
+
+					for (let i = 0; i < targets.length; i += 2) {
+						const target = index[
+							targets[i]
+						] as (typeof targetNames)[number];
+						const value = Number(index[targets[i + 1]]);
+
+						if (
+							targetNames.includes(target) &&
+							Number.isFinite(value)
+						) {
+							pair[target] = value;
+						}
+					}
+
+					return pair;
+				})
+			: []
+	);

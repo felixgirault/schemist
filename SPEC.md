@@ -572,19 +572,26 @@ target (`pass`).
 
 Permalinks are generated with version `2`. Version `1` is still
 read, so older links (including the ones embedded in exports)
-keep working; a format change adds a version. Both share the
-payload below and only differ in how colors are written (see
-values):
+keep working, with no pairs; a format change adds a version. The
+payload of version `1`, which version `2` extends, is:
 
 ```
 <root>@<nodes>@<dictionary>
 ```
 
-| Part         | Content                                                                                                                                         |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dictionary` | Comma-separated strings, in order of first use: type codes, tokens, param names, colors. `%`, `,` and `@` are escaped as `%25`, `%2C` and `%40` |
-| `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                         |
-| `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                             |
+Version `2` adds the pairs (§9.7) after the nodes, and writes
+colors differently (see values):
+
+```
+<root>@<nodes>@<pairs>@<dictionary>
+```
+
+| Part         | Content                                                                                                                                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dictionary` | Comma-separated strings, in order of first use: type codes, tokens, param names, colors (v2: also pair names, targets and values). `%`, `,` and `@` are escaped as `%25`, `%2C` and `%40` |
+| `pairs`      | v2 only: comma-separated pair records, empty without pairs                                                                                                                               |
+| `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                                                                 |
+| `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                                                                      |
 
 A node record is an optional `!` (hidden) followed by numbers,
 each written in hexadecimal: 1 digit as is, 2 digits prefixed
@@ -611,8 +618,17 @@ checked by `validateTree` (§5.3), which accepts colors given as
 strings), within the ranges of §4.1 with a 0.001 tolerance for
 conversion noise: an out-of-range color fails the link.
 
+A pair record is written the same way: the dictionary indexes of
+the `fg` and `bg` names, then for each target (`wcag2`, `apca`,
+`difference`) the dictionary indexes of its name and of its value
+as text (`4.5`). Names are the colors' names (mostly tokens,
+already in the dictionary). Packing is structural: it does not
+evaluate colors, and a target that is unknown or not a number is
+ignored on unpacking; `resolvePairs` checks the names when the
+palette loads (§10.1).
+
 Examples, a Custom color alone: `1@0@01223@clr,,color,ffc208`,
-`2@0@01223@clr,,color,90_50_50`.
+`2@0@01223@@clr,,color,90_50_50`.
 
 The rationale for keeping this custom format rather than
 compressing links is recorded in

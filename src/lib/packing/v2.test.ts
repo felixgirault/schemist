@@ -72,3 +72,43 @@ test('v1 permalinks are still supported', () => {
 test('permalinks are written with version 2', () => {
 	expect(packVersioned({type: 'clr'})).toMatch(/^2@/);
 });
+
+const pairsTree: NodeData = {
+	type: 'clr',
+	token: 'Bg',
+	args: {color: {h: 85.4, s: 99.9, l: 82.1}},
+	children: [
+		{type: 'ctr', token: 'On $', args: {amount: 80}},
+		{type: 'cmp', token: 'Chart 1', isHidden: true}
+	],
+	pairs: [
+		{fg: 'On Bg', bg: 'Bg', wcag2: 4.5, apca: 60},
+		{fg: 'Chart 1', bg: 'Bg', difference: 10.5}
+	]
+};
+
+test('packs pairs by names', () => {
+	expect(
+		unpackVersioned(packVersioned(pairsTree))
+	).toMatchObject(pairsTree);
+});
+
+test('packs a tree without pairs', () => {
+	const {pairs, ...plain} = pairsTree;
+	const unpacked = unpackVersioned(packVersioned(plain));
+
+	expect(unpacked).toMatchObject(plain);
+	expect(unpacked).not.toHaveProperty('pairs');
+});
+
+test('ignores unknown or malformed targets', () => {
+	const packed = packVersioned({
+		type: 'cmp',
+		token: 'A',
+		pairs: [{fg: 'A', bg: 'B', wcag2: 3}]
+	});
+
+	expect(
+		unpackVersioned(packed.replace('wcag2', 'nope')).pairs
+	).toEqual([{fg: 'A', bg: 'B'}]);
+});

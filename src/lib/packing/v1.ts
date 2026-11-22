@@ -1,6 +1,11 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import type {Args, Param, NodeData} from '#lib/core/nodes.js';
+import type {
+	Args,
+	NodeData,
+	Param,
+	PresetPair
+} from '#lib/core/nodes.js';
 import {validateTree} from '#lib/core/tree.js';
 import defs, {isNodeType} from '#lib/definitions/index.js';
 
@@ -16,6 +21,30 @@ const hexCodec: ColorCodec = {
 	decode: (data) => `#${data}`
 };
 
+// Numbers in hexadecimal: 1 digit as is, 2 prefixed with `x`, 3
+// with `y`.
+export const encodeNumbers = (
+	numbers: {toString: (radix: number) => string}[]
+) =>
+	numbers
+		.map((v) => v.toString(16))
+		.map((v) =>
+			v.length === 3 ? `y${v}` : v.length === 2 ? `x${v}` : v
+		)
+		.join('');
+
+export const decodeNumbers = (packed: string) =>
+	packed
+		.match(/y[0-9a-f]{3}|x[0-9a-f]{2}|[0-9a-f]/gi)!
+		.map((v) =>
+			parseInt(
+				v.startsWith('x') || v.startsWith('y')
+					? v.substring(1)
+					: v,
+				16
+			)
+		);
+
 // Escapes the separators so tokens can contain them.
 const escapeEntry = (entry: string) =>
 	entry.replace(/[%,@]/g, encodeURIComponent);
@@ -23,9 +52,12 @@ const escapeEntry = (entry: string) =>
 const unescapeEntry = (entry: string) =>
 	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
 
+// `packExtra` adds a section between the nodes and the dictionary,
+// which version 2 uses for the pairs.
 export const pack = (
 	node: NodeData,
-	colorCodec = hexCodec
+	colorCodec = hexCodec,
+	packExtra?: (indice: (key: string) => number) => string
 ): string => {
 	const packed: string[] = [];
 	// A Map keeps insertion order, unlike an object which lists
@@ -81,16 +113,7 @@ export const pack = (
 			...children
 		];
 
-		const packedData = data
-			.map((v) => v.toString(16))
-			.map((v) =>
-				v.length === 3
-					? `y${v}`
-					: v.length === 2
-						? `x${v}`
-						: v
-			)
-			.join('');
+		const packedData = encodeNumbers(data);
 
 		packed.push(`${hiddenFlag}${packedData}`);
 		return i;
@@ -101,14 +124,20 @@ export const pack = (
 	return [
 		rootIndex,
 		packed.join(','),
+		...(packExtra ? [packExtra(indice)] : []),
 		[...index.keys()].map(escapeEntry).join(',')
 	].join('@');
 };
 
 // What comes out of a permalink is validated like any outside data.
-export const unpack = (data: string, colorCodec = hexCodec) => {
-	const [rootIndex, inlinePacked, inlineIndex] =
-		data.split('@');
+// With `unpackExtra`, reads the section `pack` got `packExtra` for.
+export const unpack = (
+	data: string,
+	colorCodec = hexCodec,
+	unpackExtra?: (section: string, index: string[]) => PresetPair[]
+) => {
+	const [rootIndex, inlinePacked, ...rest] = data.split('@');
+	const inlineIndex = rest.pop()!;
 
 	const packed = inlinePacked.split(',');
 	const index = inlineIndex.split(',').map(unescapeEntry);
@@ -141,17 +170,7 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 	};
 
 	const unpackData = (packedData: string) => {
-		const matches = packedData.match(
-			/y[0-9a-f]{3}|x[0-9a-f]{2}|[0-9a-f]/gi
-		);
-
-		const data = matches!
-			.map((v) =>
-				v.startsWith('x') || v.startsWith('y')
-					? v.substring(1)
-					: v
-			)
-			.map((v) => parseInt(v, 16));
+		const data = decodeNumbers(packedData);
 
 		const type = index[data.shift() as number];
 		const token = index[data.shift() as number];
@@ -189,8 +208,12 @@ export const unpack = (data: string, colorCodec = hexCodec) => {
 		)
 	});
 
+	const tree = inflateNode(nodes[parseInt(rootIndex, 16)]) as object;
+	const pairs = unpackExtra?.(rest[0], index);
+
 	return validateTree(
-		inflateNode(nodes[parseInt(rootIndex, 16)]),
-		'permalink'
+		pairs?.length ? {...tree, pairs} : tree,
+		'permalink',
+		true
 	);
 };
