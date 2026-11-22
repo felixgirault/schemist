@@ -93,11 +93,21 @@ depends on the use.
 for each pair of the compared colors, once per pair, in
 `sortedColors` order.
 
-A lower triangle: one row and one column per color, labeled with
-its swatch and name. Each cell is a button showing the two colors
-and `minLevel` rounded to 1 decimal, in the panel's text color so
-it stays readable on any pair. Cells below the minimum are marked
-by more than color (an outline and a warning icon).
+A compact lower triangle, so large sets stay scannable. Rows are
+labeled with the color's swatch and name, and stay in place while
+the matrix scrolls. Columns are labeled with the swatch alone,
+the name in its tooltip and accessible label. Each cell is a
+button of fixed width showing `minLevel` rounded to a whole
+number (about 1 is the just-noticeable difference, so decimals
+add little), in the panel's text color so it stays readable on
+any pair. Cells below the minimum show a warning icon instead of
+the number, and an outline. The pair details keep 1 decimal.
+
+The first version repeated both swatches and 1 decimal in every
+cell, and full names in column headers: about 7rem per column, so
+15 colors were two to three screens wide. Compact, a column is
+about 2.5rem: 15 colors take about 43rem, 30 about 80rem
+(estimated from the CSS).
 
 Activating a cell shows the pair below the matrix: one row for
 normal vision and one per simulation, each with the two colors as
@@ -128,6 +138,18 @@ kB gzipped, to the app (culori code alone, not a full build).
 - **A "closest color" line on each tree node**: clutters the
   tree, and compares against the whole palette.
 - **A fixed threshold**: no single value fits every use (ADR 3).
+- **A difference filter in the contrast view**: over 200,000
+  random sRGB pairs, every pair reaching WCAG 3:1 had a
+  difference of at least 25.3 (4.5:1: 36.9; APCA Lc 45: 19.9; Lc
+  60: 30.4), so it would filter nothing once a contrast minimum
+  is set. The Colors filter only restricts backgrounds there, so
+  it cannot scope the check to a set, and every pair shows twice.
+- **A list of the closest pairs above the matrix**: easy to scan
+  at any size, but repeats the matrix. Can be added if large
+  palettes stay hard to read.
+- **Hiding rows and columns without a pair below the minimum**:
+  shows nothing for a palette without conflicts, and the layout
+  moves with the minimum.
 
 ## Later
 
