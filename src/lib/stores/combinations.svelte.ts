@@ -6,8 +6,14 @@ import type {Difference} from '#lib/core/difference.js';
 import {difference} from '#lib/core/difference.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
 import type {PairTargets} from '#lib/core/nodes.js';
-import type {TargetCheck} from '#lib/core/pairs.js';
-import {checkPair, targetNames, uses} from '#lib/core/pairs.js';
+import type {TargetCheck, Use} from '#lib/core/pairs.js';
+import {
+	checkPair,
+	holdsUse,
+	targetNames,
+	usesOf,
+	uses
+} from '#lib/core/pairs.js';
 import type {ColorPair, Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
@@ -27,6 +33,8 @@ export type PairCheck = {
 	bg: PaletteColor;
 	checks: TargetCheck[];
 	pass: boolean;
+	// what the pair is for, inferred from its targets
+	for: ReturnType<typeof usesOf>;
 };
 
 class Combinations {
@@ -148,7 +156,8 @@ class Combinations {
 					fg,
 					bg,
 					checks,
-					pass: checks.every(({pass}) => pass)
+					pass: checks.every(({pass}) => pass),
+					for: usesOf(pair)
 				}
 			];
 		});
@@ -258,20 +267,6 @@ class Combinations {
 		return this.checkUse(fg, bg).every(({pass}) => pass);
 	}
 
-	// Whether a pair has every target of the use at its value.
-	hasUse(pair?: PairTargets) {
-		const checks = targetNames.filter(
-			(name) => this.useTargets[name] !== undefined
-		);
-
-		return (
-			checks.length > 0 &&
-			checks.every(
-				(name) => pair?.[name] === this.useTargets[name]
-			)
-		);
-	}
-
 	// Ordered pairs of compared colors, and those meeting the use.
 	cellCount = $derived(
 		this.comparedColors.length *
@@ -288,27 +283,22 @@ class Combinations {
 		)
 	);
 
-	// Sets the use's targets on a pair, or removes them if the pair
+	// Sets a use's targets on a pair, or removes them if the pair
 	// has them at those values already, so a target typed in the card
 	// is never removed by a click.
-	toggleUse(fg: PaletteColor, bg: PaletteColor) {
-		const wanted = this.useTargets;
-
-		if (
-			!targetNames.some((name) => wanted[name] !== undefined)
-		) {
-			return;
-		}
-
+	toggleUse(fg: PaletteColor, bg: PaletteColor, use: Use) {
 		const pair = palette.pairs.find(
 			(p) => p.fg === fg.id && p.bg === bg.id
 		);
-		const isSet = this.hasUse(pair);
+		const isSet = holdsUse(pair, use);
 		const targets: PairTargets = {...pair};
 
 		for (const name of targetNames) {
-			if (wanted[name] !== undefined) {
-				targets[name] = isSet ? undefined : wanted[name];
+			const wanted =
+				use.targets[name as keyof Use['targets']];
+
+			if (wanted !== undefined) {
+				targets[name] = isSet ? undefined : wanted;
 			}
 		}
 

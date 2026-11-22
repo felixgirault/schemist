@@ -409,15 +409,14 @@ expensive combination computations during slider drags.
 | `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                       |
 | `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b`   |
 | `openDifferenceId`            | Id of the pair shown in the matrix details, or `null`                                                                                                                                             |
-| `pairChecks`                  | `{id, pair, fg, bg, checks, pass}` for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations     |
+| `pairChecks`                  | `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations     |
 | `passingPairs`                | Count of `pairChecks` that pass                                                                                                                                                                   |
 | `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                      |
-| `use`                         | `'body'` (default), `'large'`, `'categories'` or `'custom'`: the use that dims and declares pairs in pairs mode (§9.7 `uses`); `setUse(use)` sets it, Custom starting from the last use's targets |
+| `use`                         | `'body'` (default), `'large'`, `'categories'` or `'custom'`: the use that dims the grid in pairs mode (§9.7 `uses`), and nothing else; `setUse(use)` sets it, Custom starting from the last use's targets |
 | `custom`                      | `PairTargets` of the Custom use, a missing one not checked                                                                                                                                        |
 | `useTargets`, `useName`       | The targets of the use (`custom` for Custom), and its name                                                                                                                                        |
 | `checkUse(fg, bg)`            | `checkPair` of the use's targets on a pair, as is and per selected simulation                                                                                                                     |
-| `hasUse(pair?)`               | Whether a pair has every target of the use at its value (false for no target)                                                                                                                     |
-| `toggleUse(fg, bg)`           | Sets every target of the use on the pair, keeping its others, or removes them if it has them all at those values; nothing for a use with no target                                                |
+| `toggleUse(fg, bg, use)`      | Sets every target of a built-in use (an entry of `uses`, not the filter's) on the pair, keeping its others, or removes them if it has them all at those values                                  |
 | `cellCount`, `passingCells`   | Ordered pairs of compared colors, and those passing `passesUse` (every target of the use met in the worst case)                                                                                   |
 | `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                  |
 | `openPair`                    | `{fg, bg, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                                   |
@@ -596,6 +595,11 @@ target (`pass`).
 as data: **Body text** (`wcag2` 4.5, `apca` 75), **Large text and
 UI** (`wcag2` 3), **Categories** (`difference` 10). The grid adds
 a Custom one (§11.5).
+
+A pair's uses are inferred, nothing is stored: `usesOf(pair)`
+returns `{uses, custom}`, the built-in uses whose targets the
+pair holds at those values (`holdsUse(pair, use)`), and whether
+targets are left over, which are Custom.
 
 ## 10. Permalinks
 
@@ -799,8 +803,8 @@ simulations are selected, under it one aria-hidden strip per
 simulation, side by side, each the simulated background with a
 bar in the simulated foreground (cells then are 2.75rem high).
 The tooltip has the names and the WCAG 2 contrast, then each
-target of the use per simulation, which the accessible name
-repeats. A declared cell gets a border in the panel's text color
+target of the use per simulation and, for a declared pair, its
+uses (`, for Body text`), which the accessible name repeats. A declared cell gets a border in the panel's text color
 and a corner badge in the panel's colors: a check, or a warning
 icon with a dashed border when the pair misses one of its targets
 in the worst case of the selected simulations. Marks are in the
@@ -808,7 +812,7 @@ panel's colors so they stay readable on any pair, and on the
 border so that the outline stays the focus ring. Each button's
 accessible name says whether the pair meets its targets, misses
 them, or is not declared. The filters set what cells are checked
-against: **Check** picks a use (§9.7), or **Custom**, which shows
+against, and only dim: **Check** picks a use (§9.7), or **Custom**, which shows
 a minimum field per metric (WCAG 2, APCA, difference; empty is
 not checked) and starts from the targets of the use picked last.
 The **Contrast type**, **Minimum contrast level** and **Minimum
@@ -826,11 +830,12 @@ has the whole width. It has: a large sample with both names in
 the foreground on the background; each target of the use (grade
 and level, or difference) for normal vision and each simulation,
 each row in its simulated colors with an icon and a text
-alternative for met or not met; a **Require <use>** button that
-calls `toggleUse` (sets every target of the use, replacing a
-target of another value; **Remove <use> requirement** when the
-pair has them all at those values; disabled with a hint when the
-use has no target); one number field per target (a value is
+alternative for met or not met; the uses the pair is for (`usesOf`) or
+"Not declared"; one button per built-in use, **+ Body text**
+(accessible name "Require Body text") or **Body text ✓**
+("Remove Body text") when the pair holds its targets, calling
+`toggleUse` (sets every target of the use, replacing a target of
+another value); the filter plays no part; one number field per target (a value is
 applied on change, clearing every field removes the pair); for
 each declared target the measured levels; **Remove pair**; a
 **Preview** button toggling `previewedUid` to `<bgId>-<fgId>`

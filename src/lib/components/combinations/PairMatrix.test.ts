@@ -1,4 +1,5 @@
 import {parseColor} from '#lib/color/parsing.js';
+import {uses} from '#lib/core/pairs.js';
 import {combinations} from '#lib/stores/combinations.svelte.js';
 import {collectNodes} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
@@ -77,7 +78,7 @@ test('opens the details of a declared pair', () => {
 	combinations.openPairIds = null;
 });
 
-test('toggles the targets of the use on a pair', () => {
+test('toggles the targets of a use on a pair', () => {
 	const entry = (token: string) =>
 		palette.colors.find(({id}) => id === node(token).id)!;
 	const pairOf = () =>
@@ -85,14 +86,19 @@ test('toggles the targets of the use on a pair', () => {
 			({fg, bg}) =>
 				fg === node('Grey').id && bg === node('Black').id
 		);
+	const use = (id: string) => uses.find((u) => u.id === id)!;
+	const toggle = (id: string) =>
+		combinations.toggleUse(
+			entry('Grey'),
+			entry('Black'),
+			use(id)
+		);
 
-	combinations.use = 'categories';
-	combinations.toggleUse(entry('Grey'), entry('Black'));
+	toggle('categories');
 	expect(pairOf()).toMatchObject({difference: 10});
 
 	// another use adds all its targets to the same pair
-	combinations.use = 'body';
-	combinations.toggleUse(entry('Grey'), entry('Black'));
+	toggle('body');
 	expect(pairOf()).toMatchObject({
 		difference: 10,
 		wcag2: 4.5,
@@ -100,12 +106,11 @@ test('toggles the targets of the use on a pair', () => {
 	});
 
 	// the same use removes its targets, the last ones the pair
-	combinations.toggleUse(entry('Grey'), entry('Black'));
+	toggle('body');
 	expect(pairOf()).toMatchObject({difference: 10});
 	expect(pairOf()?.wcag2).toBeUndefined();
 	expect(pairOf()?.apca).toBeUndefined();
-	combinations.use = 'categories';
-	combinations.toggleUse(entry('Grey'), entry('Black'));
+	toggle('categories');
 	expect(pairOf()).toBeUndefined();
 
 	// a target at another value, typed in the card, is set to the
@@ -113,18 +118,10 @@ test('toggles the targets of the use on a pair', () => {
 	palette.setPair(node('Grey').id, node('Black').id, {
 		wcag2: 7
 	});
-	combinations.use = 'large';
-	combinations.toggleUse(entry('Grey'), entry('Black'));
+	toggle('large');
 	expect(pairOf()).toMatchObject({wcag2: 3});
-	combinations.toggleUse(entry('Grey'), entry('Black'));
+	toggle('large');
 	expect(pairOf()).toBeUndefined();
-
-	// an empty custom use declares nothing
-	combinations.custom = {};
-	combinations.use = 'custom';
-	combinations.toggleUse(entry('Grey'), entry('Black'));
-	expect(pairOf()).toBeUndefined();
-	combinations.use = 'body';
 });
 
 test('custom starts from the last use and checks what is typed', () => {
@@ -173,7 +170,7 @@ test('a click opens the card without declaring', () => {
 	expect(palette.pairs).toHaveLength(before);
 });
 
-test('the card has the lens, Require and Preview', () => {
+test('the card has the lens, a button per use and Preview', () => {
 	combinations.use = 'body';
 	combinations.blindnessTypes = ['protanomaly'];
 	combinations.openPairIds = {
@@ -183,19 +180,25 @@ test('the card has the lens, Require and Preview', () => {
 
 	let html = render(PairMatrix).body;
 
-	expect(html).toContain('Require Body text');
+	expect(html).toContain('aria-label="Require Body text"');
+	expect(html).toContain('+ Large text and UI');
+	expect(html).toContain('Not declared.');
 	expect(html).toContain('WCAG 2 contrast, at least 4.5');
 	expect(html).toContain('APCA contrast, at least 75');
 	expect(html).toContain('protanomaly');
 	expect(html).toContain('Preview');
 
-	// Require toggles the use's targets on the pair
+	// a button toggles the use's targets on the pair
 	combinations.toggleUse(
 		palette.colors.find((e) => e.id === node('Grey').id)!,
-		palette.colors.find((e) => e.id === node('Black').id)!
+		palette.colors.find((e) => e.id === node('Black').id)!,
+		uses[0]
 	);
 	html = render(PairMatrix).body;
-	expect(html).toContain('Remove Body text requirement');
+	expect(html).toContain('aria-label="Remove Body text"');
+	expect(html).toContain('Body text ✓');
+	expect(html).toContain('For Body text.');
+	expect(html).toContain(', for Body text"');
 
 	// Preview finds the pair
 	combinations.previewedUid = `${node('Black').id}-${node('Grey').id}`;

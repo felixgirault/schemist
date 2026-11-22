@@ -46,6 +46,37 @@ export const uses = [
 	targets: PairTargets;
 }[];
 
+export type Use = (typeof uses)[number];
+
+// Whether a pair has every target of the use at its value.
+export const holdsUse = (
+	pair: PairTargets | undefined,
+	use: Use
+) =>
+	targetNames.every(
+		(name) =>
+			use.targets[name as keyof Use['targets']] ===
+				undefined ||
+			pair?.[name] ===
+				use.targets[name as keyof Use['targets']]
+	);
+
+// The uses a pair is for: each built-in one it holds, and whether
+// targets are left over (Custom).
+export const usesOf = (pair: PairTargets) => {
+	const held = uses.filter((use) => holdsUse(pair, use));
+	const covered = new Set<string>(
+		held.flatMap((use) => Object.keys(use.targets))
+	);
+
+	return {
+		uses: held,
+		custom: targetNames.some(
+			(name) => pair[name] !== undefined && !covered.has(name)
+		)
+	};
+};
+
 export const hasTarget = (targets: PairTargets) =>
 	targetNames.some((name) => targets[name] !== undefined);
 

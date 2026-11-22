@@ -12,7 +12,11 @@
 	import type {PaletteColor} from '#lib/core/evaluate.js';
 	import type {PairTargets} from '#lib/core/nodes.js';
 	import type {TargetCheck} from '#lib/core/pairs.js';
-	import {targetNames} from '#lib/core/pairs.js';
+	import {
+		holdsUse,
+		targetNames,
+		uses
+	} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {round} from '#lib/utils/math.js';
@@ -119,6 +123,17 @@
 			)
 			.join('');
 
+	// What a declared pair is for, for tooltips, names and the card.
+	const forNames = (check?: {
+		for: {uses: {name: string}[]; custom: boolean};
+	}) =>
+		check
+			? [
+					...check.for.uses.map(({name}) => name),
+					...(check.for.custom ? ['Custom'] : [])
+				].join(', ')
+			: '';
+
 	const hex = (color: RgbColor) => formatRgbToHex(color);
 </script>
 
@@ -213,7 +228,12 @@
 															column.rgbColor
 														),
 														1
-													)}:1{simulations(levels)}"
+													)}:1{simulations(
+														levels
+													)}{check
+														? ', for ' +
+															forNames(check)
+														: ''}"
 													aria-pressed={open?.fg
 														.id === column.id &&
 														open?.bg.id === row.id}
@@ -225,7 +245,10 @@
 														? 'reaches'
 														: 'misses'} the minimum{simulations(
 														levels
-													)}"
+													)}{check
+														? ', for ' +
+															forNames(check)
+														: ''}"
 													onclick={() =>
 														handleCell(
 															column,
@@ -361,26 +384,38 @@
 							{/each}
 						{/if}
 
-						<button
-							class="button"
-							disabled={!useChecks.length}
-							onclick={() =>
-								combinations.toggleUse(
-									open!.fg,
-									open!.bg
-								)}
-						>
-							{#if combinations.hasUse(open.check?.pair)}
-								Remove {combinations.useName} requirement
+						<p>
+							{#if open.check}
+								For {forNames(open.check)}.
 							{:else}
-								Require {combinations.useName}
+								Not declared.
 							{/if}
-						</button>
-						{#if !useChecks.length}
-							<p class="hint">
-								Set a minimum to require it.
-							</p>
-						{/if}
+						</p>
+
+						<div class="button-list">
+							{#each uses as use (use.id)}
+								{@const isSet = holdsUse(
+									open.check?.pair,
+									use
+								)}
+								<button
+									class="button"
+									aria-label="{isSet
+										? 'Remove'
+										: 'Require'} {use.name}"
+									onclick={() =>
+										combinations.toggleUse(
+											open!.fg,
+											open!.bg,
+											use
+										)}
+								>
+									{isSet
+										? `${use.name} ✓`
+										: `+ ${use.name}`}
+								</button>
+							{/each}
+						</div>
 
 						<div class="targets">
 							{#each targetNames as name (name)}

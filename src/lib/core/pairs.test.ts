@@ -1,7 +1,7 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
 import {expect, test} from 'vitest';
-import {checkPair, resolvePairs} from './pairs';
+import {checkPair, resolvePairs, usesOf} from './pairs';
 
 const colors = [
 	{name: 'A'},
@@ -85,4 +85,26 @@ test('checks each target in the worst case', () => {
 		target: 'difference',
 		pass: false
 	});
+});
+
+test('infers the uses of a pair from its targets', () => {
+	const names = (pair: Parameters<typeof usesOf>[0]) => {
+		const {uses, custom} = usesOf(pair);
+		return [
+			...uses.map(({id}) => id),
+			...(custom ? ['custom'] : [])
+		];
+	};
+
+	expect(names({wcag2: 4.5, apca: 75})).toEqual(['body']);
+	expect(names({wcag2: 3, difference: 10})).toEqual([
+		'large',
+		'categories'
+	]);
+	// leftover targets are Custom
+	expect(names({wcag2: 4.5})).toEqual(['custom']);
+	expect(names({wcag2: 3, apca: 60})).toEqual([
+		'large',
+		'custom'
+	]);
 });
