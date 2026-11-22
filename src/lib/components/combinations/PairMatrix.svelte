@@ -76,6 +76,12 @@
 		}
 	});
 
+	// The open pair is kept in the store, so that leaving the grid
+	// and coming back would reopen the card unasked.
+	$effect(() => () => {
+		combinations.openPairIds = null;
+	});
+
 	const previewUid = $derived(
 		open ? `${open.bg.id}-${open.fg.id}` : null
 	);
@@ -158,6 +164,13 @@
 {#snippet swatch(color: RgbColor)}
 	<span class="swatch" style="background: {hex(color)};"></span>
 {/snippet}
+
+<!-- On the window, as focus may be on a cell rather than the card -->
+<svelte:window
+	onkeydown={(event) => {
+		if (open && event.key === 'Escape') handleClose();
+	}}
+/>
 
 <div class="matrix-panel">
 	{#if unsavedNames.length}
@@ -316,9 +329,6 @@
 			role="dialog"
 			tabindex="-1"
 			aria-label="Pair details"
-			onkeydown={(event) => {
-				if (event.key === 'Escape') handleClose();
-			}}
 		>
 			{#if open}
 				<h3 class="h3">{open.fg.name} on {open.bg.name}</h3>
