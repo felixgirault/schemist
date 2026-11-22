@@ -775,10 +775,12 @@ it; the panel is a single root element, as the global
 `.data-layout` grid needs): a full grid, backgrounds as rows and
 foregrounds as columns, of compact cells, with swatch-only
 headers (name as tooltip and accessible name) and sticky row
-headers. Nothing is drawn on the diagonal. Every other cell is
-drawn as its pair: "Aa" in the foreground on the background, with
-the names and the WCAG 2 contrast as tooltip. A declared cell
-gets a border in the panel's text color and a corner badge in the
+headers. The grid takes at least the panel's width, its cells
+stretching from 2rem, and scrolls when the colors do not fit.
+Nothing is drawn on the diagonal. Every other cell is drawn as
+its pair: "Aa" in the foreground on the background, with the
+names and the WCAG 2 contrast as tooltip. A declared cell gets a
+border in the panel's text color and a corner badge in the
 panel's colors: a check, or a warning icon with a dashed border
 when the pair misses one of its targets in the worst case of the
 selected simulations. Marks are in the panel's colors so they

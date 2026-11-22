@@ -268,14 +268,24 @@
 </div>
 
 <style>
+	/* At least the panel's width; a table never shrinks below its
+	content, so many colors still scroll. */
 	.matrix-panel :global(.matrix) {
+		width: 100%;
 		border-spacing: 4px;
+	}
+
+	.matrix-panel th[scope='row'] {
+		width: 1%;
 	}
 
 	/* The border marks declared pairs, so that the outline stays
 	the focus ring. */
 	.matrix-panel .pair-cell {
 		position: relative;
+		width: 100%;
+		min-width: 2rem;
+		height: 2rem;
 		border: 2px solid transparent;
 	}
 
