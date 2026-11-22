@@ -830,7 +830,9 @@ combinations, in the order given, after `--min`; `\/` and `\\`
 escape a `/` or `\` in a name; a value without exactly one
 unescaped `/`, with a name not in the palette, with a name shared
 by several colors, or with the same name on both sides is
-rejected naming it). Levels (`level`, simulated `level`,
+rejected naming it, through the resolver, §9.7, which also knows
+hidden colors: combinations are then computed over all colors,
+hidden ones included). Levels (`level`, simulated `level`,
 `minLevel`) are truncated to 2 decimals, never rounded up past a
 threshold (4.496 stays 4.49, not the 4.5 AA). With `--blindness`,
 each combination also has `minLevel` and `minGrade` (worst of
@@ -855,6 +857,20 @@ defaults; color params are CSS color strings converted with
 and the param, e.g.
 `root.children[2].args.amount: expected an integer between 0 and 100`.
 Usage text is printed only for command line errors.
+
+The root may have `pairs` (§9.7; an unknown key anywhere else):
+objects with strings `fg` and `bg` and numbers `wcag2`, `apca`,
+`difference`, checked by the same validation, then resolved with
+every color of the tree, hidden ones included. A pair that does
+not resolve fails the tree, with its path:
+`root.pairs[2].fg: unknown color "text/bdy"`. Without `--pair`,
+`eval` adds `pairs: [{fg, bg, targets, levels, pass}]` for the
+declared pairs: `targets` as declared, `levels` the worst level
+of each target (base and `--blindness` simulations, truncated
+like the others) and `pass` whether every target is reached on
+its exact level. Each target is measured on its own, whatever
+`--contrast`. With `--pair`, the declared pairs are replaced by
+the given ones for that run and `pairs` is omitted.
 
 `export --format tokens` nests names split on `/` and `.`
 (§11.8). When `exportTokens` reports conflicts, it fails like a

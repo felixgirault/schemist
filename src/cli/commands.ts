@@ -15,6 +15,7 @@ import {
 	toExportEntries
 } from '#lib/core/export.js';
 import type {ExportCasing} from '#lib/core/export.js';
+import {checkPair, resolvePairs} from '#lib/core/pairs.js';
 import {permalink} from '#lib/routing.js';
 import {parseArgs} from 'node:util';
 import {UsageError} from './errors.js';
@@ -38,7 +39,8 @@ eval options:
   --difference                Add the CIEDE2000 color difference of each pair
   --min <level>               Only combinations with a min level >= level
   --pair 'fg/bg'              Only this pair, repeatable, in the given order
-                              (use \\/ for a "/" in a name)
+                              (use \\/ for a "/" in a name); replaces the
+                              tree's declared pairs
 
 export options:
   --format css|sass|tokens    Required
@@ -247,34 +249,41 @@ export const run = (
 				)
 		: [];
 	const min = number('min', values.min, 0);
-	const names = entries.map(({name}) => name);
-	const pairs = (values.pair ?? []).map((value) => {
-		const pair = parsePair(value);
+	// --pair can name hidden colors, like declared pairs
+	const all = evaluate(tree, true);
+	const parsed = (values.pair ?? []).map(parsePair);
+	// the placeholder target is only there to pass the resolver
+	const {pairs: picked, errors} = resolvePairs(
+		parsed.map(([fg, bg]) => ({fg, bg, wcag2: 0})),
+		all
+	);
 
-		for (const name of pair) {
-			const count = names.filter((n) => n === name).length;
+	if (errors.length) {
+		const {index, message} = errors[0];
 
-			if (!count) {
-				throw new UsageError(
-					`--pair "${value}": unknown color "${name}"`
-				);
-			}
+		throw new UsageError(
+			`--pair "${values.pair![index]}": ${message}`
+		);
+	}
 
-			if (count > 1) {
-				throw new UsageError(
-					`--pair "${value}": "${name}" names ${count} colors, give them distinct tokens`
-				);
-			}
-		}
-
-		if (pair[0] === pair[1]) {
-			throw new UsageError(
-				`--pair "${value}": a color is never combined with itself`
+	const pairs = picked.map(({fg, bg}): [string, string] => [
+		fg.name,
+		bg.name
+	]);
+	const declared = values.pair
+		? []
+		: resolvePairs(tree.pairs ?? [], all).pairs.map(
+				(pair) => ({
+					fg: pair.fg.name,
+					bg: pair.bg.name,
+					checks: checkPair(
+						pair,
+						pair.fg.rgbColor,
+						pair.bg.rgbColor,
+						blindness as BlindnessType[]
+					)
+				})
 			);
-		}
-
-		return pair;
-	});
 
 	return json({
 		colors: entries.map(({name, color}) => ({
@@ -283,8 +292,8 @@ export const run = (
 		})),
 		combinations: pick(
 			combine(
-				entries,
-				entries,
+				pairs.length ? all : entries,
+				pairs.length ? all : entries,
 				contrast === 'apca' ? 'wcag3' : 'wcag2',
 				blindness as BlindnessType[]
 			).filter(({minLevel}) => minLevel >= min),
@@ -322,6 +331,22 @@ export const run = (
 				})
 			})
 		),
+		...(declared.length && {
+			pairs: declared.map(({fg, bg, checks}) => ({
+				fg,
+				bg,
+				targets: Object.fromEntries(
+					checks.map(({target, goal}) => [target, goal])
+				),
+				levels: Object.fromEntries(
+					checks.map(({target, minLevel}) => [
+						target,
+						truncate(minLevel)
+					])
+				),
+				pass: checks.every(({pass}) => pass)
+			}))
+		}),
 		permalink: link
 	});
 };

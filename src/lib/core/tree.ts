@@ -4,9 +4,11 @@ import type {
 	IdentifiedNodeData,
 	NodeData,
 	Param,
-	ParamValue
+	ParamValue,
+	PresetPair
 } from '#lib/core/nodes.js';
 import {defaultArgs, isPresetDef} from '#lib/core/nodes.js';
+import {targetNames} from '#lib/core/pairs.js';
 import defs, {isNodeType} from '#lib/definitions/index.js';
 
 const isObject = (
@@ -39,6 +41,38 @@ const nodeKeys = [
 	'children',
 	'isHidden'
 ];
+
+const pairKeys = ['fg', 'bg', ...targetNames];
+
+const validatePairs = (value: unknown, path: string) => {
+	if (!Array.isArray(value)) {
+		throw new Error(`${path}: expected an array`);
+	}
+
+	return value.map((pair, i): PresetPair => {
+		const at = `${path}[${i}]`;
+
+		if (!isObject(pair)) {
+			throw new Error(`${at}: expected an object`);
+		}
+
+		for (const [key, v] of Object.entries(pair)) {
+			if (!pairKeys.includes(key)) {
+				throw new Error(`${at}: unknown key "${key}"`);
+			}
+
+			if (key === 'fg' || key === 'bg') {
+				if (typeof v !== 'string') {
+					throw new Error(`${at}.${key}: expected a string`);
+				}
+			} else if (typeof v !== 'number' || !Number.isFinite(v)) {
+				throw new Error(`${at}.${key}: expected a number`);
+			}
+		}
+
+		return pair as PresetPair;
+	});
+};
 
 const validateArg = (
 	path: string,
@@ -92,19 +126,20 @@ const validateArg = (
 // color objects.
 export const validateTree = (
 	node: unknown,
-	path: string
+	path: string,
+	isRoot = false
 ): NodeData => {
 	if (!isObject(node)) {
 		throw new Error(`${path}: expected an object`);
 	}
 
 	for (const key of Object.keys(node)) {
-		if (!nodeKeys.includes(key)) {
+		if (!nodeKeys.includes(key) && !(isRoot && key === 'pairs')) {
 			throw new Error(`${path}: unknown key "${key}"`);
 		}
 	}
 
-	const {type, token, args, children, isHidden} = node;
+	const {type, token, args, children, isHidden, pairs} = node;
 
 	if (typeof type !== 'string' || !isNodeType(type)) {
 		throw new Error(
@@ -168,6 +203,10 @@ export const validateTree = (
 		result.children = children.map((child, i) =>
 			validateTree(child, `${path}.children[${i}]`)
 		);
+	}
+
+	if (pairs !== undefined) {
+		result.pairs = validatePairs(pairs, `${path}.pairs`);
 	}
 
 	return result;

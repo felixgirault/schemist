@@ -68,6 +68,44 @@ test.each([
 	[
 		{type: 'cmp', children: {}},
 		'root.children: expected an array'
+	],
+	[
+		{type: 'cmp', children: [{type: 'cmp', pairs: []}]},
+		'root.children[0]: unknown key "pairs"'
+	],
+	[{type: 'cmp', pairs: {}}, 'root.pairs: expected an array'],
+	[
+		{type: 'cmp', pairs: [{fg: 'a', bg: 'b', x: 1}]},
+		'root.pairs[0]: unknown key "x"'
+	],
+	[
+		{type: 'cmp', pairs: [{fg: 1, bg: 'b', wcag2: 3}]},
+		'root.pairs[0].fg: expected a string'
+	],
+	[
+		{type: 'cmp', pairs: [{fg: 'a', bg: 'b', apca: '60'}]},
+		'root.pairs[0].apca: expected a number'
+	],
+	[
+		{
+			type: 'clr',
+			token: 'Bg',
+			children: [{type: 'cmp', token: 'Text'}],
+			pairs: [
+				{fg: 'Text', bg: 'Bg', wcag2: 3},
+				{fg: 'Txt', bg: 'Bg', wcag2: 3}
+			]
+		},
+		'root.pairs[1].fg: unknown color "Txt"'
+	],
+	[
+		{
+			type: 'clr',
+			token: 'Bg',
+			children: [{type: 'cmp', token: 'Text'}],
+			pairs: [{fg: 'Text', bg: 'Bg'}]
+		},
+		'root.pairs[0]: expected at least one target'
 	]
 ])('rejects %j', (tree, message) => {
 	expect(() =>
@@ -87,4 +125,19 @@ test('accepts tokens with the separators of permalinks', () => {
 	expect(parse({type: 'cmp', token: 'a, b@c'}).token).toBe(
 		'a, b@c'
 	);
+});
+
+test('keeps the pairs of the root, naming hidden colors too', () => {
+	const pairs = [{fg: 'Text', bg: 'Bg', wcag2: 4.5, apca: 60}];
+
+	expect(
+		parse({
+			type: 'clr',
+			token: 'Bg',
+			children: [
+				{type: 'cmp', token: 'Text', isHidden: true}
+			],
+			pairs
+		}).pairs
+	).toEqual(pairs);
 });

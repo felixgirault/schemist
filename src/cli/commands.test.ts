@@ -384,3 +384,62 @@ test('eval --pair rejects names shared by several colors', () => {
 		'--pair "X/Root": "X" names 2 colors, give them distinct tokens'
 	);
 });
+
+const declared = JSON.stringify({
+	type: 'clr',
+	token: 'Bg',
+	args: {color: '#ffffff'},
+	children: [{type: 'ctr', token: 'Text', args: {amount: 90}}],
+	pairs: [
+		{fg: 'Text', bg: 'Bg', wcag2: 4.5, apca: 60},
+		{fg: 'Bg', bg: 'Text', wcag2: 30}
+	]
+});
+
+test('eval reports the declared pairs, --pair replaces them', () => {
+	const {pairs, combinations} = JSON.parse(
+		run(
+			['eval', '-', '--blindness', 'protanomaly'],
+			() => declared
+		)
+	);
+
+	expect(combinations).toHaveLength(2);
+	expect(pairs).toEqual([
+		{
+			fg: 'Text',
+			bg: 'Bg',
+			targets: {wcag2: 4.5, apca: 60},
+			levels: {
+				wcag2: expect.any(Number),
+				apca: expect.any(Number)
+			},
+			pass: true
+		},
+		{
+			fg: 'Bg',
+			bg: 'Text',
+			targets: {wcag2: 30},
+			levels: {wcag2: expect.any(Number)},
+			pass: false
+		}
+	]);
+	expect(
+		JSON.parse(
+			run(['eval', '-', '--pair', 'Text/Bg'], () => declared)
+		)
+	).not.toHaveProperty('pairs');
+});
+
+test('eval --pair finds hidden colors', () => {
+	const hidden = JSON.stringify({
+		type: 'clr',
+		token: 'Bg',
+		children: [{type: 'cmp', token: 'Hid', isHidden: true}]
+	});
+	const {combinations} = JSON.parse(
+		run(['eval', '-', '--pair', 'Hid/Bg'], () => hidden)
+	);
+
+	expect(combinations).toHaveLength(1);
+});

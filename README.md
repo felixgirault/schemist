@@ -57,9 +57,9 @@ hand back a permalink. It runs on the same code as the app, so
 results match.
 
 A good loop for an agent: read `types` and `presets`, write a
-tree, then check it before exporting. `eval` the pairs the design
-uses (`--pair`) with both `--contrast wcag2` and
-`--contrast apca`, each with
+tree, then check it before exporting. Declare the pairs the
+design uses in the tree (`pairs`, see below), and `eval` them
+with both `--contrast wcag2` and `--contrast apca`, each with
 `--blindness protanomaly,deuteranomaly,tritanomaly`, and read
 `minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
 text, and 3 for large text and non-text UI such as input borders
@@ -99,10 +99,15 @@ A tree is nodes with a `type`, optional `token` (the name, where
 `$` stands for the parent's name), `args`, `children` and
 `isHidden`. Each node derives its color from its parent, like in
 the app. Get the available types and params from `types`, and
-ideas from `presets`. Presets can't have children. Color args are
-CSS color strings, range args are integers within their bounds.
-Invalid trees are rejected with the path of the problem, e.g.
-`root.children[2].args.amount`.
+ideas from `presets`. Presets can't have children. Color args
+are CSS color strings, range args are integers within their
+bounds. The root can also declare the `pairs` that must work
+together, each with the names of its two colors (`fg` on `bg`)
+and its own targets, any of `wcag2`, `apca` and `difference`;
+`eval` then reports whether each pair meets them, in the worst
+case of `--blindness`. A pair on an unknown or ambiguous name
+makes the tree invalid. Invalid trees are rejected with the path
+of the problem, e.g. `root.children[2].args.amount`.
 
 ```json
 {
@@ -113,6 +118,14 @@ Invalid trees are rejected with the path of the problem, e.g.
 		{"type": "ctr", "token": "$ text", "args": {"amount": 90}},
 		{"type": "l", "token": "$ light", "args": {"amount": 90}},
 		{"type": "cmp", "token": "Accent"}
+	],
+	"pairs": [
+		{
+			"fg": "Brand text",
+			"bg": "Brand light",
+			"wcag2": 4.5,
+			"apca": 60
+		}
 	]
 }
 ```
@@ -157,11 +170,12 @@ $ npm run cli -- export palette.json --format css --prefix color
 `minLevel` and `minGrade`, the worst case with the simulations),
 `--min <level>` (hides combinations whose worst level is below)
 and `--pair 'fg/bg'`, repeatable, to get only the pairs you care
-about, in that order (`\/` stands for a `/` in a name).
-`--difference` adds the CIEDE2000 color difference of each pair
-(and of its simulations). Levels are truncated to 2 decimals.
-`export` takes `--color-format`, `--casing`, `--prefix` and
-`--precision`. Both take `--origin` for the permalink.
+about, in that order, instead of the declared ones (`\/` stands
+for a `/` in a name). `--difference` adds the CIEDE2000 color
+difference of each pair (and of its simulations). Levels are
+truncated to 2 decimals. `export` takes `--color-format`,
+`--casing`, `--prefix` and `--precision`. Both take `--origin`
+for the permalink.
 
 Changing the CLI, its error messages or this section? Agents read
 them, so [evals/](evals/README.md) runs agents on real prompts
