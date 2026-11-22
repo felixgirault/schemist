@@ -360,18 +360,23 @@ expensive combination computations during slider drags.
 
 ### 8.2 `combinations`
 
-| Member                        | Description                                                                            |
-| ----------------------------- | -------------------------------------------------------------------------------------- |
-| `colorFilters`                | Node ids to restrict backgrounds to (empty = all)                                      |
-| `contrastType`                | `'wcag2'` (default) or `'wcag3'` (APCA); changing it converts `minLevel` (§9.3)        |
-| `minLevel`                    | Minimum contrast to list, default 0                                                    |
-| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                  |
-| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                     |
-| `previewedUid`                | Combination applied to the app theme, or `null`                                        |
-| `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root |
-| `all`                         | `combine(...)` of the filtered colors (§9.1)                                           |
-| `filtered`                    | `all` with `minLevel ≥` the selected minimum                                           |
-| `previewed`                   | The combination matching `previewedUid`                                                |
+| Member                        | Description                                                                                                                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `colorFilters`                | Node ids to restrict backgrounds to (empty = all)                                                                                                                                               |
+| `contrastType`                | `'wcag2'` (default) or `'wcag3'` (APCA); changing it converts `minLevel` (§9.3)                                                                                                                 |
+| `minLevel`                    | Minimum contrast to list, default 0                                                                                                                                                             |
+| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                           |
+| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                              |
+| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                 |
+| `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root                                                                                                          |
+| `all`                         | `combine(...)` of the filtered colors (§9.1)                                                                                                                                                    |
+| `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                    |
+| `previewed`                   | The combination matching `previewedUid`                                                                                                                                                         |
+| `mode`                        | `'contrast'` (default) or `'difference'` (§11.5); not persisted                                                                                                                                 |
+| `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                     |
+| `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b` |
+| `openDifferenceId`            | Id of the pair shown in the matrix details, or `null`                                                                                                                                           |
+| `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                               |
 
 ### 8.3 `features`
 

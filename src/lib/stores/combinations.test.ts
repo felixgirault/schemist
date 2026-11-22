@@ -56,3 +56,55 @@ test.each(cases)(
 		).toEqual(byPair(projectCombinations(combinations.all)));
 	}
 );
+
+test('differences hold one entry per unordered pair', () => {
+	combinations.colorFilters = [];
+	combinations.blindnessTypes = [];
+
+	const colors = combinations.sortedColors;
+	const {differences} = combinations;
+
+	expect(differences).toHaveLength(
+		(colors.length * (colors.length - 1)) / 2
+	);
+	expect(differences[0]!.id).toBe(
+		`${colors[0]!.id}-${colors[1]!.id}`
+	);
+	expect(differences.at(-1)!.id).toBe(
+		`${colors.at(-2)!.id}-${colors.at(-1)!.id}`
+	);
+	expect(
+		differences.every(({simulated}) => !simulated.length)
+	).toBe(true);
+});
+
+test('differences include the simulations', () => {
+	combinations.colorFilters = [];
+	combinations.blindnessTypes = ['protanomaly', 'tritanomaly'];
+
+	for (const {
+		simulated,
+		level,
+		minLevel
+	} of combinations.differences) {
+		expect(simulated.map(({type}) => type)).toEqual([
+			'protanomaly',
+			'tritanomaly'
+		]);
+		expect(minLevel).toBeLessThanOrEqual(level);
+	}
+});
+
+test('differences follow the colors filter', () => {
+	const [a, b, c] = combinations.sortedColors.map(({id}) => id);
+	combinations.blindnessTypes = [];
+	combinations.colorFilters = [c!, a!, b!];
+
+	expect(combinations.differences.map(({id}) => id)).toEqual([
+		`${a}-${b}`,
+		`${a}-${c}`,
+		`${b}-${c}`
+	]);
+
+	combinations.colorFilters = [];
+});

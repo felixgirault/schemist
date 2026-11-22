@@ -2,12 +2,23 @@ import type {ContrastType} from '#lib/color/contrast.js';
 import {Wcag2Level, equivalence} from '#lib/color/contrast.js';
 import type {BlindnessType} from '#lib/core/contrast.js';
 import {combine} from '#lib/core/contrast.js';
+import type {Difference} from '#lib/core/difference.js';
+import {difference} from '#lib/core/difference.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
 
+export type PairDifference = Difference & {
+	id: string;
+	a: PaletteColor;
+	b: PaletteColor;
+};
+
 class Combinations {
+	mode = $state<'contrast' | 'difference'>('contrast');
+	minDifference = $state(10);
+	openDifferenceId = $state<string | null>(null);
 	colorFilters = $state<Node['id'][]>([]);
 	#contrastType = $state<ContrastType>('wcag2');
 	minLevel = $state<number>(Wcag2Level.ko);
@@ -66,6 +77,30 @@ class Combinations {
 
 	filtered = $derived(
 		this.all.filter(({minLevel}) => minLevel >= this.minLevel)
+	);
+
+	// one per unordered pair of the compared colors
+	differences = $derived(
+		this.#filteredColors.flatMap((a, i) =>
+			this.#filteredColors
+				.slice(i + 1)
+				.map((b): PairDifference => ({
+					id: `${a.id}-${b.id}`,
+					a,
+					b,
+					...difference(
+						a.rgbColor,
+						b.rgbColor,
+						this.blindnessTypes
+					)
+				}))
+		)
+	);
+
+	openDifference = $derived(
+		this.differences.find(
+			({id}) => id === this.openDifferenceId
+		) ?? null
 	);
 
 	previewed = $derived(
