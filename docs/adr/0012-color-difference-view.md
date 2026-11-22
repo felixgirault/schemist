@@ -112,9 +112,8 @@ The matrix scrolls horizontally when wider than the panel.
 Measured in Node with the 3 simulations: 0.39 ms for 6 colors,
 2.09 ms for 30, 5.99 ms for 50, about the cost of `combine` for
 the same colors (0.35, 3.02, 9.16 ms), which the panel already
-runs. The Lab conversion and CIEDE2000 add 4.5 kB
-minified, 1.1 kB gzipped, to the app (culori code alone, not a
-full build).
+runs. The Lab conversion and CIEDE2000 add 4.5 kB minified, 1.1
+kB gzipped, to the app (culori code alone, not a full build).
 
 ## Alternatives rejected
 
