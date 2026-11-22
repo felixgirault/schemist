@@ -10,7 +10,10 @@ export const continuousGradient = (colors: SchemistColor[]) => {
 	return `linear-gradient(90deg, ${stops})`;
 };
 
-export const discreteGradient = (colors: SchemistColor[]) => {
+export const discreteGradient = (
+	colors: SchemistColor[],
+	angle = 90
+) => {
 	const l = 100 / colors.length;
 	const stops = colors
 		.map(
@@ -19,7 +22,7 @@ export const discreteGradient = (colors: SchemistColor[]) => {
 		)
 		.join(', ');
 
-	return `linear-gradient(90deg, ${stops})`;
+	return `linear-gradient(${angle}deg, ${stops})`;
 };
 
 export const joinProperties = (props: Record<string, string>) =>

@@ -28,7 +28,7 @@ test.each(
 )(
 	'evaluate matches the store for $preset.label under $hex',
 	({preset, hex}) => {
-		const tree = rootTree(hex, preset.nodes);
+		const tree = rootTree(hex, [{type: preset.type}]);
 		expect(viaCore(tree)).toEqual(viaStore(tree));
 	}
 );
@@ -57,4 +57,40 @@ test('evaluate ids are depth-first indexes', () => {
 		'2',
 		'3'
 	]);
+});
+
+test('evaluate replaces presets with the colors they generate', () => {
+	const tree = rootTree('#3b82f6', [
+		{type: 'lsc', token: 'Step', args: {steps: 3}},
+		{type: 'h'}
+	]);
+
+	expect(evaluate(tree).map(({id}) => id)).toEqual([
+		'0',
+		'1.0',
+		'1.1',
+		'1.2',
+		'2'
+	]);
+	expect(viaCore(tree)).toEqual(viaStore(tree));
+});
+
+test('evaluate hides all the colors of a hidden preset', () => {
+	const tree = rootTree('#3b82f6', [
+		{type: 'smp', isHidden: true}
+	]);
+
+	expect(evaluate(tree)).toHaveLength(1);
+	expect(viaCore(tree)).toEqual(viaStore(tree));
+});
+
+test('evaluate ids of nested presets follow their parent', () => {
+	const ids = evaluate(
+		rootTree('#3b82f6', [{type: 'mal'}])
+	).map(({id}) => id);
+
+	expect(ids.slice(1).every((id) => id.startsWith('1.'))).toBe(
+		true
+	);
+	expect(ids.some((id) => /^1\.\d+\.\d+$/.test(id))).toBe(true);
 });

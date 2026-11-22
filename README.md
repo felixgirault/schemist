@@ -80,7 +80,9 @@ Commands (JSON on stdout, errors on stderr with a non-zero exit
 code):
 
 - `types`: the node types and their params.
-- `presets`: the presets, as lists of nodes to reuse.
+- `presets`: the presets, which are node types of their own
+  (`{"type": "lsc", "args": {"steps": 5}}`), with the nodes they
+  generate.
 - `eval <tree.json|->`: colors, contrast combinations and a
   permalink.
 - `export <tree.json|-> --format css|sass|tokens`: the same text
@@ -93,9 +95,9 @@ A tree is nodes with a `type`, optional `token` (the name, where
 `$` stands for the parent's name), `args`, `children` and
 `isHidden`. Each node derives its color from its parent, like in
 the app. Get the available types and params from `types`, and
-ideas from `presets`. Color args are CSS color strings, range
-args are integers within their bounds. Invalid trees are rejected
-with the path of the problem, e.g.
+ideas from `presets`. Presets can't have children. Color args are
+CSS color strings, range args are integers within their bounds.
+Invalid trees are rejected with the path of the problem, e.g.
 `root.children[2].args.amount`.
 
 ```json

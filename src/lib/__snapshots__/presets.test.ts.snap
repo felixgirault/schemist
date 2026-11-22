@@ -1138,10 +1138,6 @@ exports[`outputs of preset Scale under #3b82f6 1`] = `
     "Sky dancer",
   ],
   [
-    "#000000",
-    "Black",
-  ],
-  [
     "#011437",
     "Infinite night",
   ],
@@ -1177,10 +1173,6 @@ exports[`outputs of preset Scale under #3b82f6 1`] = `
     "#d3e4fe",
     "Veiling waterfalls",
   ],
-  [
-    "#ffffff",
-    "White",
-  ],
 ]
 `;
 
@@ -1189,10 +1181,6 @@ exports[`outputs of preset Scale under #808080 1`] = `
   [
     "#808080",
     "Grey",
-  ],
-  [
-    "#000000",
-    "Black",
   ],
   [
     "#161616",
@@ -1230,10 +1218,6 @@ exports[`outputs of preset Scale under #808080 1`] = `
     "#e2e2e2",
     "Jupiter",
   ],
-  [
-    "#ffffff",
-    "White",
-  ],
 ]
 `;
 
@@ -1242,10 +1226,6 @@ exports[`outputs of preset Scale under #ff0000 1`] = `
   [
     "#ff0000",
     "Red",
-  ],
-  [
-    "#000000",
-    "Black",
   ],
   [
     "#330000",
@@ -1282,10 +1262,6 @@ exports[`outputs of preset Scale under #ff0000 1`] = `
   [
     "#ffd8d2",
     "Girlie",
-  ],
-  [
-    "#ffffff",
-    "White",
   ],
 ]
 `;

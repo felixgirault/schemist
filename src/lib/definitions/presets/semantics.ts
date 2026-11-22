@@ -1,29 +1,25 @@
-import type {Preset} from '#lib/core/nodes.js';
+import {definePreset} from '#lib/core/nodes.js';
 import informative from '#lib/definitions/nodes/informative.js';
 import negative from '#lib/definitions/nodes/negative.js';
 import positive from '#lib/definitions/nodes/positive.js';
 import warning from '#lib/definitions/nodes/warning.js';
 
-export default {
+export default definePreset({
+	type: 'sem',
 	label: 'Semantic colors',
 	description:
 		'Colors to convey information, positiveness, danger, negativeness',
-	nodes: [
-		{
-			type: informative.type,
-			token: 'Info'
-		},
-		{
-			type: positive.type,
-			token: 'Success'
-		},
-		{
-			type: warning.type,
-			token: 'Warning'
-		},
-		{
-			type: negative.type,
-			token: 'Error'
-		}
-	]
-} satisfies Preset;
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return [
+			{type: informative.type, token: 'Info'},
+			{type: positive.type, token: 'Success'},
+			{type: warning.type, token: 'Warning'},
+			{type: negative.type, token: 'Error'}
+		];
+	}
+});

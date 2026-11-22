@@ -1,18 +1,20 @@
-import type {Preset} from '#lib/core/nodes.js';
+import {definePreset} from '#lib/core/nodes.js';
 import tetradLeft from '#lib/definitions/nodes/tetradLeft.js';
 import tetradRight from '#lib/definitions/nodes/tetradRight.js';
 
-export default {
+export default definePreset({
+	type: 'ttd',
 	label: 'Tetrad',
-	description: '',
-	nodes: [
-		{
-			type: tetradLeft.type,
-			token: 'Left $ tetrad'
-		},
-		{
-			type: tetradRight.type,
-			token: 'Right $ tetrad'
-		}
-	]
-} satisfies Preset;
+	description: 'Hues evenly spread in four',
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return [
+			{type: tetradLeft.type, token: 'Left $ tetrad'},
+			{type: tetradRight.type, token: 'Right $ tetrad'}
+		];
+	}
+});

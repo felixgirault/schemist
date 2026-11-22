@@ -49,6 +49,10 @@ test.each([
 		'root.args.amount: expected an integer between 0 and 100'
 	],
 	[
+		{type: 'stt', children: [{type: 'cmp'}]},
+		'root.children: a preset ("stt") can\'t have children'
+	],
+	[
 		{type: 'clr', args: {color: 'blue-ish'}},
 		'root.args.color: expected a CSS color string'
 	],

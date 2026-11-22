@@ -2,7 +2,6 @@ import {parseColor} from '#lib/color/parsing.js';
 import type {Combination} from '#lib/core/contrast.js';
 import type {NodeData} from '#lib/core/nodes.js';
 import color from '#lib/definitions/nodes/color.js';
-import presets from '#lib/definitions/presets/index.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {parseTree} from '#lib/tree.js';
 
@@ -22,13 +21,7 @@ export const loadPalette = (tree: NodeData) => {
 
 // Tree shared by the combinations tests.
 export const combinationsTree = () =>
-	rootTree(
-		'#3b82f6',
-		['Semantic color pairs', 'Neutral'].flatMap<NodeData>(
-			(name) =>
-				presets.find(({label}) => label === name)!.nodes
-		)
-	);
+	rootTree('#3b82f6', [{type: 'smp'}, {type: 'ntl'}]);
 
 // Combinations without uids, which hold node ids.
 export const projectCombinations = (all: Combination[]) =>

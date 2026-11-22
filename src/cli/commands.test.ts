@@ -25,6 +25,21 @@ test('presets lists presets with hex color args', () => {
 	const presets = JSON.parse(exec('presets'));
 	expect(JSON.stringify(presets)).not.toMatch(/"h":/);
 	expect(presets[0]).toHaveProperty('label');
+	expect(presets[0]).toHaveProperty('type');
+});
+
+test('eval evaluates presets into the colors they generate', () => {
+	const result = JSON.parse(
+		run(['eval', '-'], () =>
+			JSON.stringify({
+				type: 'clr',
+				args: {color: '#3b82f6'},
+				children: [{type: 'lsc', args: {steps: 2}}]
+			})
+		)
+	);
+
+	expect(result.colors).toHaveLength(3);
 });
 
 test('eval filters combinations and maps apca to wcag3', () => {

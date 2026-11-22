@@ -71,15 +71,16 @@ src/
                            manipulation, contrast, simulation, naming
     core/                  Svelte-free logic, shared with the CLI (no runes):
                            nodes.ts (NodeType, NodeDef, defineNode, Param,
-                           Args, NodeOutput, NodeData, Preset,
-                           defaultArgs, generateName),
-                           tree.ts (validateTree, §5.3),
+                           Args, NodeOutput, NodeData, PresetDef,
+                           definePreset, defaultArgs, applyDef),
+                           tree.ts (validateTree, withIds, §5.3),
                            evaluate.ts (evaluate(NodeData) → colors),
                            contrast.ts (combine, §9.1),
                            difference.ts (difference, §9.6),
                            export.ts (export formatters and defaults, §11.8)
-    definitions/nodes/     Node types (§6)
-    definitions/presets/   Presets (§7)
+    definitions/           `defs`: every node type, presets included
+      nodes/               Node types (§6)
+      presets/             Presets (§7)
     stores/                Reactive state, `.svelte.ts` modules (§8)
     packing/               Permalink encoding (§10)
     components/            UI (§11)
@@ -180,22 +181,26 @@ Numbers are rounded to a `precision` (decimals, default 3).
 
 A class with reactive fields:
 
-| Field      | Kind     | Description                                                                           |
-| ---------- | -------- | ------------------------------------------------------------------------------------- |
-| `id`       | readonly | `n<uid>`, unique per session                                                          |
-| `def`      | readonly | Node type definition (§6)                                                             |
-| `token`    | state    | Name template (§4.4), `''` for an automatic name                                      |
-| `isHidden` | state    | Excluded from combinations and exports, still drawn in the tree                       |
-| `args`     | state    | Parameter values, initialized from the type's defaults                                |
-| `children` | getter   | Child nodes, ordered (private state, read-only)                                       |
-| `parent`   | getter   | Parent node, `undefined` for the root (private state)                                 |
-| `input`    | derived  | `parent.output`, or `{color: white, name: ''}` for the root                           |
-| `output`   | derived  | `{color: def.apply(input.color, args), name: generateName(token, color, input.name)}` |
+| Field       | Kind     | Description                                                                           |
+| ----------- | -------- | ------------------------------------------------------------------------------------- |
+| `id`        | readonly | `n<uid>`, unique per session                                                          |
+| `def`       | readonly | Node type definition (§6)                                                             |
+| `token`     | state    | Name template (§4.4), `''` for an automatic name                                      |
+| `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree                       |
+| `args`      | state    | Parameter values, initialized from the type's defaults                                |
+| `children`  | getter   | Child nodes, ordered (private state, read-only)                                       |
+| `parent`    | getter   | Parent node, `undefined` for the root (private state)                                 |
+| `input`     | derived  | `parent.output`, or `{color: white, name: ''}` for the root                           |
+| `generated` | derived  | Colors of a preset, `{[id]: {color, name}}`, `{}` for other types (§7)                |
+| `output`    | derived  | `{color: def.apply(input.color, args), name: generateName(token, color, input.name)}` |
 
 Both ends of the parent-children link are private and only change
 through the operations: `addChild(child)` (detaches it from its
 previous parent first), `removeChild(child)`, `destroy()`
-(removes the node and its subtree from its parent).
+(removes the node and its subtree from its parent),
+`replaceWith(nodes)` (puts nodes in its place among its
+siblings). `addChild` throws on presets (§7). The `id` can be
+given to the constructor, `n<uid>` otherwise.
 
 `generateName` and the `NodeDef`, `Param`, `Args` and
 `NodeOutput` (`{color, name}`) types live in
@@ -205,7 +210,8 @@ previous parent first), `removeChild(child)`, `destroy()`
 
 `collectOutputs(root)` walks the tree depth-first, parent before
 children, and returns `{[id]: {color, name}}` for every
-**visible** node. Children of a hidden node are still collected.
+**visible** node, presets replaced by their generated colors
+(§7). Children of a hidden node are still collected.
 
 `evaluate(NodeData)` (`#lib/core/evaluate.ts`) computes the same
 visible outputs without the store, as `PaletteColor`s
@@ -232,9 +238,11 @@ permalink holds before building the tree.
 
 Defined in `src/lib/definitions/nodes/` with `defineNode`, which
 infers the type of `apply`'s and `argsLabel`'s arguments from
-`params`, and registered in `index.ts` (`defs` by type, typed
-against the `NodeType` union of the codes below so that none is
-missing or misspelled; `defList` for display order). A definition
+`params`, and registered in `index.ts` (`colorDefs` by type,
+typed against the `ColorType` union of the codes below so that
+none is missing or misspelled; `defList` for display order). The
+presets (§7) join them in `definitions/index.ts`, which exports
+`defs` typed against `NodeType`, the union of both. A definition
 has a short `type` code (used in permalinks), a `label`, an
 optional `description` and `argsLabel`, `params`, a `samples`
 style for previews (`single`, `discrete`, `continuous`) and
@@ -264,34 +272,61 @@ style for previews (`single`, `discrete`, `continuous`) and
 | `clr` | Custom color              | color (`#ffc208`)                                          | The color argument, ignoring the input |
 
 Param kinds: `range` (integer slider), `color` (color picker,
-§11.3), `boolean` (checkbox; no current type uses it).
+§11.3), `boolean` (toggle button, used by presets).
 
 ## 7. Presets
 
-Defined in `src/lib/definitions/presets/`, listed in `index.ts`.
-A preset is `{label, description?, nodes: NodeData[]}`; applying
-it adds its nodes as children of the selected node. `$` in tokens
-refers to the parent's name.
+A preset is a node type whose params generate several colors (ADR
+7). Each is defined in `src/lib/definitions/presets/` with
+`definePreset`, which is a `NodeDef` plus
+`build(args) → NodeData[]`: a template tree, evaluated on the
+node's input with the existing node types, never stored. Its own
+`apply` returns the input unchanged. Presets are registered in
+`defs` (so packing, storage and the CLI handle them as any other
+type) but not in `defList`; `presets/index.ts` lists them for the
+child picker.
 
-| Preset                 | Nodes                                                                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| States                 | Highlight `$ light`, Shadow `$ dark`                                                                                          |
-| Split complementary    | `scl`, `scr`                                                                                                                  |
-| Triad                  | `trl`, `trr`                                                                                                                  |
-| Tetrad                 | `ttl`, `ttr`                                                                                                                  |
-| Semantic colors        | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                         |
-| Semantic color pairs   | Semantic colors, each with a Contrasting child `On $`                                                                         |
-| Scale                  | Lightness 0, 10, …, 100                                                                                                       |
-| Neutral                | Hidden Saturation 5 `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                      |
-| Harmonies              | Left tetrad, left triad, split complementaries, right triad, right tetrad                                                     |
-| Rainbow                | Analogous steps 1–11                                                                                                          |
-| Material tones light   | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                           |
-| Material tones dark    | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                            |
-| Material neutral light | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline          |
-| Material neutral dark  | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                 |
-| Material light         | Hidden Saturation 40 `Primary` with light tones, hidden Complementary and Error branches with light tones, and light neutrals |
-| Material dark          | Same structure with dark tones and dark neutrals                                                                              |
-| Schemist theme         | Triad left `Secondary` and right `Tertiary` with States, Semantic color pairs, Neutral                                        |
+- A preset node has no children: `addChild` throws, `parseTree`
+  and `unpack` drop children, and `validateTree` rejects them.
+- Its colors are derived: `Node.generated` (and `evaluate` in the
+  core) evaluates `build(args)`, honoring the `isHidden` and
+  tokens of the template nodes. `$` in them refers to the
+  preset's name: its token, or the parent's name when empty.
+- Generated colors have ids `<preset id>.<index>`, the index
+  being the depth-first position in the template (`n12.3`, and
+  `n12.1.0` for a preset inside a preset). In `evaluate`, a
+  preset at depth-first index `1` generates `1.0`, `1.1`, …
+- `collectOutputs` emits the visible generated colors instead of
+  the preset itself; hiding the preset hides all of them.
+- **Expand** (`expandPreset`, `#lib/tree.ts`) replaces the preset
+  with `parseTree` of its template, at its position among its
+  siblings, in one change. The new nodes keep the generated ids,
+  so combination filters carry over; they are hidden if the
+  preset was, and `$` is replaced by the preset's token if it had
+  one. Expanded nodes can't be turned back into a preset.
+
+| Type  | Preset                 | Params (min–max, default)                             | Builds                                                                                                                                  |
+| ----- | ---------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `stt` | States                 | amount % 0–50 (10)                                    | Highlight `$ light`, Shadow `$ dark`                                                                                                    |
+| `spc` | Split complementary    | —                                                     | `scl`, `scr`                                                                                                                            |
+| `trd` | Triad                  | —                                                     | `trl`, `trr`                                                                                                                            |
+| `ttd` | Tetrad                 | —                                                     | `ttl`, `ttr`                                                                                                                            |
+| `sem` | Semantic colors        | —                                                     | `inf` Info, `pos` Success, `wrn` Warning, `neg` Error                                                                                   |
+| `smp` | Semantic color pairs   | —                                                     | Semantic colors, each with a Contrasting child `On $`                                                                                   |
+| `lsc` | Scale                  | steps 1–10 (9)                                        | `steps` Lightness nodes of `round(100 × i / (steps + 1))`, `i` in `1…steps` (no black and white ends)                                   |
+| `ntl` | Neutral                | saturation % 0–100 (5)                                | Hidden Saturation `Desaturated $` with Lightness 98, 85, 50, 15, 2 (`Neutral white` … `Neutral black`)                                  |
+| `hrm` | Harmonies              | tetrad, triad, split (booleans, all `true`)           | The enabled harmonies: left ones, then right ones, from the farthest hue to the closest and back                                        |
+| `rnb` | Rainbow                | colors 1–23 (11)                                      | `count` Hue nodes of `round(360 × i / (count + 1))`°                                                                                    |
+| `mtl` | Material tones light   | —                                                     | Lightness 40 `$`, 100 `On $`, 90 `$ container`, 10 `On $ container`                                                                     |
+| `mtd` | Material tones dark    | —                                                     | Lightness 80 `$`, 20 `On $`, 30 `$ container`, 90 `On $ container`                                                                      |
+| `mnl` | Material neutral light | —                                                     | Hidden Saturation 10 with Lightness 99 Surface, 10 On surface, 90 Surface variant, 30 On surface variant, 50 Outline                    |
+| `mnd` | Material neutral dark  | —                                                     | Same tokens with Lightness 10, 90, 30, 80, 60                                                                                           |
+| `mal` | Material light         | —                                                     | Hidden Saturation 40 `Primary` with Material tones light, hidden Complementary and Error branches with them, and Material neutral light |
+| `mad` | Material dark          | —                                                     | Same structure with dark tones and dark neutrals                                                                                        |
+| `sch` | Schemist theme         | secondary, tertiary, semantics, neutrals (all `true`) | Triad left `Secondary` and right `Tertiary` (each with States), Semantic color pairs, Neutral, as enabled                               |
+
+Presets reusing other presets (Material, Schemist theme) embed
+them as preset nodes, which can be expanded in turn.
 
 ## 8. Application state
 
@@ -485,21 +520,24 @@ Example, a Custom color `#ffc208` alone:
 
 ### 11.2 Palette tree
 
-Each node shows its color and name, then actions:
+Each node shows its color (a preset shows a bar of its generated
+colors, top to bottom) and name, then actions:
 
-| Action     | Tooltip                                      | Effect                                             |
-| ---------- | -------------------------------------------- | -------------------------------------------------- |
-| Remove     | Remove this color and all of its derivatives | Not available on the root                          |
-| Visibility | Don't compare this color                     | Toggles `isHidden`                                 |
-| Info       | Show color info                              | Hex, RGB, HSL and LCH values                       |
-| Options    | Tune this color                              | Parameter fields; open by default on the root only |
-| Add        | Add matching colors                          | Opens the child picker                             |
+| Action     | Tooltip                                      | Effect                                                                         |
+| ---------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| Remove     | Remove this color and all of its derivatives | Not available on the root                                                      |
+| Visibility | Don't compare this color                     | Toggles `isHidden`                                                             |
+| Info       | Show color info                              | Hex, RGB, HSL and LCH values; name and hex of each generated color for presets |
+| Options    | Tune this color                              | Parameter fields; open by default on the root only                             |
+| Expand     | Turn into separate colors                    | Presets only, replaces them with plain nodes (§7)                              |
+| Add        | Add matching colors                          | Opens the child picker; disabled on presets                                    |
 
 - The name is editable in place (Enter or blur commits). The hint
   reads "Insert parent color name with $." on child nodes.
 - A root without children shows a "Start by adding matching
   colors" call to action.
-- Range fields show a gradient previewing the parameter's effect.
+- Range fields show a gradient previewing the parameter's effect
+  (none for presets). Boolean fields are toggle buttons.
 
 ### 11.3 Color field
 
@@ -514,8 +552,8 @@ typed in.
 ### 11.4 Child picker
 
 A modal with two lists, each item previewed on the current color:
-**Color palettes** (presets, §7) and **Single colors** (node
-types, in `defList` order, §6).
+**Color palettes** (presets, §7, added as a single node) and
+**Single colors** (node types, in `defList` order, §6).
 
 ### 11.5 Combinations panel
 
@@ -599,7 +637,8 @@ parts, conflicts and duplicates (with no color dropped, whatever
 the tree order); `names.test.ts` renders the tokens export and
 its conflict notice. Export components are rendered server-side;
 there are no browser or end-to-end tests. A core test asserts
-that `evaluate` matches `collectOutputs` for every preset. CLI
+that `evaluate` matches `collectOutputs` for every preset, and
+store tests cover preset outputs, children and expanding. CLI
 tests cover tree validation and argument handling, and build the
 CLI to run it under plain Node (it crashes on runes if a store
 leaks into `core/`), comparing `eval` with the core and checking
@@ -637,7 +676,7 @@ are parsed with `node:util` `parseArgs`.
 | Command                            | Output                                                                                                                        |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `types`                            | Node types: `type`, `label`, `description`, `params` (`name`, `kind`, `min`, `max`, `unit`, `default`; color defaults as hex) |
-| `presets`                          | Presets: `label`, `description`, `nodes` (color args as hex)                                                                  |
+| `presets`                          | Presets: `type`, `label`, `description`, `params`, `nodes` (what they generate with their default params, color args as hex)  |
 | `eval <tree.json\|->`              | `{colors: [{name, hex}], combinations: [{bg, fg, level, grade, simulated: [{type, level, grade}]}], permalink}`               |
 | `export <tree.json\|-> --format F` | CSS, Sass or design tokens text, as the app produces it                                                                       |
 

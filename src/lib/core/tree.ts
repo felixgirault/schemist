@@ -4,8 +4,8 @@ import type {
 	Param,
 	ParamValue
 } from '#lib/core/nodes.js';
-import {defaultArgs} from '#lib/core/nodes.js';
-import defs, {isNodeType} from '#lib/definitions/nodes/index.js';
+import {defaultArgs, isPresetDef} from '#lib/core/nodes.js';
+import defs, {isNodeType} from '#lib/definitions/index.js';
 
 const isObject = (
 	value: unknown
@@ -130,6 +130,12 @@ export const validateTree = (
 			throw new Error(`${path}.children: expected an array`);
 		}
 
+		if (children.length && isPresetDef(def)) {
+			throw new Error(
+				`${path}.children: a preset ("${type}") can't have children`
+			);
+		}
+
 		result.children = children.map((child, i) =>
 			validateTree(child, `${path}.children[${i}]`)
 		);
@@ -137,3 +143,26 @@ export const validateTree = (
 
 	return result;
 };
+
+// Gives ids to template nodes, depth-first, so that generated
+// colors keep them once expanded (see `evaluateNodes`).
+export const withIds = (
+	nodes: NodeData[],
+	prefix: string,
+	counter = {next: 0}
+): NodeData[] =>
+	nodes.map(({children, ...node}) => ({
+		...node,
+		id: `${prefix}.${counter.next++}`,
+		...(children && {
+			children: withIds(children, prefix, counter)
+		})
+	}));
+
+// Hides a whole tree, e.g. to keep a hidden preset hidden once
+// expanded.
+export const hideTree = (tree: NodeData): NodeData => ({
+	...tree,
+	isHidden: true,
+	children: tree.children?.map(hideTree)
+});

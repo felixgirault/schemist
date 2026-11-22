@@ -1,24 +1,24 @@
-import {parseColor} from '#lib/color/parsing.js';
+import {evaluateNodes} from '#lib/core/evaluate.js';
 import type {
 	Args,
 	NodeDef,
 	NodeOutput,
 	NodeType
 } from '#lib/core/nodes.js';
-import {defaultArgs, generateName} from '#lib/core/nodes.js';
-import defs from '#lib/definitions/nodes/index.js';
+import {
+	applyDef,
+	defaultArgs,
+	defaultInput,
+	isPresetDef
+} from '#lib/core/nodes.js';
+import defs from '#lib/definitions/index.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
 
 export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
 
-const defaultInput: NodeOutput = {
-	color: parseColor('#fff')[1]!,
-	name: ''
-};
-
 export class Node {
-	readonly id = `n${uid()}`;
+	readonly id: string;
 	readonly def: NodeDef;
 	token = $state('');
 	isHidden = $state(false);
@@ -30,17 +30,31 @@ export class Node {
 	input: NodeOutput = $derived(
 		this.#parent?.output ?? defaultInput
 	);
-	output: NodeOutput = $derived.by(() => {
-		const color = this.def.apply(this.input.color, this.args);
-		const name = generateName(
-			this.token,
-			color,
-			this.input.name
-		);
-		return {color, name};
+	output: NodeOutput = $derived.by(() =>
+		applyDef(this.def, this.args, this.token, this.input)
+	);
+	// Colors of a preset, keyed by `<preset id>.<index>`.
+	generated: NodeOutputRecord = $derived.by(() => {
+		const {def, args, output, id} = this;
+
+		return isPresetDef(def)
+			? Object.fromEntries(
+					evaluateNodes(
+						def.build(args),
+						output,
+						`${id}.`
+					).map(({id, color, name}) => [id, {color, name}])
+				)
+			: {};
 	});
 
-	constructor(type: NodeType, isHidden = false, token = '') {
+	constructor(
+		type: NodeType,
+		isHidden = false,
+		token = '',
+		id = `n${uid()}`
+	) {
+		this.id = id;
 		this.def = defs[type];
 		this.isHidden = isHidden;
 		this.token = token;
@@ -56,6 +70,10 @@ export class Node {
 	}
 
 	addChild(child: Node) {
+		if (isPresetDef(this.def)) {
+			throw new Error("A preset can't have children.");
+		}
+
 		child.#parent?.removeChild(child);
 		child.#parent = this;
 		this.#children.push(child);
@@ -73,20 +91,50 @@ export class Node {
 	destroy() {
 		this.#parent?.removeChild(this);
 	}
+
+	// Puts the given nodes in place of this one among its
+	// siblings.
+	replaceWith(nodes: Node[]) {
+		const parent = this.#parent;
+
+		if (!parent) {
+			return;
+		}
+
+		nodes.forEach((node) => {
+			node.#parent?.removeChild(node);
+			node.#parent = parent;
+		});
+
+		const i = parent.#children.indexOf(this);
+		parent.#children = [
+			...parent.#children.slice(0, i),
+			...nodes,
+			...parent.#children.slice(i + 1)
+		];
+
+		this.#parent = undefined;
+	}
 }
 
 export const createNode = (
 	type: NodeType,
 	isHidden = false,
-	token = ''
-) => new Node(type, isHidden, token);
+	token = '',
+	id?: string
+) => new Node(type, isHidden, token, id);
 
-// Outputs of all visible nodes, in tree order.
+// Outputs of all visible nodes, in tree order, with presets
+// replaced by their colors.
 export const collectOutputs = (
 	node: Node,
 	outputs: NodeOutputRecord = {}
 ) => {
-	if (!node.isHidden) {
+	if (isPresetDef(node.def)) {
+		if (!node.isHidden) {
+			Object.assign(outputs, node.generated);
+		}
+	} else if (!node.isHidden) {
 		outputs[node.id] = node.output;
 	}
 

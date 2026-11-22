@@ -1,4 +1,4 @@
-import type {NodeDef, NodeType} from '#lib/core/nodes.js';
+import type {ColorType, NodeDef} from '#lib/core/nodes.js';
 import analogous from './analogous';
 import color from './color';
 import complementary from './complementary';
@@ -20,7 +20,9 @@ import triadRight from './triadRight';
 import warning from './warning';
 
 // Typed against the list of types, so that none is missing.
-const defs: {[T in NodeType]: NodeDef & {type: T}} = {
+export const colorDefs: {
+	[T in ColorType]: NodeDef & {type: T};
+} = {
 	[analogous.type]: analogous,
 	[complementary.type]: complementary,
 	[contrasting.type]: contrasting,
@@ -41,11 +43,6 @@ const defs: {[T in NodeType]: NodeDef & {type: T}} = {
 	[triadRight.type]: triadRight,
 	[warning.type]: warning
 };
-
-export const isNodeType = (type: string): type is NodeType =>
-	Object.hasOwn(defs, type);
-
-export default defs;
 
 export const defList = [
 	analogous,

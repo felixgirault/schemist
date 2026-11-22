@@ -1,17 +1,20 @@
-import type {Preset} from '#lib/core/nodes.js';
+import {definePreset} from '#lib/core/nodes.js';
 import contrasting from '#lib/definitions/nodes/contrasting.js';
 import semantics from './semantics';
 
-export default {
+export default definePreset({
+	type: 'smp',
 	label: 'Semantic color pairs',
-	description: '',
-	nodes: semantics.nodes.map((node) => ({
-		...node,
-		children: [
-			{
-				type: contrasting.type,
-				token: 'On $'
-			}
-		]
-	}))
-} satisfies Preset;
+	description: 'Semantic colors, each with a contrasting color',
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return semantics.build({}).map((node) => ({
+			...node,
+			children: [{type: contrasting.type, token: 'On $'}]
+		}));
+	}
+});

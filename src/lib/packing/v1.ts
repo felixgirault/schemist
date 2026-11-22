@@ -3,7 +3,7 @@ import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import type {Args, Param, NodeData} from '#lib/core/nodes.js';
 import {validateTree} from '#lib/core/tree.js';
-import defs, {isNodeType} from '#lib/definitions/nodes/index.js';
+import defs, {isNodeType} from '#lib/definitions/index.js';
 
 // Escapes the separators so tokens can contain them.
 const escapeEntry = (entry: string) =>

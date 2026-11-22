@@ -1,4 +1,3 @@
-import presets from '#lib/definitions/presets/index.js';
 import {exportSettings} from '#lib/stores/export.svelte.js';
 import {loadPalette, rootTree} from '#lib/testing/tree.js';
 import {render} from 'svelte/server';
@@ -6,8 +5,10 @@ import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import Export from './Export.svelte';
 
 const tree = rootTree('#3b82f6', [
-	...presets.find(({label}) => label === 'Semantic colors')!
-		.nodes
+	{type: 'inf', token: 'Info'},
+	{type: 'pos', token: 'Success'},
+	{type: 'wrn', token: 'Warning'},
+	{type: 'neg', token: 'Error'}
 ]);
 
 beforeAll(() => {

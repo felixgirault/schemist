@@ -2,7 +2,7 @@
 	import BooleanField from '#lib/components/forms/BooleanField.svelte';
 	import ColorField from '#lib/components/forms/ColorField.svelte';
 	import RangeField from '#lib/components/forms/RangeField.svelte';
-	import {argOf} from '#lib/core/nodes.js';
+	import {argOf, isPresetDef} from '#lib/core/nodes.js';
 	import {paramSamples} from '#lib/samples.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
@@ -34,17 +34,20 @@
 				unit={param.unit}
 				min={param.min}
 				max={param.max}
-				gradient={(def.samples === 'continuous'
-					? continuousGradient
-					: discreteGradient)(
-					paramSamples(
-						def,
-						node.args,
-						param.name,
-						node.input.color,
-						clamp(param.max - param.min, 15)
-					)
-				)}
+				gradient={isPresetDef(def)
+					? // Presets output several colors, see ADR 7.
+						'transparent'
+					: (def.samples === 'continuous'
+							? continuousGradient
+							: discreteGradient)(
+							paramSamples(
+								def,
+								node.args,
+								param.name,
+								node.input.color,
+								clamp(param.max - param.min, 15)
+							)
+						)}
 				bind:value={
 					() => argOf(node.args, param),
 					(value) => (node.args[param.name] = value)

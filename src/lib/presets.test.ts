@@ -16,7 +16,9 @@ test.each(cases)(
 	'outputs of preset $preset.label under $hex',
 	({preset, hex}) => {
 		const outputs = Object.values(
-			collectOutputs(parseTree(rootTree(hex, preset.nodes)))
+			collectOutputs(
+				parseTree(rootTree(hex, [{type: preset.type}]))
+			)
 		).map(({color, name}) => [
 			formatSchemistToHex(color),
 			name

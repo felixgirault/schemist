@@ -1,11 +1,12 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import nearestColor from '#lib/color/nearest.js';
+import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import {sentenceCase} from '#lib/utils/strings.js';
 
 // Codes of node types, which are stored in permalinks, so they
 // must never change.
-export type NodeType =
+export type ColorType =
 	| 'anl'
 	| 'clr'
 	| 'cmp'
@@ -25,6 +26,27 @@ export type NodeType =
 	| 'ttl'
 	| 'ttr'
 	| 'wrn';
+
+export type PresetType =
+	| 'hrm'
+	| 'lsc'
+	| 'mad'
+	| 'mal'
+	| 'mnd'
+	| 'mnl'
+	| 'mtd'
+	| 'mtl'
+	| 'ntl'
+	| 'rnb'
+	| 'sch'
+	| 'smp'
+	| 'sem'
+	| 'spc'
+	| 'stt'
+	| 'trd'
+	| 'ttd';
+
+export type NodeType = ColorType | PresetType;
 
 export type SampleType = 'single' | 'discrete' | 'continuous';
 
@@ -87,16 +109,41 @@ export type NodeDef<
 	apply(color: SchemistColor, args: ArgsOf<P>): SchemistColor;
 };
 
+// A node whose colors are generated from a template tree, see
+// ADR 7. Its own `apply` leaves the input unchanged.
+export type PresetDef<
+	P extends readonly Param[] = readonly Param[]
+> = NodeDef<P> & {
+	type: PresetType;
+	build(args: ArgsOf<P>): NodeData[];
+};
+
+export const isPresetDef = (def: NodeDef): def is PresetDef =>
+	'build' in def;
+
 // Infers args from params, and keeps the type code as is, so
 // that the registry can check it.
 export const defineNode = <
-	const T extends NodeType,
+	const T extends ColorType,
 	const P extends readonly Param[]
 >(
 	def: NodeDef<P> & {type: T}
 ) => def;
 
+export const definePreset = <
+	const T extends PresetType,
+	const P extends readonly Param[]
+>(
+	def: PresetDef<P> & {type: T}
+) => def;
+
 export type NodeOutput = {color: SchemistColor; name: string};
+
+// Input of the root.
+export const defaultInput: NodeOutput = {
+	color: parseColor('#fff')[1]!,
+	name: ''
+};
 
 export const defaultArgs = (def: NodeDef): Args =>
 	Object.fromEntries(
@@ -114,16 +161,32 @@ export const generateName = (
 			: token
 		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
+// A preset is named after its parent unless it has a token, so
+// that `$` in the tokens of its colors still makes sense.
+export const applyDef = (
+	def: NodeDef,
+	args: Args,
+	token: string,
+	input: NodeOutput
+): NodeOutput => {
+	const color = def.apply(input.color, args);
+
+	return {
+		color,
+		name:
+			isPresetDef(def) && !token
+				? input.name
+				: generateName(token, color, input.name)
+	};
+};
+
 export type NodeData = {
+	// Set to restore a node with the id it had, e.g. when a preset
+	// is expanded into the nodes it generated.
+	id?: string;
 	type: NodeType;
 	token?: string;
 	args?: Args;
 	children?: NodeData[];
 	isHidden?: boolean;
-};
-
-export type Preset = {
-	label: string;
-	description?: string;
-	nodes: NodeData[];
 };

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AddIcon from '#lib/components/icons/AddIcon.svelte';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
+	import ExpandIcon from '#lib/components/icons/ExpandIcon.svelte';
 	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
@@ -11,12 +12,15 @@
 		optionsId: string;
 		isHiddenId: string;
 		isRemovable: boolean;
+		// Presets can be expanded, but can't have children.
+		isPreset: boolean;
 		isHidden: boolean;
 		isInfoOpen: boolean;
 		areOptionsOpen: boolean;
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
+		onExpand: () => void;
 		onRemove: () => void;
 	}
 
@@ -25,12 +29,14 @@
 		optionsId,
 		isHiddenId,
 		isRemovable,
+		isPreset,
 		isHidden = $bindable(),
 		isInfoOpen = $bindable(),
 		areOptionsOpen = $bindable(),
 		hasOptions,
 		hasHint,
 		onPick,
+		onExpand,
 		onRemove
 	}: Props = $props();
 
@@ -91,10 +97,23 @@
 		<OptionsIcon />
 	</button>
 
+	{#if isPreset}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Turn into separate colors"
+			disabled={!isRemovable}
+			onclick={onExpand}
+		>
+			<ExpandIcon />
+		</button>
+	{/if}
+
 	<button
 		class="button button--icon button--hint"
 		type="button"
 		title="Add matching colors"
+		disabled={isPreset}
 		onclick={onPick}
 	>
 		<AddIcon />

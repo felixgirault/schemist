@@ -1,19 +1,21 @@
 import type {NodeData} from '#lib/core/nodes.js';
-import type defs from '#lib/definitions/nodes/index.js';
+import {isPresetDef} from '#lib/core/nodes.js';
+import {hideTree, withIds} from '#lib/core/tree.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {createNode} from '#lib/stores/nodes.svelte.js';
 
-export const parseTree = (preset: NodeData) => {
-	const {type, isHidden, token, args, children} = preset;
-	const node = createNode(type, isHidden, token);
+export const parseTree = (data: NodeData) => {
+	const {id, type, isHidden, token, args, children} = data;
+	const node = createNode(type, isHidden, token, id);
 
 	if (args) {
 		Object.assign(node.args, args);
 	}
 
-	if (children) {
-		children.forEach((childPreset) => {
-			node.addChild(parseTree(childPreset));
+	// Presets generate their colors, and can't have children.
+	if (children && !isPresetDef(node.def)) {
+		children.forEach((child) => {
+			node.addChild(parseTree(child));
 		});
 	}
 
@@ -23,7 +25,7 @@ export const parseTree = (preset: NodeData) => {
 export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
 	const data: NodeData = {
-		type: node.def.type as keyof typeof defs,
+		type: node.def.type,
 		isHidden: node.isHidden
 	};
 
@@ -40,4 +42,29 @@ export const serializeTree = (node: Node) => {
 	}
 
 	return data;
+};
+
+// Replaces a preset with the plain nodes it builds, in a single
+// change. They keep the ids of the colors they generated, see
+// ADR 7.
+export const expandPreset = (preset: Node) => {
+	const {def, args, token, isHidden} = preset;
+
+	if (!preset.parent || !isPresetDef(def)) {
+		return;
+	}
+
+	const trees = withIds(def.build(args), preset.id).map(
+		(tree) => {
+			// `$` referred to the preset, which is going away.
+			const named =
+				token && tree.token
+					? {...tree, token: tree.token.replace('$', token)}
+					: tree;
+
+			return isHidden ? hideTree(named) : named;
+		}
+	);
+
+	preset.replaceWith(trees.map(parseTree));
 };

@@ -1,18 +1,20 @@
-import type {Preset} from '#lib/core/nodes.js';
+import {definePreset} from '#lib/core/nodes.js';
 import triadLeft from '#lib/definitions/nodes/triadLeft.js';
 import triadRight from '#lib/definitions/nodes/triadRight.js';
 
-export default {
+export default definePreset({
+	type: 'trd',
 	label: 'Triad',
-	description: '',
-	nodes: [
-		{
-			type: triadLeft.type,
-			token: 'Left $ triad'
-		},
-		{
-			type: triadRight.type,
-			token: 'Right $ triad'
-		}
-	]
-} satisfies Preset;
+	description: 'Hues evenly spread in three',
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return [
+			{type: triadLeft.type, token: 'Left $ triad'},
+			{type: triadRight.type, token: 'Right $ triad'}
+		];
+	}
+});

@@ -1,18 +1,26 @@
-import type {Preset} from '#lib/core/nodes.js';
+import {definePreset} from '#lib/core/nodes.js';
 import splitComplementaryLeft from '#lib/definitions/nodes/splitComplementaryLeft.js';
 import splitComplementaryRight from '#lib/definitions/nodes/splitComplementaryRight.js';
 
-export default {
+export default definePreset({
+	type: 'spc',
 	label: 'Split complementary',
-	description: '',
-	nodes: [
-		{
-			type: splitComplementaryLeft.type,
-			token: 'Left $ complementary'
-		},
-		{
-			type: splitComplementaryRight.type,
-			token: 'Right $ complementary'
-		}
-	]
-} satisfies Preset;
+	description: 'Hues on each side of the complementary color',
+	params: [],
+	samples: 'discrete',
+	apply(color) {
+		return color;
+	},
+	build() {
+		return [
+			{
+				type: splitComplementaryLeft.type,
+				token: 'Left $ complementary'
+			},
+			{
+				type: splitComplementaryRight.type,
+				token: 'Right $ complementary'
+			}
+		];
+	}
+});
