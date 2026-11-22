@@ -315,6 +315,27 @@ describe('check', () => {
 		});
 	});
 
+	test('checks the color difference of a pair', () => {
+		const pair = {fg: 'text/body', bg: 'background/page'};
+		const check1 = (difference: number) =>
+			check(1, {
+				trees: ['out/light.json'],
+				pairs: [{...pair, difference}]
+			});
+
+		expect(check1(10).pass).toBe(true);
+		expect(check1(10).pairs?.[0]).toMatchObject({
+			metric: 'difference',
+			target: 10,
+			pass: true
+		});
+
+		const failed = check1(1000);
+
+		expect(failed.pass).toBe(false);
+		expect(failed.pairs?.[0].level).toBeLessThan(1000);
+	});
+
 	test('a darker body text fails its pair', () => {
 		const result = check(3);
 

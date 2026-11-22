@@ -5,6 +5,7 @@ export type PairExpect = {
 	bg: string;
 	wcag2?: number;
 	apca?: number;
+	difference?: number;
 };
 
 // What a case expects of the trees an agent writes, from expect.json.
@@ -18,7 +19,7 @@ export type PairResult = {
 	tree: string;
 	fg: string;
 	bg: string;
-	metric: 'wcag2' | 'apca';
+	metric: 'wcag2' | 'apca' | 'difference';
 	target: number;
 	level: number;
 	pass: boolean;

@@ -111,12 +111,13 @@ lives in `graders/<type>.ts`, with its settings and an example.
 `check` re-checks the agent's trees with the CLI built from the
 ref, not with what the agent claims. For each tree of
 `expect.json` it reads the colors, then asks for the level of
-each pair that has a `wcag2` or `apca` target, in the worst case
-of the three color blindness simulations. It fails when a tree is
-missing or invalid, a pair's token is missing, a pair is under
-its target in any tree, or an expected `hex` is in no tree. The
-report lists the problems and each failed pair with its level and
-target.
+each pair that has a `wcag2`, `apca` or `difference` target (the
+CIEDE2000 difference, minimum 10 for categorical colors), in the
+worst case of the three color blindness simulations. It fails
+when a tree is missing or invalid, a pair's token is missing, a
+pair is under its target in any tree, or an expected `hex` is in
+no tree. The report lists the problems and each failed pair with
+its level and target.
 
 A run's score is the weighted fraction of graders passed, a
 case's score the mean of its runs.
