@@ -19,6 +19,13 @@ export type BlindnessType =
 	| 'deuteranomaly'
 	| 'tritanomaly';
 
+export const simulation = (type: BlindnessType) =>
+	type === 'protanomaly'
+		? simulateProtanomaly
+		: type === 'deuteranomaly'
+			? simulateDeuteranomaly
+			: simulateTritanomaly;
+
 export type CombinationContrast = {
 	type: BlindnessType;
 	bg: RgbColor;
@@ -68,12 +75,7 @@ export const combine = (
 		let minGrade = baseGrade;
 
 		const simulatedContrasts = blindnessTypes.map((type) => {
-			const simulate =
-				type === 'protanomaly'
-					? simulateProtanomaly
-					: type === 'deuteranomaly'
-						? simulateDeuteranomaly
-						: simulateTritanomaly;
+			const simulate = simulation(type);
 
 			const bg = simulate(bgOutput.rgbColor);
 			const fg = simulate(fgOutput.rgbColor);

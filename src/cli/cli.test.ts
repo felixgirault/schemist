@@ -65,6 +65,36 @@ test('eval matches the core', () => {
 	});
 });
 
+test('eval --difference shows a closer pair under deuteranomaly', () => {
+	const {status, stdout} = exec(
+		JSON.stringify({
+			type: 'clr',
+			token: 'Red',
+			args: {color: '#c83c3c'},
+			children: [
+				{
+					type: 'clr',
+					token: 'Green',
+					args: {color: '#3c963c'}
+				}
+			]
+		}),
+		'eval',
+		'-',
+		'--difference',
+		'--blindness',
+		'deuteranomaly',
+		'--pair',
+		'Red/Green'
+	);
+	const [{difference}] = JSON.parse(stdout).combinations;
+
+	expect(status).toBe(0);
+	expect(difference.minLevel).toBeLessThan(
+		difference.level / 2
+	);
+});
+
 test('an invalid tree exits with an error naming the path', () => {
 	const {status, stdout, stderr} = exec(
 		JSON.stringify({

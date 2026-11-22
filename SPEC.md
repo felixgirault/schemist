@@ -74,6 +74,7 @@ src/
                            PresetNode, Preset, defaultArgs, generateName),
                            evaluate.ts (evaluate(PresetNode) → entries),
                            contrast.ts (combine, §9.1),
+                           difference.ts (difference, §9.6),
                            export.ts (export formatters and defaults, §11.8)
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
@@ -385,6 +386,25 @@ return 0 (issue #46).
 A CSS grayscale filter on the whole layout, to compare lightness
 by eye.
 
+### 9.6 Color difference
+
+`difference(a, b, blindnessTypes)` (`#lib/core/difference.ts`)
+returns the CIEDE2000 difference between two colors (`level`,
+0–100), the same for each simulation applied to both colors
+(`simulated`, in order), and `minLevel`, the lowest of them. It
+is symmetric and not part of `combine`.
+
+Reference values (rules of thumb, not built into the CLI): about
+1 is the just-noticeable difference, varying with hue and
+saturation
+([Wikipedia](https://en.wikipedia.org/wiki/Color_difference)); at
+least 10 between any two colors of a categorical palette (Lu et
+al., "Palettailor", IEEE VIS 2020,
+[arXiv:2009.02969](https://arxiv.org/abs/2009.02969)); smaller
+marks need more, points more than bars or lines (Szafir,
+"Modeling Color Difference for Visualization Design", IEEE TVCG
+2018, doi:10.1109/TVCG.2017.2744359).
+
 ## 10. Permalinks
 
 ### 10.1 Flow
@@ -624,7 +644,11 @@ rejected naming it). Levels (`level`, simulated `level`,
 threshold (4.496 stays 4.49, not the 4.5 AA). With `--blindness`,
 each combination also has `minLevel` and `minGrade` (worst of
 base and simulated); without it they are omitted. Combinations
-are computed over all visible colors. `export` options:
+are computed over all visible colors. `--difference` adds
+`difference: {level, minLevel, simulated: [{type, level}]}` to
+each combination (§9.6; `minLevel` only with `--blindness`,
+levels truncated like the others; it never filters, `--min` still
+applies to contrast). `export` options:
 `--format css|sass|tokens` (required), `--color-format`,
 `--casing`, `--prefix`, `--precision`, defaulting to
 `defaultExportSettings` (`#lib/core/export.ts`). `--origin`

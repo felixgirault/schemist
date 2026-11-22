@@ -13,7 +13,8 @@ import type {
 // Re-checks the trees of the case's expect.json with the CLI. Passes
 // when every tree exists and is valid, has every token of the
 // expected pairs, and every pair meets its targets (wcag2, apca) in
-// the worst case of the color blindness simulations, in every tree.
+// the worst case of the color blindness simulations, in every tree
+// (`difference` is the CIEDE2000 difference between the two colors).
 // Every expected hex must appear in at least one tree. Takes no
 // settings.
 //
@@ -21,7 +22,7 @@ import type {
 //   weight: 3
 export type Check = Record<string, never>;
 
-const metrics: Metric[] = ['wcag2', 'apca'];
+const metrics: Metric[] = ['wcag2', 'apca', 'difference'];
 
 type Findings = {
 	problems: string[];

@@ -59,7 +59,12 @@ uses (`--pair`) with both `--contrast wcag2` and
 `--blindness protanomaly,deuteranomaly,tritanomaly`, and read
 `minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
 text, and 3 for large text and non-text UI such as input borders
-and focus rings. What you usually tune is the `amount` of
+and focus rings. Contrast doesn't tell whether two colors look
+different: for categorical colors (chart series, tags, map
+regions), check every pair among them with
+`eval --difference --blindness …` and aim for a
+`difference.minLevel` of at least 10, more for small marks like
+scatter plot points. What you usually tune is the `amount` of
 Lightness (`l`) and Saturation (`s`) nodes: adjust, re-run, and
 repeat until every pair passes. Then `export` it and give the
 permalinks back so the palettes can be opened and tweaked in the
@@ -146,10 +151,11 @@ $ npm run cli -- export palette.json --format css --prefix color
 `minLevel` and `minGrade`, the worst case with the simulations),
 `--min <level>` (hides combinations whose worst level is below)
 and `--pair 'fg/bg'`, repeatable, to get only the pairs you care
-about, in that order (`\/` stands for a `/` in a name). Levels
-are truncated to 2 decimals. `export` takes `--color-format`,
-`--casing`, `--prefix` and `--precision`. Both take `--origin`
-for the permalink.
+about, in that order (`\/` stands for a `/` in a name).
+`--difference` adds the CIEDE2000 color difference of each pair
+(and of its simulations). Levels are truncated to 2 decimals.
+`export` takes `--color-format`, `--casing`, `--prefix` and
+`--precision`. Both take `--origin` for the permalink.
 
 Changing the CLI, its error messages or this section? Agents read
 them, so [evals/](evals/README.md) runs agents on real prompts

@@ -156,7 +156,22 @@
 		{"fg": "chart/5", "bg": "bg/page", "wcag2": 3},
 		{"fg": "chart/5", "bg": "bg/surface", "wcag2": 3},
 		{"fg": "chart/6", "bg": "bg/page", "wcag2": 3},
-		{"fg": "chart/6", "bg": "bg/surface", "wcag2": 3}
+		{"fg": "chart/6", "bg": "bg/surface", "wcag2": 3},
+		{"fg": "chart/1", "bg": "chart/2", "difference": 10},
+		{"fg": "chart/1", "bg": "chart/3", "difference": 10},
+		{"fg": "chart/1", "bg": "chart/4", "difference": 10},
+		{"fg": "chart/1", "bg": "chart/5", "difference": 10},
+		{"fg": "chart/1", "bg": "chart/6", "difference": 10},
+		{"fg": "chart/2", "bg": "chart/3", "difference": 10},
+		{"fg": "chart/2", "bg": "chart/4", "difference": 10},
+		{"fg": "chart/2", "bg": "chart/5", "difference": 10},
+		{"fg": "chart/2", "bg": "chart/6", "difference": 10},
+		{"fg": "chart/3", "bg": "chart/4", "difference": 10},
+		{"fg": "chart/3", "bg": "chart/5", "difference": 10},
+		{"fg": "chart/3", "bg": "chart/6", "difference": 10},
+		{"fg": "chart/4", "bg": "chart/5", "difference": 10},
+		{"fg": "chart/4", "bg": "chart/6", "difference": 10},
+		{"fg": "chart/5", "bg": "chart/6", "difference": 10}
 	],
 	"hex": ["#be7ef3", "#1fb5a0"]
 }

@@ -1,10 +1,12 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import type {ColorFormat} from '#lib/color/formatting.js';
+import type {RgbColor} from '#lib/color/types.js';
 import type {
 	BlindnessType,
 	Combination
 } from '#lib/core/contrast.js';
 import {combine} from '#lib/core/contrast.js';
+import {difference} from '#lib/core/difference.js';
 import {evaluate} from '#lib/core/evaluate.js';
 import {
 	defaultExportSettings,
@@ -33,6 +35,7 @@ Commands:
 eval options:
   --contrast wcag2|apca       Contrast metric (default wcag2)
   --blindness a,b,c           protanomaly, deuteranomaly, tritanomaly
+  --difference                Add the CIEDE2000 color difference of each pair
   --min <level>               Only combinations with a min level >= level
   --pair 'fg/bg'              Only this pair, repeatable, in the given order
                               (use \\/ for a "/" in a name)
@@ -93,6 +96,7 @@ const parse = (argv: string[]) => {
 				'contrast': {type: 'string'},
 				'blindness': {type: 'string'},
 				'min': {type: 'string'},
+				'difference': {type: 'boolean'},
 				'format': {type: 'string'},
 				'color-format': {type: 'string'},
 				'casing': {type: 'string'},
@@ -111,6 +115,27 @@ const parse = (argv: string[]) => {
 // threshold.
 export const truncate = (level: number) =>
 	Math.floor(level * 100) / 100;
+
+const differenceOf = (
+	a: RgbColor,
+	b: RgbColor,
+	blindness: BlindnessType[]
+) => {
+	const {level, simulated, minLevel} = difference(
+		a,
+		b,
+		blindness
+	);
+
+	return {
+		level: truncate(level),
+		...(blindness.length && {minLevel: truncate(minLevel)}),
+		simulated: simulated.map(({type, level}) => ({
+			type,
+			level: truncate(level)
+		}))
+	};
+};
 
 // Keeps the combinations of the given [fg, bg] pairs, in that order;
 // all of them when there are no pairs.
@@ -287,7 +312,14 @@ export const run = (
 						level: truncate(level),
 						grade
 					})
-				)
+				),
+				...(values.difference && {
+					difference: differenceOf(
+						contrast.bg,
+						contrast.fg,
+						blindness as BlindnessType[]
+					)
+				})
 			})
 		),
 		permalink: link

@@ -1,7 +1,7 @@
 // Runs `schemist <args>` with the tree on stdin and returns stdout.
 export type Cli = (args: string[], tree: string) => string;
 
-export type Metric = 'wcag2' | 'apca';
+export type Metric = 'wcag2' | 'apca' | 'difference';
 
 export type Color = {name: string; hex: string};
 
@@ -27,7 +27,7 @@ export const colors = (cli: Cli, tree: string): Color[] =>
 	evaluated(cli, tree, []).colors;
 
 // The level of each pair in the worst case of the color blindness
-// simulations.
+// simulations. The `difference` metric is the CIEDE2000 difference.
 export const worstLevels = (
 	cli: Cli,
 	tree: string,
@@ -35,8 +35,9 @@ export const worstLevels = (
 	pairs: {fg: string; bg: string}[]
 ): PairLevel[] =>
 	evaluated(cli, tree, [
-		'--contrast',
-		metric,
+		...(metric === 'difference'
+			? ['--difference']
+			: ['--contrast', metric]),
 		'--blindness',
 		allBlindnessTypes,
 		...pairs.flatMap(({fg, bg}) => [
@@ -47,14 +48,16 @@ export const worstLevels = (
 		({
 			fg,
 			bg,
-			minLevel
+			minLevel,
+			difference
 		}: {
 			fg: string;
 			bg: string;
 			minLevel: number;
+			difference?: {minLevel: number};
 		}) => ({
 			fg,
 			bg,
-			level: minLevel
+			level: (difference ?? {minLevel}).minLevel
 		})
 	);
