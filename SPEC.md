@@ -86,8 +86,9 @@ src/
     packing/               Permalink encoding (§10)
     components/            UI (§11)
     utils/                 Generic helpers (arrays, css, math, strings, …)
-    tree.ts                parseTree / serializeTree (tree ⇄ NodeData)
-    palette.ts             getRootNode (initial tree from URL, storage or random)
+    tree.ts                parseTree / serializeTree (tree ⇄ NodeData),
+                           parsePairs / namePairs (pairs ⇄ names, §8.1)
+    palette.ts             loadPalette (initial tree and pairs from URL, storage or random)
     routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
@@ -229,17 +230,19 @@ visible outputs without the store, as `PaletteColor`s
 
 ### 5.3 Tree data (`#lib/tree.ts`, `#lib/core/tree.ts`)
 
-`NodeData = {id?, type, token?, args?, children?, isHidden?}`
+`NodeData = {id?, type, token?, args?, children?, isHidden?, pairs?}`
 (`#lib/core/nodes.ts`) is the plain form of a tree, used by
 presets, permalinks, history snapshots and the CLI, with `type` a
 `NodeType` (§6). `parseTree(NodeData) → Node` merges given `args`
 over the type defaults and reuses `id` when set;
-`serializeTree(Node) → IdentifiedNodeData` (a tree whose ids are
-all set) includes ids and omits empty tokens, args and children.
+`serializeTree(Node, pairs?) → IdentifiedNodeData` (a tree whose
+ids are all set) includes ids, omits empty tokens, args and
+children, and writes the root's pairs (§8.1).
 Permalinks don't store ids. `changedArg` and `withIds` live in
 `#lib/core/tree.ts`.
 
-`validateTree(data, path)` (`#lib/core/tree.ts`) checks data from
+`validateTree(data, path, isRoot?)` (`#lib/core/tree.ts`, which
+also accepts the root's `pairs`) checks data from
 outside and returns a `NodeData`: unknown keys, node types and
 params, and invalid values are rejected naming their path. Color
 args are CSS strings, converted to colors. The CLI (§14)
@@ -352,9 +355,34 @@ each exporting a single reactive object.
 | `root`           | Root `Node` (`undefined` until the palette component mounts)                                        |
 | `outputs`        | `collectOutputs(root)`, updated synchronously                                                       |
 | `settledOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
-| `permalink`      | `permalink(serializeTree(root), window.location.origin)` (§10.1)                                    |
+| `storedPairs`    | Declared pairs as set, `{fg: Node, bg: Node, wcag2?, apca?, difference?}` (`NodePair`), set on load |
+| `pairs`          | `storedPairs` whose two nodes are still in the tree                                                 |
+| `unsavedPairs`   | `{pair, names}` for the pairs a permalink cannot hold (see below)                                   |
+| `permalink`      | `permalink(serializeTree(root, pairs), window.location.origin)` (§10.1)                             |
 | `colors`         | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                  |
 | `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                             |
+
+`setPair(fg, bg, targets)` declares or replaces a pair, or
+removes it when it has no target.
+
+**Pairs hold nodes, never names.** `NodePair` has no name field,
+so a pair cannot go out of sync with its colors: a rename (own or
+a parent's `On $`) changes nothing, a move keeps the same nodes,
+and a removed node takes its pairs out of `pairs` (a pair is
+never kept on a node that left the tree). Names appear only when
+saving and loading, in `#lib/tree.ts`, always through
+`resolvePairs` (§9.7): `serializeTree(root, pairs)` writes
+`root.pairs` with `namePairs(root, pairs)`, and
+`parsePairs(tree, root)` turns the saved names into nodes. A
+hidden color keeps its pairs (they are shown as hidden, not
+checked). Saving needs unique names: a pair with a name shared by
+several colors (hidden ones included) is in `unsavedPairs`, with
+the names to rename, and left out of the permalink until then; no
+other pair is dropped. On load, a pair that does not resolve is
+dropped and logged (`console.error`), the rest of the palette
+opens. A round-trip test (serialize, pack, unpack, parse) after
+renames, parent renames, moves, removals and hides checks that
+every saveable pair comes back on the same colors.
 
 The debounce keeps single edits snappy while throttling the
 expensive combination computations during slider drags.
@@ -556,11 +584,12 @@ target (`pass`).
 - **Share** copies the permalink to the clipboard and shows "Link
   copied" (or a hint to copy it from the address bar if the
   clipboard is unavailable) for 2 seconds.
-- On load, `getRootNode()` unpacks `?preset=`, which validates
+- On load, `loadPalette()` unpacks `?preset=`, which validates
   the tree with `validateTree` (§5.3), else the palette stored in
-  `localStorage`. If both are missing or invalid (errors are
-  logged), the tree is a single Custom color node with a random
-  usable color.
+  `localStorage` (leniently: a pair that does not resolve is
+  dropped and logged, the palette is kept, §8.1). If both are
+  missing or invalid (errors are logged), the tree is a single
+  Custom color node with a random usable color.
 - Exports embed the permalink (CSS/Sass comment, design tokens
   description).
 

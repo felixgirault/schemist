@@ -12,6 +12,7 @@ import {
 	isPresetDef,
 	remapArgs
 } from '#lib/core/nodes.js';
+import type {ResolvedPair} from '#lib/core/pairs.js';
 import defs from '#lib/definitions/index.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
@@ -141,6 +142,16 @@ export const createNode = (
 	token = '',
 	id?: string
 ) => new Node(type, isHidden, token, id);
+
+// A declared pair, on the nodes themselves rather than their names,
+// so that it follows them through renames and moves.
+export type NodePair = ResolvedPair<Node>;
+
+// All nodes, hidden ones included, in tree order.
+export const collectNodes = (node: Node): Node[] => [
+	node,
+	...node.children.flatMap(collectNodes)
+];
 
 // Outputs of all visible nodes, in tree order, with presets
 // replaced by their colors.

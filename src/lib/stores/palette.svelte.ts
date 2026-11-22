@@ -1,13 +1,18 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
+import type {PairTargets} from '#lib/core/nodes.js';
 import {permalink} from '#lib/routing.js';
 import type {
 	Node,
-	NodeOutputRecord
+	NodeOutputRecord,
+	NodePair
 } from '#lib/stores/nodes.svelte.js';
-import {collectOutputs} from '#lib/stores/nodes.svelte.js';
-import {serializeTree} from '#lib/tree.js';
+import {
+	collectNodes,
+	collectOutputs
+} from '#lib/stores/nodes.svelte.js';
+import {namePairs, serializeTree} from '#lib/tree.js';
 import {
 	debounce,
 	withElapsedTime
@@ -16,6 +21,24 @@ import {clamp} from '#lib/utils/math.js';
 
 class Palette {
 	root = $state<Node>();
+	// Declared pairs, as they were set: some may be of nodes since
+	// removed, see `pairs`.
+	storedPairs = $state.raw<NodePair[]>([]);
+	// The stored pairs whose two nodes are still in the tree, so
+	// that no removal has to remember the pairs.
+	pairs = $derived.by(() => {
+		const nodes = new Set(
+			this.root ? collectNodes(this.root) : []
+		);
+
+		return this.storedPairs.filter(
+			({fg, bg}) => nodes.has(fg) && nodes.has(bg)
+		);
+	});
+	// The pairs a permalink cannot hold until a color is renamed
+	unsavedPairs = $derived(
+		this.root ? namePairs(this.root, this.pairs).unsaved : []
+	);
 	outputs = $derived(
 		this.root ? collectOutputs(this.root) : {}
 	);
@@ -51,8 +74,26 @@ class Palette {
 		const {origin} = window.location;
 
 		return this.root
-			? permalink(serializeTree(this.root), origin)
+			? permalink(serializeTree(this.root, this.pairs), origin)
 			: origin;
+	}
+
+	// Declares the pair of two nodes, or removes it with no target.
+	setPair(
+		fg: Node,
+		bg: Node,
+		{wcag2, apca, difference}: PairTargets
+	) {
+		const others = this.pairs.filter(
+			(pair) => pair.fg !== fg || pair.bg !== bg
+		);
+
+		this.storedPairs =
+			wcag2 === undefined &&
+			apca === undefined &&
+			difference === undefined
+				? others
+				: [...others, {fg, bg, wcag2, apca, difference}];
 	}
 
 	constructor() {

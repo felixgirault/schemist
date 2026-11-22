@@ -4,7 +4,7 @@ import {argOf} from '#lib/core/nodes.js';
 import color from '#lib/definitions/nodes/color.js';
 import {pack} from '#lib/packing/index.js';
 import {afterEach, expect, test, vi} from 'vitest';
-import {getRootNode} from './palette';
+import {loadPalette} from './palette';
 
 const packed = (hex: string) =>
 	pack({type: 'clr', args: {color: parseColor(hex)[1]!}});
@@ -18,7 +18,7 @@ const load = (preset: string | null, stored: string | null) => {
 
 	vi.stubGlobal('localStorage', {getItem: () => stored});
 	return formatSchemistToHex(
-		argOf(getRootNode().args, color.params[0])
+		argOf(loadPalette().root.args, color.params[0])
 	);
 };
 
