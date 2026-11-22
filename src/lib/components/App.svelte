@@ -111,7 +111,10 @@
 		<header>
 			<h2 class="h2">
 				Combinations <span>
-					{#if combinations.mode === 'difference'}
+					{#if combinations.mode === 'pairs'}
+						({combinations.passingPairs} / {combinations
+							.pairChecks.length})
+					{:else if combinations.mode === 'difference'}
 						({combinations.differences.filter(
 							({minLevel}) =>
 								minLevel >= combinations.minDifference

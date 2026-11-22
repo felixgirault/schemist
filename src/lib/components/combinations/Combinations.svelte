@@ -8,6 +8,7 @@
 	import DifferenceMatrix from '#lib/components/combinations/DifferenceMatrix.svelte';
 	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
 	import ModeFilter from '#lib/components/combinations/ModeFilter.svelte';
+	import PairMatrix from '#lib/components/combinations/PairMatrix.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
@@ -28,7 +29,7 @@
 				{#if combinations.mode === 'contrast'}
 					<ContrastTypeFilter />
 					<ContrastFilter />
-				{:else}
+				{:else if combinations.mode === 'difference'}
 					<DifferenceFilter />
 				{/if}
 				<BlindnessFilter />
@@ -37,7 +38,9 @@
 		{/if}
 	</div>
 
-	{#if combinations.mode === 'difference'}
+	{#if combinations.mode === 'pairs'}
+		<PairMatrix />
+	{:else if combinations.mode === 'difference'}
 		<DifferenceMatrix />
 	{:else}
 		<div class="list">

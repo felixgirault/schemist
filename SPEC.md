@@ -402,10 +402,15 @@ expensive combination computations during slider drags.
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                    |
 | `comparedColors`              | `sortedColors` restricted to the Colors filter (all when empty)                                                                                                                                 |
 | `previewed`                   | The combination matching `previewedUid`                                                                                                                                                         |
-| `mode`                        | `'contrast'` (default) or `'difference'` (§11.5); not persisted                                                                                                                                 |
+| `mode`                        | `'contrast'` (default), `'difference'` or `'pairs'` (§11.5); not persisted                                                                                                                      |
 | `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                     |
 | `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b` |
 | `openDifferenceId`            | Id of the pair shown in the matrix details, or `null`                                                                                                                                           |
+| `pairChecks`                  | `{id, pair, fg, bg, checks, pass}` for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations   |
+| `passingPairs`                | Count of `pairChecks` that pass                                                                                                                                                                 |
+| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                    |
+| `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                |
+| `openPair`                    | `{fg, bg, nodes, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                          |
 | `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                               |
 
 ### 8.3 `features`
@@ -737,8 +742,8 @@ change.
 
 ### 11.5 Combinations panel
 
-- A **Contrast | Difference** switch (`mode`). Difference mode is
-  described below the contrast one.
+- A **Contrast | Difference | Pairs** switch (`mode`). Difference
+  and Pairs modes are described below the contrast one.
 - Filters, shown with at least two colors: **Colors** (background
   restriction, with Reset), **Contrast type**, **Minimum contrast
   level**, **Color blindness simulation**, **Luminosity
@@ -763,6 +768,34 @@ change.
   exists. The matrix scrolls horizontally when wider than the
   panel. With fewer than two compared colors the panel asks to
   select at least two.
+
+**Pairs mode** shows the pairs declared in the palette (§9.7),
+built on the difference matrix pieces (`matrix.css`, shared with
+it; the panel is a single root element, as the global
+`.data-layout` grid needs): a full grid, backgrounds as rows and
+foregrounds as columns, of compact cells, with swatch-only
+headers (name as tooltip and accessible name) and sticky row
+headers. Nothing is drawn on the diagonal. A declared cell shows
+a check, or a warning icon with a dashed outline when the pair
+misses one of its targets in the worst case of the selected
+simulations; an undeclared cell is empty. Each button's
+accessible name says whether the pair meets its targets, misses
+them, or is not declared. Activating a cell (it is a button, so
+keyboard accessible) opens, in an `elevated` card under the grid,
+one number field per target (WCAG 2 contrast, APCA contrast,
+color difference; a value is applied on change, clearing every
+field removes the pair), and for each declared target the
+measured level for normal vision and each simulation with an icon
+and a text alternative for met or not met, and a **Remove pair**
+button. The panel closes the card when a color is no longer
+compared. Pairs with a hidden color are listed under the grid as
+not checked. A notice names the colors to rename when pairs
+cannot be saved (§8.1). The heading counts passing pairs /
+declared pairs (`pairChecks`; hidden pairs are in neither).
+Filters: **Colors** restricts the grid's rows and columns,
+**Color blindness simulation** and **Luminosity analysis** work
+as in the other modes; **Contrast type** and the minimum fields
+are hidden, since each pair has its own targets.
 
 ### 11.6 Theming
 
@@ -831,21 +864,28 @@ source (link, storage, random). Characterization snapshots cover
 the outputs (hex values and names) of every preset under a few
 root colors, `combinations.all` (WCAG 2 and APCA, with and
 without simulations) and the CSS, Sass and design tokens exports.
-Unit tests of `exportTokens` cover nesting, empty parts, `$`
-parts, conflicts and duplicates (with no color dropped, whatever
-the tree order); `names.test.ts` renders the tokens export and
-its conflict notice. Export components are rendered server-side;
-there are no browser or end-to-end tests. A core test asserts
-that `evaluate` matches `collectOutputs` for every preset, and
-store tests cover preset outputs, children and expanding. CLI
-tests cover tree validation and argument handling, and build the
-CLI to run it under plain Node (it crashes on runes if a store
-leaks into `core/`), comparing `eval` with the core and checking
-that an invalid tree, or conflicting token names, fails with its
-message. The eval harness (§15) is tested on small recorded
-transcripts and trees under `evals/fixtures/`, with the core
-standing in for the CLI: no model is called. CI runs the unit
-tests and `check` (not `lint` or `build`).
+Declared pairs have unit tests of the resolver and of the checks
+(`core/pairs.test.ts`), of the packing (`packing/v2.test.ts`), of
+tree validation and `eval` (CLI tests), of the store round trip
+(serialize, pack, unpack, parse after renames, moves, removals,
+hides and duplicate names; `presets.test.ts`), of their undo and
+redo and of swapping (`stores/history.test.ts`), and a
+server-side render of the Pairs panel. Unit tests of
+`exportTokens` cover nesting, empty parts, `$` parts, conflicts
+and duplicates (with no color dropped, whatever the tree order);
+`names.test.ts` renders the tokens export and its conflict
+notice. Export components are rendered server-side; there are no
+browser or end-to-end tests. A core test asserts that `evaluate`
+matches `collectOutputs` for every preset, and store tests cover
+preset outputs, children and expanding. CLI tests cover tree
+validation and argument handling, and build the CLI to run it
+under plain Node (it crashes on runes if a store leaks into
+`core/`), comparing `eval` with the core and checking that an
+invalid tree, or conflicting token names, fails with its message.
+The eval harness (§15) is tested on small recorded transcripts
+and trees under `evals/fixtures/`, with the core standing in for
+the CLI: no model is called. CI runs the unit tests and `check`
+(not `lint` or `build`).
 
 ## 13. Known issues and limits
 

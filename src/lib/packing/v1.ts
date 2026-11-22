@@ -134,7 +134,10 @@ export const pack = (
 export const unpack = (
 	data: string,
 	colorCodec = hexCodec,
-	unpackExtra?: (section: string, index: string[]) => PresetPair[]
+	unpackExtra?: (
+		section: string,
+		index: string[]
+	) => PresetPair[]
 ) => {
 	const [rootIndex, inlinePacked, ...rest] = data.split('@');
 	const inlineIndex = rest.pop()!;
@@ -208,7 +211,9 @@ export const unpack = (
 		)
 	});
 
-	const tree = inflateNode(nodes[parseInt(rootIndex, 16)]) as object;
+	const tree = inflateNode(
+		nodes[parseInt(rootIndex, 16)]
+	) as object;
 	const pairs = unpackExtra?.(rest[0], index);
 
 	return validateTree(

@@ -28,6 +28,15 @@
 			<label class="button" for="mode-difference">
 				Difference
 			</label>
+
+			<input
+				class="button-trigger hidden"
+				id="mode-pairs"
+				type="radio"
+				value="pairs"
+				bind:group={combinations.mode}
+			/>
+			<label class="button" for="mode-pairs">Pairs</label>
 		</div>
 	</div>
 </fieldset>

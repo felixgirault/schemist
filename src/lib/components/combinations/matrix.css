@@ -1,0 +1,91 @@
+/* Shared by the difference and pairs matrices. */
+.matrix-panel .scroller {
+	overflow-x: auto;
+}
+
+/* Overrides the global table styles, made for data tables. */
+.matrix-panel .matrix {
+	width: auto;
+	margin: 0;
+	border-collapse: separate;
+	border-spacing: 2px;
+}
+
+.matrix-panel th,
+.matrix-panel td {
+	padding: 0;
+	border: 0;
+	font-weight: normal;
+	text-align: center;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+.matrix-panel th[scope='row'] {
+	position: sticky;
+	left: 0;
+	background: var(--bg);
+}
+
+.matrix-panel .swatch {
+	display: inline-block;
+	width: 1rem;
+	height: 1rem;
+	border: 1px solid currentColor;
+	border-radius: 50%;
+	vertical-align: middle;
+}
+
+.matrix-panel .cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 2rem;
+	height: 1.75rem;
+	padding: 0;
+	color: inherit;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: var(--radius);
+	font: inherit;
+	font-size: 0.875rem;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.matrix-panel .cell[aria-pressed='true'] {
+	background: var(--shadow);
+}
+
+/* Off target: a dashed outline, besides the warning icon. */
+.matrix-panel .cell--below {
+	border: 2px dashed currentColor;
+}
+
+.matrix-panel .cell svg,
+.matrix-panel .row svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.matrix-panel .details {
+	width: fit-content;
+	max-width: 100%;
+	margin-top: 1rem;
+	padding: 1rem;
+	border-radius: var(--radius);
+	background: var(--bg);
+}
+
+.matrix-panel .row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem 0;
+}
+
+.matrix-panel .type {
+	min-width: 14ch;
+	font-variant: small-caps;
+}

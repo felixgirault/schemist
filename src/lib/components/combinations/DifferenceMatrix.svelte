@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import type {RgbColor} from '#lib/color/types.js';
+	import './matrix.css';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
 	import {simulation} from '#lib/core/contrast.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
@@ -27,7 +28,7 @@
 	<span class="swatch" style="background: {hex(color)};"></span>
 {/snippet}
 
-<div>
+<div class="matrix-panel">
 	{#if colors.length > 1}
 		<div class="scroller">
 			<table class="matrix">
@@ -129,95 +130,3 @@
 		<p>Select at least two colors to compare.</p>
 	{/if}
 </div>
-
-<style>
-	.scroller {
-		overflow-x: auto;
-	}
-
-	/* Overrides the global table styles, made for data tables. */
-	.matrix {
-		width: auto;
-		margin: 0;
-		border-collapse: separate;
-		border-spacing: 2px;
-	}
-
-	th,
-	td {
-		padding: 0;
-		border: 0;
-		font-weight: normal;
-		text-align: center;
-		vertical-align: middle;
-		white-space: nowrap;
-	}
-
-	th[scope='row'] {
-		position: sticky;
-		left: 0;
-		background: var(--bg);
-	}
-
-	.swatch {
-		display: inline-block;
-		width: 1rem;
-		height: 1rem;
-		border: 1px solid currentColor;
-		border-radius: 50%;
-		vertical-align: middle;
-	}
-
-	.cell {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		box-sizing: border-box;
-		width: 2rem;
-		height: 1.75rem;
-		padding: 0;
-		color: inherit;
-		background: transparent;
-		border: 1px solid transparent;
-		border-radius: var(--radius);
-		font: inherit;
-		font-size: 0.875rem;
-		white-space: nowrap;
-		cursor: pointer;
-	}
-
-	.cell[aria-pressed='true'] {
-		background: var(--shadow);
-	}
-
-	.cell--below {
-		border: 2px dashed currentColor;
-	}
-
-	.cell :global(svg),
-	.row :global(svg) {
-		width: 1rem;
-		height: 1rem;
-	}
-
-	.details {
-		width: fit-content;
-		max-width: 100%;
-		margin-top: 1rem;
-		padding: 1rem;
-		border-radius: var(--radius);
-		background: var(--bg);
-	}
-
-	.row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.25rem 0;
-	}
-
-	.type {
-		min-width: 14ch;
-		font-variant: small-caps;
-	}
-</style>

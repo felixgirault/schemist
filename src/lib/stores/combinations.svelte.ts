@@ -5,7 +5,10 @@ import {combine} from '#lib/core/contrast.js';
 import type {Difference} from '#lib/core/difference.js';
 import {difference} from '#lib/core/difference.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
-import type {Node} from '#lib/stores/nodes.svelte.js';
+import type {TargetCheck} from '#lib/core/pairs.js';
+import {checkPair} from '#lib/core/pairs.js';
+import type {Node, NodePair} from '#lib/stores/nodes.svelte.js';
+import {collectNodes} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
 
@@ -15,8 +18,22 @@ export type PairDifference = Difference & {
 	b: PaletteColor;
 };
 
+// A declared pair checked against its targets, `id` being
+// `<bgId>-<fgId>`.
+export type PairCheck = {
+	id: string;
+	pair: NodePair;
+	fg: PaletteColor;
+	bg: PaletteColor;
+	checks: TargetCheck[];
+	pass: boolean;
+};
+
 class Combinations {
-	mode = $state<'contrast' | 'difference'>('contrast');
+	mode = $state<'contrast' | 'difference' | 'pairs'>(
+		'contrast'
+	);
+	openPairIds = $state<{fg: string; bg: string} | null>(null);
 	minDifference = $state(10);
 	openDifferenceId = $state<string | null>(null);
 	colorFilters = $state<Node['id'][]>([]);
@@ -102,6 +119,81 @@ class Combinations {
 			({id}) => id === this.openDifferenceId
 		) ?? null
 	);
+
+	// declared pairs of visible colors, checked as they are measured
+	pairChecks = $derived.by(() => {
+		const byId = new Map(palette.colors.map((e) => [e.id, e]));
+
+		return palette.pairs.flatMap((pair): PairCheck[] => {
+			const fg = byId.get(pair.fg.id);
+			const bg = byId.get(pair.bg.id);
+
+			if (!fg || !bg) return [];
+
+			const checks = checkPair(
+				pair,
+				fg.rgbColor,
+				bg.rgbColor,
+				this.blindnessTypes
+			);
+
+			return [
+				{
+					id: `${bg.id}-${fg.id}`,
+					pair,
+					fg,
+					bg,
+					checks,
+					pass: checks.every(({pass}) => pass)
+				}
+			];
+		});
+	});
+
+	passingPairs = $derived(
+		this.pairChecks.filter(({pass}) => pass).length
+	);
+
+	// declared pairs left out of the checks
+	hiddenPairs = $derived(
+		palette.pairs.filter(
+			({fg, bg}) => fg.isHidden || bg.isHidden
+		)
+	);
+
+	// The cell shown in the details: its colors, and its pair if it
+	// is declared. `null` once a color is gone.
+	openPair = $derived.by(() => {
+		const ids = this.openPairIds;
+		const fg = this.comparedColors.find(
+			({id}) => id === ids?.fg
+		);
+		const bg = this.comparedColors.find(
+			({id}) => id === ids?.bg
+		);
+
+		if (!fg || !bg) return null;
+
+		return {
+			fg,
+			bg,
+			nodes: this.nodesOf(fg, bg),
+			check: this.pairChecks.find(
+				({id}) => id === `${bg.id}-${fg.id}`
+			)
+		};
+	});
+
+	nodesOf(fg: PaletteColor, bg: PaletteColor) {
+		const nodes = palette.root
+			? collectNodes(palette.root)
+			: [];
+
+		return {
+			fg: nodes.find(({id}) => id === fg.id)!,
+			bg: nodes.find(({id}) => id === bg.id)!
+		};
+	}
 
 	previewed = $derived(
 		this.previewedUid

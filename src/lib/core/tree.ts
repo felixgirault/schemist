@@ -63,9 +63,14 @@ const validatePairs = (value: unknown, path: string) => {
 
 			if (key === 'fg' || key === 'bg') {
 				if (typeof v !== 'string') {
-					throw new Error(`${at}.${key}: expected a string`);
+					throw new Error(
+						`${at}.${key}: expected a string`
+					);
 				}
-			} else if (typeof v !== 'number' || !Number.isFinite(v)) {
+			} else if (
+				typeof v !== 'number' ||
+				!Number.isFinite(v)
+			) {
 				throw new Error(`${at}.${key}: expected a number`);
 			}
 		}
@@ -134,7 +139,10 @@ export const validateTree = (
 	}
 
 	for (const key of Object.keys(node)) {
-		if (!nodeKeys.includes(key) && !(isRoot && key === 'pairs')) {
+		if (
+			!nodeKeys.includes(key) &&
+			!(isRoot && key === 'pairs')
+		) {
 			throw new Error(`${path}: unknown key "${key}"`);
 		}
 	}
