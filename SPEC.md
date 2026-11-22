@@ -670,18 +670,18 @@ change.
 - Difference mode hides **Contrast type** and swaps **Minimum
   contrast level** for **Minimum difference** (number field). The
   cards give way to a lower-triangle matrix with a row and a
-  column per compared color. Row headers show swatch and name and
-  stay sticky on the left; column headers show the swatch only,
-  the name being a tooltip and the accessible name. Each cell is
-  a fixed-width button with `minLevel` rounded to a whole number
-  in the panel's text color (the label keeps 1 decimal); cells
-  below the minimum get a dashed outline and a warning icon in
-  place of the number. Activating a cell shows, under the matrix,
-  a row for normal vision and one per simulation (the two
-  simulated colors and the level); the panel closes it when the
-  pair no longer exists. The matrix scrolls horizontally when
-  wider than the panel. With fewer than two compared colors the
-  panel asks to select at least two.
+  column per compared color. Row and column headers show the
+  swatch only, the name being a tooltip and the accessible name;
+  row headers stay sticky on the left. Each cell is a fixed-width
+  button with `minLevel` rounded to a whole number in the panel's
+  text color (the label keeps 1 decimal); cells below the minimum
+  get a dashed outline and a warning icon in place of the number.
+  Activating a cell shows, under the matrix, a row for normal
+  vision and one per simulation (the two simulated colors and the
+  level); the panel closes it when the pair no longer exists. The
+  matrix scrolls horizontally when wider than the panel. With
+  fewer than two compared colors the panel asks to select at
+  least two.
 
 ### 11.6 Theming
 

@@ -44,9 +44,9 @@
 			<tbody>
 				{#each colors.slice(1) as row, j (row.id)}
 					<tr>
-						<th scope="row">
+						<th scope="row" title={row.name}>
 							{@render swatch(row.rgbColor)}
-							{row.name}
+							<span class="hidden">{row.name}</span>
 						</th>
 						{#each colors.slice(0, j + 1) as column (column.id)}
 							{@const pair = byId.get(

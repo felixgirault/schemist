@@ -93,10 +93,12 @@ depends on the use.
 for each pair of the compared colors, once per pair, in
 `sortedColors` order.
 
-A compact lower triangle, so large sets stay scannable. Rows are
-labeled with the color's swatch and name, and stay in place while
-the matrix scrolls. Columns are labeled with the swatch alone,
-the name in its tooltip and accessible label. Each cell is a
+A compact lower triangle, so large sets stay scannable. Rows and
+columns are labeled with the swatch alone, the name in its
+tooltip and accessible label; row labels stay in place while the
+matrix scrolls. Names in row labels took too much width, and
+truncating them was rejected: similar colors are still told apart
+in the pair details, which name both colors. Each cell is a
 button of fixed width showing `minLevel` rounded to a whole
 number (about 1 is the just-noticeable difference, so decimals
 add little), in the panel's text color so it stays readable on
