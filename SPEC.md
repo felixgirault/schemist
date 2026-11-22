@@ -392,36 +392,36 @@ expensive combination computations during slider drags.
 
 ### 8.2 `combinations`
 
-| Member                        | Description                                                                                                                                                                                       |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `colorFilters`                | Node ids to restrict backgrounds to (empty = all)                                                                                                                                                 |
-| `contrastType`                | `'wcag2'` (default) or `'wcag3'` (APCA); changing it converts `minLevel` (§9.3)                                                                                                                   |
-| `minLevel`                    | Minimum contrast to list, default 0                                                                                                                                                               |
-| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                             |
-| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                |
-| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                   |
-| `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root                                                                                                            |
-| `all`                         | `combine(...)` of the filtered colors (§9.1)                                                                                                                                                      |
-| `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                      |
-| `comparedColors`              | `sortedColors` restricted to the Colors filter (all when empty)                                                                                                                                   |
-| `previewed`                   | The combination matching `previewedUid`                                                                                                                                                           |
-| `mode`                        | `'contrast'` (default), `'difference'` or `'pairs'` (§11.5); not persisted                                                                                                                        |
-| `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                       |
-| `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b`   |
-| `openDifferenceId`            | Id of the pair shown in the matrix details, or `null`                                                                                                                                             |
-| `pairChecks`                  | `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations     |
-| `passingPairs`                | Count of `pairChecks` that pass                                                                                                                                                                   |
-| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                      |
-| `use`                         | `'body'` (default), `'large'`, `'categories'` or `'custom'`: the use that dims the grid in pairs mode (§9.7 `uses`), and nothing else; `setUse(use)` sets it, Custom starting from the last use's targets |
-| `custom`                      | `PairTargets` of the Custom use, a missing one not checked                                                                                                                                        |
-| `useTargets`, `useName`       | The targets of the use (`custom` for Custom), and its name                                                                                                                                        |
-| `checkUse(fg, bg)`            | `checkPair` of the use's targets on a pair, as is and per selected simulation                                                                                                                     |
-| `toggleUse(fg, bg, use)`      | Sets every target of a built-in use (an entry of `uses`, not the filter's) on the pair, keeping its others, or removes them if it has them all at those values                                  |
-| `cellCount`, `passingCells`   | Ordered pairs of compared colors, and those passing `passesUse` (every target of the use met in the worst case)                                                                                   |
-| `requirements`                | The declared pairs of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                    |
-| `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                  |
-| `openPair`                    | `{fg, bg, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                                   |
-| `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                                 |
+| Member                        | Description                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `colorFilters`                | Node ids to restrict backgrounds to (empty = all)                                                                                                                                                                                     |
+| `contrastType`                | `'wcag2'` (default) or `'wcag3'` (APCA); changing it converts `minLevel` (§9.3)                                                                                                                                                       |
+| `minLevel`                    | Minimum contrast to list, default 0                                                                                                                                                                                                   |
+| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                 |
+| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                                                    |
+| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                                                       |
+| `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root                                                                                                                                                |
+| `all`                         | `combine(...)` of the filtered colors (§9.1)                                                                                                                                                                                          |
+| `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                                                          |
+| `comparedColors`              | `sortedColors` restricted to the Colors filter (all when empty)                                                                                                                                                                       |
+| `previewed`                   | The combination matching `previewedUid`                                                                                                                                                                                               |
+| `mode`                        | `'contrast'` (default), `'difference'` or `'pairs'` (§11.5); not persisted                                                                                                                                                            |
+| `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                                                           |
+| `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b`                                       |
+| `openDifferenceId`            | Id of the pair shown in the matrix details, or `null`                                                                                                                                                                                 |
+| `pairChecks`                  | `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
+| `passingPairs`                | Count of `pairChecks` that pass                                                                                                                                                                                                       |
+| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                          |
+| `use`                         | `'body'` (default), `'large'`, `'categories'` or `'custom'`: the use that dims the grid in pairs mode (§9.7 `uses`), and nothing else; `setUse(use)` sets it, Custom starting from the last use's targets                             |
+| `custom`                      | `PairTargets` of the Custom use, a missing one not checked                                                                                                                                                                            |
+| `useTargets`, `useName`       | The targets of the use (`custom` for Custom), and its name                                                                                                                                                                            |
+| `checkUse(fg, bg)`            | `checkPair` of the use's targets on a pair, as is and per selected simulation                                                                                                                                                         |
+| `toggleUse(fg, bg, use)`      | Sets every target of a built-in use (an entry of `uses`, not the filter's) on the pair, keeping its others, or removes them if it has them all at those values                                                                        |
+| `cellCount`, `passingCells`   | Ordered pairs of compared colors, and those passing `passesUse` (every target of the use met in the worst case)                                                                                                                       |
+| `requirements`                | The declared pairs of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                                           |
+| `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                                                      |
+| `openPair`                    | `{fg, bg, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                                                                       |
+| `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                                                                     |
 
 ### 8.3 `features`
 
@@ -805,59 +805,61 @@ simulation, side by side, each the simulated background with a
 bar in the simulated foreground (cells then are 2.75rem high).
 The tooltip has the names and the WCAG 2 contrast, then each
 target of the use per simulation and, for a declared pair, its
-uses (`, for Body text`), which the accessible name repeats. A declared cell gets a border in the panel's text color
-and a corner badge in the panel's colors: a check, or a warning
-icon with a dashed border when the pair misses one of its targets
-in the worst case of the selected simulations. Marks are in the
+uses (`, for Body text`), which the accessible name repeats. A
+declared cell gets a border in the panel's text color and a
+corner badge in the panel's colors: a check, or a warning icon
+with a dashed border when the pair misses one of its targets in
+the worst case of the selected simulations. Marks are in the
 panel's colors so they stay readable on any pair, and on the
 border so that the outline stays the focus ring. Each button's
 accessible name says whether the pair meets its targets, misses
 them, or is not declared. The filters set what cells are checked
-against, and only dim: **Check** picks a use (§9.7), or **Custom**, which shows
-a minimum field per metric (WCAG 2, APCA, difference; empty is
-not checked) and starts from the targets of the use picked last.
-The **Contrast type**, **Minimum contrast level** and **Minimum
-difference** filters are not shown in this mode. A cell whose
-pair misses a target of the use, in the worst case of the
-selected simulations, has its colors dimmed (not its marks), and
-its accessible name says whether it reaches the minimum.
-Activating a cell (a button, so keyboard accessible) only opens
-its card, or closes it when it is open already. The `elevated`
-card, a labelled region (`<section>`) docked in a column beside
-the grid (the grid scrolling on its own, the column sticky at the
-top), or under the grid when the panel is narrower than 48rem
-(container query). With no pair open the column is the
-requirements list (below); with one, the card. The card has: a large sample with both names in
-the foreground on the background; each target of the use (grade
-and level, or difference) for normal vision and each simulation,
-each row in its simulated colors with an icon and a text
-alternative for met or not met; the uses the pair is for (`usesOf`) or
-"Not declared"; one button per built-in use, **+ Body text**
-(accessible name "Require Body text") or **Body text ✓**
-("Remove Body text") when the pair holds its targets, calling
-`toggleUse` (sets every target of the use, replacing a target of
-another value); the filter plays no part; one number field per target (a value is
-applied on change, clearing every field removes the pair); for
-each declared target the measured levels; **Remove pair**; a
-**Preview** button toggling `previewedUid` to `<bgId>-<fgId>`
-(§11.5); and **Close**. The panel closes the card when a color is
-no longer compared. The requirements list is a labelled
-region titled **Requirements**: the declared pairs by use
-(`requirements`, Custom last, a pair under each use it holds),
-each a button with both swatches and names (foreground on
-background) and an icon with a text alternative for met or not
-met in the worst case of the selected simulations; activating
-one sets `openPairIds`, and **Close** comes back to the list.
-Pairs with a hidden color follow as **Not checked, a color is
-hidden**. With no declared pair, a hint says to open a cell and
-pick a use. Opening the card leaves the focus on the
-cell, so that the next cell is one key away; Esc (from anywhere),
-**Close** or the open cell close it. A notice names the colors to
-rename when pairs cannot be saved (§8.1). The heading counts
-cells meeting the use / cells (`passingCells`, `cellCount`); the
-hint gives the declared count. **Colors** restricts the grid's
-rows and columns, **Color blindness simulation** and **Luminosity
-analysis** work as in the other modes.
+against, and only dim: **Check** picks a use (§9.7), or
+**Custom**, which shows a minimum field per metric (WCAG 2, APCA,
+difference; empty is not checked) and starts from the targets of
+the use picked last. The **Contrast type**, **Minimum contrast
+level** and **Minimum difference** filters are not shown in this
+mode. A cell whose pair misses a target of the use, in the worst
+case of the selected simulations, has its colors dimmed (not its
+marks), and its accessible name says whether it reaches the
+minimum. Activating a cell (a button, so keyboard accessible)
+only opens its card, or closes it when it is open already. The
+`elevated` card, a labelled region (`<section>`) docked in a
+column beside the grid (the grid scrolling on its own, the column
+sticky at the top), or under the grid when the panel is narrower
+than 48rem (container query). With no pair open the column is the
+requirements list (below); with one, the card. The card has: a
+large sample with both names in the foreground on the background;
+each target of the use (grade and level, or difference) for
+normal vision and each simulation, each row in its simulated
+colors with an icon and a text alternative for met or not met;
+the uses the pair is for (`usesOf`) or "Not declared"; one button
+per built-in use, **+ Body text** (accessible name "Require Body
+text") or **Body text ✓** ("Remove Body text") when the pair
+holds its targets, calling `toggleUse` (sets every target of the
+use, replacing a target of another value); the filter plays no
+part; one number field per target (a value is applied on change,
+clearing every field removes the pair); for each declared target
+the measured levels; **Remove pair**; a **Preview** button
+toggling `previewedUid` to `<bgId>-<fgId>` (§11.5); and
+**Close**. The panel closes the card when a color is no longer
+compared. The requirements list is a labelled region titled
+**Requirements**: the declared pairs by use (`requirements`,
+Custom last, a pair under each use it holds), each a button with
+both swatches and names (foreground on background) and an icon
+with a text alternative for met or not met in the worst case of
+the selected simulations; activating one sets `openPairIds`, and
+**Close** comes back to the list. Pairs with a hidden color
+follow as **Not checked, a color is hidden**. With no declared
+pair, a hint says to open a cell and pick a use. Opening the card
+leaves the focus on the cell, so that the next cell is one key
+away; Esc (from anywhere), **Close** or the open cell close it. A
+notice names the colors to rename when pairs cannot be saved
+(§8.1). The heading counts cells meeting the use / cells
+(`passingCells`, `cellCount`); the hint gives the declared count.
+**Colors** restricts the grid's rows and columns, **Color
+blindness simulation** and **Luminosity analysis** work as in the
+other modes.
 
 ### 11.6 Theming
 
