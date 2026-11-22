@@ -8,4 +8,7 @@
   `--blindness protanomaly,deuteranomaly,tritanomaly`, and read
   `minLevel`: aim for 4.5 and Lc 60 for body text, 3 for input
   borders and focus rings, and iterate until every pair passes.
+  For categorical colors (chart series, tags), also check every
+  pair with `--difference` and aim for a `difference.minLevel` of
+  at least 10.
 - SPEC.md is the reference for the codebase.

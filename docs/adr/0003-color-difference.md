@@ -77,23 +77,35 @@ map), and the README gives reference points instead.
   be added if it proves tedious.
 - **Built-in grades**: no single threshold fits every use.
 
-## Open question
+## Reference values
 
-Which reference values the README gives for "noticeable" and
-"distinct enough for categorical data", with sources. To be
-settled during step 4, from published guidance, not invented.
+Rules of thumb for the README and SPEC, not built-in thresholds:
+
+- About 1 ΔE00 is the just-noticeable difference, varying with
+  hue and saturation
+  ([Wikipedia](https://en.wikipedia.org/wiki/Color_difference)).
+- At least 10 between any two colors of a categorical palette:
+  Palettailor makes it a hard constraint, citing Brychtová &
+  Çöltekin (Lu et al., IEEE VIS 2020,
+  [arXiv:2009.02969](https://arxiv.org/abs/2009.02969)).
+- Smaller marks need larger differences, points more than bars or
+  lines (Szafir, IEEE TVCG 2018, doi:10.1109/TVCG.2017.2744359).
 
 ## Plan
 
 1. Register `lab65`; add `core/difference.ts` with tests against
    known CIEDE2000 values.
-2. `eval --difference`, with tests on output shape, simulations
-   and truncation; the built-CLI test covers one pair.
+2. `eval --difference` (`simulated` is always present, empty
+   without `--blindness`, like contrast), with tests on output
+   shape, simulations and truncation; the built-CLI test covers
+   one pair.
 3. Re-run the chart part of the harder agent prompt against the
    new option, and check the agents use it instead of their own
-   scripts.
+   scripts. Done after step 4.
 4. SPEC §14, README CLI section and agent loop (when to use
-   `--difference`, reference values).
+   `--difference`, reference values). Done before step 3: agents
+   only use what the README's agent loop tells them, as the
+   Sonnet baseline showed.
 
 ## Consequences
 

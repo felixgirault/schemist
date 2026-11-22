@@ -394,6 +394,17 @@ returns the CIEDE2000 difference between two colors (`level`,
 (`simulated`, in order), and `minLevel`, the lowest of them. It
 is symmetric and not part of `combine`.
 
+Reference values (rules of thumb, not built into the CLI): about
+1 is the just-noticeable difference, varying with hue and
+saturation
+([Wikipedia](https://en.wikipedia.org/wiki/Color_difference)); at
+least 10 between any two colors of a categorical palette (Lu et
+al., "Palettailor", IEEE VIS 2020,
+[arXiv:2009.02969](https://arxiv.org/abs/2009.02969)); smaller
+marks need more, points more than bars or lines (Szafir,
+"Modeling Color Difference for Visualization Design", IEEE TVCG
+2018, doi:10.1109/TVCG.2017.2744359).
+
 ## 10. Permalinks
 
 ### 10.1 Flow
