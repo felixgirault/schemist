@@ -165,7 +165,18 @@ export const run = (
 		]);
 
 		if (format === 'tokens') {
-			return exportTokens(entries, link);
+			const {json: tokens, conflicts} = exportTokens(
+				entries,
+				link
+			);
+
+			if (conflicts.length) {
+				throw new Error(
+					`tokens: conflicting names ${conflicts.map((name) => `"${name}"`).join(', ')}: a name is both a token and a group, repeated, or has a part starting with $; rename them or give them distinct tokens`
+				);
+			}
+
+			return tokens;
 		}
 
 		return exportVariables(

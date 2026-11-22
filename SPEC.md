@@ -522,7 +522,22 @@ Outputs (visible colors, tree order). The formatting lives in
 - **Table**: swatch, name, value.
 - **Design tokens**: JSON
   `{"Colors": {"$description": "Build with Schemist (<permalink>)", "<name>": {"$type": "color", "$value": "#rrggbb"}}}`,
-  always hex.
+  always hex. Names are split on runs of `/` and `.` (empty parts
+  dropped, spaces kept) and nested as groups along that path:
+  `button/primary/bg` gives `Colors.button.primary.bg`; a name
+  without separators stays a direct key of `Colors`. No color is
+  dropped: a path used by several colors gets ` (2)`, ` (3)`...
+  on its last part, in tree order; a token that is also a group
+  (`button/primary` next to `button/primary/bg`) stays flat under
+  `Colors` with its full name as key; a name with a part starting
+  with `$` (which would read as a DTCG property) stays flat too,
+  with the leading `$` of each part stripped. A flat key already
+  taken gets ` (2)`... as well. `exportTokens` returns
+  `{json, conflicts}`, `conflicts` being the names involved, in
+  tree order. When there are some, the tokens export shows a
+  one-line notice above the code (`.hint`, linked to the code by
+  `aria-describedby`) listing them in quotes; no notice otherwise
+  or for other formats.
 - **CSS**: `/* @see <permalink> */` then `--<name>: <value>;`
   lines.
 - **Sass**: same with `$<name>: <value>;`.
@@ -539,18 +554,21 @@ simulation and packing (snapshots of every node type and preset,
 and round trips). Characterization snapshots cover the outputs
 (hex values and names) of every preset under a few root colors,
 `combinations.all` (WCAG 2 and APCA, with and without
-simulations) and the CSS, Sass and design tokens exports. Export
-components are rendered server-side; there are no browser or
-end-to-end tests. A core test asserts that `evaluate` matches
-`collectOutputs` for every preset. CLI tests cover tree
-validation and argument handling, and build the CLI to run it
-under plain Node (it crashes on runes if a store leaks into
-`core/`), comparing `eval` with the core and checking that an
-invalid tree fails with its path. The eval harness (§15) is
-tested on small recorded transcripts and trees under
-`evals/fixtures/`, with the core standing in for the CLI: no
-model is called. CI runs the unit tests and `check` (not `lint`
-or `build`).
+simulations) and the CSS, Sass and design tokens exports. Unit
+tests of `exportTokens` cover nesting, empty parts, `$` parts,
+conflicts and duplicates (with no color dropped, whatever the
+tree order); `names.test.ts` renders the tokens export and its
+conflict notice. Export components are rendered server-side;
+there are no browser or end-to-end tests. A core test asserts
+that `evaluate` matches `collectOutputs` for every preset. CLI
+tests cover tree validation and argument handling, and build the
+CLI to run it under plain Node (it crashes on runes if a store
+leaks into `core/`), comparing `eval` with the core and checking
+that an invalid tree, or conflicting token names, fails with its
+message. The eval harness (§15) is tested on small recorded
+transcripts and trees under `evals/fixtures/`, with the core
+standing in for the CLI: no model is called. CI runs the unit
+tests and `check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
@@ -622,6 +640,11 @@ with `parseColor`, invalid ones rejected. Errors name the node
 path and the param, e.g.
 `root.children[2].args.amount: expected an integer between 0 and 100`.
 Usage text is printed only for command line errors.
+
+`export --format tokens` nests names split on `/` and `.`
+(§11.8). When `exportTokens` reports conflicts, it fails like a
+tree error (no usage text, exit code 1, nothing on stdout):
+`tokens: conflicting names "button/primary", "brand": a name is both a token and a group, repeated, or has a part starting with $; rename them or give them distinct tokens`.
 
 ## 15. Agent evals
 

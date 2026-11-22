@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tokens keep both colors when two share a name 1`] = `
+{
+  "brand": {
+    "$type": "color",
+    "$value": "#ff0000",
+  },
+  "brand (2)": {
+    "$type": "color",
+    "$value": "#00ff00",
+  },
+}
+`;

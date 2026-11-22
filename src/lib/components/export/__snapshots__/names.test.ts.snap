@@ -1,0 +1,37 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`export tokens with separators and duplicate names 1`] = `
+"{
+  "Colors": {
+    "$description": "Build with Schemist (https://schemist.test?preset=1@5@04225,06227,08229,0a22b,0a22c,0122301234@clr,,color,3b82f6,button/primary/bg,ff0000,button.primary.bg,00ff00,button/primary,0000ff,brand,111111,222222)",
+    "Sky dancer": {
+      "$type": "color",
+      "$value": "#3b82f6"
+    },
+    "button": {
+      "primary": {
+        "bg": {
+          "$type": "color",
+          "$value": "#ff0000"
+        },
+        "bg (2)": {
+          "$type": "color",
+          "$value": "#00ff00"
+        }
+      }
+    },
+    "brand": {
+      "$type": "color",
+      "$value": "#111111"
+    },
+    "brand (2)": {
+      "$type": "color",
+      "$value": "#222222"
+    },
+    "button/primary": {
+      "$type": "color",
+      "$value": "#0000ff"
+    }
+  }
+}"
+`;
