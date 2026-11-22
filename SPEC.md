@@ -448,7 +448,12 @@ expensive combination computations during slider drags.
 | `checkUse(fg, bg)`            | `checkPair` of the use's targets on a pair, as is and per selected simulation                                                                                                                                                         |
 | `toggleUse(fg, bg, use)`      | Sets every target of a built-in use (an entry of `uses`, not the filter's) on the pair, keeping its others, or removes them if it has them all at those values                                                                        |
 | `cellCount`, `passingCells`   | Ordered pairs of compared colors, and those passing `passesUse` (every target of the use met in the worst case)                                                                                                                       |
-| `requirements`                | The declared pairs of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                                           |
+| `requirements`                | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                         |
+| `ruleChecks`                  | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                              |
+| `ruleCells`                   | `Map` rule id → `Set` of grid cells `<bgId>-<fgId>` of its pairs, plus the reverse of each for a role among itself                                                                                                                    |
+| `ruleId`, `outlinedCells`     | The rule hovered or focused in the requirements (or `null`), and its cells, which the grid outlines                                                                                                                                   |
+| `describeRule(rule)`          | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                     |
+| `pairColors`, `rolesOf`       | `comparedColors` sorted by the first role of each color (stable, colors with no role last), and the names of all the roles of each color id                                                                                           |
 | `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                                                      |
 | `openPair`                    | `{fg, bg, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                                                                       |
 | `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                                                                     |
@@ -908,33 +913,60 @@ large sample with both names in the foreground on the background;
 each target of the use (grade and level, or difference) for
 normal vision and each simulation, each row in its simulated
 colors with an icon and a text alternative for met or not met;
-the uses the pair is for (`usesOf`) or "Not declared"; one button
-per built-in use, **+ Body text** (accessible name "Require Body
-text") or **Body text ✓** ("Remove Body text") when the pair
-holds its targets, calling `toggleUse` (sets every target of the
-use, replacing a target of another value); the filter plays no
-part; one number field per target (a value is applied on change,
-clearing every field removes the pair); for each declared target
-the measured levels; **Remove pair**; a **Preview** button
+the uses the pair is for (`usesOf`) or "Not declared"; its
+**sources**, one line each: "Body text, from Text on Surfaces"
+per rule (`describeRule`), "one-off" with ", overrides Muted on
+Surfaces" when it replaced rules; **Override for this pair**
+(when rules are a source), which declares a one-off pair with the
+targets the rules give; one button per built-in use, **+ Body
+text** (accessible name "Require Body text") or **Body text ✓**
+("Remove Body text") when the pair holds its targets, calling
+`toggleUse` (sets every target of the use, replacing a target of
+another value); the filter plays no part; one number field per
+target (a value is applied on change, clearing every field
+removes the pair); for each declared target the measured levels;
+**Remove pair** (one-off pairs only); a **Preview** button
 toggling `previewedUid` to `<bgId>-<fgId>` (§11.5); and
 **Close**. The panel closes the card when a color is no longer
-compared. The requirements list is a labelled region titled
-**Requirements**: the declared pairs by use (`requirements`,
-Custom last, a pair under each use it holds), each a button with
-both swatches and names (foreground on background) and an icon
-with a text alternative for met or not met in the worst case of
-the selected simulations; activating one sets `openPairIds`, and
-**Close** comes back to the list. Pairs with a hidden color
-follow as **Not checked, a color is hidden**. With no declared
-pair, a hint says to open a cell and pick a use. Opening the card
-leaves the focus on the cell, so that the next cell is one key
-away; Esc (from anywhere), **Close** or the open cell close it. A
-notice names the colors to rename when pairs cannot be saved
-(§8.1). The heading counts cells meeting the use / cells
-(`passingCells`, `cellCount`); the hint gives the declared count.
-**Colors** restricts the grid's rows and columns, **Color
-blindness simulation** and **Luminosity analysis** work as in the
-other modes.
+compared. The requirements column (`Requirements.svelte`) is a
+labelled region titled **Requirements**. It lists the rules, each
+collapsed to one line: a disclosure button (`aria-expanded`) with
+the roles, the use and an icon with a text alternative (met when
+none of the rule's pairs fails, in the worst case of the selected
+simulations), and a button to remove the rule. Expanded, a rule
+shows its roles (the one role once for a role among itself): a
+name field (rename, reverted if empty or taken), chips with the
+members' swatches and names, each with a **Remove X from Role**
+button, **Add a color to Role** (`+`) opening a picker, a search
+field and the visible colors not in the role, as buttons with
+swatches (Esc closes it), "Used by N rules" when shared, and
+**Delete role** (which also deletes its rules); then the rule's
+failing pairs, each a button naming the pair and its first missed
+target (level / goal) that opens its card (`openPairIds`).
+Hovering or focusing a rule sets `ruleId`, and the grid draws a
+ring (`pair-cell--rule`, a box shadow in the highlight color,
+never the dimming) around exactly the cells of the rule's pairs,
+both orders for a role among itself. **Add a rule** is a form:
+the role (all roles, **New role…** with a name field), **On**
+(all roles, **Among itself**, **New role…**) and the use; a new
+role needs a free name, else an alert and nothing is added. The
+new rule opens expanded. **One-off pairs** follow: the declared
+pairs that replace or add to rules, by use as before
+(`requirements`, Custom last, a pair under each use it holds),
+each a button with both swatches and names and an icon, which
+opens its card; **Close** comes back to the column. Pairs with a
+hidden color follow as **Not checked, a color is hidden**. With
+nothing declared, a hint says to add a rule or open a cell. Rows
+and columns are sorted by role (`pairColors`: first role of each
+color, none last), and a header's tooltip lists the color's
+roles. Opening the card leaves the focus on the cell, so that the
+next cell is one key away; Esc (from anywhere), **Close** or the
+open cell close it. A notice names the colors to rename when
+pairs cannot be saved (§8.1). The heading counts cells meeting
+the use / cells (`passingCells`, `cellCount`); the hint gives the
+declared count. **Colors** restricts the grid's rows and columns,
+**Color blindness simulation** and **Luminosity analysis** work
+as in the other modes.
 
 ### 11.6 Theming
 

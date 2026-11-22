@@ -20,6 +20,7 @@
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {round} from '#lib/utils/math.js';
+	import Requirements from './Requirements.svelte';
 	import './matrix.css';
 
 	const labels = {
@@ -28,7 +29,7 @@
 		difference: 'Color difference'
 	};
 
-	let colors = $derived(combinations.comparedColors);
+	let colors = $derived(combinations.pairColors);
 	let byId = $derived(
 		new Map(combinations.pairChecks.map((c) => [c.id, c]))
 	);
@@ -58,6 +59,7 @@
 	// and coming back would reopen the card unasked.
 	$effect(() => () => {
 		combinations.openPairIds = null;
+		combinations.ruleId = null;
 	});
 
 	const previewUid = $derived(
@@ -109,6 +111,24 @@
 		palette.setPair(open.fg.id, open.bg.id, targets);
 	};
 
+	const ruleOf = (id: string) => {
+		const rule = palette.rules.find((r) => r.id === id);
+
+		return rule && combinations.describeRule(rule);
+	};
+
+	// Declares the pair with the targets its rules give it, to edit it
+	// alone.
+	const handleOverride = () => {
+		if (open?.check) {
+			palette.setPair(
+				open.fg.id,
+				open.bg.id,
+				open.check.pair
+			);
+		}
+	};
+
 	const handleRemove = () => {
 		if (open) palette.setPair(open.fg.id, open.bg.id, {});
 	};
@@ -136,6 +156,12 @@
 			: '';
 
 	const hex = (color: RgbColor) => formatRgbToHex(color);
+
+	const titleOf = (id: string, name: string) => {
+		const roles = combinations.rolesOf.get(id);
+
+		return roles ? `${name}, ${roles.join(', ')}` : name;
+	};
 </script>
 
 {#snippet swatch(color: RgbColor)}
@@ -178,7 +204,10 @@
 							<tr>
 								<td></td>
 								{#each colors as { id, name, rgbColor } (id)}
-									<th scope="col" title={name}>
+									<th
+										scope="col"
+										title={titleOf(id, name)}
+									>
 										{@render swatch(rgbColor)}
 										<span class="hidden">{name}</span>
 									</th>
@@ -188,7 +217,10 @@
 						<tbody>
 							{#each colors as row (row.id)}
 								<tr>
-									<th scope="row" title={row.name}>
+									<th
+										scope="row"
+										title={titleOf(row.id, row.name)}
+									>
 										{@render swatch(row.rgbColor)}
 										<span class="hidden">
 											{row.name}
@@ -218,6 +250,9 @@
 													class:pair-cell--off={check &&
 														!check.pass}
 													class:pair-cell--dim={!passes}
+													class:pair-cell--rule={combinations.outlinedCells?.has(
+														`${row.id}-${column.id}`
+													)}
 													style="--cell-bg: {hex(
 														row.rgbColor
 													)}; --cell-fg: {hex(
@@ -393,6 +428,39 @@
 							{/if}
 						</p>
 
+						{#if open.check}
+							{@const {sources} = open.check.pair}
+							<ul class="sources">
+								{#each sources.rules as id (id)}
+									{@const rule = ruleOf(id)}
+									{#if rule}
+										<li>
+											{rule.use}, from {rule.label}
+										</li>
+									{/if}
+								{/each}
+								{#if sources.oneOff}
+									<li>
+										one-off{#if sources.overrides.length},
+											overrides
+											{sources.overrides
+												.map(
+													(id) => ruleOf(id)?.label
+												)
+												.join(', ')}{/if}
+									</li>
+								{/if}
+							</ul>
+							{#if sources.rules.length}
+								<button
+									class="button"
+									onclick={handleOverride}
+								>
+									Override for this pair
+								</button>
+							{/if}
+						{/if}
+
 						<div class="button-list">
 							{#each uses as use (use.id)}
 								{@const isSet = holdsUse(
@@ -493,12 +561,14 @@
 								</ul>
 							{/each}
 
-							<button
-								class="button"
-								onclick={handleRemove}
-							>
-								Remove pair
-							</button>
+							{#if open.check.pair.sources.oneOff}
+								<button
+									class="button"
+									onclick={handleRemove}
+								>
+									Remove pair
+								</button>
+							{/if}
 						{:else}
 							<p class="hint">
 								Set a target to declare this pair.
@@ -516,66 +586,7 @@
 						</button>
 					</section>
 				{:else}
-					<section
-						class="details elevated"
-						aria-labelledby="requirements-title"
-					>
-						<h3 class="h3" id="requirements-title">
-							Requirements
-						</h3>
-
-						{#each combinations.requirements as { id, name, checks } (id)}
-							<h4 class="h3">{name}</h4>
-							<ul class="requirements">
-								{#each checks as { id, fg, bg, pass } (id)}
-									<li>
-										<button
-											class="button"
-											onclick={() =>
-												(combinations.openPairIds = {
-													fg: fg.id,
-													bg: bg.id
-												})}
-										>
-											{@render swatch(fg.rgbColor)}
-											{fg.name} on
-											{@render swatch(bg.rgbColor)}
-											{bg.name}
-											{#if pass}
-												<CheckIcon />
-												<span class="hidden">
-													met
-												</span>
-											{:else}
-												<WarningIcon />
-												<span class="hidden">
-													not met
-												</span>
-											{/if}
-										</button>
-									</li>
-								{/each}
-							</ul>
-						{/each}
-
-						{#if combinations.hiddenPairs.length}
-							<h4 class="h3">
-								Not checked, a color is hidden
-							</h4>
-							<ul>
-								{#each combinations.hiddenPairs as { id, fg, bg } (id)}
-									<li>{fg} on {bg}</li>
-								{/each}
-							</ul>
-						{/if}
-
-						{#if !combinations.requirements.length && !combinations.hiddenPairs.length}
-							<p class="hint">
-								Open a cell and pick a use to declare a
-								pair: the requirements are listed here.
-							</p>
-						{/if}
-					</section>
+					<Requirements />
 				{/if}
 			</div>
 		</div>
@@ -700,6 +711,14 @@
 		border-style: dashed;
 	}
 
+	/* A rule's cells: a ring around them, where Look at only dims. */
+	.matrix-panel .pair-cell--rule {
+		z-index: 1;
+		box-shadow:
+			0 0 0 3px Highlight,
+			0 0 0 5px var(--bg);
+	}
+
 	.matrix-panel .pair-cell[aria-pressed='true'] {
 		z-index: 1;
 		transform: scale(1.15);
@@ -722,11 +741,6 @@
 	.matrix-panel .badge :global(svg) {
 		width: 0.65rem;
 		height: 0.65rem;
-	}
-
-	.requirements {
-		padding: 0;
-		list-style: none;
 	}
 
 	.targets {

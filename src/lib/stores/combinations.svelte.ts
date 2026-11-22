@@ -5,7 +5,8 @@ import {combine} from '#lib/core/contrast.js';
 import type {Difference} from '#lib/core/difference.js';
 import {difference} from '#lib/core/difference.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
-import type {PairTargets} from '#lib/core/nodes.js';
+import type {AppRule, PairTargets} from '#lib/core/nodes.js';
+import type {ExpandedPair} from '#lib/core/pairs.js';
 import type {TargetCheck, Use} from '#lib/core/pairs.js';
 import {
 	checkPair,
@@ -28,7 +29,7 @@ export type PairDifference = Difference & {
 // `<bgId>-<fgId>`.
 export type PairCheck = {
 	id: string;
-	pair: ColorPair;
+	pair: ExpandedPair<string, string>;
 	fg: PaletteColor;
 	bg: PaletteColor;
 	checks: TargetCheck[];
@@ -185,7 +186,101 @@ class Combinations {
 		});
 	});
 
-	// The declared pairs by use, Custom last; a pair is under each use
+	oneOffChecks = $derived(
+		this.pairChecks.filter(({pair}) => pair.sources.oneOff)
+	);
+
+	// The pairs of each rule, by rule id, that are checked.
+	ruleChecks = $derived.by(() => {
+		const checks = new Map<string, PairCheck[]>(
+			palette.rules.map(({id}) => [id, []])
+		);
+
+		for (const check of this.pairChecks) {
+			for (const id of check.pair.sources.rules) {
+				checks.get(id)?.push(check);
+			}
+		}
+
+		return checks;
+	});
+
+	// The grid cells (`<bgId>-<fgId>`) of each rule: its pairs, and
+	// their reverse for a role among itself, which has no order.
+	ruleCells = $derived(
+		new Map(
+			palette.rules.map((rule) => {
+				const among = rule.bg === undefined;
+				const cells = new Set<string>();
+
+				for (const {fg, bg} of this.ruleChecks.get(
+					rule.id
+				) ?? []) {
+					cells.add(`${bg.id}-${fg.id}`);
+					if (among) cells.add(`${fg.id}-${bg.id}`);
+				}
+
+				return [rule.id, cells];
+			})
+		)
+	);
+
+	// The rule being hovered or focused in the requirements, whose
+	// cells the grid outlines (not to be mistaken for the dimming).
+	ruleId = $state<string | null>(null);
+	outlinedCells = $derived(
+		this.ruleId ? this.ruleCells.get(this.ruleId) : undefined
+	);
+
+	// The names of a rule: "Muted on Surfaces", and its use's.
+	describeRule(rule: AppRule) {
+		const name = (id?: string) =>
+			palette.roles.find((role) => role.id === id)?.name ??
+			'?';
+
+		return {
+			label:
+				rule.bg === undefined
+					? `${name(rule.fg)} among themselves`
+					: `${name(rule.fg)} on ${name(rule.bg)}`,
+			use:
+				uses.find(({id}) => id === rule.use)?.name ??
+				'Custom'
+		};
+	}
+
+	// The compared colors by role, as a reading aid: a color is under
+	// its first role, those with none last, the order kept otherwise.
+	// `rolesOf` has every role of a color, for its tooltip.
+	rolesOf = $derived.by(() => {
+		const roles = new Map<string, string[]>();
+
+		for (const {name, colors} of palette.roles) {
+			for (const id of colors) {
+				roles.set(id, [...(roles.get(id) ?? []), name]);
+			}
+		}
+
+		return roles;
+	});
+
+	pairColors = $derived.by(() => {
+		const first = new Map<string, number>();
+
+		palette.roles.forEach(({colors}, i) =>
+			colors.forEach(
+				(id) => first.has(id) || first.set(id, i)
+			)
+		);
+
+		return this.comparedColors.toSorted(
+			(a, b) =>
+				(first.get(a.id) ?? Infinity) -
+					(first.get(b.id) ?? Infinity) || 0
+		);
+	});
+
+	// The one-off pairs by use, Custom last; a pair is under each use
 	// it holds. Empty uses are left out.
 	requirements = $derived(
 		[

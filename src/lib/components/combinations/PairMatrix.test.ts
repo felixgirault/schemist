@@ -246,11 +246,10 @@ test('lists the declared pairs by use when none is open', () => {
 	const html = render(PairMatrix).body;
 
 	expect(html).toContain('Requirements');
-	expect(html).toContain(
-		'<h4 class="h3 svelte-ezwuto">Body text</h4>'
-	);
+	expect(html).toContain('One-off pairs');
+	expect(html).toContain('<h5 class="h3">Body text</h5>');
 	// declared with a lone target: Custom, listed last
-	expect(html).toContain('>Custom</h4>');
+	expect(html).toContain('>Custom</h5>');
 	expect(html).toContain('Not checked, a color is hidden');
 	expect(html).toContain('Secret on White');
 	expect(html).not.toContain('pair-card-title');
@@ -260,4 +259,40 @@ test('lists the declared pairs by use when none is open', () => {
 	]);
 
 	palette.setPair(id, node('Black').id, {});
+});
+
+test('lists rules, sorts colors by role and names sources', () => {
+	const root = palette.root!;
+	const surfaces = palette.addRole('Surfaces', [root.id])!;
+	const text = palette.addRole('Text', [
+		node('Grey').id,
+		node('Black').id
+	])!;
+	const rule = palette.addRule(text, surfaces, 'body');
+
+	const html = render(PairMatrix).body;
+
+	expect(html).toContain('Text on Surfaces, Body text');
+	expect(html).toContain('title="White, Surfaces"');
+	// the role's colors first, the others last
+	expect(html.indexOf('title="White, Surfaces"')).toBeLessThan(
+		html.indexOf('title="Grey, Text"')
+	);
+	expect(combinations.pairColors.map(({name}) => name)).toEqual(
+		['White', 'Grey', 'Black']
+	);
+	// both couples are declared one-off, which replace the rule's
+	expect(combinations.ruleCells.get(rule)!.size).toBe(0);
+	expect(
+		palette.expandedPairs.some(({sources}) =>
+			sources.overrides.includes(rule)
+		)
+	).toBe(true);
+	expect(combinations.describeRule(palette.rules[0])).toEqual({
+		label: 'Text on Surfaces',
+		use: 'Body text'
+	});
+
+	palette.deleteRole(surfaces);
+	palette.deleteRole(text);
 });
