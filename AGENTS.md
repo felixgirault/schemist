@@ -4,7 +4,7 @@
   the "Command-line interface" section of README.md (setup:
   `npm ci`, then `npm run cli:build`).
 - Declare the pairs the palette must meet in the tree's root
-  `pairs`, each with its targets: `wcag2` 4.5 and `apca` 60 for
+  `pairs`, each with its targets: `wcag2` 4.5 and `apca` 75 for
   body text, `wcag2` 3 for input borders and focus rings, and
   `difference` 10 between categorical colors (chart series,
   tags). Then `eval` the tree with

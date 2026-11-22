@@ -11,6 +11,7 @@
 	import {simulation} from '#lib/core/contrast.js';
 	import type {PaletteColor} from '#lib/core/evaluate.js';
 	import type {PairTargets} from '#lib/core/nodes.js';
+	import type {TargetCheck} from '#lib/core/pairs.js';
 	import {targetNames} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
@@ -58,42 +59,20 @@
 		open ? `${open.bg.id}-${open.fg.id}` : null
 	);
 
-	// The brush's metric on the open pair, as is and simulated.
-	const lens = $derived.by(() => {
-		if (!open) return null;
+	// Every target of the brush on the open pair.
+	const useChecks = $derived(
+		open ? combinations.brushChecks(open.fg, open.bg) : []
+	);
 
-		const {name, level, simulated} = combinations.brushLevels(
-			open.fg,
-			open.bg
-		);
-		const grade = (level: number) =>
-			name === 'wcag2'
-				? wcag2Grade(level)
-				: name === 'apca'
-					? `APCA ${wcag3Grade(level)}`
-					: null;
-
-		return {
-			name,
-			rows: [{type: null, level}, ...simulated].map(
-				(row) => ({
-					...row,
-					grade: grade(row.level)
-				})
-			)
-		};
-	});
-
-	const requirement = $derived.by(() => {
-		const target = combinations.brushTarget;
-
-		return {
-			target,
-			isSet:
-				!!target &&
-				open?.check?.pair[target.name] === target.value
-		};
-	});
+	const grade = (
+		target: TargetCheck['target'],
+		level: number
+	) =>
+		target === 'wcag2'
+			? wcag2Grade(level)
+			: target === 'apca'
+				? `APCA ${wcag3Grade(level)}`
+				: null;
 
 	const handlePreview = () => {
 		combinations.previewedUid =
@@ -129,6 +108,17 @@
 		if (open)
 			palette.setPair(open.nodes.fg, open.nodes.bg, {});
 	};
+
+	// The simulated levels of each target, for tooltips and names.
+	const simulations = (checks: TargetCheck[]) =>
+		checks
+			.flatMap(({target, simulated}) =>
+				simulated.map(
+					({type, level}) =>
+						`, ${type} ${target} ${round(level, 1)}`
+				)
+			)
+			.join('');
 
 	const hex = (color: RgbColor) => formatRgbToHex(color);
 </script>
@@ -196,7 +186,7 @@
 													`${row.id}-${column.id}`
 												)}
 												{@const levels =
-													combinations.brushLevels(
+													combinations.brushChecks(
 														column,
 														row
 													)}
@@ -207,8 +197,8 @@
 													)}
 												<button
 													class="cell pair-cell"
-													class:pair-cell--tall={levels
-														.simulated.length}
+													class:pair-cell--tall={combinations
+														.blindnessTypes.length}
 													class:pair-cell--declared={check}
 													class:pair-cell--off={check &&
 														!check.pass}
@@ -224,12 +214,7 @@
 															column.rgbColor
 														),
 														1
-													)}:1{levels.simulated
-														.map(
-															(s) =>
-																`, ${s.type} ${round(s.level, 1)}`
-														)
-														.join('')}"
+													)}:1{simulations(levels)}"
 													aria-pressed={open?.fg
 														.id === column.id &&
 														open?.bg.id === row.id}
@@ -239,12 +224,9 @@
 															: 'does not meet its targets'
 														: 'not declared'}, {passes
 														? 'reaches'
-														: 'misses'} the minimum{levels.simulated
-														.map(
-															(s) =>
-																`, ${s.type} ${round(s.level, 1)}`
-														)
-														.join('')}"
+														: 'misses'} the minimum{simulations(
+														levels
+													)}"
 													onclick={() =>
 														handleCell(
 															column,
@@ -256,11 +238,11 @@
 														aria-hidden="true"
 													>
 														Aa
-														{#if levels.simulated.length}
+														{#if combinations.blindnessTypes.length}
 															<span
 																class="strips"
 															>
-																{#each levels.simulated as { type } (type)}
+																{#each combinations.blindnessTypes as type (type)}
 																	{@const simulate =
 																		simulation(
 																			type
@@ -321,34 +303,49 @@
 							& {open.bg.name}
 						</p>
 
-						{#if lens}
-							<h4 class="h3">{labels[lens.name]}</h4>
-							<ul>
-								{#each lens.rows as { type, level, grade } (type)}
-									{@const simulate = type
-										? simulation(type)
-										: null}
-									<li
-										class="row lens-row"
-										style="background: {hex(
-											simulate
-												? simulate(open.bg.rgbColor)
-												: open.bg.rgbColor
-										)}; color: {hex(
-											simulate
-												? simulate(open.fg.rgbColor)
-												: open.fg.rgbColor
-										)};"
-									>
-										<span class="type">
-											{type ?? 'normal vision'}
-										</span>
-										{#if grade}<strong>
-												{grade}
-											</strong>{/if}
-										({round(level, 1)})
-										{#if requirement.target}
-											{#if level >= requirement.target.value}
+						{#if useChecks.length}
+							<h4 class="h3">{combinations.brushName}</h4>
+							{#each useChecks as { target, goal, level, simulated, pass } (target)}
+								<h5 class="h3">
+									{labels[target]}, at least {goal}
+									{#if pass}
+										<CheckIcon />
+										<span class="hidden">met</span>
+									{:else}
+										<WarningIcon />
+										<span class="hidden">not met</span>
+									{/if}
+								</h5>
+								<ul>
+									{#each [{type: null, level}, ...simulated] as { type, level: value } (type)}
+										{@const simulate = type
+											? simulation(type)
+											: null}
+										<li
+											class="row lens-row"
+											style="background: {hex(
+												simulate
+													? simulate(
+															open.bg.rgbColor
+														)
+													: open.bg.rgbColor
+											)}; color: {hex(
+												simulate
+													? simulate(
+															open.fg.rgbColor
+														)
+													: open.fg.rgbColor
+											)};"
+										>
+											<span class="type">
+												{type ?? 'normal vision'}
+											</span>
+											{#if grade(target, value)}<strong
+												>
+													{grade(target, value)}
+												</strong>{/if}
+											({round(value, 1)})
+											{#if value >= goal}
 												<CheckIcon />
 												<span class="hidden">
 													met
@@ -359,32 +356,31 @@
 													not met
 												</span>
 											{/if}
-										{/if}
-									</li>
-								{/each}
-							</ul>
+										</li>
+									{/each}
+								</ul>
+							{/each}
+						{/if}
 
-							<button
-								class="button"
-								disabled={!requirement.target}
-								onclick={() =>
-									combinations.toggleBrush(
-										open!.fg,
-										open!.bg
-									)}
-							>
-								{#if requirement.isSet}
-									Remove ≥ {requirement.target?.value} requirement
-								{:else}
-									Require ≥ {requirement.target
-										?.value ?? '…'}
-								{/if}
-							</button>
-							{#if !requirement.target}
-								<p class="hint">
-									Set a minimum to require it.
-								</p>
+						<button
+							class="button"
+							disabled={!useChecks.length}
+							onclick={() =>
+								combinations.toggleBrush(
+									open!.fg,
+									open!.bg
+								)}
+						>
+							{#if combinations.hasBrush(open.check?.pair)}
+								Remove {combinations.brushName} requirement
+							{:else}
+								Require {combinations.brushName}
 							{/if}
+						</button>
+						{#if !useChecks.length}
+							<p class="hint">
+								Set a minimum to require it.
+							</p>
 						{/if}
 
 						<div class="targets">

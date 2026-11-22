@@ -5,8 +5,9 @@ import {combine} from '#lib/core/contrast.js';
 import type {Difference} from '#lib/core/difference.js';
 import {difference} from '#lib/core/difference.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
+import type {PairTargets} from '#lib/core/nodes.js';
 import type {TargetCheck} from '#lib/core/pairs.js';
-import {checkPair} from '#lib/core/pairs.js';
+import {checkPair, targetNames, uses} from '#lib/core/pairs.js';
 import type {Node, NodePair} from '#lib/stores/nodes.svelte.js';
 import {collectNodes} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
@@ -34,8 +35,10 @@ class Combinations {
 		'contrast'
 	);
 	openPairIds = $state<{fg: string; bg: string} | null>(null);
-	// the filter that lights up and declares pairs in pairs mode
-	brush = $state<'contrast' | 'difference'>('contrast');
+	// the use that lights up and declares pairs in pairs mode
+	use = $state<(typeof uses)[number]['id'] | 'custom'>('body');
+	// the targets of the custom use, empty ones not checked
+	custom = $state<PairTargets>({});
 	minDifference = $state(10);
 	openDifferenceId = $state<string | null>(null);
 	colorFilters = $state<Node['id'][]>([]);
@@ -186,50 +189,53 @@ class Combinations {
 		};
 	});
 
-	// What the brush measures, whatever its minimum.
-	brushMetric = $derived.by(() =>
-		this.brush === 'difference'
-			? ({
-					name: 'difference',
-					value: this.minDifference
-				} as const)
-			: this.contrastType === 'wcag2'
-				? ({name: 'wcag2', value: this.minLevel} as const)
-				: ({name: 'apca', value: this.minLevel} as const)
+	// Picks a use; Custom starts from the targets of the last one.
+	setUse(use: typeof this.use) {
+		if (use === 'custom' && this.use !== 'custom') {
+			this.custom = {...this.brushTargets};
+		}
+
+		this.use = use;
+	}
+
+	brushName = $derived(
+		uses.find(({id}) => id === this.use)?.name ?? 'Custom'
 	);
 
-	// The brush's target, or null when its minimum is 0 and there is
-	// nothing to declare.
-	brushTarget = $derived(
-		this.brushMetric.value > 0 ? this.brushMetric : null
+	// The targets a pair must meet together to reach the brush.
+	brushTargets = $derived<PairTargets>(
+		uses.find(({id}) => id === this.use)?.targets ??
+			this.custom
 	);
 
-	// The brush's metric on a pair, as is and per selected simulation.
-	brushLevels(fg: PaletteColor, bg: PaletteColor) {
-		const {name} = this.brushMetric;
-		const {level, simulated} = checkPair(
-			{[name]: 0},
+	// The brush's targets on a pair, as is and per selected simulation.
+	brushChecks(fg: PaletteColor, bg: PaletteColor) {
+		return checkPair(
+			this.brushTargets,
 			fg.rgbColor,
 			bg.rgbColor,
 			this.blindnessTypes
-		)[0];
-
-		return {name, level, simulated};
+		);
 	}
 
-	// Whether a pair reaches the brush's minimum, worst case of the
-	// selected simulations.
+	// Whether a pair meets every target of the brush, worst case of
+	// the selected simulations.
 	passesBrush(fg: PaletteColor, bg: PaletteColor) {
-		const target = this.brushTarget;
+		return this.brushChecks(fg, bg).every(({pass}) => pass);
+	}
 
-		return target
-			? checkPair(
-					{[target.name]: target.value},
-					fg.rgbColor,
-					bg.rgbColor,
-					this.blindnessTypes
-				)[0].pass
-			: true;
+	// Whether a pair has every target of the brush at its value.
+	hasBrush(pair?: PairTargets) {
+		const checks = targetNames.filter(
+			(name) => this.brushTargets[name] !== undefined
+		);
+
+		return (
+			checks.length > 0 &&
+			checks.every(
+				(name) => pair?.[name] === this.brushTargets[name]
+			)
+		);
 	}
 
 	// Ordered pairs of compared colors, and those reaching the brush.
@@ -249,29 +255,32 @@ class Combinations {
 		)
 	);
 
-	// Sets the brush's target on a pair, or removes it if the pair
-	// has it at that value already, so a target typed in the card is
-	// never removed by a click.
+	// Sets the brush's targets on a pair, or removes them if the pair
+	// has them at those values already, so a target typed in the card
+	// is never removed by a click.
 	toggleBrush(fg: PaletteColor, bg: PaletteColor) {
-		const target = this.brushTarget;
+		const brush = this.brushTargets;
 
-		if (!target) return;
+		if (
+			!targetNames.some((name) => brush[name] !== undefined)
+		) {
+			return;
+		}
 
 		const nodes = this.nodesOf(fg, bg);
 		const pair = palette.pairs.find(
 			(p) => p.fg === nodes.fg && p.bg === nodes.bg
 		);
-		const {wcag2, apca, difference} = pair ?? {};
+		const isSet = this.hasBrush(pair);
+		const targets: PairTargets = {...pair};
 
-		palette.setPair(nodes.fg, nodes.bg, {
-			wcag2,
-			apca,
-			difference,
-			[target.name]:
-				pair?.[target.name] === target.value
-					? undefined
-					: target.value
-		});
+		for (const name of targetNames) {
+			if (brush[name] !== undefined) {
+				targets[name] = isSet ? undefined : brush[name];
+			}
+		}
+
+		palette.setPair(nodes.fg, nodes.bg, targets);
 	}
 
 	nodesOf(fg: PaletteColor, bg: PaletteColor) {

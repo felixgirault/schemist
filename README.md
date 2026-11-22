@@ -61,7 +61,7 @@ tree, then check it before exporting. Declare the pairs the
 design uses in the tree (`pairs`, see below), and `eval` them
 with both `--contrast wcag2` and `--contrast apca`, each with
 `--blindness protanomaly,deuteranomaly,tritanomaly`, and read
-`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
+`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 75 for body
 text, and 3 for large text and non-text UI such as input borders
 and focus rings. Contrast doesn't tell whether two colors look
 different: for categorical colors (chart series, tags, map
@@ -124,7 +124,7 @@ problem, e.g. `root.children[2].args.amount`.
 			"fg": "Brand text",
 			"bg": "Brand light",
 			"wcag2": 4.5,
-			"apca": 60
+			"apca": 75
 		}
 	]
 }

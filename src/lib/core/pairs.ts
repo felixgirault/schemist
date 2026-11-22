@@ -23,6 +23,29 @@ export const targetNames = [
 	'difference'
 ] as const;
 
+// What a pair is checked for, as the targets it takes together.
+export const uses = [
+	{
+		id: 'body',
+		name: 'Body text',
+		targets: {wcag2: 4.5, apca: 75}
+	},
+	{
+		id: 'large',
+		name: 'Large text and UI',
+		targets: {wcag2: 3}
+	},
+	{
+		id: 'categories',
+		name: 'Categories',
+		targets: {difference: 10}
+	}
+] as const satisfies {
+	id: string;
+	name: string;
+	targets: PairTargets;
+}[];
+
 export const hasTarget = (targets: PairTargets) =>
 	targetNames.some((name) => targets[name] !== undefined);
 

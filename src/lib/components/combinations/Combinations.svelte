@@ -34,12 +34,6 @@
 					<DifferenceFilter />
 				{:else}
 					<BrushFilter />
-					{#if combinations.brush === 'contrast'}
-						<ContrastTypeFilter />
-						<ContrastFilter />
-					{:else}
-						<DifferenceFilter />
-					{/if}
 				{/if}
 				<BlindnessFilter />
 				<LuminosityFilter />

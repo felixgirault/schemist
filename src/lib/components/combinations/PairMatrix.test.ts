@@ -86,55 +86,66 @@ test('toggles the brush target on a pair', () => {
 				fg === node('Grey') && bg === node('Black')
 		);
 
-	combinations.brush = 'difference';
-	combinations.minDifference = 10;
+	combinations.use = 'categories';
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({difference: 10});
 
-	// another brush adds its target to the same pair
-	combinations.brush = 'contrast';
-	combinations.minLevel = 4.5;
+	// another use adds all its targets to the same pair
+	combinations.use = 'body';
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
-	expect(pairOf()).toMatchObject({difference: 10, wcag2: 4.5});
+	expect(pairOf()).toMatchObject({
+		difference: 10,
+		wcag2: 4.5,
+		apca: 75
+	});
 
-	// the same brush removes its target, the last one the pair
+	// the same use removes its targets, the last ones the pair
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({difference: 10});
 	expect(pairOf()?.wcag2).toBeUndefined();
-	combinations.brush = 'difference';
+	expect(pairOf()?.apca).toBeUndefined();
+	combinations.use = 'categories';
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
 
 	// a target at another value, typed in the card, is set to the
-	// brush's value rather than removed
+	// use's value rather than removed
 	palette.setPair(node('Grey'), node('Black'), {wcag2: 7});
-	combinations.brush = 'contrast';
-	combinations.minLevel = 4.5;
+	combinations.use = 'large';
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
-	expect(pairOf()).toMatchObject({wcag2: 4.5});
+	expect(pairOf()).toMatchObject({wcag2: 3});
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
 
-	// a minimum of 0 declares nothing
-	combinations.brush = 'contrast';
-	combinations.minLevel = 0;
+	// an empty custom use declares nothing
+	combinations.custom = {};
+	combinations.use = 'custom';
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
+	combinations.use = 'body';
 });
 
-test('dims the cells that miss the brush minimum', () => {
-	combinations.brush = 'contrast';
-	combinations.minLevel = 4.5;
+test('custom starts from the last use and checks what is typed', () => {
+	combinations.use = 'large';
+	combinations.setUse('custom');
+	expect(combinations.custom).toEqual({wcag2: 3});
+
+	combinations.custom = {apca: 75};
+	expect(combinations.brushTargets).toEqual({apca: 75});
+
+	combinations.use = 'body';
+});
+
+test('dims the cells that miss the use', () => {
+	combinations.use = 'body';
 
 	const html = render(PairMatrix).body;
 
-	// Grey on White (1.2:1) and White on Grey miss 4.5
+	// Grey on White (1.2:1) and White on Grey miss it
 	expect(html.match(/pair-cell--dim/g)).toHaveLength(2);
 	expect(html).toContain(
 		'Grey on White: does not meet its targets, misses the minimum'
 	);
-
-	combinations.minLevel = 0;
 });
 
 test('draws one strip per simulation in every cell', () => {
@@ -143,7 +154,7 @@ test('draws one strip per simulation in every cell', () => {
 	const html = render(PairMatrix).body;
 
 	expect(html.match(/class="strip[ "]/g)).toHaveLength(12);
-	expect(html).toContain(', protanomaly ');
+	expect(html).toContain(', protanomaly wcag2 ');
 	expect(html).toContain('pair-cell--tall');
 
 	combinations.blindnessTypes = [];
@@ -161,8 +172,7 @@ test('a click opens the card without declaring', () => {
 });
 
 test('the card has the lens, Require and Preview', () => {
-	combinations.brush = 'contrast';
-	combinations.minLevel = 4.5;
+	combinations.use = 'body';
 	combinations.blindnessTypes = ['protanomaly'];
 	combinations.openPairIds = {
 		fg: node('Grey').id,
@@ -171,7 +181,9 @@ test('the card has the lens, Require and Preview', () => {
 
 	let html = render(PairMatrix).body;
 
-	expect(html).toContain('Require ≥ 4.5');
+	expect(html).toContain('Require Body text');
+	expect(html).toContain('WCAG 2 contrast, at least 4.5');
+	expect(html).toContain('APCA contrast, at least 75');
 	expect(html).toContain('protanomaly');
 	expect(html).toContain('Preview');
 
@@ -181,7 +193,7 @@ test('the card has the lens, Require and Preview', () => {
 		palette.colors.find((e) => e.id === node('Black').id)!
 	);
 	html = render(PairMatrix).body;
-	expect(html).toContain('Remove ≥ 4.5 requirement');
+	expect(html).toContain('Remove Body text requirement');
 
 	// Preview finds the pair
 	combinations.previewedUid = `${node('Black').id}-${node('Grey').id}`;
@@ -191,18 +203,14 @@ test('the card has the lens, Require and Preview', () => {
 	combinations.previewedUid = null;
 	combinations.openPairIds = null;
 	combinations.blindnessTypes = [];
-	combinations.minLevel = 0;
 	palette.setPair(node('Grey'), node('Black'), {});
 });
 
 test('counts the cells reaching the brush', () => {
-	combinations.brush = 'contrast';
-	combinations.minLevel = 4.5;
+	combinations.use = 'body';
 
 	expect(combinations.cellCount).toBe(6);
 	expect(combinations.passingCells).toBe(4);
-
-	combinations.minLevel = 0;
 });
 
 test('docks the card as a labelled region beside the grid', () => {
