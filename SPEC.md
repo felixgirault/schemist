@@ -74,6 +74,7 @@ src/
                            PresetNode, Preset, defaultArgs, generateName),
                            evaluate.ts (evaluate(PresetNode) → entries),
                            contrast.ts (combine, §9.1),
+                           difference.ts (difference, §9.4),
                            export.ts (export formatters and defaults, §11.8)
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
@@ -384,6 +385,14 @@ return 0 (issue #46).
 
 A CSS grayscale filter on the whole layout, to compare lightness
 by eye.
+
+### 9.4 Color difference
+
+`difference(a, b, blindnessTypes)` (`#lib/core/difference.ts`)
+returns the CIEDE2000 difference between two colors (`level`,
+0–100), the same for each simulation applied to both colors
+(`simulated`, in order), and `minLevel`, the lowest of them. It
+is symmetric and not part of `combine`.
 
 ## 10. Permalinks
 
