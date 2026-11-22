@@ -1,12 +1,19 @@
 <script lang="ts">
 	import Sample from '#lib/components/Sample.svelte';
-	import type {ExportEntry} from '#lib/core/export.js';
+	import type {
+		ExportEntry,
+		Requirements
+	} from '#lib/core/export.js';
+	import {requirementRows} from '#lib/core/export.js';
 
 	interface Props {
 		entries: ExportEntry[];
+		requirements: Requirements;
 	}
 
-	let {entries}: Props = $props();
+	let {entries, requirements}: Props = $props();
+
+	let rows = $derived(requirementRows(entries, requirements));
 
 	const highlight = (color: string) =>
 		color.replace(
@@ -37,6 +44,34 @@
 			{/each}
 		</tbody>
 	</table>
+
+	{#if rows.length}
+		<h3 class="h3">Requirements</h3>
+
+		<table>
+			<thead>
+				<tr>
+					<th>Foreground</th>
+					<th>Background</th>
+					<th>Use</th>
+					<th>Targets</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				{#each rows as { id, fg, bg, use, targets, pass } (id)}
+					<tr>
+						<td>{fg}</td>
+						<td>{bg}</td>
+						<td>{use}</td>
+						<td>{targets}</td>
+						<td>{pass ? 'met' : 'not met'}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{/if}
 </div>
 
 <style>

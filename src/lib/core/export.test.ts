@@ -1,5 +1,10 @@
 import {evaluate} from '#lib/core/evaluate.js';
-import {exportTokens} from '#lib/core/export.js';
+import {
+	exportTokens,
+	exportVariables,
+	requirementRows,
+	toExportEntries
+} from '#lib/core/export.js';
 import type {NodeData} from '#lib/core/nodes.js';
 import {rootTree} from '#lib/testing/tree.js';
 import {expect, test} from 'vitest';
@@ -187,4 +192,117 @@ test('a $ name does not turn its parent into a group', () => {
 			named('a/$value', '#222222')
 		).colors
 	).toEqual({a: token('#111111'), 'a/value': token('#222222')});
+});
+
+const colors = evaluate(
+	rootTree('#ffffff', [
+		named('Text', '#000000'),
+		named('Pale', '#eeeeee')
+	])
+);
+const [bg, text, pale] = colors;
+const requirements = {
+	pairs: [
+		{fg: text.id, bg: bg.id, wcag2: 4.5, apca: 75},
+		{fg: pale.id, bg: bg.id, wcag2: 4.5, apca: 75},
+		{fg: pale.id, bg: text.id, difference: 10}
+	],
+	roles: [{name: 'Surfaces', colors: [bg.id]}]
+};
+const link = 'https://schemist.test';
+
+test('tokens list roles and pairs under a reverse domain key', () => {
+	const {Colors} = JSON.parse(
+		exportTokens(colors, link, requirements).json
+	);
+
+	expect(Colors[bg.name].$extensions).toEqual({
+		'fr.fglt.schemist': {
+			roles: ['Surfaces'],
+			pairs: [
+				{
+					color: 'Text',
+					side: 'bg',
+					use: 'body text',
+					targets: {wcag2: 4.5, apca: 75}
+				},
+				{
+					color: 'Pale',
+					side: 'bg',
+					use: 'body text',
+					targets: {wcag2: 4.5, apca: 75}
+				}
+			]
+		}
+	});
+	expect(
+		Colors.Text.$extensions['fr.fglt.schemist'].roles
+	).toBe(undefined);
+});
+
+test('tokens are unchanged without requirements', () => {
+	expect(exportTokens(colors, link).json).not.toContain(
+		'$extensions'
+	);
+});
+
+const entries = toExportEntries(colors, 'hex', 3);
+const options = {
+	format: 'css' as const,
+	casing: 'dash' as const,
+	prefix: ''
+};
+
+test('CSS gets a comment per variable naming its pairs', () => {
+	expect(exportVariables(entries, options, link, requirements))
+		.toBe(`/* @see https://schemist.test */
+/*
+ * --text as body text (wcag2 4.5, apca 75)
+ * --pale as body text (wcag2 4.5, apca 75)
+ */
+--white: #ffffff;
+/*
+ * body text on --white (wcag2 4.5, apca 75)
+ * categories with --pale (difference 10)
+ */
+--text: #000000;
+/*
+ * body text on --white (wcag2 4.5, apca 75)
+ * categories with --text (difference 10)
+ */
+--pale: #eeeeee;`);
+});
+
+test('Sass names its pairs with its own variables', () => {
+	const sass = exportVariables(
+		entries,
+		{format: 'sass', casing: 'camel', prefix: 'c'},
+		link,
+		requirements
+	);
+
+	expect(sass).toContain(
+		' * body text on $cWhite (wcag2 4.5, apca 75)\n'
+	);
+	expect(sass).toContain('$cText: #000000;');
+});
+
+test('variables are unchanged without requirements', () => {
+	const plain = exportVariables(entries, options, link);
+
+	expect(plain).not.toContain('body text');
+	expect(plain).toBe(
+		exportVariables(entries, options, link, {
+			pairs: [],
+			roles: []
+		})
+	);
+});
+
+test('the table lists each pair with its status', () => {
+	expect(requirementRows(colors, requirements)).toMatchObject([
+		{fg: 'Text', use: 'body text', pass: true},
+		{fg: 'Pale', use: 'body text', pass: false},
+		{fg: 'Pale', targets: 'difference 10'}
+	]);
 });

@@ -1,17 +1,19 @@
 <script lang="ts">
 	import type {PaletteColor} from '#lib/core/evaluate.js';
+	import type {Requirements} from '#lib/core/export.js';
 	import {exportTokens} from '#lib/core/export.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import CodeArea from './CodeArea.svelte';
 
 	interface Props {
 		entries: PaletteColor[];
+		requirements: Requirements;
 	}
 
-	let {entries}: Props = $props();
+	let {entries, requirements}: Props = $props();
 
 	let exported = $derived(
-		exportTokens(entries, palette.permalink)
+		exportTokens(entries, palette.permalink, requirements)
 	);
 
 	let conflictNotice = $derived(

@@ -1,4 +1,5 @@
 import {evaluate} from '#lib/core/evaluate.js';
+import type {Requirements} from '#lib/core/export.js';
 import type {NodeData} from '#lib/core/nodes.js';
 import {
 	expandRules,
@@ -73,4 +74,28 @@ export const declaredPairs = <T extends {name: string}>(
 	}
 
 	return expanded.pairs;
+};
+
+// The pairs and roles of a tree, as the exports take them: by color
+// id, hidden colors being left out there.
+export const exportRequirements = (
+	tree: NodeData
+): Requirements => {
+	const colors = evaluate(tree, true);
+
+	return {
+		pairs: declaredPairs(tree, colors).map(
+			({fg, bg, sources, ...targets}) => ({
+				...targets,
+				fg: fg.id,
+				bg: bg.id
+			})
+		),
+		roles: resolveRoles(tree.roles ?? [], colors).roles.map(
+			({name, colors}) => ({
+				name,
+				colors: colors.map(({id}) => id)
+			})
+		)
+	};
 };

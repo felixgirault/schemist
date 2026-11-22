@@ -544,3 +544,30 @@ test.each([
 		)
 	).toThrow(message);
 });
+
+test('export carries roles and rules into every format', () => {
+	const css = run(
+		['export', '-', '--format', 'css'],
+		() => withRules
+	);
+	const sass = run(
+		['export', '-', '--format', 'sass'],
+		() => withRules
+	);
+	const tokens = JSON.parse(
+		run(['export', '-', '--format', 'tokens'], () => withRules)
+	);
+
+	expect(css).toContain(
+		'/* body text on --bg (wcag2 4.5, apca 75) */\n--text:'
+	);
+	expect(css).toContain(
+		'/* large text and ui on --bg (wcag2 3) */\n--muted:'
+	);
+	expect(sass).toContain(
+		'on $bg (wcag2 4.5, apca 75) */\n$text:'
+	);
+	expect(
+		tokens.Colors.Bg.$extensions['fr.fglt.schemist'].roles
+	).toEqual(['Surfaces']);
+});

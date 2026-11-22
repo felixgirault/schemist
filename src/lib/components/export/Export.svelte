@@ -6,6 +6,10 @@
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
+	const requirements = $derived({
+		pairs: palette.expandedPairs,
+		roles: palette.roles
+	});
 	const entries = $derived(
 		toExportEntries(
 			palette.colors,
@@ -206,15 +210,19 @@
 		</div>
 
 		{#if exportSettings.format === 'table'}
-			<TableExport {entries} />
+			<TableExport {entries} {requirements} />
 		{:else if exportSettings.format === 'tokens'}
-			<DesignTokensExport entries={palette.colors} />
+			<DesignTokensExport
+				entries={palette.colors}
+				{requirements}
+			/>
 		{:else}
 			<VariablesExport
 				{entries}
 				format={exportSettings.format}
 				casing={exportSettings.casing}
 				prefix={exportSettings.prefix}
+				{requirements}
 			/>
 		{/if}
 	</div>

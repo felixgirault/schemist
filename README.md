@@ -92,8 +92,10 @@ code):
 - `export <tree.json|-> --format css|sass|tokens`: the same text
   as the app's export. Token names with `/` or `.` nest in the
   tokens export (`button/primary/bg` gives `button.primary.bg`
-  groups); conflicting names make it fail, so rename them or give
-  them distinct tokens.
+  groups); roles and pairs of the tree show in the tokens'
+  `$extensions` and in a comment above each CSS or Sass variable;
+  conflicting names make it fail, so rename them or give them
+  distinct tokens.
 
 A tree is nodes with a `type`, optional `token` (the name, where
 `$` stands for the parent's name), `args`, `children` and

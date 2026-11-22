@@ -2,7 +2,8 @@
 	import type {
 		ExportCasing,
 		ExportEntry,
-		ExportFormat
+		ExportFormat,
+		Requirements
 	} from '#lib/core/export.js';
 	import {exportVariables} from '#lib/core/export.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
@@ -13,15 +14,18 @@
 		format: ExportFormat;
 		casing: ExportCasing;
 		prefix: string;
+		requirements: Requirements;
 	}
 
-	let {entries, format, casing, prefix}: Props = $props();
+	let {entries, format, casing, prefix, requirements}: Props =
+		$props();
 
 	let code = $derived(
 		exportVariables(
 			entries,
 			{format, casing, prefix},
-			palette.permalink
+			palette.permalink,
+			requirements
 		)
 	);
 </script>

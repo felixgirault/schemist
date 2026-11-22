@@ -1017,7 +1017,11 @@ Outputs (visible colors, tree order). The formatting lives in
 `#lib/core/export.ts` (`toExportEntries`, `exportVariables`,
 `exportTokens`); the components only wire it to the stores:
 
-- **Table**: swatch, name, value.
+- **Table**: swatch, name, value; then, if pairs are declared, a
+  **Requirements** table (`requirementRows`): foreground,
+  background, use, targets (`wcag2 4.5, apca 75`) and status, met
+  or not met as is (no simulation), for each checked pair (rules
+  expanded, `palette.expandedPairs`) of two exported colors.
 - **Design tokens**: JSON
   `{"Colors": {"$description": "Build with Schemist (<permalink>)", "<name>": {"$type": "color", "$value": "#rrggbb"}}}`,
   always hex. Names are split on runs of `/` and `.` (empty parts
@@ -1035,10 +1039,29 @@ Outputs (visible colors, tree order). The formatting lives in
   tree order. When there are some, the tokens export shows a
   one-line notice above the code (`.hint`, linked to the code by
   `aria-describedby`) listing them in quotes; no notice otherwise
-  or for other formats.
+  or for other formats. A token in a role or a pair gets
+  `"$extensions": {"fr.fglt.schemist": {"roles": [...], "pairs": [{"color", "side", "use", "targets"}]}}`
+  (DTCG's reverse-domain key for tool data; `roles` and `pairs`
+  omitted when empty, the whole `$extensions` when both are): the
+  role names, and each pair of the token: `color` the other
+  color's name, `side` the token's (`fg` or `bg`), `use` the
+  lowercase names of the uses the targets hold (`body text`,
+  `custom` for others), `targets` the pair's.
 - **CSS**: `/* @see <permalink> */` then `--<name>: <value>;`
   lines.
 - **Sass**: same with `$<name>: <value>;`.
+
+In CSS and Sass, a variable in a pair has a comment on the line
+above (one `/* ... */` line for a pair, a block with a line per
+pair otherwise), written with the format's own variable names:
+`body text on --bg-page (wcag2 4.5, apca 75)` for the text,
+`--text as body text (...)` for its background,
+`categories with --blue (difference 10)` for pairs with a
+difference target only. Pairs with a hidden color are left out
+everywhere. All exports take the requirements as `{pairs, roles}`
+by color id (`Requirements`, optional) and are unchanged without
+any; the CLI `export` declares them from the tree
+(`exportRequirements`).
 
 Variable names are split on runs of spaces, slashes and dots (so
 `button/primary/bg` gives `button-primary-bg`), stripped of every

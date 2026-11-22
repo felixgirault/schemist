@@ -4,6 +4,13 @@ import {
 	formatSchemistToHex
 } from '#lib/color/formatting.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
+import type {PairTargets, Role} from '#lib/core/nodes.js';
+import type {ResolvedPair} from '#lib/core/pairs.js';
+import {
+	checkPair,
+	targetNames,
+	usesOf
+} from '#lib/core/pairs.js';
 import {cssRule, sassRule} from '#lib/utils/css.js';
 import {camelCase, dashCase} from '#lib/utils/strings.js';
 
@@ -35,6 +42,132 @@ export type VariablesOptions = {
 	prefix: string;
 };
 
+// What the palette requires, by color id: the pairs checked (rules
+// expanded) and the roles.
+export type Requirements = {
+	pairs: ResolvedPair<string>[];
+	roles: Role<string>[];
+};
+
+export const noRequirements: Requirements = {
+	pairs: [],
+	roles: []
+};
+
+// A pair seen from one of its colors.
+export type Requirement = {
+	// the other color
+	color: PaletteColor;
+	side: 'fg' | 'bg';
+	use: string;
+	targets: PairTargets;
+};
+
+const targetsOf = (pair: PairTargets): PairTargets =>
+	Object.fromEntries(
+		targetNames.flatMap((name) =>
+			pair[name] === undefined ? [] : [[name, pair[name]]]
+		)
+	);
+
+// "wcag2 4.5, apca 75"
+export const formatTargets = (targets: PairTargets) =>
+	Object.entries(targets)
+		.map(([name, goal]) => `${name} ${goal}`)
+		.join(', ');
+
+const useName = (pair: PairTargets) => {
+	const {uses, custom} = usesOf(pair);
+	const names = uses.map(({name}) => name.toLowerCase());
+
+	return (custom ? [...names, 'custom'] : names).join(', ');
+};
+
+// The pairs of each exported color, in the order they are declared.
+// Pairs with a color out of `entries` (hidden) or no target are left
+// out.
+export const requirementsByColor = (
+	entries: PaletteColor[],
+	{pairs}: Requirements
+) => {
+	const byId = new Map(entries.map((e) => [e.id, e]));
+	const byColor = new Map<string, Requirement[]>();
+
+	for (const pair of pairs) {
+		const fg = byId.get(pair.fg);
+		const bg = byId.get(pair.bg);
+		const targets = targetsOf(pair);
+
+		if (!fg || !bg || !Object.keys(targets).length) continue;
+
+		const use = useName(targets);
+		const add = (id: string, requirement: Requirement) =>
+			byColor.set(id, [
+				...(byColor.get(id) ?? []),
+				requirement
+			]);
+
+		add(fg.id, {color: bg, side: 'fg', use, targets});
+		add(bg.id, {color: fg, side: 'bg', use, targets});
+	}
+
+	return byColor;
+};
+
+// A pair of differences has no side to read it from.
+const isSymmetric = ({targets}: Requirement) =>
+	!targets.wcag2 && !targets.apca;
+
+// "body text on --bg-page (wcag2 4.5, apca 75)" for the text, and
+// "--text as body text (...)" for its background, `name` being how
+// the format writes the other color.
+const describe = (
+	requirement: Requirement,
+	name: (color: PaletteColor) => string
+) => {
+	const {color, side, use, targets} = requirement;
+	const goals = `(${formatTargets(targets)})`;
+
+	return isSymmetric(requirement)
+		? `${use} with ${name(color)} ${goals}`
+		: side === 'fg'
+			? `${use} on ${name(color)} ${goals}`
+			: `${name(color)} as ${use} ${goals}`;
+};
+
+// Rows of the table export: each pair once, checked as it is,
+// without simulations.
+export const requirementRows = (
+	entries: PaletteColor[],
+	requirements: Requirements
+) => {
+	const byId = new Map(entries.map((e) => [e.id, e]));
+
+	return requirements.pairs.flatMap((pair) => {
+		const fg = byId.get(pair.fg);
+		const bg = byId.get(pair.bg);
+		const targets = targetsOf(pair);
+
+		if (!fg || !bg || !Object.keys(targets).length) return [];
+
+		return [
+			{
+				id: `${bg.id}-${fg.id}`,
+				fg: fg.name,
+				bg: bg.name,
+				use: useName(targets),
+				targets: formatTargets(targets),
+				pass: checkPair(
+					targets,
+					fg.rgbColor,
+					bg.rgbColor,
+					[]
+				).every(({pass}) => pass)
+			}
+		];
+	});
+};
+
 export const toExportEntries = (
 	entries: PaletteColor[],
 	colorFormat: ColorFormat,
@@ -46,26 +179,48 @@ export const toExportEntries = (
 		cssColor: formatSchemistTo(color, colorFormat, precision)
 	}));
 
+// A comment line, or a block when there are several.
+const comment = (lines: string[]) =>
+	lines.length === 1
+		? `/* ${lines[0]} */\n`
+		: `/*\n${lines.map((line) => ` * ${line}\n`).join('')} */\n`;
+
 export const exportVariables = (
 	entries: ExportEntry[],
 	{format, casing, prefix}: VariablesOptions,
-	link: string
+	link: string,
+	requirements = noRequirements
 ) => {
 	const formatRule = format === 'css' ? cssRule : sassRule;
 	const formatCase = casing === 'dash' ? dashCase : camelCase;
+	const variable = ({name}: PaletteColor) =>
+		formatCase(prefix ? `${prefix} ${name}` : name);
+	const reference = (color: PaletteColor) =>
+		(format === 'css' ? '--' : '$') + variable(color);
+	const byColor = requirementsByColor(entries, requirements);
 	const variables = entries
-		.map(({name, cssColor}) =>
-			formatRule(
-				formatCase(prefix ? `${prefix} ${name}` : name),
-				cssColor
-			)
-		)
+		.map((entry) => {
+			const found = byColor.get(entry.id);
+
+			return (
+				(found
+					? comment(
+							found.map((r) => describe(r, reference))
+						)
+					: '') +
+				formatRule(variable(entry), entry.cssColor)
+			);
+		})
 		.join('\n');
 
 	return `/* @see ${link} */\n${variables}`;
 };
 
-type Token = {$type: 'color'; $value: string};
+type Token = {
+	$type: 'color';
+	$value: string;
+	$extensions?: Record<string, unknown>;
+};
 type TokenGroup = {[key: string]: string | Token | TokenGroup};
 
 // Splits on runs of slashes and dots, like `words()`, but keeps
@@ -147,8 +302,40 @@ const placeFlatToken = (
 	colors[free] = token;
 };
 
+// The key of Schemist's data in `$extensions`, a reverse domain
+// name as DTCG asks.
+export const tokenExtensionKey = 'fr.fglt.schemist';
+
+// The roles and pairs of a token, nothing if it has none.
+const extensionsOf = (roles: string[], pairs: Requirement[]) =>
+	roles.length || pairs.length
+		? {
+				$extensions: {
+					[tokenExtensionKey]: {
+						...(roles.length ? {roles} : {}),
+						...(pairs.length
+							? {
+									pairs: pairs.map(
+										({color, side, use, targets}) => ({
+											color: color.name,
+											side,
+											use,
+											targets
+										})
+									)
+								}
+							: {})
+					}
+				}
+			}
+		: {};
+
 // A token's final path, and why it can't be nested, if so.
-const toTokenItems = (entries: PaletteColor[]) => {
+const toTokenItems = (
+	entries: PaletteColor[],
+	requirements: Requirements
+) => {
+	const byColor = requirementsByColor(entries, requirements);
 	const paths = entries.map(({name}) => tokenPath(name));
 	const repeated = repeatedKeys(paths.map(pathKey));
 	const uniquePaths = withUniquePaths(paths);
@@ -156,12 +343,18 @@ const toTokenItems = (entries: PaletteColor[]) => {
 		uniquePaths.filter((path) => !hasReservedSegment(path))
 	);
 
-	return entries.map(({name, color}, i) => ({
+	return entries.map(({id, name, color}, i) => ({
 		name,
 		path: uniquePaths[i],
 		token: {
 			'$type': 'color',
-			'$value': formatSchemistToHex(color)
+			'$value': formatSchemistToHex(color),
+			...extensionsOf(
+				requirements.roles
+					.filter(({colors}) => colors.includes(id))
+					.map((role) => role.name),
+				byColor.get(id) ?? []
+			)
 		} as Token,
 		isRepeated: repeated.has(pathKey(paths[i])),
 		isFlat:
@@ -187,9 +380,10 @@ const conflictNames = (
 // whether a group or its token comes first in the tree.
 export const exportTokens = (
 	entries: PaletteColor[],
-	link: string
+	link: string,
+	requirements = noRequirements
 ) => {
-	const items = toTokenItems(entries);
+	const items = toTokenItems(entries, requirements);
 	const colors: TokenGroup = {
 		'$description': `Build with Schemist (${link})`
 	};

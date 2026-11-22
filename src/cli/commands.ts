@@ -24,7 +24,11 @@ import {permalink} from '#lib/routing.js';
 import {parseArgs} from 'node:util';
 import {UsageError} from './errors.js';
 import {parsePair} from './pair.js';
-import {declaredPairs, parseTreeJson} from './tree.js';
+import {
+	declaredPairs,
+	exportRequirements,
+	parseTreeJson
+} from './tree.js';
 import {listPresets, listTypes} from './vocabulary.js';
 
 export const defaultOrigin = 'https://schemist.fglt.fr';
@@ -189,6 +193,7 @@ export const run = (
 	const link = permalink(tree, values.origin ?? defaultOrigin);
 
 	if (command === 'export') {
+		const requirements = exportRequirements(tree);
 		const format = oneOf('format', values.format, [
 			'css',
 			'sass',
@@ -198,7 +203,8 @@ export const run = (
 		if (format === 'tokens') {
 			const {json: tokens, conflicts} = exportTokens(
 				entries,
-				link
+				link,
+				requirements
 			);
 
 			if (conflicts.length) {
@@ -235,7 +241,8 @@ export const run = (
 				),
 				prefix: values.prefix ?? defaultExportSettings.prefix
 			},
-			link
+			link,
+			requirements
 		);
 	}
 
