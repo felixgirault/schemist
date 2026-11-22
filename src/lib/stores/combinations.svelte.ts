@@ -215,13 +215,40 @@ class Combinations {
 			this.custom
 	);
 
+	// The brush's checks of every cell, once per change rather than
+	// once per reader (the cell, its card and the count).
+	#cellChecks = $derived.by(() => {
+		const checks = new Map<string, TargetCheck[]>();
+
+		for (const bg of this.comparedColors) {
+			for (const fg of this.comparedColors) {
+				if (fg.id !== bg.id) {
+					checks.set(
+						`${bg.id}-${fg.id}`,
+						checkPair(
+							this.brushTargets,
+							fg.rgbColor,
+							bg.rgbColor,
+							this.blindnessTypes
+						)
+					);
+				}
+			}
+		}
+
+		return checks;
+	});
+
 	// The brush's targets on a pair, as is and per selected simulation.
 	brushChecks(fg: PaletteColor, bg: PaletteColor) {
-		return checkPair(
-			this.brushTargets,
-			fg.rgbColor,
-			bg.rgbColor,
-			this.blindnessTypes
+		return (
+			this.#cellChecks.get(`${bg.id}-${fg.id}`) ??
+			checkPair(
+				this.brushTargets,
+				fg.rgbColor,
+				bg.rgbColor,
+				this.blindnessTypes
+			)
 		);
 	}
 

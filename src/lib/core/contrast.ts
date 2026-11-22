@@ -30,8 +30,24 @@ const simulations: Record<
 	tritanomaly: simulateTritanomaly
 };
 
-export const simulation = (type: BlindnessType) =>
-	simulations[type];
+// Simulated once per color rather than once per pair it is in, as
+// grids measure every color against all the others.
+const simulated = new WeakMap<
+	RgbColor,
+	Partial<Record<BlindnessType, RgbColor>>
+>();
+
+export const simulation =
+	(type: BlindnessType) => (color: RgbColor) => {
+		let byType = simulated.get(color);
+
+		if (!byType) {
+			byType = {};
+			simulated.set(color, byType);
+		}
+
+		return (byType[type] ??= simulations[type](color));
+	};
 
 const contrastFns: Record<
 	ContrastType,
