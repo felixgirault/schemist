@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{"command":"npm run -s cli -- eval light.json --contrast apca --blindness protanomaly,deuteranomaly,tritanomaly --pair 'text\\/body/background\\/page'"}}]}}
+{"type":"result","subtype":"success","is_error":false,"num_turns":9,"duration_ms":80000,"total_cost_usd":0.31,"result":"Done.","modelUsage":{"claude-opus-5-5":{}}}

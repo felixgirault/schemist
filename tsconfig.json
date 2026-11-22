@@ -2,7 +2,8 @@
 	"extends": "$app/tsconfig",
 	"compilerOptions": {
 		"sourceMap": true,
-		"strict": true
+		"strict": true,
+		"allowImportingTsExtensions": true
 	},
-	"include": ["src", "vite.config.js"]
+	"include": ["src", "evals", "vite.config.js"]
 }

@@ -31,22 +31,24 @@ Production URL: <https://schemist.fglt.fr>.
 | Contrast    | `culori` `wcagContrast` (WCAG 2), `apca-w3` (APCA)                                           |
 | Color names | `color-name-list` (`bestof` list) + `nearest-color`                                          |
 | Dialogs     | `svelte-accessible-dialog`                                                                   |
-| Tests       | Vitest 5 (`src/**/*.{test,spec}.{js,ts}`)                                                    |
+| Tests       | Vitest 5 (`src/**/*.{test,spec}.{js,ts}`, `evals/**/*.test.ts`)                              |
 | Formatting  | oxfmt (`.oxfmtrc.json`: tabs, width 3, 65 columns, single quotes, sorted imports)            |
 | CI          | GitHub Actions, Node 24: `npm ci`, `npm test` then `npm run check`, on `main` pushes and PRs |
 
 Scripts:
 
-| Script              | Effect                                                                |
-| ------------------- | --------------------------------------------------------------------- |
-| `npm start`         | Dev server                                                            |
-| `npm run build`     | Static build into `build/`                                            |
-| `npm run check`     | `svelte-kit sync` + `svelte-check` (types)                            |
-| `npm test`          | Unit tests                                                            |
-| `npm run lint`      | `oxfmt --check`                                                       |
-| `npm run format`    | `oxfmt` (writes)                                                      |
-| `npm run cli:build` | `svelte-kit sync` + builds the CLI into `build-cli/schemist.js` (§14) |
-| `npm run cli`       | `node build-cli/schemist.js` (§14)                                    |
+| Script               | Effect                                                                |
+| -------------------- | --------------------------------------------------------------------- |
+| `npm start`          | Dev server                                                            |
+| `npm run build`      | Static build into `build/`                                            |
+| `npm run check`      | `svelte-kit sync` + `svelte-check` (types)                            |
+| `npm test`           | Unit tests                                                            |
+| `npm run lint`       | `oxfmt --check`                                                       |
+| `npm run format`     | `oxfmt` (writes)                                                      |
+| `npm run cli:build`  | `svelte-kit sync` + builds the CLI into `build-cli/schemist.js` (§14) |
+| `npm run cli`        | `node build-cli/schemist.js` (§14)                                    |
+| `npm run eval`       | Runs the agent evals, then grades them, costs money (§15)             |
+| `npm run eval:grade` | Grades a results directory again (§15)                                |
 
 Kit configuration lives in `vite.config.js`
 (`sveltekit({adapter: adapter()})`); there is no
@@ -87,6 +89,8 @@ src/
     features.ts            Dark scheme preference (localStorage)
     testing/               Fixtures shared by tests
 static/                    Fonts, favicon, favicon template, demo GIF
+evals/                     Agent evals (§15)
+docs/adr/                  Architecture decision records
 vite.cli.config.js         CLI build (§14)
 ```
 
@@ -542,8 +546,11 @@ end-to-end tests. A core test asserts that `evaluate` matches
 validation and argument handling, and build the CLI to run it
 under plain Node (it crashes on runes if a store leaks into
 `core/`), comparing `eval` with the core and checking that an
-invalid tree fails with its path. CI runs the unit tests and
-`check` (not `lint` or `build`).
+invalid tree fails with its path. The eval harness (§15) is
+tested on small recorded transcripts and trees under
+`evals/fixtures/`, with the core standing in for the CLI: no
+model is called. CI runs the unit tests and `check` (not `lint`
+or `build`).
 
 ## 13. Known issues and limits
 
@@ -615,3 +622,66 @@ with `parseColor`, invalid ones rejected. Errors name the node
 path and the param, e.g.
 `root.children[2].args.amount: expected an integer between 0 and 100`.
 Usage text is printed only for command line errors.
+
+## 15. Agent evals
+
+`evals/` checks that agents can generate and check color schemes
+with the CLI (§14), by running headless `claude -p` on prompts
+and grading what comes out. It is TypeScript run directly by Node
+and covered by `npm run check`; ADR 4 has the reasoning, and
+`evals/README.md` how to run it, what it costs and the latest
+baseline.
+
+```
+evals/
+  run.ts, grade.ts, eval.ts  Runner, grader, both in a row
+  graders/                   One file per grader type
+  cases/<name>/              prompt.md, expect.json, graders/*.md
+  fixtures/                  Recorded runs for the tests
+  results/                   Git-ignored: transcripts, out/, report.md
+```
+
+**A round.**
+`npm run eval -- [--case] [--runs] [-j] [--ref] [--model] [--max-cost]`
+resolves the ref to a commit and, for each run, extracts it
+without `evals/` into a fresh one-commit repository, so the
+graders are in neither its files nor its history. It runs
+`claude -p` there with the prompt on stdin,
+`--permission-mode auto`, and the user's login but none of their
+configuration (`--setting-sources project`,
+`--strict-mcp-config`, auto memory disabled), and saves
+`transcript.jsonl`, `final.md`, `meta.json` (cost, turns,
+duration, model, ref, status) and a copy of the agent's `out/`. A
+run that fails or times out is recorded, not fatal. The grader
+then builds the CLI once from the same commit in its own clone,
+apart from the runs, so that a run cannot change its own grade,
+and writes `report.md`.
+
+**Graders** are Markdown files with front matter (`type`,
+`weight` default 1, type settings, validated when the case is
+loaded) and a description as body:
+
+- `tool_used`: the agent called a tool (or one of several) a
+  number of times, with an input matching a regular expression.
+- `regex`: a pattern is found, or absent, in the transcript or in
+  a file of the run.
+- `file_exists`: at least `min` files match a glob.
+- `check`: re-checks the trees of the case's `expect.json` with
+  the built CLI: every tree valid, every pair at its WCAG 2 and
+  APCA targets in the worst case of the three color blindness
+  simulations, every expected hex in some tree.
+
+A run scores the weighted fraction of its graders passed, a case
+the mean of its runs. The report has a table of graders by run,
+costs, turns, durations, models and the failed pairs.
+
+**Cases.** `smoke` (a canary: build the CLI and write `types` to
+a file), `website` (a light and dark scheme from one color) and
+`dashboard` (a rebrand with brand colors, AAA text, states,
+status colors and a color blind safe chart palette). Prompts end
+with an output contract (file paths and token names) so that the
+graders know where to look.
+
+Evals call the model on the user's account: they are run by hand
+after changing the CLI, its errors or its docs, and before
+releases, never in `npm test` nor CI.

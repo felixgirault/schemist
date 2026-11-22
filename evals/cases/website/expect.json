@@ -1,0 +1,33 @@
+{
+	"trees": ["out/light.json", "out/dark.json"],
+	"pairs": [
+		{
+			"fg": "Text",
+			"bg": "Background",
+			"wcag2": 4.5,
+			"apca": 60
+		},
+		{"fg": "Text", "bg": "Surface", "wcag2": 4.5, "apca": 60},
+		{
+			"fg": "Muted text",
+			"bg": "Background",
+			"wcag2": 4.5,
+			"apca": 60
+		},
+		{
+			"fg": "Muted text",
+			"bg": "Surface",
+			"wcag2": 4.5,
+			"apca": 60
+		},
+		{
+			"fg": "Primary",
+			"bg": "Background",
+			"wcag2": 4.5,
+			"apca": 60
+		},
+		{"fg": "On primary", "bg": "Primary", "wcag2": 4.5},
+		{"fg": "Input border", "bg": "Background", "wcag2": 3},
+		{"fg": "Input border", "bg": "Surface", "wcag2": 3}
+	]
+}
