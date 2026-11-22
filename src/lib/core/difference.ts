@@ -2,7 +2,15 @@ import {rgbToCulori} from '#lib/color/culori.js';
 import type {RgbColor} from '#lib/color/types.js';
 import type {BlindnessType} from '#lib/core/contrast.js';
 import {simulation} from '#lib/core/contrast.js';
-import {differenceCiede2000} from 'culori/fn';
+import {
+	differenceCiede2000,
+	modeLab65,
+	useMode
+} from 'culori/fn';
+
+// Registered here rather than in color/culori.ts, so that only
+// code importing this module ships the Lab conversion.
+useMode(modeLab65);
 
 const ciede2000 = differenceCiede2000();
 

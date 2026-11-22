@@ -9,7 +9,6 @@ import {
 	convertRgbToLab,
 	convertRgbToOklab,
 	modeHsl,
-	modeLab65,
 	modeLch,
 	modeLrgb,
 	modeRgb,
@@ -21,7 +20,6 @@ useMode(modeLch); // required by chroma clamping
 useMode(modeLrgb); // required by contrast calculations
 useMode(modeRgb); // required to parse rgb() and named colors
 useMode(modeHsl); // required to parse hsl()
-useMode(modeLab65); // required by color difference calculations
 
 export const rgbFromCulori = ({
 	r,
