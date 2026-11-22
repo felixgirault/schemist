@@ -36,7 +36,7 @@
 					{#each colors.slice(0, -1) as { id, name, rgbColor } (id)}
 						<th scope="col" title={name}>
 							{@render swatch(rgbColor)}
-							<span class="visually-hidden">{name}</span>
+							<span class="hidden">{name}</span>
 						</th>
 					{/each}
 				</tr>
@@ -144,15 +144,6 @@
 		position: sticky;
 		left: 0;
 		background: var(--bg);
-	}
-
-	.visually-hidden {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
 	}
 
 	.swatch {
