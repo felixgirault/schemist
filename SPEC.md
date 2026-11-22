@@ -977,19 +977,16 @@ the grid: a container query at 48rem, under it when narrower).
 The Colors and Check filters are not shown. A section per rule,
 titled as in the requirements, reads the rule's `pairChecks`
 (`ruleChecks`, nothing is measured again), once, in the real
-colors. A role among itself (Categories) is a list of its colors,
-each a swatch beside a bar with its name, then each pair as "X
-and Y: met (or not met) (Difference 12 of 10; protanomaly 9,
-...)", the simulated levels inline. Any other rule has one
-combination card (§11.5 Contrast cards) per pair: each target
-with its grade, level and "met" or "not met", and one strip per
-selected simulation in simulated colors with its levels. Its
-Preview button toggles `previewedUid` to `<bgId>-<fgId>`;
-`previewed` falls back to the `pairChecks` pair when `all`
-(limited by the Colors filter) lacks it. Hidden colors and pairs
-not checked are left out. A final **One-off pairs** section shows
-the one-off pairs (`oneOffChecks`) as cards. With nothing
-declared a hint asks to declare rules or pairs.
+colors. Every rule, a role among itself (Categories) included,
+has one combination card (§11.5 Contrast cards) per pair: each
+target with its grade, level and "met" or "not met", and one
+strip per selected simulation in simulated colors with its
+levels. Its Preview button toggles `previewedUid` to
+`<bgId>-<fgId>`; `previewed` falls back to the `pairChecks` pair
+when `all` (limited by the Colors filter) lacks it. Hidden colors
+and pairs not checked are left out. A final **One-off pairs**
+section shows the one-off pairs (`oneOffChecks`) as cards. With
+nothing declared a hint asks to declare rules or pairs.
 
 ### 11.6 Theming
 

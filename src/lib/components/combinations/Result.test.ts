@@ -54,7 +54,9 @@ test('shows each rule with its cards', () => {
 		'Black &amp; White AAA (21) met APCA 5 (106) met'
 	);
 	expect(html).toContain('Grey &amp; White KO (1.2) not met');
-	expect(html).toContain('Red and Blue: met (Difference');
+	expect(html).toMatch(
+		/(Red|Blue) &amp; (Blue|Red) Difference \([\d.]+\) met/
+	);
 });
 
 test('shows the simulations in the cards, once', () => {

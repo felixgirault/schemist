@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {wcag2Grade, wcag3Grade} from '#lib/color/contrast.js';
-	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import Combination from '#lib/components/combinations/Combination.svelte';
 	import type {Row} from '#lib/components/combinations/Combination.svelte';
 	import {simulation} from '#lib/core/contrast.js';
@@ -8,23 +7,14 @@
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
-	import {round} from '#lib/utils/math.js';
 	import Requirements from './Requirements.svelte';
 	import './matrix.css';
 
-	const targetLabels = {
-		wcag2: 'WCAG 2',
-		apca: 'APCA',
-		difference: 'Difference'
-	};
-
-	// A role among itself is a set of categories, shown side by side;
-	// other rules are cards, one per pair.
+	// One card per pair of each rule.
 	let sections = $derived(
 		palette.rules.map((rule) => ({
 			rule,
 			...combinations.describeRule(rule),
-			isCategories: rule.bg === undefined,
 			checks: combinations.ruleChecks.get(rule.id) ?? []
 		}))
 	);
@@ -37,7 +27,7 @@
 			? wcag2Grade(level)
 			: target === 'apca'
 				? `APCA ${wcag3Grade(level)}`
-				: targetLabels[target];
+				: 'Difference';
 
 	const rowsOf = (
 		checks: TargetCheck[],
@@ -73,27 +63,6 @@
 		combinations.previewedUid =
 			combinations.previewedUid === uid ? null : uid;
 	};
-
-	const colorsOf = (checks: PairCheck[]) => [
-		...new Map(
-			checks.flatMap(({fg, bg}) => [
-				[fg.id, fg],
-				[bg.id, bg]
-			])
-		).values()
-	];
-
-	// The levels of a pair as is, then under each simulation.
-	const levels = ({checks}: PairCheck) =>
-		checks
-			.map(
-				(c) =>
-					`${targetLabels[c.target]} ${round(c.level, 1)} of ${c.goal}` +
-					c.simulated
-						.map((s) => `; ${s.type} ${round(s.level, 1)}`)
-						.join('')
-			)
-			.join(', ');
 </script>
 
 {#snippet cards(checks: PairCheck[])}
@@ -113,47 +82,12 @@
 	</div>
 {/snippet}
 
-{#snippet categories(checks: PairCheck[])}
-	<ul class="swatches">
-		{#each colorsOf(checks) as color (color.id)}
-			{@const value = formatRgbToHex(color.rgbColor)}
-			<li>
-				<span
-					class="swatch-box"
-					style="background: {value};"
-				></span>
-				<span
-					class="bar"
-					style="background: {value};"
-				></span>
-				<span>{color.name}</span>
-			</li>
-		{/each}
-	</ul>
-	<ul class="statuses">
-		{#each checks as check (check.id)}
-			<li>
-				<strong>{check.fg.name}</strong>
-				and {check.bg.name}:
-				{check.pass ? 'met' : 'not met'}
-				({levels(check)})
-			</li>
-		{/each}
-	</ul>
-{/snippet}
-
-{#snippet group(
-	title: string,
-	checks: PairCheck[],
-	isCategories = false
-)}
+{#snippet group(title: string, checks: PairCheck[])}
 	<section class="group">
 		<h3 class="h3">{title}</h3>
 
 		{#if !checks.length}
 			<p class="hint">No pair yet: add colors.</p>
-		{:else if isCategories}
-			{@render categories(checks)}
 		{:else}
 			{@render cards(checks)}
 		{/if}
@@ -164,12 +98,8 @@
 	<div class="layout">
 		<div class="body">
 			<div class="results">
-				{#each sections as { rule, label, use, isCategories, checks } (rule.id)}
-					{@render group(
-						`${label}, ${use}`,
-						checks,
-						isCategories
-					)}
+				{#each sections as { rule, label, use, checks } (rule.id)}
+					{@render group(`${label}, ${use}`, checks)}
 				{/each}
 
 				{#if combinations.oneOffChecks.length}
@@ -235,40 +165,5 @@
 			minmax(22ch, 1fr)
 		);
 		gap: 1rem;
-	}
-
-	.statuses {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		font-size: 0.9rem;
-	}
-
-	.swatches {
-		display: grid;
-		gap: 0.5rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.swatches li {
-		display: grid;
-		grid-template-columns: 2rem 1fr auto;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.swatch-box {
-		width: 2rem;
-		height: 2rem;
-		border: 1px solid var(--fg);
-		border-radius: 50%;
-	}
-
-	.bar {
-		height: 0.75rem;
-		border: 1px solid var(--fg);
-		border-radius: 2px;
 	}
 </style>
