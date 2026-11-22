@@ -104,12 +104,12 @@ of chart colors under the three simulations (ADRs 2 and 3).
 | Weakest chart pair             | 8.89               | 10.17 / 11.93 / 14.07 |
 | Cost (`website` + `dashboard`) | –                  | $1.81                 |
 
-Without `--difference`, agents checked distinctness with their
-own culori scripts and floors (ΔE 8, 10 or 15) and 2 of 3
-palettes fell up to 1.1 under 10. With it, and the README's
-target, all 3 passed; `website` stayed at 1.00. Agents still
-search candidate chart colors with culori from `node_modules` for
-speed, then check the result with the CLI.
+Without `--difference`, agents checked distinctness with ad hoc
+culori scripts, if at all, and 2 of 3 palettes fell up to 1.1
+under 10. With it, and the README's target, all 3 passed;
+`website` stayed at 1.00. Agents still search candidate chart
+colors with culori from `node_modules` for speed, then check the
+result with the CLI.
 
 ## How graders work
 
