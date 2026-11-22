@@ -676,12 +676,12 @@ change.
   button with `minLevel` rounded to a whole number in the panel's
   text color (the label keeps 1 decimal); cells below the minimum
   get a dashed outline and a warning icon in place of the number.
-  Activating a cell shows, under the matrix, a row for normal
-  vision and one per simulation (the two simulated colors and the
-  level); the panel closes it when the pair no longer exists. The
-  matrix scrolls horizontally when wider than the panel. With
-  fewer than two compared colors the panel asks to select at
-  least two.
+  Activating a cell shows, in a card under the matrix, a row for
+  normal vision and one per simulation (the two simulated colors
+  and the level); the panel closes it when the pair no longer
+  exists. The matrix scrolls horizontally when wider than the
+  panel. With fewer than two compared colors the panel asks to
+  select at least two.
 
 ### 11.6 Theming
 
