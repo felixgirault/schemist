@@ -34,9 +34,9 @@
 				<tr>
 					<td></td>
 					{#each colors.slice(0, -1) as { id, name, rgbColor } (id)}
-						<th scope="col">
+						<th scope="col" title={name}>
 							{@render swatch(rgbColor)}
-							{name}
+							<span class="visually-hidden">{name}</span>
 						</th>
 					{/each}
 				</tr>
@@ -69,11 +69,10 @@
 											: ''}"
 										onclick={() => handleOpen(pair.id)}
 									>
-										{@render swatch(column.rgbColor)}
-										{@render swatch(row.rgbColor)}
-										{round(pair.minLevel, 1)}
 										{#if below}
 											<WarningIcon />
+										{:else}
+											{round(pair.minLevel, 0)}
 										{/if}
 									</button>
 								{/if}
@@ -141,6 +140,21 @@
 		white-space: nowrap;
 	}
 
+	th[scope='row'] {
+		position: sticky;
+		left: 0;
+		background: var(--bg);
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
 	.swatch {
 		display: inline-block;
 		width: 1rem;
@@ -153,8 +167,10 @@
 	.cell {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.5rem;
+		justify-content: center;
+		box-sizing: border-box;
+		width: 2.5rem;
+		padding: 0.25rem 0;
 		color: inherit;
 		background: transparent;
 		border: 1px solid transparent;
