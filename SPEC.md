@@ -536,7 +536,11 @@ marks need more, points more than bars or lines (Szafir,
 <version>@<payload>
 ```
 
-Only version `1` exists. Its payload:
+Permalinks are generated with version `2`. Version `1` is still
+read, so older links (including the ones embedded in exports)
+keep working; a format change adds a version. Both share the
+payload below and only differ in how colors are written (see
+values):
 
 ```
 <root>@<nodes>@<dictionary>
@@ -558,11 +562,26 @@ with `x`, 3 digits prefixed with `y`. The numbers are, in order:
 4. `N / 2` pairs of (dictionary index of the param name, value),
 5. record indices of the children.
 
-Values: booleans `0`/`1`, ranges as is, colors as the dictionary
-index of their 6-digit hex code (without `#`).
+Values: booleans `0`/`1`, ranges as is, colors as a dictionary
+index. The dictionary entry of a color is:
 
-Example, a Custom color `#ffc208` alone:
-`1@0@01223@clr,,color,ffc208`.
+| Version | Color entry                                                                     |
+| ------- | ------------------------------------------------------------------------------- |
+| `1`     | 6-digit hex code without `#`, which rounds the color (lossy)                    |
+| `2`     | `h_s_l` of the `SchemistColor`, as full precision JavaScript numbers (lossless) |
+
+Version `2` rejects color entries that are not exactly three
+finite numbers. Whatever the version, `unpack` returns the tree
+checked by `validateTree` (§5.3), which accepts colors given as
+`{h, s, l}` objects for this purpose (the CLI only documents CSS
+strings).
+
+Examples, a Custom color alone: `1@0@01223@clr,,color,ffc208`,
+`2@0@01223@clr,,color,90_50_50`.
+
+The rationale for keeping this custom format rather than
+compressing links is recorded in
+`docs/adr/0010-url-packing-compression.md`.
 
 ## 11. User interface
 
@@ -698,17 +717,17 @@ casing.
 
 Unit tests cover utils, color parsing, color deficiency
 simulation, the highlight temperature, packing (snapshots of
-every node type and preset, and round trips), permalinks (tokens
-with special characters), tree serialization (ids), the undo
-history and the initial palette source (link, storage, random).
-Characterization snapshots cover the outputs (hex values and
-names) of every preset under a few root colors,
-`combinations.all` (WCAG 2 and APCA, with and without
-simulations) and the CSS, Sass and design tokens exports. Unit
-tests of `exportTokens` cover nesting, empty parts, `$` parts,
-conflicts and duplicates (with no color dropped, whatever the
-tree order); `names.test.ts` renders the tokens export and its
-conflict notice. Export components are rendered server-side;
+every node type, round trips, lossless colors and backward
+compatibility), permalinks (tokens with special characters), tree
+serialization (ids), the undo history and the initial palette
+source (link, storage, random). Characterization snapshots cover
+the outputs (hex values and names) of every preset under a few
+root colors, `combinations.all` (WCAG 2 and APCA, with and
+without simulations) and the CSS, Sass and design tokens exports.
+Unit tests of `exportTokens` cover nesting, empty parts, `$`
+parts, conflicts and duplicates (with no color dropped, whatever
+the tree order); `names.test.ts` renders the tokens export and
+its conflict notice. Export components are rendered server-side;
 there are no browser or end-to-end tests. A core test asserts
 that `evaluate` matches `collectOutputs` for every preset, and
 store tests cover preset outputs, children and expanding. CLI
@@ -723,11 +742,6 @@ tests and `check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
-- **Lossy permalinks**: colors are packed as hex, so derived
-  colors of a reopened palette can differ by one unit on some
-  channels. A lossless `v2` format exists on the
-  `adr-url-compression` branch (see its ADR on permalink
-  compression, issue #53).
 - **Packed numbers above `0xfff`** (4096) cannot be encoded,
   which caps the dictionary size and the node count per tree.
 - **`#lib` bare import** points to `src/lib/index.js`, which does

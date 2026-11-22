@@ -3,7 +3,7 @@
 exports[`export tokens with separators and duplicate names 1`] = `
 "{
   "Colors": {
-    "$description": "Build with Schemist (https://schemist.test?preset=1@5@04225,06227,08229,0a22b,0a22c,0122301234@clr,,color,3b82f6,button/primary/bg,ff0000,button.primary.bg,00ff00,button/primary,0000ff,brand,111111,222222)",
+    "$description": "Build with Schemist (https://schemist.test?preset=2@5@04225,06227,08229,0a22b,0a22c,0122301234@clr,,color,259.81452852548136_94.3725990241354_56.24635306177829,button/primary/bg,29.233880279627854_100.00000007111225_56.80846563197034,button.primary.bg,142.4953450414438_100.00000130542381_84.45289714936317,button/primary,264.05202261636987_100.0000000269043_36.65653391870817,brand,0_0_7.999402109134534,0_0_14.858472006301954)",
     "Sky dancer": {
       "$type": "color",
       "$value": "#3b82f6"

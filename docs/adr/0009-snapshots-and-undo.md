@@ -15,10 +15,9 @@ follow ADRs 6 and 7: `NodeData` for `PresetNode` (with `id?`, and
 memory only: snapshots hold them, permalinks and `localStorage`
 (which stores a packed palette, like permalinks) don't. The URL
 and storage hold the palette as packed by the current permalink
-version: until ADR 5's lossless permalinks (step 7) land, colors
-are rounded to hex when the palette is reloaded. ADR 8 swaps are
-one step, and a preset (ADR 7) is a node like any other for
-snapshots.
+version (2, lossless, as the port's step 7 adds it after this
+one). ADR 8 swaps are one step, and a preset (ADR 7) is a node
+like any other for snapshots.
 
 ## Context
 

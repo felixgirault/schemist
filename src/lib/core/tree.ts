@@ -1,4 +1,5 @@
 import {parseColor} from '#lib/color/parsing.js';
+import type {SchemistColor} from '#lib/color/types.js';
 import type {
 	IdentifiedNodeData,
 	NodeData,
@@ -14,6 +15,10 @@ const isObject = (
 	typeof value === 'object' &&
 	value !== null &&
 	!Array.isArray(value);
+
+const isColor = (value: unknown): value is SchemistColor =>
+	isObject(value) &&
+	['h', 's', 'l'].every((key) => Number.isFinite(value[key]));
 
 const nodeKeys = [
 	'type',
@@ -46,6 +51,11 @@ const validateArg = (
 			}
 			return value as boolean;
 		case 'color': {
+			// Colors that are not strings come from permalinks.
+			if (isColor(value)) {
+				return {h: value.h, s: value.s, l: value.l};
+			}
+
 			const [, color] =
 				typeof value === 'string' ? parseColor(value) : [];
 

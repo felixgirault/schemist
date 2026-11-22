@@ -1,9 +1,20 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
-import {parseColor} from '#lib/color/parsing.js';
 import type {SchemistColor} from '#lib/color/types.js';
 import type {Args, Param, NodeData} from '#lib/core/nodes.js';
 import {validateTree} from '#lib/core/tree.js';
 import defs, {isNodeType} from '#lib/definitions/index.js';
+
+// How a color is written in the dictionary. `decode` gives what
+// `validateTree` checks: a CSS color string or a color.
+export type ColorCodec = {
+	encode: (color: SchemistColor) => string;
+	decode: (data: string) => string | SchemistColor;
+};
+
+const hexCodec: ColorCodec = {
+	encode: (color) => formatSchemistToHex(color).substring(1),
+	decode: (data) => `#${data}`
+};
 
 // Escapes the separators so tokens can contain them.
 const escapeEntry = (entry: string) =>
@@ -12,7 +23,10 @@ const escapeEntry = (entry: string) =>
 const unescapeEntry = (entry: string) =>
 	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
 
-export const pack = (node: NodeData): string => {
+export const pack = (
+	node: NodeData,
+	colorCodec = hexCodec
+): string => {
 	const packed: string[] = [];
 	// A Map keeps insertion order, unlike an object which lists
 	// integer-like keys first (see #8).
@@ -37,9 +51,7 @@ export const pack = (node: NodeData): string => {
 				return value;
 			case 'color':
 				return indice(
-					formatSchemistToHex(
-						value as SchemistColor
-					).substring(1)
+					colorCodec.encode(value as SchemistColor)
 				);
 		}
 	};
@@ -94,7 +106,7 @@ export const pack = (node: NodeData): string => {
 };
 
 // What comes out of a permalink is validated like any outside data.
-export const unpack = (data: string) => {
+export const unpack = (data: string, colorCodec = hexCodec) => {
 	const [rootIndex, inlinePacked, inlineIndex] =
 		data.split('@');
 
@@ -108,7 +120,7 @@ export const unpack = (data: string) => {
 			case 'range':
 				return value;
 			case 'color':
-				return `#${index[value]}`;
+				return colorCodec.decode(index[value]);
 		}
 	};
 

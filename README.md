@@ -141,11 +141,11 @@ $ npm run cli -- eval palette.json --contrast apca \
       ]
     }
   ],
-  "permalink": "https://schemist.fglt.fr?preset=1@3@4526x5a,..."
+  "permalink": "https://schemist.fglt.fr?preset=2@3@4526x5a,..."
 }
 
 $ npm run cli -- export palette.json --format css --prefix color
-/* @see https://schemist.fglt.fr?preset=1@3@4526x5a,... */
+/* @see https://schemist.fglt.fr?preset=2@3@4526x5a,... */
 --color-brand: #3b82f6;
 --color-brand-text: #000921;
 --color-brand-light: #d3e4fe;
