@@ -80,6 +80,19 @@ of conflicting names instead of losing a color:
 - **App:** the export modal shows a short notice above the code,
   listing the conflicting names. The output stays usable.
 
+### Decided while building
+
+- A name with a part starting with `$` is also a conflict (such a
+  group would read as a DTCG property, and `$description/x` would
+  clobber the description). The token stays flat with the leading
+  `$` of each part stripped.
+- Whether a path is a group is known from all the names before
+  placing any token, so the output doesn't depend on tree order.
+- A flat key already taken (a one-segment name next to a group of
+  the same name, or another flat token) gets ` (2)`, ` (3)`…
+- The CLI message ends with "or give them distinct tokens", since
+  names without a token are generated and can't be renamed.
+
 ## Alternatives rejected
 
 - **An option to nest or not**: no case for flat slash names was

@@ -718,6 +718,39 @@ describe('the cases', () => {
 			context(1, {transcript})
 		).pass;
 
+	test('tokens-nested wants groups, not slash keys', () => {
+		const out = mkdtempSync(
+			join(tmpdir(), 'schemist-tokens-')
+		);
+		mkdirSync(join(out, 'out'));
+
+		const nested = (text: string) => {
+			writeFileSync(join(out, 'out/light.tokens.json'), text);
+
+			return grade(
+				loadCase(join(casesRoot, 'dashboard')).graders.find(
+					(g) => g.name === 'tokens-nested'
+				)!,
+				context(1, {dir: out})
+			).pass;
+		};
+
+		try {
+			expect(
+				nested(
+					'{"Colors": {"button/primary/bg": {"$type": "color"}}}'
+				)
+			).toBe(false);
+			expect(
+				nested(
+					'{"Colors": {"button": {"primary": {"bg": {"$type": "color"}}}}}'
+				)
+			).toBe(true);
+		} finally {
+			rmSync(out, {recursive: true, force: true});
+		}
+	});
+
 	test('own contrast math is flagged, in commands and files', () => {
 		const formula =
 			'const L = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;';

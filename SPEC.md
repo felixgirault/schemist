@@ -554,18 +554,21 @@ simulation and packing (snapshots of every node type and preset,
 and round trips). Characterization snapshots cover the outputs
 (hex values and names) of every preset under a few root colors,
 `combinations.all` (WCAG 2 and APCA, with and without
-simulations) and the CSS, Sass and design tokens exports. Export
-components are rendered server-side; there are no browser or
-end-to-end tests. A core test asserts that `evaluate` matches
-`collectOutputs` for every preset. CLI tests cover tree
-validation and argument handling, and build the CLI to run it
-under plain Node (it crashes on runes if a store leaks into
-`core/`), comparing `eval` with the core and checking that an
-invalid tree fails with its path. The eval harness (§15) is
-tested on small recorded transcripts and trees under
-`evals/fixtures/`, with the core standing in for the CLI: no
-model is called. CI runs the unit tests and `check` (not `lint`
-or `build`).
+simulations) and the CSS, Sass and design tokens exports. Unit
+tests of `exportTokens` cover nesting, empty parts, `$` parts,
+conflicts and duplicates (with no color dropped, whatever the
+tree order); `names.test.ts` renders the tokens export and its
+conflict notice. Export components are rendered server-side;
+there are no browser or end-to-end tests. A core test asserts
+that `evaluate` matches `collectOutputs` for every preset. CLI
+tests cover tree validation and argument handling, and build the
+CLI to run it under plain Node (it crashes on runes if a store
+leaks into `core/`), comparing `eval` with the core and checking
+that an invalid tree, or conflicting token names, fails with its
+message. The eval harness (§15) is tested on small recorded
+transcripts and trees under `evals/fixtures/`, with the core
+standing in for the CLI: no model is called. CI runs the unit
+tests and `check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
