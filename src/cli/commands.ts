@@ -24,7 +24,7 @@ import {permalink} from '#lib/routing.js';
 import {parseArgs} from 'node:util';
 import {UsageError} from './errors.js';
 import {parsePair} from './pair.js';
-import {parseTreeJson} from './tree.js';
+import {declaredPairs, parseTreeJson} from './tree.js';
 import {listPresets, listTypes} from './vocabulary.js';
 
 export const defaultOrigin = 'https://schemist.fglt.fr';
@@ -280,7 +280,11 @@ export const run = (
 	const visible = new Set(entries.map(({id}) => id));
 	const declared = values.pair
 		? []
-		: resolvePairs(tree.pairs ?? [], all).pairs.map((pair) => {
+		: declaredPairs(tree, all).map((pair) => {
+				const sources = [
+					...pair.sources.rules.map((i) => `rules[${i}]`),
+					...(pair.sources.oneOff ? ['pairs'] : [])
+				];
 				const fg = pair.fg.name;
 				const bg = pair.bg.name;
 
@@ -292,6 +296,7 @@ export const run = (
 					return {
 						fg,
 						bg,
+						sources,
 						targets: Object.fromEntries(
 							targetNames
 								.filter(
@@ -313,6 +318,7 @@ export const run = (
 				return {
 					fg,
 					bg,
+					sources,
 					targets: Object.fromEntries(
 						checks.map(({target, goal}) => [target, goal])
 					),

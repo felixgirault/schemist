@@ -57,14 +57,14 @@ hand back a permalink. It runs on the same code as the app, so
 results match.
 
 A good loop for an agent: read `types` and `presets`, write a
-tree, then check it before exporting. Declare the pairs the
-design uses in the tree (`pairs`, see below), and `eval` them
-with both `--contrast wcag2` and `--contrast apca`, each with
-`--blindness protanomaly,deuteranomaly,tritanomaly`, and read
-`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 75 for body
-text, and 3 for large text and non-text UI such as input borders
-and focus rings. Contrast doesn't tell whether two colors look
-different: for categorical colors (chart series, tags, map
+tree, then check it before exporting. Declare the roles and rules
+of the design in the tree (`roles` and `rules`, see below), and
+`eval` them with both `--contrast wcag2` and `--contrast apca`,
+each with `--blindness protanomaly,deuteranomaly,tritanomaly`,
+and read `minLevel`, the worst case. Aim for 4.5 (AA) and Lc 75
+for body text, and 3 for large text and non-text UI such as input
+borders and focus rings. Contrast doesn't tell whether two colors
+look different: for categorical colors (chart series, tags, map
 regions), check every pair among them with
 `eval --difference --blindness …` and aim for a
 `difference.minLevel` of at least 10, more for small marks like
@@ -108,6 +108,18 @@ reports whether each pair meets them, in the worst case of
 `--blindness`. A pair on an unknown or ambiguous name makes the
 tree invalid. Invalid trees are rejected with the path of the
 problem, e.g. `root.children[2].args.amount`.
+
+Rather than pairs one by one, declare the intent. A root's
+`roles` are named lists of colors (`{name, colors}`), and its
+`rules` put a role on another, for a use (`body`: wcag2 4.5 and
+apca 75, `large`: wcag2 3, `categories`: difference 10):
+`{fg: "Text", bg: "Surfaces", use: "body"}`, or a role among
+itself without `bg` (`{fg: "Chart", use: "categories"}`).
+Explicit targets next to `use` override its own. `eval` expands
+them, each color of `fg` on each one of `bg`; a `pairs` entry on
+the same couple replaces what the rules give it, which is how an
+exception is written. A rule on an unknown role, or a role
+listing an unknown or ambiguous color, makes the tree invalid.
 
 ```json
 {
@@ -181,6 +193,8 @@ Without `--pair`, `eval` also reports the tree's declared pairs:
 `pairs: [{fg, bg, targets, levels, pass}]`, `levels` being the
 worst case of each target with the simulations. A pair with a
 hidden color comes back with `hidden: true` and is not checked.
+Each pair has `sources`: the `rules[i]` it comes from, and
+`pairs` when a declared pair gave its targets.
 
 Changing the CLI, its error messages or this section? Agents read
 them, so [evals/](evals/README.md) runs agents on real prompts

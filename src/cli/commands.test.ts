@@ -409,6 +409,7 @@ test('eval reports the declared pairs, --pair replaces them', () => {
 		{
 			fg: 'Text',
 			bg: 'Bg',
+			sources: ['pairs'],
 			targets: {wcag2: 4.5, apca: 60},
 			levels: {
 				wcag2: expect.any(Number),
@@ -419,6 +420,7 @@ test('eval reports the declared pairs, --pair replaces them', () => {
 		{
 			fg: 'Bg',
 			bg: 'Text',
+			sources: ['pairs'],
 			targets: {wcag2: 30},
 			levels: {wcag2: expect.any(Number)},
 			pass: false
@@ -463,6 +465,7 @@ test('eval does not check declared pairs of hidden colors', () => {
 		fg: 'Hid',
 		bg: 'Bg',
 		targets: {wcag2: 4.5},
+		sources: ['pairs'],
 		hidden: true
 	});
 	expect(pairs[1]).toMatchObject({fg: 'Shown', pass: true});
@@ -482,4 +485,62 @@ test('eval accepts a repeated --pair', () => {
 	);
 
 	expect(combinations).toHaveLength(1);
+});
+
+const withRules = JSON.stringify({
+	type: 'clr',
+	token: 'Bg',
+	args: {color: '#ffffff'},
+	children: [
+		{type: 'ctr', token: 'Text', args: {amount: 90}},
+		{type: 'ctr', token: 'Muted', args: {amount: 30}}
+	],
+	roles: [
+		{name: 'Surfaces', colors: ['Bg']},
+		{name: 'Content', colors: ['Text', 'Muted']}
+	],
+	rules: [
+		{fg: 'Content', bg: 'Surfaces', use: 'large'},
+		{fg: 'Content', bg: 'Surfaces', use: 'body'}
+	],
+	pairs: [{fg: 'Muted', bg: 'Bg', wcag2: 3}]
+});
+
+test('eval expands rules, reporting the sources of each pair', () => {
+	const {pairs} = JSON.parse(
+		run(['eval', '-'], () => withRules)
+	);
+
+	expect(pairs).toMatchObject([
+		{
+			fg: 'Text',
+			bg: 'Bg',
+			sources: ['rules[0]', 'rules[1]'],
+			targets: {wcag2: 4.5, apca: 75},
+			pass: true
+		},
+		{
+			fg: 'Muted',
+			bg: 'Bg',
+			sources: ['pairs'],
+			targets: {wcag2: 3}
+		}
+	]);
+});
+
+test.each([
+	[
+		{roles: [{name: 'A', colors: ['Nope']}]},
+		'root.roles[0]: unknown color "Nope"'
+	],
+	[
+		{rules: [{fg: 'Nope', bg: 'Nope', use: 'body'}]},
+		'root.rules[0].fg: unknown role "Nope"'
+	]
+])('eval fails on %j', (patch, message) => {
+	expect(() =>
+		run(['eval', '-'], () =>
+			JSON.stringify({...JSON.parse(withRules), ...patch})
+		)
+	).toThrow(message);
 });

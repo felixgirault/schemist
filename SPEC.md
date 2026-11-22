@@ -1070,6 +1070,17 @@ the app (hidden colors are not exported): it comes as
 pairs are replaced by the given ones for that run and `pairs` is
 omitted; a repeated `--pair` counts once.
 
+The root may also have `roles` and `rules` (§9.7, "Roles and
+rules"), validated with the rest, then resolved strictly: a role
+member that does not resolve fails the tree
+(`root.roles[0]: unknown color "x"`), and so does a rule on an
+unknown role (`root.rules[1].fg: unknown role "x"`). `eval`
+declares the expanded pairs (`declaredPairs` in `cli/tree.ts`:
+the one-off `pairs` and the ones `expandRules` gives) and each
+one has `sources`: `rules[i]` for every rule it comes from, and
+`pairs` when a declared pair set its targets. The evals' graders
+use combinations, not declared pairs, so they need no change.
+
 `export --format tokens` nests names split on `/` and `.`
 (§11.8). When `exportTokens` reports conflicts, it fails like a
 tree error (no usage text, exit code 1, nothing on stdout):
