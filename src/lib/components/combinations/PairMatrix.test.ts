@@ -205,10 +205,22 @@ test('counts the cells reaching the brush', () => {
 	combinations.minLevel = 0;
 });
 
-test('renders the card as a manual popover dialog', () => {
+test('docks the card as a labelled region beside the grid', () => {
+	expect(render(PairMatrix).body).not.toContain(
+		'pair-card-title'
+	);
+
+	combinations.openPairIds = {
+		fg: node('Grey').id,
+		bg: node('Black').id
+	};
+
 	const html = render(PairMatrix).body;
 
 	expect(html).toMatch(
-		/<div[^>]*popover="manual"[^>]*role="dialog"/
+		/<section[^>]*aria-labelledby="pair-card-title"/
 	);
+	expect(html).not.toContain('popover');
+
+	combinations.openPairIds = null;
 });

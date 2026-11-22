@@ -34,20 +34,11 @@
 		)
 	]);
 
-	let card = $state<HTMLElement>();
-	// the cell that opened the card, to give it focus back
-	let invoker: HTMLElement | undefined;
-
 	// Shows the pair, or closes it when it is shown already.
-	const handleCell = (
-		fg: PaletteColor,
-		bg: PaletteColor,
-		event: Event
-	) => {
+	const handleCell = (fg: PaletteColor, bg: PaletteColor) => {
 		const same =
 			open?.fg.id === fg.id && open?.bg.id === bg.id;
 
-		invoker = event.currentTarget as HTMLElement;
 		combinations.openPairIds = same
 			? null
 			: {fg: fg.id, bg: bg.id};
@@ -56,25 +47,6 @@
 	const handleClose = () => {
 		combinations.openPairIds = null;
 	};
-
-	// The card is a manual popover anchored to the open cell (CSS
-	// anchor), following the open pair: shown and focused when one
-	// opens, hidden when it closes or its colors are gone. Manual,
-	// as light dismiss would close it on pressing the open cell,
-	// which the click would then reopen.
-	$effect(() => {
-		if (!card) return;
-
-		const isShown = card.matches(':popover-open');
-
-		if (open && !isShown) {
-			card.showPopover();
-			card.focus();
-		} else if (!open && isShown) {
-			card.hidePopover();
-			invoker?.focus();
-		}
-	});
 
 	// The open pair is kept in the store, so that leaving the grid
 	// and coming back would reopen the card unasked.
@@ -189,303 +161,331 @@
 			to open it. {combinations.pairChecks.length} declared.
 		</p>
 
-		<div class="scroller">
-			<table class="matrix">
-				<caption class="hidden">
-					Declared pairs, backgrounds in rows and
-					foregrounds in columns
-				</caption>
-				<thead>
-					<tr>
-						<td></td>
-						{#each colors as { id, name, rgbColor } (id)}
-							<th scope="col" title={name}>
-								{@render swatch(rgbColor)}
-								<span class="hidden">{name}</span>
-							</th>
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each colors as row (row.id)}
-						<tr>
-							<th scope="row" title={row.name}>
-								{@render swatch(row.rgbColor)}
-								<span class="hidden">{row.name}</span>
-							</th>
-							{#each colors as column (column.id)}
-								<td>
-									{#if column.id !== row.id}
-										{@const check = byId.get(
-											`${row.id}-${column.id}`
-										)}
-										{@const levels =
-											combinations.brushLevels(
-												column,
-												row
-											)}
-										{@const passes =
-											combinations.passesBrush(
-												column,
-												row
-											)}
-										<button
-											class="cell pair-cell"
-											class:pair-cell--tall={levels
-												.simulated.length}
-											class:pair-cell--declared={check}
-											class:pair-cell--off={check &&
-												!check.pass}
-											class:pair-cell--dim={!passes}
-											style="--cell-bg: {hex(
-												row.rgbColor
-											)}; --cell-fg: {hex(
-												column.rgbColor
-											)};"
-											title="{column.name} on {row.name}, {round(
-												wcag2Contrast(
-													row.rgbColor,
-													column.rgbColor
-												),
-												1
-											)}:1{levels.simulated
-												.map(
-													(s) =>
-														`, ${s.type} ${round(s.level, 1)}`
-												)
-												.join('')}"
-											aria-pressed={open?.fg.id ===
-												column.id &&
-												open?.bg.id === row.id}
-											aria-label="{column.name} on {row.name}: {check
-												? check.pass
-													? 'meets its targets'
-													: 'does not meet its targets'
-												: 'not declared'}, {passes
-												? 'reaches'
-												: 'misses'} the minimum{levels.simulated
-												.map(
-													(s) =>
-														`, ${s.type} ${round(s.level, 1)}`
-												)
-												.join('')}"
-											onclick={(event) =>
-												handleCell(
-													column,
-													row,
-													event
+		<div class="layout">
+			<div class="body" class:body--open={open}>
+				<div class="scroller">
+					<table class="matrix">
+						<caption class="hidden">
+							Declared pairs, backgrounds in rows and
+							foregrounds in columns
+						</caption>
+						<thead>
+							<tr>
+								<td></td>
+								{#each colors as { id, name, rgbColor } (id)}
+									<th scope="col" title={name}>
+										{@render swatch(rgbColor)}
+										<span class="hidden">{name}</span>
+									</th>
+								{/each}
+							</tr>
+						</thead>
+						<tbody>
+							{#each colors as row (row.id)}
+								<tr>
+									<th scope="row" title={row.name}>
+										{@render swatch(row.rgbColor)}
+										<span class="hidden">
+											{row.name}
+										</span>
+									</th>
+									{#each colors as column (column.id)}
+										<td>
+											{#if column.id !== row.id}
+												{@const check = byId.get(
+													`${row.id}-${column.id}`
 												)}
-										>
-											<span
-												class="preview"
-												aria-hidden="true"
-											>
-												Aa
-												{#if levels.simulated.length}
-													<span class="strips">
-														{#each levels.simulated as { type } (type)}
-															{@const simulate =
-																simulation(type)}
+												{@const levels =
+													combinations.brushLevels(
+														column,
+														row
+													)}
+												{@const passes =
+													combinations.passesBrush(
+														column,
+														row
+													)}
+												<button
+													class="cell pair-cell"
+													class:pair-cell--tall={levels
+														.simulated.length}
+													class:pair-cell--declared={check}
+													class:pair-cell--off={check &&
+														!check.pass}
+													class:pair-cell--dim={!passes}
+													style="--cell-bg: {hex(
+														row.rgbColor
+													)}; --cell-fg: {hex(
+														column.rgbColor
+													)};"
+													title="{column.name} on {row.name}, {round(
+														wcag2Contrast(
+															row.rgbColor,
+															column.rgbColor
+														),
+														1
+													)}:1{levels.simulated
+														.map(
+															(s) =>
+																`, ${s.type} ${round(s.level, 1)}`
+														)
+														.join('')}"
+													aria-pressed={open?.fg
+														.id === column.id &&
+														open?.bg.id === row.id}
+													aria-label="{column.name} on {row.name}: {check
+														? check.pass
+															? 'meets its targets'
+															: 'does not meet its targets'
+														: 'not declared'}, {passes
+														? 'reaches'
+														: 'misses'} the minimum{levels.simulated
+														.map(
+															(s) =>
+																`, ${s.type} ${round(s.level, 1)}`
+														)
+														.join('')}"
+													onclick={() =>
+														handleCell(
+															column,
+															row
+														)}
+												>
+													<span
+														class="preview"
+														aria-hidden="true"
+													>
+														Aa
+														{#if levels.simulated.length}
 															<span
-																class="strip"
-																style="--cell-bg: {hex(
-																	simulate(
-																		row.rgbColor
-																	)
-																)}; --cell-fg: {hex(
-																	simulate(
-																		column.rgbColor
-																	)
-																)};"
-															></span>
-														{/each}
+																class="strips"
+															>
+																{#each levels.simulated as { type } (type)}
+																	{@const simulate =
+																		simulation(
+																			type
+																		)}
+																	<span
+																		class="strip"
+																		style="--cell-bg: {hex(
+																			simulate(
+																				row.rgbColor
+																			)
+																		)}; --cell-fg: {hex(
+																			simulate(
+																				column.rgbColor
+																			)
+																		)};"
+																	></span>
+																{/each}
+															</span>
+														{/if}
 													</span>
-												{/if}
-											</span>
-											{#if check}
-												<!-- drawn in the panel's colors, readable whatever the pair -->
-												<span class="badge">
-													{#if check.pass}
-														<CheckIcon />
-													{:else}
-														<WarningIcon />
+													{#if check}
+														<!-- drawn in the panel's colors, readable whatever the pair -->
+														<span class="badge">
+															{#if check.pass}
+																<CheckIcon />
+															{:else}
+																<WarningIcon />
+															{/if}
+														</span>
 													{/if}
-												</span>
+												</button>
 											{/if}
-										</button>
-									{/if}
-								</td>
+										</td>
+									{/each}
+								</tr>
 							{/each}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-
-		<div
-			bind:this={card}
-			class="details elevated"
-			popover="manual"
-			role="dialog"
-			tabindex="-1"
-			aria-label="Pair details"
-		>
-			{#if open}
-				<h3 class="h3">{open.fg.name} on {open.bg.name}</h3>
-
-				<p
-					class="sample"
-					style="background: {hex(
-						open.bg.rgbColor
-					)}; color: {hex(open.fg.rgbColor)};"
-				>
-					{open.fg.name}
-					<br />
-					& {open.bg.name}
-				</p>
-
-				{#if lens}
-					<h4 class="h3">{labels[lens.name]}</h4>
-					<ul>
-						{#each lens.rows as { type, level, grade } (type)}
-							{@const simulate = type
-								? simulation(type)
-								: null}
-							<li
-								class="row lens-row"
-								style="background: {hex(
-									simulate
-										? simulate(open.bg.rgbColor)
-										: open.bg.rgbColor
-								)}; color: {hex(
-									simulate
-										? simulate(open.fg.rgbColor)
-										: open.fg.rgbColor
-								)};"
-							>
-								<span class="type">
-									{type ?? 'normal vision'}
-								</span>
-								{#if grade}<strong>{grade}</strong>{/if}
-								({round(level, 1)})
-								{#if requirement.target}
-									{#if level >= requirement.target.value}
-										<CheckIcon />
-										<span class="hidden">met</span>
-									{:else}
-										<WarningIcon />
-										<span class="hidden">not met</span>
-									{/if}
-								{/if}
-							</li>
-						{/each}
-					</ul>
-
-					<button
-						class="button"
-						disabled={!requirement.target}
-						onclick={() =>
-							combinations.toggleBrush(
-								open!.fg,
-								open!.bg
-							)}
-					>
-						{#if requirement.isSet}
-							Remove ≥ {requirement.target?.value} requirement
-						{:else}
-							Require ≥ {requirement.target?.value ?? '…'}
-						{/if}
-					</button>
-					{#if !requirement.target}
-						<p class="hint">
-							Set a minimum to require it.
-						</p>
-					{/if}
-				{/if}
-
-				<div class="targets">
-					{#each targetNames as name (name)}
-						<label>
-							{labels[name]}
-							<input
-								type="number"
-								min={0}
-								step="any"
-								value={open.check?.pair[name] ?? ''}
-								onchange={(event) =>
-									handleTarget(name, event)}
-							/>
-						</label>
-					{/each}
+						</tbody>
+					</table>
 				</div>
 
-				{#if open.check}
-					{#each open.check.checks as { target, goal, level, simulated, pass } (target)}
-						{@const rows = [
-							{type: null, level},
-							...simulated
-						]}
-						<h4 class="h3">
-							{labels[target]}, at least {goal}
-							{#if pass}
-								<CheckIcon />
-								<span class="hidden">met</span>
-							{:else}
-								<WarningIcon />
-								<span class="hidden">not met</span>
+				{#if open}
+					<section
+						class="details elevated"
+						aria-labelledby="pair-card-title"
+					>
+						<h3 class="h3" id="pair-card-title">
+							{open.fg.name} on {open.bg.name}
+						</h3>
+
+						<p
+							class="sample"
+							style="background: {hex(
+								open.bg.rgbColor
+							)}; color: {hex(open.fg.rgbColor)};"
+						>
+							{open.fg.name}
+							<br />
+							& {open.bg.name}
+						</p>
+
+						{#if lens}
+							<h4 class="h3">{labels[lens.name]}</h4>
+							<ul>
+								{#each lens.rows as { type, level, grade } (type)}
+									{@const simulate = type
+										? simulation(type)
+										: null}
+									<li
+										class="row lens-row"
+										style="background: {hex(
+											simulate
+												? simulate(open.bg.rgbColor)
+												: open.bg.rgbColor
+										)}; color: {hex(
+											simulate
+												? simulate(open.fg.rgbColor)
+												: open.fg.rgbColor
+										)};"
+									>
+										<span class="type">
+											{type ?? 'normal vision'}
+										</span>
+										{#if grade}<strong>
+												{grade}
+											</strong>{/if}
+										({round(level, 1)})
+										{#if requirement.target}
+											{#if level >= requirement.target.value}
+												<CheckIcon />
+												<span class="hidden">
+													met
+												</span>
+											{:else}
+												<WarningIcon />
+												<span class="hidden">
+													not met
+												</span>
+											{/if}
+										{/if}
+									</li>
+								{/each}
+							</ul>
+
+							<button
+								class="button"
+								disabled={!requirement.target}
+								onclick={() =>
+									combinations.toggleBrush(
+										open!.fg,
+										open!.bg
+									)}
+							>
+								{#if requirement.isSet}
+									Remove ≥ {requirement.target?.value} requirement
+								{:else}
+									Require ≥ {requirement.target
+										?.value ?? '…'}
+								{/if}
+							</button>
+							{#if !requirement.target}
+								<p class="hint">
+									Set a minimum to require it.
+								</p>
 							{/if}
-						</h4>
-						<ul>
-							{#each rows as { type, level } (type)}
-								{@const simulate = type
-									? simulation(type)
-									: null}
-								<li class="row">
-									<span class="type">
-										{type ?? 'normal vision'}
-									</span>
-									{@render swatch(
-										simulate
-											? simulate(open.fg.rgbColor)
-											: open.fg.rgbColor
-									)}
-									{@render swatch(
-										simulate
-											? simulate(open.bg.rgbColor)
-											: open.bg.rgbColor
-									)}
-									<strong>{round(level, 1)}</strong>
-									{#if level >= goal}
+						{/if}
+
+						<div class="targets">
+							{#each targetNames as name (name)}
+								<label>
+									{labels[name]}
+									<input
+										type="number"
+										min={0}
+										step="any"
+										value={open.check?.pair[name] ??
+											''}
+										onchange={(event) =>
+											handleTarget(name, event)}
+									/>
+								</label>
+							{/each}
+						</div>
+
+						{#if open.check}
+							{#each open.check.checks as { target, goal, level, simulated, pass } (target)}
+								{@const rows = [
+									{type: null, level},
+									...simulated
+								]}
+								<h4 class="h3">
+									{labels[target]}, at least {goal}
+									{#if pass}
 										<CheckIcon />
 										<span class="hidden">met</span>
 									{:else}
 										<WarningIcon />
 										<span class="hidden">not met</span>
 									{/if}
-								</li>
+								</h4>
+								<ul>
+									{#each rows as { type, level } (type)}
+										{@const simulate = type
+											? simulation(type)
+											: null}
+										<li class="row">
+											<span class="type">
+												{type ?? 'normal vision'}
+											</span>
+											{@render swatch(
+												simulate
+													? simulate(
+															open.fg.rgbColor
+														)
+													: open.fg.rgbColor
+											)}
+											{@render swatch(
+												simulate
+													? simulate(
+															open.bg.rgbColor
+														)
+													: open.bg.rgbColor
+											)}
+											<strong>
+												{round(level, 1)}
+											</strong>
+											{#if level >= goal}
+												<CheckIcon />
+												<span class="hidden">
+													met
+												</span>
+											{:else}
+												<WarningIcon />
+												<span class="hidden">
+													not met
+												</span>
+											{/if}
+										</li>
+									{/each}
+								</ul>
 							{/each}
-						</ul>
-					{/each}
 
-					<button class="button" onclick={handleRemove}>
-						Remove pair
-					</button>
-				{:else}
-					<p class="hint">
-						Set a target to declare this pair.
-					</p>
+							<button
+								class="button"
+								onclick={handleRemove}
+							>
+								Remove pair
+							</button>
+						{:else}
+							<p class="hint">
+								Set a target to declare this pair.
+							</p>
+						{/if}
+
+						<button class="button" onclick={handlePreview}>
+							{combinations.previewedUid === previewUid
+								? 'Stop preview'
+								: 'Preview'}
+						</button>
+
+						<button class="button" onclick={handleClose}>
+							Close
+						</button>
+					</section>
 				{/if}
-
-				<button class="button" onclick={handlePreview}>
-					{combinations.previewedUid === previewUid
-						? 'Stop preview'
-						: 'Preview'}
-				</button>
-
-				<button class="button" onclick={handleClose}>
-					Close
-				</button>
-			{/if}
+			</div>
 		</div>
 
 		{#if combinations.hiddenPairs.length}
@@ -569,32 +569,39 @@
 		font-weight: 600;
 	}
 
-	/* Next to the open cell where anchors are supported, centered by
-	the browser otherwise. */
-	.matrix-panel :global(.pair-cell[aria-pressed='true']) {
-		anchor-name: --open-pair-cell;
+	.layout {
+		container-type: inline-size;
+	}
+
+	/* The grid scrolls on its own, the card stays in view beside it
+	when the panel has room, under it otherwise. */
+	.body {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.body > :global(.scroller) {
+		min-width: 0;
+	}
+
+	@container (min-width: 48rem) {
+		.body--open {
+			grid-template-columns: minmax(0, 1fr) 32ch;
+			align-items: start;
+		}
+
+		.body--open .details {
+			position: sticky;
+			top: 0;
+			max-height: 100vh;
+			margin-top: 0;
+			overflow: auto;
+		}
 	}
 
 	.matrix-panel .details {
-		width: 32ch;
-		max-width: calc(100vw - 2rem);
-		max-height: calc(100vh - 2rem);
-		overflow: auto;
 		border: 1px solid var(--fg);
 		color: var(--fg);
-	}
-
-	@supports (anchor-name: --a) {
-		.matrix-panel .details {
-			inset: auto;
-			margin: 0.5rem;
-			position-anchor: --open-pair-cell;
-			position-area: block-end span-inline-end;
-			position-try-fallbacks:
-				flip-block,
-				flip-inline,
-				flip-block flip-inline;
-		}
 	}
 
 	/* Dims the colors only, not the marks of a declared pair. */
