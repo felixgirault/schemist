@@ -133,10 +133,10 @@ test('the saved palette holds the pairs', () => {
 
 test('undo, redo and saving keep roles and rules', () => {
 	const roles = [
-		{name: 'Surfaces', colors: [node('Bg').id]},
-		{name: 'Content', colors: [node('Text').id]}
+		{id: 'r1', name: 'Surfaces', colors: [node('Bg').id]},
+		{id: 'r2', name: 'Content', colors: [node('Text').id]}
 	];
-	const rules = [{fg: 'Content', bg: 'Surfaces', use: 'body'}];
+	const rules = [{id: 'u1', fg: 'r2', bg: 'r1', use: 'body'}];
 
 	step(() => {
 		palette.storedRoles = roles;
@@ -165,7 +165,9 @@ test('undo, redo and saving keep roles and rules', () => {
 		)
 	);
 
-	expect(data.rules).toEqual(rules);
+	expect(data.rules).toEqual([
+		{fg: 'Content', bg: 'Surfaces', use: 'body'}
+	]);
 	expect(data.roles).toEqual([
 		{name: 'Surfaces', colors: ['Bg']},
 		{name: 'Content', colors: ['Text']}

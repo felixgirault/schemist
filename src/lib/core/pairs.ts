@@ -202,12 +202,17 @@ export type RuleError = {
 	message: string;
 };
 
-// Where the targets of a pair come from: the rules by index, and the
-// one-off pair that replaces them.
-export type PairSources = {rules: number[]; oneOff: boolean};
+// Where the targets of a pair come from: the rules (by index, or the
+// key the app gives them), and the one-off pair that replaces them,
+// `overrides` being the rules it replaces.
+export type PairSources<K = number> = {
+	rules: K[];
+	overrides: K[];
+	oneOff: boolean;
+};
 
-export type ExpandedPair<T> = ResolvedPair<T> & {
-	sources: PairSources;
+export type ExpandedPair<T, K = number> = ResolvedPair<T> & {
+	sources: PairSources<K>;
 };
 
 // The targets of a rule: its use's, which its own targets override.
@@ -295,7 +300,11 @@ export const expandRules = <T>(
 						fg,
 						bg,
 						...targets,
-						sources: {rules: [index], oneOff: false},
+						sources: {
+							rules: [index],
+							overrides: [],
+							oneOff: false
+						},
 						among
 					};
 
@@ -331,7 +340,11 @@ export const expandRules = <T>(
 			wcag2,
 			apca,
 			difference,
-			sources: {rules: [], oneOff: true},
+			sources: {
+				rules: [],
+				overrides: replaced?.sources.rules ?? [],
+				oneOff: true
+			},
 			among: false
 		};
 

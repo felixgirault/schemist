@@ -1,4 +1,6 @@
 import type {
+	AppRole,
+	AppRule,
 	IdentifiedNodeData,
 	NodeData,
 	PresetPair,
@@ -13,6 +15,7 @@ import {
 	collectColors,
 	createNode
 } from '#lib/stores/nodes.svelte.js';
+import {uid} from '#lib/utils/generators.js';
 
 const colorsOf = (root: Node) => collectColors(root);
 
@@ -42,12 +45,12 @@ export const parsePairs = (
 	}));
 };
 
-// The roles of a tree on the ids of its colors; what does not
-// resolve is dropped and logged, as for pairs.
+// The roles of a tree on the ids of its colors, with ids of their
+// own; what does not resolve is dropped and logged, as for pairs.
 export const parseRoles = (
 	data: NodeData,
 	root: Node
-): Role[] => {
+): AppRole[] => {
 	const {roles, errors} = resolveRoles(
 		data.roles ?? [],
 		colorsOf(root)
@@ -58,29 +61,80 @@ export const parseRoles = (
 	);
 
 	return roles.map(({name, colors}) => ({
+		id: `r${uid()}`,
 		name,
 		colors: colors.map(({id}) => id)
 	}));
 };
 
+// The rules of a tree on the ids of `roles`, with ids of their own.
+// A rule of an unknown role is dropped and logged.
+export const parseRules = (
+	data: NodeData,
+	roles: AppRole[]
+): AppRule[] => {
+	const idOf = (name?: string) =>
+		roles.find((role) => role.name === name)?.id;
+
+	return (data.rules ?? []).flatMap((rule, index) => {
+		const fg = idOf(rule.fg);
+		const bg =
+			rule.bg === undefined ? undefined : idOf(rule.bg);
+
+		if (!fg || (rule.bg !== undefined && !bg)) {
+			console.error(`Dropped rule ${index}: unknown role`);
+			return [];
+		}
+
+		return [{...rule, id: `u${uid()}`, fg, bg}];
+	});
+};
+
 // The roles by names, as saved. A member whose name does not
 // point to a single color is left out until a color is renamed,
-// like an unsaved pair.
-const nameRoles = (root: Node, roles: Role[]): Role[] => {
+// and listed in `unsaved` (by name), like an unsaved pair.
+export const nameRoles = (root: Node, roles: AppRole[]) => {
 	const colors = colorsOf(root);
 	const nameOf = (id: string) =>
 		colors.find((color) => color.id === id)?.name ?? id;
-
-	return resolveRoles(
-		roles.map(({name, colors}) => ({
-			name,
-			colors: colors.map(nameOf)
-		})),
-		colors
-	).roles.map(({name, colors}) => ({
+	const named = roles.map(({name, colors}) => ({
 		name,
-		colors: colors.map((color) => color.name)
+		colors: colors.map(nameOf)
 	}));
+	const shared = (name: string) =>
+		colors.filter((color) => color.name === name).length > 1;
+
+	return {
+		saved: resolveRoles(named, colors).roles.map(
+			({name, colors}): Role => ({
+				name,
+				colors: colors.map((color) => color.name)
+			})
+		),
+		unsaved: [
+			...new Set(
+				named.flatMap(({colors}) => colors).filter(shared)
+			)
+		]
+	};
+};
+
+// The rules by names, as saved. A rule of a deleted role is left out.
+export const nameRules = (
+	roles: AppRole[],
+	rules: AppRule[]
+): Rule[] => {
+	const nameOf = (id?: string) =>
+		roles.find((role) => role.id === id)?.name;
+
+	return rules.flatMap(({id, fg, bg, ...rule}) => {
+		const from = nameOf(fg);
+		const to = bg === undefined ? undefined : nameOf(bg);
+
+		return from && (bg === undefined || to)
+			? [{...rule, fg: from, bg: to}]
+			: [];
+	});
 };
 
 // The pairs by names, as saved, and the ones that cannot be saved
@@ -146,8 +200,8 @@ export const parseTree = (data: NodeData) => {
 export const serializeTree = (
 	node: Node,
 	pairs?: ColorPair[],
-	roles?: Role[],
-	rules?: Rule[]
+	roles?: AppRole[],
+	rules?: AppRule[]
 ) => {
 	const {token, args, children} = node;
 	const data: IdentifiedNodeData = {
@@ -179,11 +233,11 @@ export const serializeTree = (
 	}
 
 	if (roles?.length) {
-		data.roles = nameRoles(node, roles);
+		data.roles = nameRoles(node, roles).saved;
 	}
 
-	if (rules?.length) {
-		data.rules = rules;
+	if (roles && rules?.length) {
+		data.rules = nameRules(roles, rules);
 	}
 
 	return data;
@@ -227,11 +281,14 @@ export const pairsOn = (
 
 // The roles of a snapshot on the colors of a tree parsed from it.
 // Members that are not colors of the tree are dropped, roles stay.
-export const rolesOn = (root: Node, roles: Role[]): Role[] => {
+export const rolesOn = (
+	root: Node,
+	roles: AppRole[]
+): AppRole[] => {
 	const ids = new Set(colorsOf(root).map(({id}) => id));
 
-	return roles.map(({name, colors}) => ({
-		name,
-		colors: colors.filter((id) => ids.has(id))
+	return roles.map((role) => ({
+		...role,
+		colors: role.colors.filter((id) => ids.has(id))
 	}));
 };

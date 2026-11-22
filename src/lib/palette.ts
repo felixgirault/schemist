@@ -1,6 +1,11 @@
 import {randomUsableColor} from '#lib/color/manipulation.js';
 import {unpack} from '#lib/packing/index.js';
-import {parsePairs, parseRoles, parseTree} from '#lib/tree.js';
+import {
+	parsePairs,
+	parseRoles,
+	parseRules,
+	parseTree
+} from '#lib/tree.js';
 
 const StorageKey = 'palette';
 
@@ -31,12 +36,13 @@ export const loadPalette = () => {
 			try {
 				const data = unpack(preset);
 				const root = parseTree(data);
+				const roles = parseRoles(data, root);
 
 				return {
 					root,
 					pairs: parsePairs(data, root),
-					roles: parseRoles(data, root),
-					rules: data.rules ?? []
+					roles,
+					rules: parseRules(data, roles)
 				};
 			} catch (e) {
 				console.error(

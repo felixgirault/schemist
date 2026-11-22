@@ -357,11 +357,12 @@ each exporting a single reactive object.
 | `settledOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms)                 |
 | `storedPairs`    | Declared pairs as set, `{fg: string, bg: string, wcag2?, apca?, difference?}` (`ColorPair`, color ids), set on load |
 | `pairs`          | `storedPairs` whose two colors are still in the tree (hidden and generated ones included)                           |
-| `storedRoles`    | Roles as set, `{name, colors: string[]}` (color ids), set on load (ADR 16)                                          |
+| `storedRoles`    | Roles as set, `{id, name, colors: string[]}` (color ids), set on load (ADR 16)                                      |
 | `roles`          | `storedRoles` without the colors since removed; a role stays until deleted, even empty                              |
-| `rules`          | Rules as set, `{fg, bg?, use?, ...targets}` naming roles (§9.7), set on load                                        |
-| `expandedPairs`  | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off pairs and the ones rules give, with `sources`    |
+| `rules`          | Rules as set, `{id, fg, bg?, use?, ...targets}` with `fg` and `bg` **role ids** (§9.7), set on load                 |
+| `expandedPairs`  | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off and rule pairs, `sources` holding **rule ids**   |
 | `unsavedPairs`   | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                   |
+| `unsavedMembers` | Names of role members a permalink cannot hold, shared by several colors (see below)                                 |
 | `permalink`      | `permalink(serializeTree(root, pairs, roles, rules), window.location.origin)` (§10.1)                               |
 | `colors`         | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                  |
 | `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                                             |
@@ -369,13 +370,30 @@ each exporting a single reactive object.
 `setPair(fg, bg, targets)` declares or replaces a pair, or
 removes it when it has no target. It only touches one-off pairs
 (`pairs`): `combinations.pairChecks`, the hidden pairs and the
-requirements list read `expandedPairs`, so rules loaded from a
-link are checked. The app has no way to edit roles and rules yet
-(ADR 16, step 2); they are kept by load, undo and saving.
-`parseRoles(tree, root)` and `rolesOn` map saved role names to
-ids and drop what is not a color of the tree, like pairs; a role
-member whose name is shared by several colors is left out of the
-saved roles until renamed (not listed in `unsavedPairs`).
+requirements list read `expandedPairs`, so rules are checked.
+
+**Roles and rules hold ids too.** Roles and rules have ids of
+their own (`AppRole`, `AppRule`, `r<n>` and `u<n>`), rules hold
+role ids and the sources of expanded pairs hold rule ids:
+renaming a role or removing a rule rewrites nothing elsewhere.
+The core's `expandRules` looks roles up by name and numbers
+rules, so `expandedPairs` gives it role ids as names and maps the
+indexes of the sources back to rule ids. Names only exist in the
+saved format, mapped like color names: `parseRoles(tree, root)`
+and `parseRules(tree, roles)` give ids at load (what does not
+resolve is dropped and logged), `nameRoles(root, roles)` and
+`nameRules(roles, rules)` map back when saving; snapshots hold
+ids (§8.5). Methods, each one change for the history:
+`addRole(name, colors?)` (returns the id; nothing when the name
+is empty or taken, names being what a permalink holds),
+`renameRole(id, name)` (false when empty or taken),
+`deleteRole(id)` (also deletes its rules),
+`addMember(roleId, colorId)`, `removeMember`,
+`addRule(fg, bg | undefined, use)` (no `bg`, or `bg` equal to
+`fg`, is a role among itself) and `removeRule(id)`. A role member
+whose name is shared by several colors is left out of the saved
+role until renamed, and listed in `unsavedMembers`; the pairs
+notice lists it with the unsaved pairs' names.
 
 **Pairs hold color ids, never names.** `ColorPair` has no name
 field, so a pair cannot go out of sync with its colors: a rename
@@ -642,15 +660,16 @@ on itself; a role among itself gives each couple once, in role
 order (`bg` equal to `fg` means the same). Rules on a couple
 combine with the highest goal of each target. A one-off pair on a
 couple replaces what rules give it (for a role among itself, in
-either order). Each pair has `sources: {rules, oneOff}`: the
-**indexes** in `rules` of the rules it comes from (so a rule has
-no id; editing rules keeps indexes in sync), or `oneOff: true`
-with no rules when a declared pair replaced them. Order: rules'
-couples by rule, one-off pairs replacing in place, others last.
-`errors` are `{index, field?, message}` for unknown roles (`fg`
-or `bg`), an unknown use, or no target; the rule is left out. An
-unknown role is an error here, not in `validateTree`, so that the
-app stays lenient like for pairs.
+either order). Each pair has
+`sources: {rules, overrides, oneOff}`: the **indexes** in `rules`
+of the rules it comes from (the app maps them to rule ids, §8.1),
+or `oneOff: true` with no rules when a declared pair replaced
+them, `overrides` then being the indexes of the rules it
+replaced. Order: rules' couples by rule, one-off pairs replacing
+in place, others last. `errors` are `{index, field?, message}`
+for unknown roles (`fg` or `bg`), an unknown use, or no target;
+the rule is left out. An unknown role is an error here, not in
+`validateTree`, so that the app stays lenient like for pairs.
 
 ## 10. Permalinks
 

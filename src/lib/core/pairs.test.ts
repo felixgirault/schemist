@@ -213,7 +213,7 @@ test('a one-off pair replaces what rules give its couple', () => {
 	expect(ac.apca).toBeUndefined();
 	expect(ac).toMatchObject({
 		wcag2: 3,
-		sources: {rules: [], oneOff: true}
+		sources: {rules: [], overrides: [0], oneOff: true}
 	});
 	expect(pairs.at(-1)).toMatchObject({bg: 'z'});
 });
@@ -230,7 +230,7 @@ test('a one-off pair replaces a couple of a role among itself', () => {
 			fg: 'b',
 			bg: 'a',
 			difference: 20,
-			sources: {rules: [], oneOff: true}
+			sources: {rules: [], overrides: [0], oneOff: true}
 		}
 	]);
 });

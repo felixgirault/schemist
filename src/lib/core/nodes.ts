@@ -232,6 +232,12 @@ export type Rule = PairTargets & {
 	use?: string;
 };
 
+// Roles and rules in the app, where links are ids (ADR 16): a role
+// holds color ids, a rule's `fg` and `bg` are role ids. Names are only
+// in the saved format.
+export type AppRole = Role & {id: string};
+export type AppRule = Rule & {id: string};
+
 export type NodeData = {
 	// Set when serializing a tree, to restore it as is, and when a
 	// preset is expanded into the nodes it generated.

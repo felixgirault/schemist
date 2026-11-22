@@ -34,9 +34,10 @@
 	);
 	let open = $derived(combinations.openPair);
 	let unsavedNames = $derived([
-		...new Set(
-			palette.unsavedPairs.flatMap(({names}) => names)
-		)
+		...new Set([
+			...palette.unsavedPairs.flatMap(({names}) => names),
+			...palette.unsavedMembers
+		])
 	]);
 
 	// Shows the pair, or closes it when it is shown already.
@@ -151,8 +152,8 @@
 <div class="matrix-panel">
 	{#if unsavedNames.length}
 		<p class="hint" role="status">
-			Pairs on these colors are not in the permalink until
-			they get distinct names: {unsavedNames
+			Pairs and roles on these colors are not in the permalink
+			until they get distinct names: {unsavedNames
 				.map((name) => `"${name}"`)
 				.join(', ')}.
 		</p>

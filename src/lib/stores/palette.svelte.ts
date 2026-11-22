@@ -1,7 +1,12 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
-import type {PairTargets, Role, Rule} from '#lib/core/nodes.js';
+import type {
+	AppRole,
+	AppRule,
+	PairTargets
+} from '#lib/core/nodes.js';
+import type {ExpandedPair} from '#lib/core/pairs.js';
 import {expandRules} from '#lib/core/pairs.js';
 import {permalink} from '#lib/routing.js';
 import type {
@@ -13,11 +18,12 @@ import {
 	collectColors,
 	collectOutputs
 } from '#lib/stores/nodes.svelte.js';
-import {namePairs, serializeTree} from '#lib/tree.js';
+import {namePairs, nameRoles, serializeTree} from '#lib/tree.js';
 import {
 	debounce,
 	withElapsedTime
 } from '#lib/utils/functions.js';
+import {uid} from '#lib/utils/generators.js';
 import {clamp} from '#lib/utils/math.js';
 
 class Palette {
@@ -38,27 +44,53 @@ class Palette {
 			({fg, bg}) => ids.has(fg) && ids.has(bg)
 		);
 	});
-	// Roles and rules as set (ADR 16): roles hold color ids, rules
-	// name roles. Nothing edits them yet, but loading, undo and saving
-	// keep them.
-	storedRoles = $state.raw<Role[]>([]);
-	rules = $state.raw<Rule[]>([]);
+	// Roles and rules as set (ADR 16), linked by ids: roles hold color
+	// ids, rules hold role ids. Names are only in the saved format.
+	storedRoles = $state.raw<AppRole[]>([]);
+	rules = $state.raw<AppRule[]>([]);
 	// The roles without the colors since removed.
 	roles = $derived.by(() => {
 		const ids = new Set(this.allColors.map(({id}) => id));
 
-		return this.storedRoles.map(({name, colors}) => ({
-			name,
-			colors: colors.filter((id) => ids.has(id))
+		return this.storedRoles.map((role) => ({
+			...role,
+			colors: role.colors.filter((id) => ids.has(id))
 		}));
 	});
-	// What is checked: the declared pairs and the ones rules give.
-	expandedPairs = $derived(
-		expandRules(this.roles, this.rules, this.pairs).pairs
+	// What is checked: the declared pairs and the ones rules give,
+	// their sources holding rule ids. The core looks roles up by
+	// `name` and numbers rules, so it gets the role ids as names and
+	// the numbers are mapped back to ids here.
+	expandedPairs = $derived.by(
+		(): ExpandedPair<string, string>[] => {
+			const roles = this.roles.map(({id, colors}) => ({
+				name: id,
+				colors
+			}));
+			const ids = (indexes: number[]) =>
+				indexes.map((i) => this.rules[i].id);
+
+			return expandRules(
+				roles,
+				this.rules,
+				this.pairs
+			).pairs.map(({sources, ...pair}) => ({
+				...pair,
+				sources: {
+					...sources,
+					rules: ids(sources.rules),
+					overrides: ids(sources.overrides)
+				}
+			}));
+		}
 	);
 	// The pairs a permalink cannot hold until a color is renamed
 	unsavedPairs = $derived(
 		this.root ? namePairs(this.root, this.pairs).unsaved : []
+	);
+	// The names of role members a permalink cannot hold either
+	unsavedMembers = $derived(
+		this.root ? nameRoles(this.root, this.roles).unsaved : []
 	);
 	outputs = $derived(
 		this.root ? collectOutputs(this.root) : {}
@@ -123,6 +155,90 @@ class Palette {
 			difference === undefined
 				? others
 				: [...others, {fg, bg, wcag2, apca, difference}];
+	}
+
+	// Roles and rules are edited by ids; every change is recorded by
+	// the history, as any other. A role name is never empty nor shared,
+	// as names are what a permalink holds.
+	#isFree(name: string, except?: string) {
+		return (
+			name !== '' &&
+			!this.storedRoles.some(
+				(role) => role.name === name && role.id !== except
+			)
+		);
+	}
+
+	// Returns the id of the new role, or nothing if its name is taken.
+	addRole(name: string, colors: string[] = []) {
+		name = name.trim();
+
+		if (!this.#isFree(name)) return;
+
+		const id = `r${uid()}`;
+
+		this.storedRoles = [
+			...this.storedRoles,
+			{id, name, colors}
+		];
+		return id;
+	}
+
+	renameRole(id: string, name: string) {
+		name = name.trim();
+
+		if (!this.#isFree(name, id)) return false;
+
+		this.storedRoles = this.storedRoles.map((role) =>
+			role.id === id ? {...role, name} : role
+		);
+		return true;
+	}
+
+	// Also removes the rules of the role.
+	deleteRole(id: string) {
+		this.storedRoles = this.storedRoles.filter(
+			(role) => role.id !== id
+		);
+		this.rules = this.rules.filter(
+			({fg, bg}) => fg !== id && bg !== id
+		);
+	}
+
+	addMember(roleId: string, colorId: string) {
+		this.storedRoles = this.storedRoles.map((role) =>
+			role.id === roleId && !role.colors.includes(colorId)
+				? {...role, colors: [...role.colors, colorId]}
+				: role
+		);
+	}
+
+	removeMember(roleId: string, colorId: string) {
+		this.storedRoles = this.storedRoles.map((role) =>
+			role.id === roleId
+				? {
+						...role,
+						colors: role.colors.filter(
+							(id) => id !== colorId
+						)
+					}
+				: role
+		);
+	}
+
+	// Without `bg`, a role among itself. Returns the id of the rule.
+	addRule(fg: string, bg: string | undefined, use: string) {
+		const id = `u${uid()}`;
+
+		this.rules = [
+			...this.rules,
+			{id, fg, bg: bg === fg ? undefined : bg, use}
+		];
+		return id;
+	}
+
+	removeRule(id: string) {
+		this.rules = this.rules.filter((rule) => rule.id !== id);
 	}
 
 	constructor() {

@@ -1,9 +1,9 @@
 import type {
+	AppRole,
+	AppRule,
 	IdentifiedNodeData,
 	NodeData,
-	PresetPair,
-	Role,
-	Rule
+	PresetPair
 } from '#lib/core/nodes.js';
 import {changedArg} from '#lib/core/tree.js';
 import {pack} from '#lib/packing/index.js';
@@ -22,21 +22,22 @@ import {History} from '#lib/utils/history.svelte.js';
 import {goto} from '$app/navigation';
 import {untrack} from 'svelte';
 
-// A state of the palette. Pairs and roles are by color ids, which the tree
+// A state of the palette. Pairs and roles are by color ids, rules by
+// role ids, which the tree
 // keeps once restored, so that undoing brings back the pairs of
 // that state, whatever the nodes became since.
 export type Snapshot = {
 	tree: IdentifiedNodeData;
 	pairs: PresetPair[];
-	roles: Role[];
-	rules: Rule[];
+	roles: AppRole[];
+	rules: AppRule[];
 };
 
 export const read = (
 	root: Node,
 	pairs: ColorPair[],
-	roles: Role[],
-	rules: Rule[]
+	roles: AppRole[],
+	rules: AppRule[]
 ) =>
 	$state.snapshot({
 		tree: serializeTree(root),
