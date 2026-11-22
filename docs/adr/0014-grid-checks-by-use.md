@@ -12,9 +12,9 @@ Two parts of it don't hold up:
 - The brush is either Contrast (WCAG 2 or APCA, one minimum) or
   Difference (one minimum). A real requirement mixes them: body
   text needs WCAG 2 4.5 and APCA Lc 75 at once (APCA "In a
-  Nutshell"). Declaring both takes two passes, switching the brush
-  in between. The pair format already holds every target at once
-  (`wcag2`, `apca`, `difference`); only the brush is split.
+  Nutshell"). Declaring both takes two passes, switching the
+  brush in between. The pair format already holds every target at
+  once (`wcag2`, `apca`, `difference`); only the brush is split.
 - The pair card is a popover anchored to its cell. It covers
   cells next to the one open, and moves on every click.
 
@@ -25,12 +25,12 @@ Two parts of it don't hold up:
 The brush picks a use instead of a metric. A use is a named set
 of targets:
 
-| Use | Targets |
-|---|---|
-| Body text | WCAG 2 4.5, APCA 75 |
-| Large text and UI (borders, focus rings, icons) | WCAG 2 3 |
-| Categories (chart series, tags) | difference 10 |
-| Custom | any of the three, typed in |
+| Use                                             | Targets                    |
+| ----------------------------------------------- | -------------------------- |
+| Body text                                       | WCAG 2 4.5, APCA 75        |
+| Large text and UI (borders, focus rings, icons) | WCAG 2 3                   |
+| Categories (chart series, tags)                 | difference 10              |
+| Custom                                          | any of the three, typed in |
 
 - The uses are data in `core/pairs.ts`, next to `targetNames`, so
   that the CLI and agent guidance can name the same values later.
