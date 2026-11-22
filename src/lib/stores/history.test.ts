@@ -18,10 +18,13 @@ vi.stubGlobal('location', {pathname: '/', search: ''});
 // The pairs as node tokens, whatever the node objects.
 const pairs = () =>
 	palette.pairs.map(({fg, bg, wcag2}) => [
-		fg.token,
-		bg.token,
+		token(fg),
+		token(bg),
 		wcag2
 	]);
+
+const token = (id: string) =>
+	collectNodes(palette.root!).find((n) => n.id === id)!.token;
 
 const snapshot = () => read(palette.root!, palette.pairs);
 
@@ -50,7 +53,9 @@ const step = (change: () => void) => {
 
 test('undo and redo keep the pairs of each state', () => {
 	step(() =>
-		palette.setPair(node('Text'), node('Bg'), {wcag2: 4.5})
+		palette.setPair(node('Text').id, node('Bg').id, {
+			wcag2: 4.5
+		})
 	);
 	step(() => {
 		palette.root!.args.color = parseColor('#ff0000')[1]!;
@@ -64,14 +69,18 @@ test('undo and redo keep the pairs of each state', () => {
 
 	history.redo();
 	expect(pairs()).toEqual([['Text', 'Bg', 4.5]]);
-	expect(palette.pairs[0].fg).toBe(node('Text'));
+	expect(palette.pairs[0].fg).toBe(node('Text').id);
 });
 
 test('declaring and removing a pair are undoable', () => {
 	step(() =>
-		palette.setPair(node('Text'), node('Bg'), {wcag2: 4.5})
+		palette.setPair(node('Text').id, node('Bg').id, {
+			wcag2: 4.5
+		})
 	);
-	step(() => palette.setPair(node('Text'), node('Bg'), {}));
+	step(() =>
+		palette.setPair(node('Text').id, node('Bg').id, {})
+	);
 	expect(pairs()).toEqual([]);
 
 	history.undo();
@@ -87,16 +96,20 @@ test('declaring and removing a pair are undoable', () => {
 test('swapping a color keeps its pairs', () => {
 	const text = node('Text');
 
-	step(() => palette.setPair(text, node('Bg'), {wcag2: 4.5}));
+	step(() =>
+		palette.setPair(text.id, node('Bg').id, {wcag2: 4.5})
+	);
 	step(() => text.setType('cmp'));
 
 	expect(pairs()).toEqual([['Text', 'Bg', 4.5]]);
-	expect(palette.pairs[0].fg).toBe(text);
+	expect(palette.pairs[0].fg).toBe(text.id);
 });
 
 test('the saved palette holds the pairs', () => {
 	step(() =>
-		palette.setPair(node('Text'), node('Bg'), {wcag2: 4.5})
+		palette.setPair(node('Text').id, node('Bg').id, {
+			wcag2: 4.5
+		})
 	);
 
 	const data = unpack(

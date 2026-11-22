@@ -8,8 +8,7 @@ import type {PaletteColor} from '#lib/core/evaluate.js';
 import type {PairTargets} from '#lib/core/nodes.js';
 import type {TargetCheck} from '#lib/core/pairs.js';
 import {checkPair, targetNames, uses} from '#lib/core/pairs.js';
-import type {Node, NodePair} from '#lib/stores/nodes.svelte.js';
-import {collectNodes} from '#lib/stores/nodes.svelte.js';
+import type {ColorPair, Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
 
@@ -23,7 +22,7 @@ export type PairDifference = Difference & {
 // `<bgId>-<fgId>`.
 export type PairCheck = {
 	id: string;
-	pair: NodePair;
+	pair: ColorPair;
 	fg: PaletteColor;
 	bg: PaletteColor;
 	checks: TargetCheck[];
@@ -130,8 +129,8 @@ class Combinations {
 		const byId = new Map(palette.colors.map((e) => [e.id, e]));
 
 		return palette.pairs.flatMap((pair): PairCheck[] => {
-			const fg = byId.get(pair.fg.id);
-			const bg = byId.get(pair.bg.id);
+			const fg = byId.get(pair.fg);
+			const bg = byId.get(pair.bg);
 
 			if (!fg || !bg) return [];
 
@@ -159,12 +158,21 @@ class Combinations {
 		this.pairChecks.filter(({pass}) => pass).length
 	);
 
-	// declared pairs left out of the checks
-	hiddenPairs = $derived(
-		palette.pairs.filter(
-			({fg, bg}) => fg.isHidden || bg.isHidden
-		)
-	);
+	// declared pairs left out of the checks, by color names
+	hiddenPairs = $derived.by(() => {
+		const byId = new Map(
+			palette.allColors.map((c) => [c.id, c])
+		);
+
+		return palette.pairs.flatMap(({fg, bg}) => {
+			const from = byId.get(fg);
+			const to = byId.get(bg);
+
+			return from?.isHidden || to?.isHidden
+				? [{id: `${bg}-${fg}`, fg: from!.name, bg: to!.name}]
+				: [];
+		});
+	});
 
 	// The cell shown in the details: its colors, and its pair if it
 	// is declared. `null` once a color is gone.
@@ -182,7 +190,6 @@ class Combinations {
 		return {
 			fg,
 			bg,
-			nodes: this.nodesOf(fg, bg),
 			check: this.pairChecks.find(
 				({id}) => id === `${bg.id}-${fg.id}`
 			)
@@ -267,9 +274,8 @@ class Combinations {
 			return;
 		}
 
-		const nodes = this.nodesOf(fg, bg);
 		const pair = palette.pairs.find(
-			(p) => p.fg === nodes.fg && p.bg === nodes.bg
+			(p) => p.fg === fg.id && p.bg === bg.id
 		);
 		const isSet = this.hasBrush(pair);
 		const targets: PairTargets = {...pair};
@@ -280,18 +286,7 @@ class Combinations {
 			}
 		}
 
-		palette.setPair(nodes.fg, nodes.bg, targets);
-	}
-
-	nodesOf(fg: PaletteColor, bg: PaletteColor) {
-		const nodes = palette.root
-			? collectNodes(palette.root)
-			: [];
-
-		return {
-			fg: nodes.find(({id}) => id === fg.id)!,
-			bg: nodes.find(({id}) => id === bg.id)!
-		};
+		palette.setPair(fg.id, bg.id, targets);
 	}
 
 	previewed = $derived(

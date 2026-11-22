@@ -101,12 +101,11 @@
 			[name]: value
 		};
 
-		palette.setPair(open.nodes.fg, open.nodes.bg, targets);
+		palette.setPair(open.fg.id, open.bg.id, targets);
 	};
 
 	const handleRemove = () => {
-		if (open)
-			palette.setPair(open.nodes.fg, open.nodes.bg, {});
+		if (open) palette.setPair(open.fg.id, open.bg.id, {});
 	};
 
 	// The simulated levels of each target, for tooltips and names.
@@ -487,8 +486,8 @@
 		{#if combinations.hiddenPairs.length}
 			<h3 class="h3">Not checked, a color is hidden</h3>
 			<ul>
-				{#each combinations.hiddenPairs as { fg, bg } (`${bg.id}-${fg.id}`)}
-					<li>{fg.output.name} on {bg.output.name}</li>
+				{#each combinations.hiddenPairs as { id, fg, bg } (id)}
+					<li>{fg} on {bg}</li>
 				{/each}
 			</ul>
 		{/if}

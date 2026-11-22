@@ -2,14 +2,16 @@ import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {parseColor} from '#lib/color/parsing.js';
 import presets from '#lib/definitions/presets/index.js';
 import {pack, unpack} from '#lib/packing/index.js';
-import type {Node, NodePair} from '#lib/stores/nodes.svelte.js';
+import type {ColorPair, Node} from '#lib/stores/nodes.svelte.js';
 import {
+	collectColors,
 	collectNodes,
 	collectOutputs
 } from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {rootTree} from '#lib/testing/tree.js';
 import {
+	expandPreset,
 	namePairs,
 	parsePairs,
 	parseTree,
@@ -41,7 +43,7 @@ test.each(cases)(
 );
 
 // Serializes the palette as a permalink does, and loads it back.
-const reload = (root: Node, pairs: NodePair[]) => {
+const reload = (root: Node, pairs: ColorPair[]) => {
 	const tree = unpack(pack(serializeTree(root, pairs)));
 	const loaded = parseTree(tree);
 
@@ -49,12 +51,12 @@ const reload = (root: Node, pairs: NodePair[]) => {
 };
 
 // Where the nodes of each pair stand in the tree.
-const positions = (root: Node, pairs: NodePair[]) => {
-	const nodes = collectNodes(root);
+const positions = (root: Node, pairs: ColorPair[]) => {
+	const ids = collectColors(root).map(({id}) => id);
 
 	return pairs.map(({fg, bg, wcag2, apca, difference}) => ({
-		fg: nodes.indexOf(fg),
-		bg: nodes.indexOf(bg),
+		fg: ids.indexOf(fg),
+		bg: ids.indexOf(bg),
 		wcag2,
 		apca,
 		difference
@@ -65,10 +67,12 @@ const expectSaved = () => {
 	const root = palette.root!;
 	const {saved} = namePairs(root, palette.pairs);
 	const back = reload(root, palette.pairs);
+	const names = new Map(
+		collectColors(root).map(({id, name}) => [id, name])
+	);
 	const expected = palette.pairs.filter(({fg, bg}) =>
 		saved.some(
-			(p) =>
-				p.fg === fg.output.name && p.bg === bg.output.name
+			(p) => p.fg === names.get(fg) && p.bg === names.get(bg)
 		)
 	);
 
@@ -102,9 +106,9 @@ describe('declared pairs', () => {
 		});
 		[bg, text, accent, onAccent] = collectNodes(palette.root!);
 		palette.storedPairs = [];
-		palette.setPair(text, bg, {wcag2: 4.5, apca: 60});
-		palette.setPair(onAccent, accent, {wcag2: 4.5});
-		palette.setPair(accent, bg, {difference: 10});
+		palette.setPair(text.id, bg.id, {wcag2: 4.5, apca: 60});
+		palette.setPair(onAccent.id, accent.id, {wcag2: 4.5});
+		palette.setPair(accent.id, bg.id, {difference: 10});
 	});
 
 	test('survive a round trip', () => {
@@ -183,7 +187,53 @@ describe('declared pairs', () => {
 	});
 
 	test('remove with no target', () => {
-		palette.setPair(text, bg, {});
+		palette.setPair(text.id, bg.id, {});
 		expect(palette.pairs).toHaveLength(2);
+	});
+});
+
+describe('pairs on the colors of a preset', () => {
+	let root: Node, preset: Node;
+
+	beforeEach(() => {
+		root = palette.root = parseTree(
+			rootTree('#3b82f6', [{type: 'stt', token: 'Brand'}])
+		);
+		preset = root.children[0];
+		palette.storedPairs = [];
+		palette.setPair(`${preset.id}.0`, root.id, {wcag2: 4.5});
+	});
+
+	test('are kept, saved by name and restored', () => {
+		expect(palette.pairs).toHaveLength(1);
+		expect(namePairs(root, palette.pairs).saved).toEqual([
+			expect.objectContaining({fg: 'Brand light'})
+		]);
+
+		const back = reload(root, palette.pairs);
+
+		expect(back.pairs).toEqual([
+			expect.objectContaining({
+				fg: `${back.root.children[0].id}.0`,
+				bg: back.root.id,
+				wcag2: 4.5
+			})
+		]);
+	});
+
+	test('are kept when the preset is hidden', () => {
+		preset.isHidden = true;
+		expect(palette.pairs).toHaveLength(1);
+		expect(
+			palette.allColors.find(
+				({id}) => id === `${preset.id}.0`
+			)?.isHidden
+		).toBe(true);
+	});
+
+	test('survive expanding the preset', () => {
+		expandPreset(preset);
+		expect(palette.pairs).toHaveLength(1);
+		expectSaved();
 	});
 });

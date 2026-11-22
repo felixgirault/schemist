@@ -143,9 +143,10 @@ export const createNode = (
 	id?: string
 ) => new Node(type, isHidden, token, id);
 
-// A declared pair, on the nodes themselves rather than their names,
-// so that it follows them through renames and moves.
-export type NodePair = ResolvedPair<Node>;
+// A declared pair, on color ids rather than names, so that it
+// follows the colors through renames and moves: a node's id, or
+// `<preset id>.<index>` for a color a preset generates.
+export type ColorPair = ResolvedPair<string>;
 
 // All nodes, hidden ones included, in tree order.
 export const collectNodes = (node: Node): Node[] => [
@@ -172,3 +173,24 @@ export const collectOutputs = (
 	);
 	return outputs;
 };
+
+// Every color of the tree, hidden ones included, with presets
+// replaced by their colors. A hidden node hides its own colors.
+export const collectColors = (
+	node: Node
+): {id: string; name: string; isHidden: boolean}[] => [
+	...(isPresetDef(node.def)
+		? Object.entries(node.generated).map(([id, {name}]) => ({
+				id,
+				name,
+				isHidden: node.isHidden
+			}))
+		: [
+				{
+					id: node.id,
+					name: node.output.name,
+					isHidden: node.isHidden
+				}
+			]),
+	...node.children.flatMap(collectColors)
+];

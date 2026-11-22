@@ -6,26 +6,22 @@ import type {
 import {isPresetDef} from '#lib/core/nodes.js';
 import {resolvePairs} from '#lib/core/pairs.js';
 import {hideTree, withIds} from '#lib/core/tree.js';
-import type {Node, NodePair} from '#lib/stores/nodes.svelte.js';
+import type {ColorPair, Node} from '#lib/stores/nodes.svelte.js';
 import {
-	collectNodes,
+	collectColors,
 	createNode
 } from '#lib/stores/nodes.svelte.js';
 
-const colorsOf = (root: Node) =>
-	collectNodes(root).map((node) => ({
-		name: node.output.name,
-		node
-	}));
+const colorsOf = (root: Node) => collectColors(root);
 
 // The names of the pairs resolved on the tree: the only place
-// where the app goes from names to nodes. A pair that does not
+// where the app goes from names to color ids. A pair that does not
 // resolve (a bad permalink) is dropped and logged, the rest of the
 // palette is kept.
 export const parsePairs = (
 	data: NodeData,
 	root: Node
-): NodePair[] => {
+): ColorPair[] => {
 	const {pairs, errors} = resolvePairs(
 		data.pairs ?? [],
 		colorsOf(root)
@@ -38,8 +34,8 @@ export const parsePairs = (
 	);
 
 	return pairs.map(({fg, bg, ...targets}) => ({
-		fg: fg.node,
-		bg: bg.node,
+		fg: fg.id,
+		bg: bg.id,
 		...targets
 	}));
 };
@@ -47,19 +43,19 @@ export const parsePairs = (
 // The pairs by names, as saved, and the ones that cannot be saved
 // because a name does not point to a single color, with the names
 // to change. Resolving the names is what keeps a saved pair on its
-// two nodes.
-export const namePairs = (root: Node, pairs: NodePair[]) => {
+// two colors.
+export const namePairs = (root: Node, pairs: ColorPair[]) => {
+	const colors = colorsOf(root);
+	const nameOf = (id: string) =>
+		colors.find((color) => color.id === id)?.name ?? id;
 	const named = pairs.map(
 		({fg, bg, ...targets}): PresetPair => ({
 			...targets,
-			fg: fg.output.name,
-			bg: bg.output.name
+			fg: nameOf(fg),
+			bg: nameOf(bg)
 		})
 	);
-	const {pairs: resolved, errors} = resolvePairs(
-		named,
-		colorsOf(root)
-	);
+	const {pairs: resolved, errors} = resolvePairs(named, colors);
 
 	return {
 		saved: resolved.map(
@@ -105,7 +101,7 @@ export const parseTree = (data: NodeData) => {
 // `pairs` are the root's, saved by names.
 export const serializeTree = (
 	node: Node,
-	pairs?: NodePair[]
+	pairs?: ColorPair[]
 ) => {
 	const {token, args, children} = node;
 	const data: IdentifiedNodeData = {
@@ -164,20 +160,13 @@ export const expandPreset = (preset: Node) => {
 	preset.replaceWith(trees.map(parseTree));
 };
 
-// The pairs of a snapshot (by node ids) on the nodes of a tree
-// parsed from it. Pairs of unknown nodes are dropped.
+// The pairs of a snapshot on the colors of a tree parsed from it.
+// Pairs of unknown colors are dropped.
 export const pairsOn = (
 	root: Node,
 	pairs: PresetPair[]
-): NodePair[] => {
-	const nodes = new Map(
-		collectNodes(root).map((node) => [node.id, node])
-	);
+): ColorPair[] => {
+	const ids = new Set(colorsOf(root).map(({id}) => id));
 
-	return pairs.flatMap(({fg, bg, ...targets}) => {
-		const from = nodes.get(fg);
-		const to = nodes.get(bg);
-
-		return from && to ? [{fg: from, bg: to, ...targets}] : [];
-	});
+	return pairs.filter(({fg, bg}) => ids.has(fg) && ids.has(bg));
 };

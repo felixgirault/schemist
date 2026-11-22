@@ -30,9 +30,9 @@ beforeAll(() => {
 		])
 	);
 	const root = palette.root!;
-	palette.setPair(node('Black'), root, {wcag2: 4.5});
-	palette.setPair(node('Grey'), root, {wcag2: 4.5});
-	palette.setPair(node('Secret'), root, {wcag2: 4.5});
+	palette.setPair(node('Black').id, root.id, {wcag2: 4.5});
+	palette.setPair(node('Grey').id, root.id, {wcag2: 4.5});
+	palette.setPair(node('Secret').id, root.id, {wcag2: 4.5});
 });
 
 test('counts the declared pairs of visible colors', () => {
@@ -83,7 +83,7 @@ test('toggles the brush target on a pair', () => {
 	const pairOf = () =>
 		palette.pairs.find(
 			({fg, bg}) =>
-				fg === node('Grey') && bg === node('Black')
+				fg === node('Grey').id && bg === node('Black').id
 		);
 
 	combinations.use = 'categories';
@@ -110,7 +110,9 @@ test('toggles the brush target on a pair', () => {
 
 	// a target at another value, typed in the card, is set to the
 	// use's value rather than removed
-	palette.setPair(node('Grey'), node('Black'), {wcag2: 7});
+	palette.setPair(node('Grey').id, node('Black').id, {
+		wcag2: 7
+	});
 	combinations.use = 'large';
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({wcag2: 3});
@@ -203,7 +205,7 @@ test('the card has the lens, Require and Preview', () => {
 	combinations.previewedUid = null;
 	combinations.openPairIds = null;
 	combinations.blindnessTypes = [];
-	palette.setPair(node('Grey'), node('Black'), {});
+	palette.setPair(node('Grey').id, node('Black').id, {});
 });
 
 test('counts the cells reaching the brush', () => {

@@ -6,10 +6,10 @@ import {permalink} from '#lib/routing.js';
 import type {
 	Node,
 	NodeOutputRecord,
-	NodePair
+	ColorPair
 } from '#lib/stores/nodes.svelte.js';
 import {
-	collectNodes,
+	collectColors,
 	collectOutputs
 } from '#lib/stores/nodes.svelte.js';
 import {namePairs, serializeTree} from '#lib/tree.js';
@@ -21,18 +21,20 @@ import {clamp} from '#lib/utils/math.js';
 
 class Palette {
 	root = $state<Node>();
-	// Declared pairs, as they were set: some may be of nodes since
+	// Declared pairs, as they were set: some may be of colors since
 	// removed, see `pairs`.
-	storedPairs = $state.raw<NodePair[]>([]);
-	// The stored pairs whose two nodes are still in the tree, so
+	storedPairs = $state.raw<ColorPair[]>([]);
+	// Every color of the tree, hidden ones included.
+	allColors = $derived(
+		this.root ? collectColors(this.root) : []
+	);
+	// The stored pairs whose two colors are still in the tree, so
 	// that no removal has to remember the pairs.
 	pairs = $derived.by(() => {
-		const nodes = new Set(
-			this.root ? collectNodes(this.root) : []
-		);
+		const ids = new Set(this.allColors.map(({id}) => id));
 
 		return this.storedPairs.filter(
-			({fg, bg}) => nodes.has(fg) && nodes.has(bg)
+			({fg, bg}) => ids.has(fg) && ids.has(bg)
 		);
 	});
 	// The pairs a permalink cannot hold until a color is renamed
@@ -81,10 +83,10 @@ class Palette {
 			: origin;
 	}
 
-	// Declares the pair of two nodes, or removes it with no target.
+	// Declares the pair of two colors, or removes it with no target.
 	setPair(
-		fg: Node,
-		bg: Node,
+		fg: string,
+		bg: string,
 		{wcag2, apca, difference}: PairTargets
 	) {
 		const others = this.pairs.filter(

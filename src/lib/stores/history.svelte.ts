@@ -7,7 +7,7 @@ import {changedArg} from '#lib/core/tree.js';
 import {pack} from '#lib/packing/index.js';
 import {storePalette} from '#lib/palette.js';
 import {presetQuery} from '#lib/routing.js';
-import type {Node, NodePair} from '#lib/stores/nodes.svelte.js';
+import type {ColorPair, Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {pairsOn, parseTree, serializeTree} from '#lib/tree.js';
 import {debounce} from '#lib/utils/functions.js';
@@ -15,7 +15,7 @@ import {History} from '#lib/utils/history.svelte.js';
 import {goto} from '$app/navigation';
 import {untrack} from 'svelte';
 
-// A state of the palette. Pairs are by node ids, which the tree
+// A state of the palette. Pairs are by color ids, which the tree
 // keeps once restored, so that undoing brings back the pairs of
 // that state, whatever the nodes became since.
 export type Snapshot = {
@@ -23,14 +23,10 @@ export type Snapshot = {
 	pairs: PresetPair[];
 };
 
-export const read = (root: Node, pairs: NodePair[]) =>
+export const read = (root: Node, pairs: ColorPair[]) =>
 	$state.snapshot({
 		tree: serializeTree(root),
-		pairs: pairs.map(({fg, bg, ...targets}) => ({
-			...targets,
-			fg: fg.id,
-			bg: bg.id
-		}))
+		pairs
 	}) as Snapshot;
 
 // What is saved: names instead of ids, see `namePairs`.
