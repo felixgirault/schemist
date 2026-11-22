@@ -150,6 +150,36 @@ export const defaultArgs = (def: NodeDef): Args =>
 		def.params.map(({name, default: d}) => [name, d])
 	);
 
+const isSameParam = (a: Param, b: Param) =>
+	a.type === b.type &&
+	(a.type !== 'range' ||
+		(b.type === 'range' &&
+			a.min === b.min &&
+			a.max === b.max));
+
+// Types share param names with different meanings (e.g. the
+// `amount` of a lightness or of a highlight), so args are only
+// kept when the new type has the exact same param, see ADR 8.
+export const remapArgs = (
+	from: NodeDef,
+	to: NodeDef,
+	args: Args
+): Args =>
+	Object.fromEntries(
+		to.params.map((param) => {
+			const previous = from.params.find(
+				({name}) => name === param.name
+			);
+
+			return [
+				param.name,
+				previous && isSameParam(previous, param)
+					? args[param.name]
+					: param.default
+			];
+		})
+	);
+
 export const generateName = (
 	token: string,
 	color: SchemistColor,

@@ -1,5 +1,6 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {evaluate} from '#lib/core/evaluate.js';
+import defs from '#lib/definitions/index.js';
 import {
 	collectOutputs,
 	createNode
@@ -127,4 +128,56 @@ test('collectOutputs matches evaluate for expanded presets', () => {
 	expect(hexes(root)).toEqual(
 		evaluate(tree).map(({color}) => formatSchemistToHex(color))
 	);
+});
+
+test('setType keeps the node and its subtree', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [
+			{
+				type: 'l',
+				token: 'Dark $',
+				isHidden: true,
+				children: [{type: 'cmp'}]
+			}
+		]
+	});
+
+	const [node] = tree.children;
+	const [child] = node.children;
+	const {id} = node;
+
+	node.setType('hlt');
+
+	expect(node.def).toBe(defs.hlt);
+	expect(node.id).toBe(id);
+	expect(node.token).toBe('Dark $');
+	expect(node.isHidden).toBe(true);
+	expect(node.parent).toBe(tree);
+	expect(node.children).toEqual([child]);
+	expect(tree.children).toEqual([node]);
+});
+
+test('setType updates the output', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'l', args: {amount: 20}}]
+	});
+
+	const [node] = tree.children;
+	node.setType('s');
+
+	expect(node.output.color).toEqual(
+		defs.s.apply(tree.output.color, {amount: 20})
+	);
+});
+
+test('setType refuses to make a preset of a node with children', () => {
+	const [node] = parseTree({
+		type: 'clr',
+		children: [{type: 'l', children: [{type: 'cmp'}]}]
+	}).children;
+
+	expect(() => node.setType('stt')).toThrow('children');
+	expect(node.def).toBe(defs.l);
 });

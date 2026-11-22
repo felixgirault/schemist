@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {formatSchemist} from '#lib/color/formatting.js';
+	import type {SchemistColor} from '#lib/color/types.js';
 	import ChildOption from '#lib/components/palette/ChildOption.svelte';
 	import Sample from '#lib/components/Sample.svelte';
 	import type {NodeType} from '#lib/core/nodes.js';
@@ -10,44 +11,51 @@
 		sample,
 		samples
 	} from '#lib/samples.js';
-	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {
 		continuousGradient,
 		discreteGradient
 	} from '#lib/utils/css.js';
 
 	interface Props {
-		node: Node;
+		// Color on which samples are computed.
+		color: SchemistColor;
+		selectedType?: NodeType;
+		// Presets can't replace a type, see ADR 7.
+		hasPresets?: boolean;
 		onAddNode: (type: NodeType) => void;
 	}
 
-	let {node, onAddNode}: Props = $props();
-
-	const color = $derived(node.output.color);
+	let {color, selectedType, hasPresets, onAddNode}: Props =
+		$props();
 </script>
 
 <div class="picker">
-	<section>
-		<h2 class="h2">Color palettes</h2>
+	{#if hasPresets}
+		<section>
+			<h2 class="h2">Color palettes</h2>
 
-		<div class="grid">
-			{#each presets as preset (preset.type)}
-				<ChildOption
-					label={preset.label}
-					description={preset.description}
-					onClick={() => {
-						onAddNode(preset.type);
-					}}
-				>
-					<Sample
-						color={discreteGradient(
-							presetSamples([{type: preset.type}], color)
-						)}
-					/>
-				</ChildOption>
-			{/each}
-		</div>
-	</section>
+			<div class="grid">
+				{#each presets as preset (preset.type)}
+					<ChildOption
+						label={preset.label}
+						description={preset.description}
+						onClick={() => {
+							onAddNode(preset.type);
+						}}
+					>
+						<Sample
+							color={discreteGradient(
+								presetSamples(
+									[{type: preset.type}],
+									color
+								)
+							)}
+						/>
+					</ChildOption>
+				{/each}
+			</div>
+		</section>
+	{/if}
 
 	<section>
 		<h2 class="h2">Single colors</h2>
@@ -57,6 +65,7 @@
 				<ChildOption
 					label={def.label}
 					description={def.description}
+					isSelected={def.type === selectedType}
 					onClick={() => {
 						onAddNode(def.type);
 					}}
@@ -100,6 +109,7 @@
 
 	section {
 		flex-basis: 50%;
+		flex-grow: 1;
 		margin-bottom: 4rem;
 	}
 

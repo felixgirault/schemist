@@ -9,7 +9,8 @@ import {
 	applyDef,
 	defaultArgs,
 	defaultInput,
-	isPresetDef
+	isPresetDef,
+	remapArgs
 } from '#lib/core/nodes.js';
 import defs from '#lib/definitions/index.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
@@ -19,7 +20,8 @@ export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
 
 export class Node {
 	readonly id: string;
-	readonly def: NodeDef;
+	// Raw, as definitions are never mutated, only replaced.
+	def: NodeDef = $state.raw(defs.clr);
 	token = $state('');
 	isHidden = $state(false);
 	args: Args = $state({});
@@ -59,6 +61,22 @@ export class Node {
 		this.isHidden = isHidden;
 		this.token = token;
 		this.args = defaultArgs(this.def);
+	}
+
+	// Keeps the id, token, visibility and children, so that the
+	// change is recorded as a single history step.
+	setType(type: NodeType) {
+		const def = defs[type];
+
+		// Presets generate their colors, and can't have children.
+		if (isPresetDef(def) && this.#children.length) {
+			throw new Error(
+				"A node with children can't be a preset."
+			);
+		}
+
+		this.args = remapArgs(this.def, def, this.args);
+		this.def = def;
 	}
 
 	get children(): readonly Node[] {

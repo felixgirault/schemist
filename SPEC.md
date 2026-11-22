@@ -184,7 +184,7 @@ A class with reactive fields:
 | Field       | Kind     | Description                                                                           |
 | ----------- | -------- | ------------------------------------------------------------------------------------- |
 | `id`        | readonly | `n<uid>`, unique per session                                                          |
-| `def`       | readonly | Node type definition (§6)                                                             |
+| `def`       | raw      | Node type definition (§6), replaced by `setType`                                      |
 | `token`     | state    | Name template (§4.4), `''` for an automatic name                                      |
 | `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree                       |
 | `args`      | state    | Parameter values, initialized from the type's defaults                                |
@@ -198,13 +198,21 @@ Both ends of the parent-children link are private and only change
 through the operations: `addChild(child)` (detaches it from its
 previous parent first), `removeChild(child)`, `destroy()`
 (removes the node and its subtree from its parent),
-`replaceWith(nodes)` (puts nodes in its place among its
-siblings). `addChild` throws on presets (§7). The `id` can be
-given to the constructor, `n<uid>` otherwise.
+`setType(type)` (changes the definition, keeping the id, token,
+visibility and children; it throws if it would make a preset of a
+node with children), `replaceWith(nodes)` (puts nodes in its
+place among its siblings). `addChild` throws on presets (§7). The
+`id` can be given to the constructor, `n<uid>` otherwise.
 
 `generateName` and the `NodeDef`, `Param`, `Args` and
 `NodeOutput` (`{color, name}`) types live in
 `#lib/core/nodes.ts`.
+
+`setType` remaps args with `remapArgs` (`#lib/core/nodes.ts`): an
+arg is kept when the new type has a param with the same name,
+kind and range, and reset to the new type's default otherwise
+(ADR 8). Highlight ↔ Shadow and Lightness ↔ Saturation keep all
+their args.
 
 ### 5.2 Outputs
 
@@ -523,14 +531,15 @@ Example, a Custom color `#ffc208` alone:
 Each node shows its color (a preset shows a bar of its generated
 colors, top to bottom) and name, then actions:
 
-| Action     | Tooltip                                      | Effect                                                                         |
-| ---------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
-| Remove     | Remove this color and all of its derivatives | Not available on the root                                                      |
-| Visibility | Don't compare this color                     | Toggles `isHidden`                                                             |
-| Info       | Show color info                              | Hex, RGB, HSL and LCH values; name and hex of each generated color for presets |
-| Options    | Tune this color                              | Parameter fields; open by default on the root only                             |
-| Expand     | Turn into separate colors                    | Presets only, replaces them with plain nodes (§7)                              |
-| Add        | Add matching colors                          | Opens the child picker; disabled on presets                                    |
+| Action     | Tooltip                                      | Effect                                                                                     |
+| ---------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Remove     | Remove this color and all of its derivatives | Not available on the root                                                                  |
+| Visibility | Don't compare this color                     | Toggles `isHidden`                                                                         |
+| Info       | Show color info                              | Hex, RGB, HSL and LCH values; name and hex of each generated color for presets             |
+| Options    | Tune this color                              | Parameter fields; open by default on the root only                                         |
+| Expand     | Turn into separate colors                    | Presets only, replaces them with plain nodes (§7)                                          |
+| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root, replaced by Expand on presets |
+| Add        | Add matching colors                          | Opens the child picker; disabled on presets                                                |
 
 - The name is editable in place (Enter or blur commits). The hint
   reads "Insert parent color name with $." on child nodes.
@@ -554,6 +563,12 @@ typed in.
 A modal with two lists, each item previewed on the current color:
 **Color palettes** (presets, §7, added as a single node) and
 **Single colors** (node types, in `defList` order, §6).
+
+When changing a color's type, the modal is titled "Change color
+type" and only lists single colors, previewed on the parent's
+color (the node's input). The current type is marked with a check
+and `aria-current`. Picking a type calls `setType`, in one
+change.
 
 ### 11.5 Combinations panel
 

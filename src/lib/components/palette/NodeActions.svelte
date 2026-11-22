@@ -3,6 +3,7 @@
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import ExpandIcon from '#lib/components/icons/ExpandIcon.svelte';
 	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
+	import SwapIcon from '#lib/components/icons/SwapIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';
@@ -12,6 +13,7 @@
 		optionsId: string;
 		isHiddenId: string;
 		isRemovable: boolean;
+		isSwappable: boolean;
 		// Presets can be expanded, but can't have children.
 		isPreset: boolean;
 		isHidden: boolean;
@@ -20,6 +22,7 @@
 		hasOptions: boolean;
 		hasHint: boolean;
 		onPick: () => void;
+		onSwap: () => void;
 		onExpand: () => void;
 		onRemove: () => void;
 	}
@@ -29,6 +32,7 @@
 		optionsId,
 		isHiddenId,
 		isRemovable,
+		isSwappable,
 		isPreset,
 		isHidden = $bindable(),
 		isInfoOpen = $bindable(),
@@ -36,6 +40,7 @@
 		hasOptions,
 		hasHint,
 		onPick,
+		onSwap,
 		onExpand,
 		onRemove
 	}: Props = $props();
@@ -106,6 +111,16 @@
 			onclick={onExpand}
 		>
 			<ExpandIcon />
+		</button>
+	{:else}
+		<button
+			class="button button--icon"
+			type="button"
+			title="Change this color's type"
+			disabled={!isSwappable}
+			onclick={onSwap}
+		>
+			<SwapIcon />
 		</button>
 	{/if}
 
