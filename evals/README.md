@@ -90,6 +90,27 @@ Scores at 1.00 mean the cases no longer separate good runs from
 bad ones on Sonnet: a regression shows as a drop, an improvement
 needs a harder case.
 
+### Nested tokens and color difference (bc03830)
+
+`dashboard` then gained three graders: `tokens-nested`,
+`difference` (the agent used `eval --difference`) and, in
+`check`, a minimum CIEDE2000 difference of 10 between every pair
+of chart colors under the three simulations (ADRs 2 and 3).
+
+| `dashboard`                    | f68c0ce, re-graded | bc03830               |
+| ------------------------------ | ------------------ | --------------------- |
+| Score                          | 0.64               | 1.00                  |
+| Runs with all chart pairs ≥ 10 | 1 of 3             | 3 of 3                |
+| Weakest chart pair             | 8.89               | 10.17 / 11.93 / 14.07 |
+| Cost (`website` + `dashboard`) | –                  | $1.81                 |
+
+Without `--difference`, agents checked distinctness with their
+own culori scripts and floors (ΔE 8, 10 or 15) and 2 of 3
+palettes fell up to 1.1 under 10. With it, and the README's
+target, all 3 passed; `website` stayed at 1.00. Agents still
+search candidate chart colors with culori from `node_modules` for
+speed, then check the result with the CLI.
+
 ## How graders work
 
 A grader is a Markdown file in `cases/<name>/graders/`: flat
