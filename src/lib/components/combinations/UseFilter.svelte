@@ -34,14 +34,14 @@
 			{#each options as { id, name } (id)}
 				<input
 					class="button-trigger hidden"
-					id="brush-{id}"
+					id="use-{id}"
 					type="radio"
-					name="brush"
+					name="use"
 					value={id}
 					checked={combinations.use === id}
 					onchange={() => combinations.setUse(id)}
 				/>
-				<label class="button" for="brush-{id}">{name}</label>
+				<label class="button" for="use-{id}">{name}</label>
 			{/each}
 		</div>
 

@@ -199,23 +199,23 @@ class Combinations {
 	// Picks a use; Custom starts from the targets of the last one.
 	setUse(use: typeof this.use) {
 		if (use === 'custom' && this.use !== 'custom') {
-			this.custom = {...this.brushTargets};
+			this.custom = {...this.useTargets};
 		}
 
 		this.use = use;
 	}
 
-	brushName = $derived(
+	useName = $derived(
 		uses.find(({id}) => id === this.use)?.name ?? 'Custom'
 	);
 
-	// The targets a pair must meet together to reach the brush.
-	brushTargets = $derived<PairTargets>(
+	// The targets a pair must meet together to meet the use.
+	useTargets = $derived<PairTargets>(
 		uses.find(({id}) => id === this.use)?.targets ??
 			this.custom
 	);
 
-	// The brush's checks of every cell, once per change rather than
+	// The use's checks of every cell, once per change rather than
 	// once per reader (the cell, its card and the count).
 	#cellChecks = $derived.by(() => {
 		const checks = new Map<string, TargetCheck[]>();
@@ -226,7 +226,7 @@ class Combinations {
 					checks.set(
 						`${bg.id}-${fg.id}`,
 						checkPair(
-							this.brushTargets,
+							this.useTargets,
 							fg.rgbColor,
 							bg.rgbColor,
 							this.blindnessTypes
@@ -239,12 +239,12 @@ class Combinations {
 		return checks;
 	});
 
-	// The brush's targets on a pair, as is and per selected simulation.
-	brushChecks(fg: PaletteColor, bg: PaletteColor) {
+	// The use's targets on a pair, as is and per selected simulation.
+	checkUse(fg: PaletteColor, bg: PaletteColor) {
 		return (
 			this.#cellChecks.get(`${bg.id}-${fg.id}`) ??
 			checkPair(
-				this.brushTargets,
+				this.useTargets,
 				fg.rgbColor,
 				bg.rgbColor,
 				this.blindnessTypes
@@ -252,27 +252,27 @@ class Combinations {
 		);
 	}
 
-	// Whether a pair meets every target of the brush, worst case of
+	// Whether a pair meets every target of the use, worst case of
 	// the selected simulations.
-	passesBrush(fg: PaletteColor, bg: PaletteColor) {
-		return this.brushChecks(fg, bg).every(({pass}) => pass);
+	passesUse(fg: PaletteColor, bg: PaletteColor) {
+		return this.checkUse(fg, bg).every(({pass}) => pass);
 	}
 
-	// Whether a pair has every target of the brush at its value.
-	hasBrush(pair?: PairTargets) {
+	// Whether a pair has every target of the use at its value.
+	hasUse(pair?: PairTargets) {
 		const checks = targetNames.filter(
-			(name) => this.brushTargets[name] !== undefined
+			(name) => this.useTargets[name] !== undefined
 		);
 
 		return (
 			checks.length > 0 &&
 			checks.every(
-				(name) => pair?.[name] === this.brushTargets[name]
+				(name) => pair?.[name] === this.useTargets[name]
 			)
 		);
 	}
 
-	// Ordered pairs of compared colors, and those reaching the brush.
+	// Ordered pairs of compared colors, and those meeting the use.
 	cellCount = $derived(
 		this.comparedColors.length *
 			(this.comparedColors.length - 1)
@@ -282,21 +282,20 @@ class Combinations {
 			(n, bg) =>
 				n +
 				this.comparedColors.filter(
-					(fg) =>
-						fg.id !== bg.id && this.passesBrush(fg, bg)
+					(fg) => fg.id !== bg.id && this.passesUse(fg, bg)
 				).length,
 			0
 		)
 	);
 
-	// Sets the brush's targets on a pair, or removes them if the pair
+	// Sets the use's targets on a pair, or removes them if the pair
 	// has them at those values already, so a target typed in the card
 	// is never removed by a click.
-	toggleBrush(fg: PaletteColor, bg: PaletteColor) {
-		const brush = this.brushTargets;
+	toggleUse(fg: PaletteColor, bg: PaletteColor) {
+		const wanted = this.useTargets;
 
 		if (
-			!targetNames.some((name) => brush[name] !== undefined)
+			!targetNames.some((name) => wanted[name] !== undefined)
 		) {
 			return;
 		}
@@ -304,12 +303,12 @@ class Combinations {
 		const pair = palette.pairs.find(
 			(p) => p.fg === fg.id && p.bg === bg.id
 		);
-		const isSet = this.hasBrush(pair);
+		const isSet = this.hasUse(pair);
 		const targets: PairTargets = {...pair};
 
 		for (const name of targetNames) {
-			if (brush[name] !== undefined) {
-				targets[name] = isSet ? undefined : brush[name];
+			if (wanted[name] !== undefined) {
+				targets[name] = isSet ? undefined : wanted[name];
 			}
 		}
 

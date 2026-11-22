@@ -59,9 +59,9 @@
 		open ? `${open.bg.id}-${open.fg.id}` : null
 	);
 
-	// Every target of the brush on the open pair.
+	// Every target of the use on the open pair.
 	const useChecks = $derived(
-		open ? combinations.brushChecks(open.fg, open.bg) : []
+		open ? combinations.checkUse(open.fg, open.bg) : []
 	);
 
 	const grade = (
@@ -185,12 +185,12 @@
 													`${row.id}-${column.id}`
 												)}
 												{@const levels =
-													combinations.brushChecks(
+													combinations.checkUse(
 														column,
 														row
 													)}
 												{@const passes =
-													combinations.passesBrush(
+													combinations.passesUse(
 														column,
 														row
 													)}
@@ -303,7 +303,7 @@
 						</p>
 
 						{#if useChecks.length}
-							<h4 class="h3">{combinations.brushName}</h4>
+							<h4 class="h3">{combinations.useName}</h4>
 							{#each useChecks as { target, goal, level, simulated, pass } (target)}
 								<h5 class="h3">
 									{labels[target]}, at least {goal}
@@ -365,15 +365,15 @@
 							class="button"
 							disabled={!useChecks.length}
 							onclick={() =>
-								combinations.toggleBrush(
+								combinations.toggleUse(
 									open!.fg,
 									open!.bg
 								)}
 						>
-							{#if combinations.hasBrush(open.check?.pair)}
-								Remove {combinations.brushName} requirement
+							{#if combinations.hasUse(open.check?.pair)}
+								Remove {combinations.useName} requirement
 							{:else}
-								Require {combinations.brushName}
+								Require {combinations.useName}
 							{/if}
 						</button>
 						{#if !useChecks.length}

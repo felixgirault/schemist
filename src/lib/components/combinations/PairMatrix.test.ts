@@ -77,7 +77,7 @@ test('opens the details of a declared pair', () => {
 	combinations.openPairIds = null;
 });
 
-test('toggles the brush target on a pair', () => {
+test('toggles the targets of the use on a pair', () => {
 	const entry = (token: string) =>
 		palette.colors.find(({id}) => id === node(token).id)!;
 	const pairOf = () =>
@@ -87,12 +87,12 @@ test('toggles the brush target on a pair', () => {
 		);
 
 	combinations.use = 'categories';
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({difference: 10});
 
 	// another use adds all its targets to the same pair
 	combinations.use = 'body';
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({
 		difference: 10,
 		wcag2: 4.5,
@@ -100,12 +100,12 @@ test('toggles the brush target on a pair', () => {
 	});
 
 	// the same use removes its targets, the last ones the pair
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({difference: 10});
 	expect(pairOf()?.wcag2).toBeUndefined();
 	expect(pairOf()?.apca).toBeUndefined();
 	combinations.use = 'categories';
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
 
 	// a target at another value, typed in the card, is set to the
@@ -114,15 +114,15 @@ test('toggles the brush target on a pair', () => {
 		wcag2: 7
 	});
 	combinations.use = 'large';
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toMatchObject({wcag2: 3});
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
 
 	// an empty custom use declares nothing
 	combinations.custom = {};
 	combinations.use = 'custom';
-	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	combinations.toggleUse(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
 	combinations.use = 'body';
 });
@@ -133,7 +133,7 @@ test('custom starts from the last use and checks what is typed', () => {
 	expect(combinations.custom).toEqual({wcag2: 3});
 
 	combinations.custom = {apca: 75};
-	expect(combinations.brushTargets).toEqual({apca: 75});
+	expect(combinations.useTargets).toEqual({apca: 75});
 
 	combinations.use = 'body';
 });
@@ -189,8 +189,8 @@ test('the card has the lens, Require and Preview', () => {
 	expect(html).toContain('protanomaly');
 	expect(html).toContain('Preview');
 
-	// Require toggles the brush target on the pair
-	combinations.toggleBrush(
+	// Require toggles the use's targets on the pair
+	combinations.toggleUse(
 		palette.colors.find((e) => e.id === node('Grey').id)!,
 		palette.colors.find((e) => e.id === node('Black').id)!
 	);
@@ -208,7 +208,7 @@ test('the card has the lens, Require and Preview', () => {
 	palette.setPair(node('Grey').id, node('Black').id, {});
 });
 
-test('counts the cells reaching the brush', () => {
+test('counts the cells meeting the use', () => {
 	combinations.use = 'body';
 
 	expect(combinations.cellCount).toBe(6);
