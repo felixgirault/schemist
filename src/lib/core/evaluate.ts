@@ -22,13 +22,14 @@ export type EvaluatedColor = NodeOutput & {id: string};
 // replaced by the colors they generate. Ids are the nodes'
 // depth-first indexes after `prefix`, and those of generated
 // colors follow their preset's id: `<preset id>.<index>`, see
-// ADR 7.
+// ADR 7. Hidden nodes are left out unless `withHidden`.
 export const evaluateNodes = (
 	nodes: NodeData[],
 	input: NodeOutput,
 	prefix = '',
 	counter = {next: 0},
-	colors: EvaluatedColor[] = []
+	colors: EvaluatedColor[] = [],
+	withHidden = false
 ) => {
 	nodes.forEach(({type, token, args, isHidden, children}) => {
 		const id = `${prefix}${counter.next++}`;
@@ -37,20 +38,21 @@ export const evaluateNodes = (
 		const output = applyDef(def, nodeArgs, token ?? '', input);
 
 		if (isPresetDef(def)) {
-			if (!isHidden) {
+			if (withHidden || !isHidden) {
 				evaluateNodes(
 					def.build(nodeArgs),
 					output,
 					`${id}.`,
 					undefined,
-					colors
+					colors,
+					withHidden
 				);
 			}
 
 			return;
 		}
 
-		if (!isHidden) {
+		if (withHidden || !isHidden) {
 			colors.push({id, ...output});
 		}
 
@@ -60,7 +62,8 @@ export const evaluateNodes = (
 				output,
 				prefix,
 				counter,
-				colors
+				colors,
+				withHidden
 			);
 		}
 	});
@@ -75,6 +78,15 @@ export const toPaletteColors = (colors: EvaluatedColor[]) =>
 	}));
 
 // Colors of all visible nodes, in tree order, like
-// `collectOutputs`.
-export const evaluate = (tree: NodeData) =>
-	toPaletteColors(evaluateNodes([tree], defaultInput));
+// `collectOutputs`, or of all nodes with `withHidden`.
+export const evaluate = (tree: NodeData, withHidden = false) =>
+	toPaletteColors(
+		evaluateNodes(
+			[tree],
+			defaultInput,
+			'',
+			undefined,
+			undefined,
+			withHidden
+		)
+	);

@@ -77,6 +77,7 @@ src/
                            evaluate.ts (evaluate(NodeData) → colors),
                            contrast.ts (combine, §9.1),
                            difference.ts (difference, §9.6),
+                           pairs.ts (resolvePairs, checkPair, §9.7),
                            export.ts (export formatters and defaults, §11.8)
     definitions/           `defs`: every node type, presets included
       nodes/               Node types (§6)
@@ -512,6 +513,33 @@ al., "Palettailor", IEEE VIS 2020,
 marks need more, points more than bars or lines (Szafir,
 "Modeling Color Difference for Visualization Design", IEEE TVCG
 2018, doi:10.1109/TVCG.2017.2744359).
+
+### 9.7 Declared pairs
+
+The root of a tree (`PresetNode.pairs`, `#lib/core/nodes.ts`) may
+declare the pairs that must work together:
+`{fg, bg, wcag2?, apca?, difference?}`, the names of two colors
+and at least one target (free numbers, no defaults). Pairs are
+ordered, `fg` on `bg` (APCA depends on it; a difference target
+does not); a tree has at most one pair per ordered couple, and
+`a/b` and `b/a` are two pairs. `pairs` is accepted on the root
+only.
+
+`resolvePairs(pairs, colors)` (`#lib/core/pairs.ts`) is the only
+code that maps names to colors. `colors` is every color of the
+tree, hidden ones included (`evaluate(tree, true)`); it returns
+`{pairs, errors}`: the resolved `{fg, bg, ...targets}` and, for
+each pair that does not resolve, `{index, field?, message}` for
+an unknown name (`unknown color "x"`), a name shared by several
+colors (`"x" names 2 colors, give them distinct tokens`), a color
+paired with itself (`a color is never combined with itself`), no
+target, or a pair declared twice. Callers decide what an error
+means: the CLI fails (§14), the app drops the pair (§10.1).
+
+`checkPair(targets, fg, bg, blindnessTypes)` measures each target
+of a pair as is and under each simulation (`level`, `simulated`,
+`minLevel`, the lowest) and tells whether `minLevel` reaches the
+target (`pass`).
 
 ## 10. Permalinks
 

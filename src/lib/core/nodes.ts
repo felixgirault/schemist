@@ -210,6 +210,15 @@ export const applyDef = (
 	};
 };
 
+export type PairTargets = {
+	wcag2?: number;
+	apca?: number;
+	difference?: number;
+};
+
+// A pair as saved: the names of its two colors, and its targets.
+export type PresetPair = PairTargets & {fg: string; bg: string};
+
 export type NodeData = {
 	// Set when serializing a tree, to restore it as is, and when a
 	// preset is expanded into the nodes it generated.
@@ -219,6 +228,8 @@ export type NodeData = {
 	args?: Args;
 	children?: NodeData[];
 	isHidden?: boolean;
+	// root only
+	pairs?: PresetPair[];
 };
 
 // A tree whose ids are all set, once serialized or numbered.
