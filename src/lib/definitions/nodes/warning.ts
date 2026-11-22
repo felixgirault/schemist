@@ -1,7 +1,7 @@
 import {orangeishColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/core/nodes.js';
+import {defineNode} from '#lib/core/nodes.js';
 
-export default {
+export default defineNode({
 	type: 'wrn',
 	label: 'Warning',
 	description: 'An orangeish color to convey danger',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return orangeishColor(color);
 	}
-} satisfies NodeDef;
+});

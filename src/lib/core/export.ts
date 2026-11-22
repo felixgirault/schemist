@@ -3,20 +3,28 @@ import {
 	formatSchemistTo,
 	formatSchemistToHex
 } from '#lib/color/formatting.js';
-import type {Entry} from '#lib/core/evaluate.js';
+import type {PaletteColor} from '#lib/core/evaluate.js';
 import {cssRule, sassRule} from '#lib/utils/css.js';
 import {camelCase, dashCase} from '#lib/utils/strings.js';
 
 export type ExportFormat = 'table' | 'tokens' | 'css' | 'sass';
 export type ExportCasing = 'dash' | 'camel';
-export interface ExportEntry extends Entry {
+export interface ExportEntry extends PaletteColor {
 	cssColor: string;
 }
 
-export const defaultExportSettings = {
-	format: 'table' as ExportFormat,
-	colorFormat: 'hex' as ColorFormat,
-	casing: 'dash' as ExportCasing,
+export type ExportSettings = {
+	format: ExportFormat;
+	colorFormat: ColorFormat;
+	casing: ExportCasing;
+	precision: number;
+	prefix: string;
+};
+
+export const defaultExportSettings: ExportSettings = {
+	format: 'table',
+	colorFormat: 'hex',
+	casing: 'dash',
 	precision: 3,
 	prefix: ''
 };
@@ -28,7 +36,7 @@ export type VariablesOptions = {
 };
 
 export const toExportEntries = (
-	entries: Entry[],
+	entries: PaletteColor[],
 	colorFormat: ColorFormat,
 	precision: number
 ): ExportEntry[] =>
@@ -140,7 +148,7 @@ const placeFlatToken = (
 };
 
 // A token's final path, and why it can't be nested, if so.
-const toTokenItems = (entries: Entry[]) => {
+const toTokenItems = (entries: PaletteColor[]) => {
 	const paths = entries.map(({name}) => tokenPath(name));
 	const repeated = repeatedKeys(paths.map(pathKey));
 	const uniquePaths = withUniquePaths(paths);
@@ -177,7 +185,10 @@ const conflictNames = (
 // returned in `conflicts`, so no color is dropped. Group paths are
 // known before placing anything, so the result doesn't depend on
 // whether a group or its token comes first in the tree.
-export const exportTokens = (entries: Entry[], link: string) => {
+export const exportTokens = (
+	entries: PaletteColor[],
+	link: string
+) => {
 	const items = toTokenItems(entries);
 	const colors: TokenGroup = {
 		'$description': `Build with Schemist (${link})`

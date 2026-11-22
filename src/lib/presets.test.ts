@@ -1,8 +1,8 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import presets from '#lib/definitions/presets/index.js';
-import {parseTree} from '#lib/presets.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
 import {rootTree} from '#lib/testing/tree.js';
+import {parseTree} from '#lib/tree.js';
 import {expect, test} from 'vitest';
 
 const cases = Object.values(presets).flatMap((preset) =>
@@ -17,7 +17,7 @@ test.each(cases)(
 	({preset, hex}) => {
 		const outputs = Object.values(
 			collectOutputs(parseTree(rootTree(hex, preset.nodes)))
-		).map(([color, name]) => [
+		).map(({color, name}) => [
 			formatSchemistToHex(color),
 			name
 		]);

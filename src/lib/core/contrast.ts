@@ -1,4 +1,7 @@
-import type {ContrastType} from '#lib/color/contrast.js';
+import type {
+	ContrastGrade,
+	ContrastType
+} from '#lib/color/contrast.js';
 import {
 	wcag2Contrast,
 	wcag2Grade,
@@ -11,27 +14,45 @@ import {
 	simulateTritanomaly
 } from '#lib/color/simulation.js';
 import type {RgbColor} from '#lib/color/types.js';
-import type {Entry} from '#lib/core/evaluate.js';
+import type {PaletteColor} from '#lib/core/evaluate.js';
 
 export type BlindnessType =
-	| 'none'
 	| 'protanomaly'
 	| 'deuteranomaly'
 	| 'tritanomaly';
 
+const simulations: Record<
+	BlindnessType,
+	(color: RgbColor) => RgbColor
+> = {
+	protanomaly: simulateProtanomaly,
+	deuteranomaly: simulateDeuteranomaly,
+	tritanomaly: simulateTritanomaly
+};
+
 export const simulation = (type: BlindnessType) =>
-	type === 'protanomaly'
-		? simulateProtanomaly
-		: type === 'deuteranomaly'
-			? simulateDeuteranomaly
-			: simulateTritanomaly;
+	simulations[type];
+
+const contrastFns: Record<
+	ContrastType,
+	{
+		level: (bg: RgbColor, fg: RgbColor) => number;
+		grade: (level: number) => ContrastGrade;
+	}
+> = {
+	wcag2: {level: wcag2Contrast, grade: wcag2Grade},
+	wcag3: {level: wcag3Contrast, grade: wcag3Grade}
+};
 
 export type CombinationContrast = {
-	type: BlindnessType;
 	bg: RgbColor;
 	fg: RgbColor;
 	level: number;
-	grade: string;
+	grade: ContrastGrade;
+};
+
+export type SimulatedContrast = CombinationContrast & {
+	type: BlindnessType;
 };
 
 export type Combination = {
@@ -39,29 +60,30 @@ export type Combination = {
 	bgName: string;
 	fgName: string;
 	minLevel: number;
-	minGrade: string;
+	minGrade: ContrastGrade;
 	contrast: CombinationContrast;
-	simulatedContrasts: CombinationContrast[];
+	simulatedContrasts: SimulatedContrast[];
 };
 
 // Every entry of `bgEntries` as a background, against every other
 // entry of `allEntries` as a foreground.
 export const combine = (
-	bgEntries: Entry[],
-	allEntries: Entry[],
+	bgEntries: PaletteColor[],
+	allEntries: PaletteColor[],
 	contrastType: ContrastType,
 	blindnessTypes: BlindnessType[]
 ): Combination[] => {
 	const colorPairs = bgEntries.flatMap((color) =>
 		allEntries
 			.filter((other) => color.id !== other.id)
-			.map((other): [Entry, Entry] => [color, other])
+			.map((other): [PaletteColor, PaletteColor] => [
+				color,
+				other
+			])
 	);
 
-	const levelFn =
-		contrastType === 'wcag2' ? wcag2Contrast : wcag3Contrast;
-	const gradeFn =
-		contrastType === 'wcag2' ? wcag2Grade : wcag3Grade;
+	const {level: levelFn, grade: gradeFn} =
+		contrastFns[contrastType];
 
 	return colorPairs.map(([bgOutput, fgOutput]): Combination => {
 		const baseLevel = levelFn(
@@ -72,29 +94,31 @@ export const combine = (
 		const baseGrade = gradeFn(baseLevel);
 
 		let minLevel = baseLevel;
-		let minGrade = baseGrade;
+		let minGrade: ContrastGrade = baseGrade;
 
-		const simulatedContrasts = blindnessTypes.map((type) => {
-			const simulate = simulation(type);
+		const simulatedContrasts = blindnessTypes.map(
+			(type): SimulatedContrast => {
+				const simulate = simulation(type);
 
-			const bg = simulate(bgOutput.rgbColor);
-			const fg = simulate(fgOutput.rgbColor);
-			const level = levelFn(bg, fg);
-			const grade = gradeFn(level);
+				const bg = simulate(bgOutput.rgbColor);
+				const fg = simulate(fgOutput.rgbColor);
+				const level = levelFn(bg, fg);
+				const grade = gradeFn(level);
 
-			if (level < minLevel) {
-				minLevel = level;
-				minGrade = grade;
+				if (level < minLevel) {
+					minLevel = level;
+					minGrade = grade;
+				}
+
+				return {
+					type,
+					bg,
+					fg,
+					level,
+					grade
+				};
 			}
-
-			return {
-				type,
-				bg,
-				fg,
-				level,
-				grade
-			};
-		});
+		);
 
 		return {
 			uid: `${bgOutput.id}-${fgOutput.id}`,
@@ -103,7 +127,6 @@ export const combine = (
 			minLevel,
 			minGrade,
 			contrast: {
-				type: 'none',
 				bg: bgOutput.rgbColor,
 				fg: fgOutput.rgbColor,
 				level: baseLevel,

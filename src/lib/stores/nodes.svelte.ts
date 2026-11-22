@@ -2,7 +2,8 @@ import {parseColor} from '#lib/color/parsing.js';
 import type {
 	Args,
 	NodeDef,
-	NodeOutput
+	NodeOutput,
+	NodeType
 } from '#lib/core/nodes.js';
 import {defaultArgs, generateName} from '#lib/core/nodes.js';
 import defs from '#lib/definitions/nodes/index.js';
@@ -11,7 +12,10 @@ import {uid} from '#lib/utils/generators.js';
 
 export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
 
-const defaultInput: NodeOutput = [parseColor('#fff')[1]!, ''];
+const defaultInput: NodeOutput = {
+	color: parseColor('#fff')[1]!,
+	name: ''
+};
 
 export class Node {
 	readonly id = `n${uid()}`;
@@ -19,54 +23,60 @@ export class Node {
 	token = $state('');
 	isHidden = $state(false);
 	args: Args = $state({});
-	children: Node[] = $state([]);
-	parent?: Node = $state();
+	// Only changed through the tree methods, which keep both ends
+	// of a link in sync.
+	#children: Node[] = $state([]);
+	#parent?: Node = $state();
 	input: NodeOutput = $derived(
-		this.parent?.output ?? defaultInput
+		this.#parent?.output ?? defaultInput
 	);
 	output: NodeOutput = $derived.by(() => {
-		const color = this.def.apply(this.input[0], this.args);
+		const color = this.def.apply(this.input.color, this.args);
 		const name = generateName(
 			this.token,
 			color,
-			this.input[1]
+			this.input.name
 		);
-		return [color, name];
+		return {color, name};
 	});
 
-	constructor(
-		type: keyof typeof defs,
-		isHidden = false,
-		token = ''
-	) {
+	constructor(type: NodeType, isHidden = false, token = '') {
 		this.def = defs[type];
 		this.isHidden = isHidden;
 		this.token = token;
 		this.args = defaultArgs(this.def);
 	}
 
+	get children(): readonly Node[] {
+		return this.#children;
+	}
+
+	get parent() {
+		return this.#parent;
+	}
+
 	addChild(child: Node) {
-		child.parent?.removeChild(child);
-		child.parent = this;
-		this.children.push(child);
+		child.#parent?.removeChild(child);
+		child.#parent = this;
+		this.#children.push(child);
 	}
 
 	removeChild(child: Node) {
-		const i = this.children.indexOf(child);
+		const i = this.#children.indexOf(child);
 
 		if (i >= 0) {
-			this.children = withoutIndex(this.children, i);
-			child.parent = undefined;
+			this.#children = withoutIndex(this.#children, i);
+			child.#parent = undefined;
 		}
 	}
 
 	destroy() {
-		this.parent?.removeChild(this);
+		this.#parent?.removeChild(this);
 	}
 }
 
 export const createNode = (
-	type: keyof typeof defs,
+	type: NodeType,
 	isHidden = false,
 	token = ''
 ) => new Node(type, isHidden, token);

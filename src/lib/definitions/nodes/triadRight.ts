@@ -1,7 +1,7 @@
 import {rotateHue} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/core/nodes.js';
+import {defineNode} from '#lib/core/nodes.js';
 
-export default {
+export default defineNode({
 	type: 'trr',
 	label: 'Right triad',
 	description: '',
@@ -10,4 +10,4 @@ export default {
 	apply(color) {
 		return rotateHue(color, 120);
 	}
-} satisfies NodeDef;
+});

@@ -70,9 +70,11 @@ src/
     color/                 Color model, conversions, parsing, formatting,
                            manipulation, contrast, simulation, naming
     core/                  Svelte-free logic, shared with the CLI (no runes):
-                           nodes.ts (NodeDef, Param, Args, NodeOutput,
-                           PresetNode, Preset, defaultArgs, generateName),
-                           evaluate.ts (evaluate(PresetNode) → entries),
+                           nodes.ts (NodeType, NodeDef, defineNode, Param,
+                           Args, NodeOutput, NodeData, Preset,
+                           defaultArgs, generateName),
+                           tree.ts (validateTree, §5.3),
+                           evaluate.ts (evaluate(NodeData) → colors),
                            contrast.ts (combine, §9.1),
                            difference.ts (difference, §9.6),
                            export.ts (export formatters and defaults, §11.8)
@@ -82,7 +84,7 @@ src/
     packing/               Permalink encoding (§10)
     components/            UI (§11)
     utils/                 Generic helpers (arrays, css, math, strings, …)
-    presets.ts             parseTree / serializeTree (tree ⇄ PresetNode)
+    tree.ts                parseTree / serializeTree (tree ⇄ NodeData)
     palette.ts             getRootNode (initial tree from URL or random)
     routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
@@ -178,52 +180,64 @@ Numbers are rounded to a `precision` (decimals, default 3).
 
 A class with reactive fields:
 
-| Field      | Kind     | Description                                                              |
-| ---------- | -------- | ------------------------------------------------------------------------ |
-| `id`       | readonly | `n<uid>`, unique per session                                             |
-| `def`      | readonly | Node type definition (§6)                                                |
-| `token`    | state    | Name template (§4.4), `''` for an automatic name                         |
-| `isHidden` | state    | Excluded from combinations and exports, still drawn in the tree          |
-| `args`     | state    | Parameter values, initialized from the type's defaults                   |
-| `children` | state    | Child nodes, ordered                                                     |
-| `parent`   | state    | Parent node, `undefined` for the root                                    |
-| `input`    | derived  | `parent.output`, or `[white, '']` for the root                           |
-| `output`   | derived  | `[def.apply(input color, args), generateName(token, color, input name)]` |
+| Field      | Kind     | Description                                                                           |
+| ---------- | -------- | ------------------------------------------------------------------------------------- |
+| `id`       | readonly | `n<uid>`, unique per session                                                          |
+| `def`      | readonly | Node type definition (§6)                                                             |
+| `token`    | state    | Name template (§4.4), `''` for an automatic name                                      |
+| `isHidden` | state    | Excluded from combinations and exports, still drawn in the tree                       |
+| `args`     | state    | Parameter values, initialized from the type's defaults                                |
+| `children` | getter   | Child nodes, ordered (private state, read-only)                                       |
+| `parent`   | getter   | Parent node, `undefined` for the root (private state)                                 |
+| `input`    | derived  | `parent.output`, or `{color: white, name: ''}` for the root                           |
+| `output`   | derived  | `{color: def.apply(input.color, args), name: generateName(token, color, input.name)}` |
 
-Operations: `addChild(child)` (detaches it from its previous
-parent first), `removeChild(child)`, `destroy()` (removes the
-node and its subtree from its parent).
+Both ends of the parent-children link are private and only change
+through the operations: `addChild(child)` (detaches it from its
+previous parent first), `removeChild(child)`, `destroy()`
+(removes the node and its subtree from its parent).
 
 `generateName` and the `NodeDef`, `Param`, `Args` and
-`NodeOutput` types live in `#lib/core/nodes.ts`.
+`NodeOutput` (`{color, name}`) types live in
+`#lib/core/nodes.ts`.
 
 ### 5.2 Outputs
 
 `collectOutputs(root)` walks the tree depth-first, parent before
-children, and returns `{[id]: [color, name]}` for every
+children, and returns `{[id]: {color, name}}` for every
 **visible** node. Children of a hidden node are still collected.
 
-`evaluate(PresetNode)` (`#lib/core/evaluate.ts`) computes the
-same visible outputs without the store, as
-`{id, name, color, rgbColor}` entries. Ids are depth-first
-indexes (`'0'`, `'1'`, …).
+`evaluate(NodeData)` (`#lib/core/evaluate.ts`) computes the same
+visible outputs without the store, as `PaletteColor`s
+(`{id, name, color, rgbColor}`). Ids are depth-first indexes
+(`'0'`, `'1'`, …).
 
-### 5.3 Tree serialization (`#lib/presets.ts`)
+### 5.3 Tree data (`#lib/tree.ts`, `#lib/core/tree.ts`)
 
-`PresetNode = {type, token?, args?, children?, isHidden?}`
+`NodeData = {type, token?, args?, children?, isHidden?}`
 (`#lib/core/nodes.ts`) is the plain form of a tree, used by
-presets and permalinks. `parseTree(PresetNode) → Node` merges
-given `args` over the type defaults;
-`serializeTree(Node) → PresetNode` omits empty tokens, args and
-children.
+presets, permalinks and the CLI, with `type` a `NodeType` (§6).
+`parseTree(NodeData) → Node` merges given `args` over the type
+defaults; `serializeTree(Node) → NodeData` omits empty tokens,
+args and children.
+
+`validateTree(data, path)` (`#lib/core/tree.ts`) checks data from
+outside and returns a `NodeData`: unknown keys, node types and
+params, and invalid values are rejected naming their path. Color
+args are CSS strings, converted to colors. The CLI (§14)
+validates its input with it, and `unpack` (§10) validates what a
+permalink holds before building the tree.
 
 ## 6. Node types
 
-Defined in `src/lib/definitions/nodes/`, registered in `index.ts`
-(`defs` by type, `defList` for display order). A definition has a
-short `type` code (used in permalinks), a `label`, an optional
-`description` and `argsLabel`, `params`, a `samples` style for
-previews (`single`, `discrete`, `continuous`) and
+Defined in `src/lib/definitions/nodes/` with `defineNode`, which
+infers the type of `apply`'s and `argsLabel`'s arguments from
+`params`, and registered in `index.ts` (`defs` by type, typed
+against the `NodeType` union of the codes below so that none is
+missing or misspelled; `defList` for display order). A definition
+has a short `type` code (used in permalinks), a `label`, an
+optional `description` and `argsLabel`, `params`, a `samples`
+style for previews (`single`, `discrete`, `continuous`) and
 `apply(color, args)` (the `NodeDef` type, in
 `#lib/core/nodes.ts`).
 
@@ -255,9 +269,9 @@ Param kinds: `range` (integer slider), `color` (color picker,
 ## 7. Presets
 
 Defined in `src/lib/definitions/presets/`, listed in `index.ts`.
-A preset is `{label, description?, nodes: PresetNode[]}`;
-applying it adds its nodes as children of the selected node. `$`
-in tokens refers to the parent's name.
+A preset is `{label, description?, nodes: NodeData[]}`; applying
+it adds its nodes as children of the selected node. `$` in tokens
+refers to the parent's name.
 
 | Preset                 | Nodes                                                                                                                         |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -286,13 +300,14 @@ each exporting a single reactive object.
 
 ### 8.1 `palette`
 
-| Member             | Description                                                                                         |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| `root`             | Root `Node`, set when the palette component mounts                                                  |
-| `outputs`          | `collectOutputs(root)`, updated synchronously                                                       |
-| `debouncedOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
-| `permalink`        | `permalink(serializeTree(root), window.location.origin)` (§10.1)                                    |
-| `rootColor`        | Root's color in `debouncedOutputs`, else the first output, else `#feffff`                           |
+| Member           | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `root`           | Root `Node` (`undefined` until the palette component mounts)                                        |
+| `outputs`        | `collectOutputs(root)`, updated synchronously                                                       |
+| `settledOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
+| `permalink`      | `permalink(serializeTree(root), window.location.origin)` (§10.1)                                    |
+| `colors`         | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                  |
+| `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                             |
 
 The debounce keeps single edits snappy while throttling the
 expensive combination computations during slider drags.
@@ -307,7 +322,6 @@ expensive combination computations during slider drags.
 | `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                  |
 | `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                     |
 | `previewedUid`                | Combination applied to the app theme, or `null`                                        |
-| `colorEntries`                | `{id, name, color, rgbColor}` from `palette.debouncedOutputs`, in tree order           |
 | `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root |
 | `all`                         | `combine(...)` of the filtered colors (§9.1)                                           |
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                           |
@@ -327,8 +341,8 @@ under `darkSchemeFeature` = `'1'` / `'0'`) and `colorInputFormat`
 default `dash`), `precision` (default 3), `prefix` (default
 `''`), from `defaultExportSettings` (`#lib/core/export.ts`).
 
-The `ExportFormat`, `ExportCasing` and `ExportEntry` types live
-in `#lib/core/export.ts`.
+`ExportSettings` and the `ExportFormat`, `ExportCasing` and
+`ExportEntry` types live in `#lib/core/export.ts`.
 
 None of this state is persisted except the dark scheme.
 
@@ -337,8 +351,9 @@ None of this state is persisted except the dark scheme.
 ### 9.1 Combinations
 
 Computed by `combine` (`#lib/core/contrast.ts`), which also holds
-the `Combination`, `CombinationContrast` and `BlindnessType`
-types.
+the `Combination`, `CombinationContrast`, `SimulatedContrast` (a
+contrast with its simulated `type`) and `BlindnessType` (without
+`none`) types.
 
 For each color in the filtered set (as background) and every
 other color (as foreground), one combination with
@@ -409,7 +424,7 @@ marks need more, points more than bars or lines (Szafir,
 
 ### 10.1 Flow
 
-- `permalink(tree, origin)`, with `tree` a `PresetNode`
+- `permalink(tree, origin)`, with `tree` a `NodeData`
   (`serializeTree(root)` for a store node), =
   `<origin>?preset=<encodeURI(pack(tree))>`, with `&`, `#` and
   `+` also percent-encoded so they survive the query string.
@@ -417,8 +432,9 @@ marks need more, points more than bars or lines (Szafir,
   `window.location.origin`.
 - **Share** navigates to that URL (the address bar then holds the
   link; nothing is copied to the clipboard).
-- On load, `getRootNode()` unpacks `?preset=`. If it is missing
-  or invalid (the error is logged), the tree is a single Custom
+- On load, `getRootNode()` unpacks `?preset=`, which validates
+  the tree with `validateTree` (§5.3). If it is missing or
+  invalid (the error is logged), the tree is a single Custom
   color node with a random usable color.
 - Exports embed the permalink (CSS/Sass comment, design tokens
   description).
@@ -649,14 +665,14 @@ applies to contrast). `export` options:
 `defaultExportSettings` (`#lib/core/export.ts`). `--origin`
 (default `https://schemist.fglt.fr`) sets the permalink origin.
 
-Input is a `PresetNode` JSON tree (file path, or `-` for stdin),
-validated in `src/cli/tree.ts`: unknown keys, node types and
+Input is a `NodeData` JSON tree (file path, or `-` for stdin),
+validated by `validateTree` (`src/lib/core/tree.ts`, which also
+validates unpacked permalinks): unknown keys, node types and
 params, non-integers or integers outside `min`–`max` for ranges,
-and non-booleans are rejected; tokens containing `,` or `@` are
-rejected too (they break permalinks, §13); missing args take the
-type's defaults; color params are CSS color strings converted
-with `parseColor`, invalid ones rejected. Errors name the node
-path and the param, e.g.
+and non-booleans are rejected; missing args take the type's
+defaults; color params are CSS color strings converted with
+`parseColor`, invalid ones rejected. Errors name the node path
+and the param, e.g.
 `root.children[2].args.amount: expected an integer between 0 and 100`.
 Usage text is printed only for command line errors.
 

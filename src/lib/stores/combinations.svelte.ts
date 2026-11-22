@@ -1,9 +1,8 @@
 import type {ContrastType} from '#lib/color/contrast.js';
 import {Wcag2Level, equivalence} from '#lib/color/contrast.js';
-import {schemistToRgb} from '#lib/color/conversion.js';
 import type {BlindnessType} from '#lib/core/contrast.js';
 import {combine} from '#lib/core/contrast.js';
-import type {Entry} from '#lib/core/evaluate.js';
+import type {PaletteColor} from '#lib/core/evaluate.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {circular} from '#lib/utils/math.js';
@@ -25,22 +24,11 @@ class Combinations {
 		this.minLevel = equivalence(type, this.minLevel);
 	}
 
-	colorEntries = $derived(
-		Object.entries(palette.debouncedOutputs).map(
-			([id, output]): Entry => ({
-				id,
-				color: output[0],
-				rgbColor: schemistToRgb(output[0]),
-				name: output[1]
-			})
-		)
-	);
-
 	// sorts colors by hue and lightness
 	sortedColors = $derived.by(() => {
 		const root = palette.root;
-		const sorted = this.colorEntries
-			.map((output): [number, Entry] => {
+		const sorted = palette.colors
+			.map((output): [number, PaletteColor] => {
 				const {h, l} = output.color;
 				const weight =
 					Math.round(circular(h)) * 10 +
@@ -70,7 +58,7 @@ class Combinations {
 	all = $derived(
 		combine(
 			this.#filteredColors,
-			this.colorEntries,
+			palette.colors,
 			this.contrastType,
 			this.blindnessTypes
 		)

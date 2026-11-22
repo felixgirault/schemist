@@ -1,7 +1,7 @@
 import {rotateHue} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/core/nodes.js';
+import {defineNode} from '#lib/core/nodes.js';
 
-export default {
+export default defineNode({
 	type: 'anl',
 	label: 'Analogous',
 	params: [
@@ -18,4 +18,4 @@ export default {
 	apply(color, {steps}) {
 		return rotateHue(color, steps * 30);
 	}
-} satisfies NodeDef;
+});

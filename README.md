@@ -94,9 +94,9 @@ A tree is nodes with a `type`, optional `token` (the name, where
 `isHidden`. Each node derives its color from its parent, like in
 the app. Get the available types and params from `types`, and
 ideas from `presets`. Color args are CSS color strings, range
-args are integers within their bounds, and tokens can't contain
-`,` or `@`. Invalid trees are rejected with the path of the
-problem, e.g. `root.children[2].args.amount`.
+args are integers within their bounds. Invalid trees are rejected
+with the path of the problem, e.g.
+`root.children[2].args.amount`.
 
 ```json
 {

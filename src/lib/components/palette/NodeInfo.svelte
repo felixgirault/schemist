@@ -19,10 +19,10 @@
 
 	let {id, node}: Props = $props();
 
-	let hex = $derived(formatSchemistToHex(node.output[0]));
-	let rgb = $derived(schemistToRgb(node.output[0]));
-	let hsl = $derived(schemistToHsl(node.output[0]));
-	let lch = $derived(schemistToLch(node.output[0]));
+	let hex = $derived(formatSchemistToHex(node.output.color));
+	let rgb = $derived(schemistToRgb(node.output.color));
+	let hsl = $derived(schemistToHsl(node.output.color));
+	let lch = $derived(schemistToLch(node.output.color));
 </script>
 
 <section {id} class="form">

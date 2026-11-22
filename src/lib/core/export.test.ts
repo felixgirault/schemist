@@ -1,17 +1,17 @@
 import {evaluate} from '#lib/core/evaluate.js';
 import {exportTokens} from '#lib/core/export.js';
-import type {PresetNode} from '#lib/core/nodes.js';
+import type {NodeData} from '#lib/core/nodes.js';
 import {rootTree} from '#lib/testing/tree.js';
 import {expect, test} from 'vitest';
 
-const named = (token: string, hex: string): PresetNode => ({
+const named = (token: string, hex: string): NodeData => ({
 	type: 'clr',
 	token,
 	args: {color: rootTree(hex, []).args.color}
 });
 
 // Tokens under `Colors`, without the root, which has a generated name.
-const run = (...nodes: PresetNode[]) => {
+const run = (...nodes: NodeData[]) => {
 	const {json, conflicts} = exportTokens(
 		evaluate(rootTree('#3b82f6', nodes)).slice(1),
 		'https://schemist.test'
@@ -21,7 +21,7 @@ const run = (...nodes: PresetNode[]) => {
 	return {colors: Colors, conflicts};
 };
 
-const tokens = (...nodes: PresetNode[]) => run(...nodes).colors;
+const tokens = (...nodes: NodeData[]) => run(...nodes).colors;
 
 const token = (hex: string) => ({$type: 'color', $value: hex});
 
@@ -152,7 +152,7 @@ test('a suffixed name never overwrites an existing one', () => {
 
 // A `$` in a token stands for the parent's name, so only a root
 // node can hold one as is.
-const runRoots = (...nodes: PresetNode[]) => {
+const runRoots = (...nodes: NodeData[]) => {
 	const {json, conflicts} = exportTokens(
 		nodes.flatMap((node) => evaluate(node)),
 		'https://schemist.test'

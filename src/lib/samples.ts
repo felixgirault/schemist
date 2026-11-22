@@ -2,7 +2,7 @@ import type {
 	Args,
 	NodeDef,
 	Param,
-	PresetNode
+	NodeData
 } from '#lib/core/nodes.js';
 import defs from '#lib/definitions/nodes/index.js';
 import {range} from '#lib/utils/generators.js';
@@ -81,7 +81,7 @@ export const presetSample = (
 	);
 
 export const presetSamples = (
-	nodes: PresetNode[],
+	nodes: NodeData[],
 	color: SchemistColor
 ) =>
 	nodes.flatMap(({type, args, children, isHidden}) => {

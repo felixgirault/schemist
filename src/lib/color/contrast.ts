@@ -79,6 +79,10 @@ export const wcag3Grade = (level: number) =>
 						? '1'
 						: '0';
 
+export type ContrastGrade =
+	| ReturnType<typeof wcag2Grade>
+	| ReturnType<typeof wcag3Grade>;
+
 export const wcag2Contrast = (bg: RgbColor, fg: RgbColor) =>
 	wcagContrast(rgbToCulori(bg), rgbToCulori(fg));
 

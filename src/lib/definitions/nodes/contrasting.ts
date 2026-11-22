@@ -1,7 +1,7 @@
 import {contrastingColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/core/nodes.js';
+import {defineNode} from '#lib/core/nodes.js';
 
-export default {
+export default defineNode({
 	type: 'ctr',
 	label: 'Contrasting',
 	description:
@@ -21,4 +21,4 @@ export default {
 	apply(color, {amount}) {
 		return contrastingColor(color, amount);
 	}
-} satisfies NodeDef;
+});

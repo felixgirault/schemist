@@ -4,11 +4,11 @@
 	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
-	import {parseTree} from '#lib/presets.js';
 	import {features} from '#lib/stores/features.svelte.js';
 	import type {Node} from '#lib/stores/nodes.svelte.js';
 	import {createNode} from '#lib/stores/nodes.svelte.js';
 	import {overlayColor} from '#lib/style.js';
+	import {parseTree} from '#lib/tree.js';
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
@@ -47,7 +47,7 @@
 		HTMLDivElement
 	> = ({currentTarget}) => {
 		node.token = currentTarget.innerText;
-		currentTarget.innerText = node.output[1];
+		currentTarget.innerText = node.output.name;
 		isEditingToken = false;
 	};
 
@@ -65,7 +65,7 @@
 <article class:isHidden={node.isHidden}>
 	<div
 		class="output"
-		style="--output: {formatSchemist(node.output[0])};"
+		style="--output: {formatSchemist(node.output.color)};"
 	></div>
 
 	<div class="self" class:open={areOptionsOpen}>
@@ -83,7 +83,7 @@
 						onblur={handleTokenBlur}
 						onkeydown={handleTokenKey}
 					>
-						{node.output[1]}
+						{node.output.name}
 					</div>
 				</h3>
 
@@ -148,7 +148,7 @@
 	<Modal
 		label="Select matching color"
 		overlayColor={overlayColor(
-			node.output[0],
+			node.output.color,
 			features.isDarkScheme
 		)}
 		onClose={() => {

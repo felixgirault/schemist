@@ -1,8 +1,30 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import nearestColor from '#lib/color/nearest.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import type defs from '#lib/definitions/nodes/index.js';
 import {sentenceCase} from '#lib/utils/strings.js';
+
+// Codes of node types, which are stored in permalinks, so they
+// must never change.
+export type NodeType =
+	| 'anl'
+	| 'clr'
+	| 'cmp'
+	| 'ctr'
+	| 'h'
+	| 'hlt'
+	| 'inf'
+	| 'l'
+	| 'neg'
+	| 'pos'
+	| 's'
+	| 'scl'
+	| 'scr'
+	| 'sdw'
+	| 'trl'
+	| 'trr'
+	| 'ttl'
+	| 'ttr'
+	| 'wrn';
 
 export type SampleType = 'single' | 'discrete' | 'continuous';
 
@@ -32,23 +54,51 @@ export type RangeParam = {
 
 export type Param = BooleanParam | ColorParam | RangeParam;
 
-export type Args = {
-	[name: string]: any;
+export type ParamValue<P extends Param = Param> =
+	P extends RangeParam
+		? number
+		: P extends BooleanParam
+			? boolean
+			: SchemistColor;
+
+// Args of a list of params, keyed by their names.
+export type ArgsOf<P extends readonly Param[]> = {
+	[K in P[number] as K['name']]: ParamValue<K>;
 };
 
-export type NodeDef = {
-	type: string;
+export type Args = Record<string, ParamValue>;
+
+// Args hold values of the kind of their param, as they start
+// from defaults and are only set by fields of that kind.
+export const argOf = <P extends Param>(args: Args, param: P) =>
+	args[param.name] as ParamValue<P>;
+
+// Methods rather than function properties, so that definitions of
+// any params fit `NodeDef` (methods are bivariant).
+export type NodeDef<
+	P extends readonly Param[] = readonly Param[]
+> = {
+	type: NodeType;
 	label: string;
-	argsLabel?: (args: Args) => string;
+	argsLabel?(args: ArgsOf<P>): string;
 	description?: string;
-	params: Param[];
+	params: P;
 	samples: SampleType;
-	apply: (color: SchemistColor, args: Args) => SchemistColor;
+	apply(color: SchemistColor, args: ArgsOf<P>): SchemistColor;
 };
 
-export type NodeOutput = [color: SchemistColor, name: string];
+// Infers args from params, and keeps the type code as is, so
+// that the registry can check it.
+export const defineNode = <
+	const T extends NodeType,
+	const P extends readonly Param[]
+>(
+	def: NodeDef<P> & {type: T}
+) => def;
 
-export const defaultArgs = (def: NodeDef) =>
+export type NodeOutput = {color: SchemistColor; name: string};
+
+export const defaultArgs = (def: NodeDef): Args =>
 	Object.fromEntries(
 		def.params.map(({name, default: d}) => [name, d])
 	);
@@ -64,16 +114,16 @@ export const generateName = (
 			: token
 		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
-export type PresetNode = {
-	type: keyof typeof defs;
+export type NodeData = {
+	type: NodeType;
 	token?: string;
 	args?: Args;
-	children?: PresetNode[];
+	children?: NodeData[];
 	isHidden?: boolean;
 };
 
 export type Preset = {
 	label: string;
 	description?: string;
-	nodes: PresetNode[];
+	nodes: NodeData[];
 };

@@ -1,7 +1,7 @@
 import {setLightness} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/core/nodes.js';
+import {defineNode} from '#lib/core/nodes.js';
 
-export default {
+export default defineNode({
 	type: 'l',
 	label: `Lightness`,
 	argsLabel: ({amount}) => `${amount}%`,
@@ -21,4 +21,4 @@ export default {
 	apply(color, {amount}) {
 		return setLightness(color, amount);
 	}
-} satisfies NodeDef;
+});

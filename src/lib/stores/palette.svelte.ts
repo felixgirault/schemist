@@ -1,11 +1,13 @@
+import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
-import {serializeTree} from '#lib/presets.js';
+import type {PaletteColor} from '#lib/core/evaluate.js';
 import {permalink} from '#lib/routing.js';
 import type {
 	Node,
 	NodeOutputRecord
 } from '#lib/stores/nodes.svelte.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
+import {serializeTree} from '#lib/tree.js';
 import {
 	debounce,
 	withElapsedTime
@@ -13,8 +15,7 @@ import {
 import {clamp} from '#lib/utils/math.js';
 
 class Palette {
-	// set when the palette mounts, before anything reads it
-	root = $state<Node>(undefined!);
+	root = $state<Node>();
 	outputs = $derived(
 		this.root ? collectOutputs(this.root) : {}
 	);
@@ -25,25 +26,39 @@ class Palette {
 	// This allows for a snappy feel on single updates while
 	// keeping reasonable performance on fast recurring ones
 	// (i.e. when the user drags a range input).
-	debouncedOutputs: NodeOutputRecord = $state.raw({});
+	settledOutputs: NodeOutputRecord = $state.raw({});
+
+	// Colors of the settled outputs, as combinations and exports
+	// need them.
+	colors = $derived(
+		Object.entries(this.settledOutputs).map(
+			([id, {color, name}]): PaletteColor => ({
+				id,
+				color,
+				rgbColor: schemistToRgb(color),
+				name
+			})
+		)
+	);
 
 	rootColor = $derived(
-		(this.root && this.debouncedOutputs[this.root.id]?.[0]) ??
-			Object.values(this.debouncedOutputs).shift()?.[0] ??
+		(this.root && this.settledOutputs[this.root.id]?.color) ??
+			Object.values(this.settledOutputs).shift()?.color ??
 			parseColor('#feffff')[1]! // not fully white so there is a hue to pick up
 	);
 
 	get permalink() {
-		return permalink(
-			serializeTree(this.root),
-			window.location.origin
-		);
+		const {origin} = window.location;
+
+		return this.root
+			? permalink(serializeTree(this.root), origin)
+			: origin;
 	}
 
 	constructor() {
 		const update = debounce(
 			(outputs: NodeOutputRecord) => {
-				this.debouncedOutputs = outputs;
+				this.settledOutputs = outputs;
 			},
 			withElapsedTime(
 				(time) => 10 + clamp(400 - time, 400) / 2

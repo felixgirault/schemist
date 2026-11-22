@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type {Entry} from '#lib/core/evaluate.js';
+	import type {PaletteColor} from '#lib/core/evaluate.js';
 	import {exportTokens} from '#lib/core/export.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import CodeArea from './CodeArea.svelte';
 
 	interface Props {
-		entries: Entry[];
+		entries: PaletteColor[];
 	}
 
 	let {entries}: Props = $props();

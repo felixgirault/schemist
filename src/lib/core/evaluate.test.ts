@@ -1,18 +1,18 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
-import type {PresetNode} from '#lib/core/nodes.js';
+import type {NodeData} from '#lib/core/nodes.js';
 import presets from '#lib/definitions/presets/index.js';
-import {parseTree} from '#lib/presets.js';
 import {collectOutputs} from '#lib/stores/nodes.svelte.js';
 import {rootTree} from '#lib/testing/tree.js';
+import {parseTree} from '#lib/tree.js';
 import {expect, test} from 'vitest';
 import {evaluate} from './evaluate';
 
-const viaStore = (tree: PresetNode) =>
+const viaStore = (tree: NodeData) =>
 	Object.values(collectOutputs(parseTree(tree))).map(
-		([color, name]) => [formatSchemistToHex(color), name]
+		({color, name}) => [formatSchemistToHex(color), name]
 	);
 
-const viaCore = (tree: PresetNode) =>
+const viaCore = (tree: NodeData) =>
 	evaluate(tree).map(({color, name}) => [
 		formatSchemistToHex(color),
 		name

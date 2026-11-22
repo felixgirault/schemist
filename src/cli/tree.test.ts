@@ -1,4 +1,5 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
+import type {SchemistColor} from '#lib/color/types.js';
 import {expect, test} from 'vitest';
 import {parseTreeJson} from './tree.js';
 
@@ -14,7 +15,9 @@ test('converts color strings and keeps the rest', () => {
 		]
 	});
 
-	expect(formatSchemistToHex(tree.args!.color)).toBe('#3b82f6');
+	expect(
+		formatSchemistToHex(tree.args!.color as SchemistColor)
+	).toBe('#3b82f6');
 	expect(tree.children).toEqual([
 		{type: 'ctr', token: 'Text', args: {amount: 50}}
 	]);
@@ -46,14 +49,6 @@ test.each([
 		'root.args.amount: expected an integer between 0 and 100'
 	],
 	[
-		{type: 'cmp', children: [{type: 'cmp', token: 'a, b'}]},
-		'root.children[0].token: "," is not allowed'
-	],
-	[
-		{type: 'cmp', token: 'a@b'},
-		'root.token: "@" is not allowed'
-	],
-	[
 		{type: 'clr', args: {color: 'blue-ish'}},
 		'root.args.color: expected a CSS color string'
 	],
@@ -81,5 +76,11 @@ test.each([
 test('fills missing args with the defaults', () => {
 	expect(parse({type: 'hlt', args: {amount: 20}}).args).toEqual(
 		{amount: 20, shift: 15, temp: 650}
+	);
+});
+
+test('accepts tokens with the separators of permalinks', () => {
+	expect(parse({type: 'cmp', token: 'a, b@c'}).token).toBe(
+		'a, b@c'
 	);
 });

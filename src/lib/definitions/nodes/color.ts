@@ -1,7 +1,7 @@
-import type {NodeDef} from '#lib/core/nodes.js';
+import {defineNode} from '#lib/core/nodes.js';
 import {defaultThemeColor} from '#lib/style.js';
 
-export default {
+export default defineNode({
 	type: 'clr',
 	label: 'Custom color',
 	params: [
@@ -16,4 +16,4 @@ export default {
 	apply(_, {color}) {
 		return color;
 	}
-} satisfies NodeDef;
+});

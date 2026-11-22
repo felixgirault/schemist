@@ -1,36 +1,39 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
-import type {RgbColor} from '#lib/color/types.js';
-import type {NodeOutput, PresetNode} from '#lib/core/nodes.js';
+import type {RgbColor, SchemistColor} from '#lib/color/types.js';
+import type {NodeOutput, NodeData} from '#lib/core/nodes.js';
 import {defaultArgs, generateName} from '#lib/core/nodes.js';
 import defs from '#lib/definitions/nodes/index.js';
 
-export type Entry = {
+export type PaletteColor = {
 	id: string;
-	name: NodeOutput[1];
-	color: NodeOutput[0];
+	name: string;
+	color: SchemistColor;
 	rgbColor: RgbColor;
 };
 
-const white: NodeOutput = [parseColor('#fff')[1]!, ''];
+const white: NodeOutput = {
+	color: parseColor('#fff')[1]!,
+	name: ''
+};
 
 // Entries of all visible nodes, in tree order, like
 // `collectOutputs`. Ids are the nodes' depth-first indexes.
-export const evaluate = (tree: PresetNode): Entry[] => {
-	const entries: Entry[] = [];
+export const evaluate = (tree: NodeData): PaletteColor[] => {
+	const entries: PaletteColor[] = [];
 	let index = 0;
 
-	const walk = (node: PresetNode, input: NodeOutput) => {
+	const walk = (node: NodeData, input: NodeOutput) => {
 		const id = String(index++);
 		const def = defs[node.type];
-		const color = def.apply(input[0], {
+		const color = def.apply(input.color, {
 			...defaultArgs(def),
 			...node.args
 		});
 		const name = generateName(
 			node.token ?? '',
 			color,
-			input[1]
+			input.name
 		);
 
 		if (!node.isHidden) {
@@ -43,7 +46,7 @@ export const evaluate = (tree: PresetNode): Entry[] => {
 		}
 
 		node.children?.forEach((child) =>
-			walk(child, [color, name])
+			walk(child, {color, name})
 		);
 	};
 

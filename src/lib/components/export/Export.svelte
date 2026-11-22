@@ -2,13 +2,13 @@
 	import TableExport from '#lib/components/export/TableExport.svelte';
 	import VariablesExport from '#lib/components/export/VariablesExport.svelte';
 	import {toExportEntries} from '#lib/core/export.js';
-	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {exportSettings} from '#lib/stores/export.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
 	const entries = $derived(
 		toExportEntries(
-			combinations.colorEntries,
+			palette.colors,
 			exportSettings.colorFormat,
 			exportSettings.precision
 		)
@@ -208,9 +208,7 @@
 		{#if exportSettings.format === 'table'}
 			<TableExport {entries} />
 		{:else if exportSettings.format === 'tokens'}
-			<DesignTokensExport
-				entries={combinations.colorEntries}
-			/>
+			<DesignTokensExport entries={palette.colors} />
 		{:else}
 			<VariablesExport
 				{entries}

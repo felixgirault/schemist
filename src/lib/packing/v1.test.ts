@@ -63,3 +63,13 @@ test('unpack tokens packed before separators were escaped', () => {
 		args: {amount: 40}
 	});
 });
+
+test.each([
+	['0@010@nope,', 'permalink.type: unknown node type "nope"'],
+	[
+		'0@0122x77@l,,amount',
+		'permalink.args.amount: expected an integer between 0 and 100'
+	]
+])('unpack rejects invalid data %s', (data, message) => {
+	expect(() => unpack(data)).toThrow(message);
+});

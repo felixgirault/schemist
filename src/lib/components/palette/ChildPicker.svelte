@@ -2,7 +2,7 @@
 	import {formatSchemist} from '#lib/color/formatting.js';
 	import ChildOption from '#lib/components/palette/ChildOption.svelte';
 	import Sample from '#lib/components/Sample.svelte';
-	import type {Preset} from '#lib/core/nodes.js';
+	import type {NodeType, Preset} from '#lib/core/nodes.js';
 	import {defList as defs} from '#lib/definitions/nodes/index.js';
 	import presets from '#lib/definitions/presets/index.js';
 	import {
@@ -18,13 +18,13 @@
 
 	interface Props {
 		node: Node;
-		onAddNode: (type: string) => void;
+		onAddNode: (type: NodeType) => void;
 		onAddPreset: (preset: Preset) => void;
 	}
 
 	let {node, onAddNode, onAddPreset}: Props = $props();
 
-	const color = $derived(node.output[0]);
+	const color = $derived(node.output.color);
 </script>
 
 <div class="picker">

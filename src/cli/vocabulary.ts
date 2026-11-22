@@ -1,5 +1,6 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
-import type {PresetNode} from '#lib/core/nodes.js';
+import type {SchemistColor} from '#lib/color/types.js';
+import type {NodeData} from '#lib/core/nodes.js';
 import {defList} from '#lib/definitions/nodes/index.js';
 import defs from '#lib/definitions/nodes/index.js';
 import presets from '#lib/definitions/presets/index.js';
@@ -23,23 +24,32 @@ export const listTypes = () =>
 	}));
 
 // Color args as hex, as the input accepts them.
-const withHexColors = (node: PresetNode): PresetNode => {
-	const {params} = defs[node.type];
-	const result = {...node};
+type JsonNode = Omit<NodeData, 'args' | 'children'> & {
+	args?: Record<string, string | number | boolean>;
+	children?: JsonNode[];
+};
 
-	if (node.args) {
+const withHexColors = ({
+	args,
+	children,
+	...rest
+}: NodeData): JsonNode => {
+	const {params} = defs[rest.type];
+	const result: JsonNode = {...rest};
+
+	if (args) {
 		result.args = Object.fromEntries(
-			Object.entries(node.args).map(([name, value]) => [
+			Object.entries(args).map(([name, value]) => [
 				name,
 				params.find((p) => p.name === name)?.type === 'color'
-					? formatSchemistToHex(value)
-					: value
+					? formatSchemistToHex(value as SchemistColor)
+					: (value as number | boolean)
 			])
 		);
 	}
 
-	if (node.children) {
-		result.children = node.children.map(withHexColors);
+	if (children) {
+		result.children = children.map(withHexColors);
 	}
 
 	return result;

@@ -1,7 +1,7 @@
-import type {PresetNode} from '#lib/core/nodes.js';
+import type {NodeData} from '#lib/core/nodes.js';
 import {pack as packV1, unpack as unpackV1} from './v1';
 
-export const pack = (node: PresetNode): string =>
+export const pack = (node: NodeData): string =>
 	`1@${packV1(node)}`;
 
 export const unpack = (data: string) => {
