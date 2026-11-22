@@ -5,6 +5,7 @@
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
 	import {simulation} from '#lib/core/contrast.js';
+	import type {PaletteColor} from '#lib/core/evaluate.js';
 	import type {PairTargets} from '#lib/core/nodes.js';
 	import {targetNames} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
@@ -29,11 +30,10 @@
 		)
 	]);
 
-	const handleOpen = (fg: string, bg: string) => {
-		const {openPairIds: ids} = combinations;
-
-		combinations.openPairIds =
-			ids?.fg === fg && ids.bg === bg ? null : {fg, bg};
+	// Toggles the brush's target on the pair, and shows it.
+	const handleCell = (fg: PaletteColor, bg: PaletteColor) => {
+		combinations.toggleBrush(fg, bg);
+		combinations.openPairIds = {fg: fg.id, bg: bg.id};
 	};
 
 	// Committed on change, so that a half-typed number does not
@@ -84,8 +84,13 @@
 	{#if colors.length > 1}
 		<p class="hint">
 			Each cell shows a foreground (column) on a background
-			(row). Activate one to declare the pair and set its
-			targets.
+			(row), dimmed when it misses the minimum.
+			{#if combinations.brushTarget}
+				Activate one to declare the pair with that minimum,
+				or to remove it.
+			{:else}
+				Set a minimum to declare pairs with it.
+			{/if}
 		</p>
 
 		<div class="scroller">
@@ -118,11 +123,17 @@
 										{@const check = byId.get(
 											`${row.id}-${column.id}`
 										)}
+										{@const passes =
+											combinations.passesBrush(
+												column,
+												row
+											)}
 										<button
 											class="cell pair-cell"
 											class:pair-cell--declared={check}
 											class:pair-cell--off={check &&
 												!check.pass}
+											class:pair-cell--dim={!passes}
 											style="--cell-bg: {hex(
 												row.rgbColor
 											)}; --cell-fg: {hex(
@@ -142,12 +153,11 @@
 												? check.pass
 													? 'meets its targets'
 													: 'does not meet its targets'
-												: 'not declared'}"
+												: 'not declared'}, {passes
+												? 'reaches'
+												: 'misses'} the minimum"
 											onclick={() =>
-												handleOpen(
-													column.id,
-													row.id
-												)}
+												handleCell(column, row)}
 										>
 											<span
 												class="preview"
@@ -300,6 +310,11 @@
 		color: var(--cell-fg);
 		font-family: var(--font-sans);
 		font-weight: 600;
+	}
+
+	/* Dims the colors only, not the marks of a declared pair. */
+	.pair-cell--dim .preview {
+		opacity: 0.25;
 	}
 
 	.matrix-panel .pair-cell--declared {

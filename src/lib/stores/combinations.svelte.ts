@@ -34,6 +34,8 @@ class Combinations {
 		'contrast'
 	);
 	openPairIds = $state<{fg: string; bg: string} | null>(null);
+	// the filter that lights up and declares pairs in pairs mode
+	brush = $state<'contrast' | 'difference'>('contrast');
 	minDifference = $state(10);
 	openDifferenceId = $state<string | null>(null);
 	colorFilters = $state<Node['id'][]>([]);
@@ -183,6 +185,58 @@ class Combinations {
 			)
 		};
 	});
+
+	// The brush's target, or null when its minimum is 0 and there is
+	// nothing to declare.
+	brushTarget = $derived.by(() => {
+		const [name, value] =
+			this.brush === 'difference'
+				? (['difference', this.minDifference] as const)
+				: this.contrastType === 'wcag2'
+					? (['wcag2', this.minLevel] as const)
+					: (['apca', this.minLevel] as const);
+
+		return value > 0 ? {name, value} : null;
+	});
+
+	// Whether a pair reaches the brush's minimum, worst case of the
+	// selected simulations.
+	passesBrush(fg: PaletteColor, bg: PaletteColor) {
+		const target = this.brushTarget;
+
+		return target
+			? checkPair(
+					{[target.name]: target.value},
+					fg.rgbColor,
+					bg.rgbColor,
+					this.blindnessTypes
+				)[0].pass
+			: true;
+	}
+
+	// Adds the brush's target to a pair, or removes it if the pair
+	// has it already.
+	toggleBrush(fg: PaletteColor, bg: PaletteColor) {
+		const target = this.brushTarget;
+
+		if (!target) return;
+
+		const nodes = this.nodesOf(fg, bg);
+		const pair = palette.pairs.find(
+			(p) => p.fg === nodes.fg && p.bg === nodes.bg
+		);
+		const {wcag2, apca, difference} = pair ?? {};
+
+		palette.setPair(nodes.fg, nodes.bg, {
+			wcag2,
+			apca,
+			difference,
+			[target.name]:
+				pair?.[target.name] === undefined
+					? target.value
+					: undefined
+		});
+	}
 
 	nodesOf(fg: PaletteColor, bg: PaletteColor) {
 		const nodes = palette.root

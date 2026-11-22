@@ -76,3 +76,55 @@ test('opens the details of a declared pair', () => {
 
 	combinations.openPairIds = null;
 });
+
+test('toggles the brush target on a pair', () => {
+	const entry = (token: string) =>
+		palette.colors.find(
+			({id}) => id === node(token).id
+		)!;
+	const pairOf = () =>
+		palette.pairs.find(
+			({fg, bg}) =>
+				fg === node('Grey') && bg === node('Black')
+		);
+
+	combinations.brush = 'difference';
+	combinations.minDifference = 10;
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toMatchObject({difference: 10});
+
+	// another brush adds its target to the same pair
+	combinations.brush = 'contrast';
+	combinations.minLevel = 4.5;
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toMatchObject({difference: 10, wcag2: 4.5});
+
+	// the same brush removes its target, the last one the pair
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toMatchObject({difference: 10});
+	expect(pairOf()?.wcag2).toBeUndefined();
+	combinations.brush = 'difference';
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toBeUndefined();
+
+	// a minimum of 0 declares nothing
+	combinations.brush = 'contrast';
+	combinations.minLevel = 0;
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toBeUndefined();
+});
+
+test('dims the cells that miss the brush minimum', () => {
+	combinations.brush = 'contrast';
+	combinations.minLevel = 4.5;
+
+	const html = render(PairMatrix).body;
+
+	// Grey on White (1.2:1) and White on Grey miss 4.5
+	expect(html.match(/pair-cell--dim/g)).toHaveLength(2);
+	expect(html).toContain(
+		'Grey on White: does not meet its targets, misses the minimum'
+	);
+
+	combinations.minLevel = 0;
+});

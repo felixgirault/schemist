@@ -146,21 +146,41 @@ Difference:
   headers, sticky row headers, a details card.
 - Every cell is drawn as its pair, "Aa" in the foreground on the
   background, so the grid is a map of the palette before any pair
-  is declared (empty cells looked like nothing to do); activating
-  one opens the card with empty target fields. A declared cell
-  gets a border and a corner badge in the panel's colors, a check
-  or a warning icon with a dashed border, showing whether the
-  pair meets all its targets (worst case of the selected
+  is declared (empty cells looked like nothing to do). A declared
+  cell gets a border and a corner badge in the panel's colors, a
+  check or a warning icon with a dashed border, showing whether
+  the pair meets all its targets (worst case of the selected
   simulations). Marks drawn in the pair's own colors would vanish
   on the pairs that fail.
 - The card shows each target's field and measured levels, per
   simulation, and a **Remove pair** button.
 - The heading counts passing pairs / declared pairs, hidden pairs
   left out of both.
-- Filters: **Colors** restricts the grid's rows and columns,
-  **Color blindness simulation** and **Luminosity analysis** work
-  as in the other modes; **Contrast type** and the minimum fields
-  are hidden, since each pair has its own targets.
+- **The filters are a brush.** A **Check** switch picks
+  **Contrast** (with **Contrast type** and **Minimum contrast
+  level**) or **Difference** (with **Minimum difference**), the
+  filters of the other modes. Undeclared cells are lit when the
+  pair passes the brush in the worst case of the selected
+  simulations, dimmed otherwise, so the grid shows what could
+  pass before anything is declared.
+- **Activating a cell toggles the brush's target on its pair**:
+  it adds `wcag2`, `apca` or `difference` with the current
+  minimum, or removes it when the pair has it already (the pair
+  goes with its last target), and opens the card for fine edits.
+  With a minimum of 0 (KO) there is no target to add: cells only
+  open the card, and a hint asks for a minimum. One brush at a
+  time, so that declaring text pairs does not also give them the
+  default difference target.
+- Other filters: **Colors** restricts the grid's rows and
+  columns, **Color blindness simulation** and **Luminosity
+  analysis** work as in the other modes.
+
+Pairs keep their own targets: the brush only sets them. A single
+global constraint was rejected, as a palette needs several (7:1
+for body text, 3:1 for chart series on the page, a difference of
+10 between series in the dashboard eval case), and filters are
+not saved, so pairs would lose their meaning on reload and in the
+CLI.
 
 Contrast and Difference modes stay, to explore before declaring.
 

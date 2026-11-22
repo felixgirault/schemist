@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
+	import BrushFilter from '#lib/components/combinations/BrushFilter.svelte';
 	import ColorFilter from '#lib/components/combinations/ColorFilter.svelte';
 	import Combination from '#lib/components/combinations/Combination.svelte';
 	import ContrastFilter from '#lib/components/combinations/ContrastFilter.svelte';
@@ -31,6 +32,14 @@
 					<ContrastFilter />
 				{:else if combinations.mode === 'difference'}
 					<DifferenceFilter />
+				{:else}
+					<BrushFilter />
+					{#if combinations.brush === 'contrast'}
+						<ContrastTypeFilter />
+						<ContrastFilter />
+					{:else}
+						<DifferenceFilter />
+					{/if}
 				{/if}
 				<BlindnessFilter />
 				<LuminosityFilter />
