@@ -27,7 +27,7 @@
 	let lch = $derived(schemistToLch(node.output.color));
 </script>
 
-<section {id} class="form">
+<section {id} popover class="form">
 	{#if isPreset}
 		<table class="table--small">
 			<thead>
@@ -101,10 +101,6 @@
 </section>
 
 <style>
-	section {
-		margin-top: 0.5rem;
-	}
-
 	table {
 		margin-bottom: 0;
 	}

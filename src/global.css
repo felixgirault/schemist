@@ -287,6 +287,28 @@ input[type='range'] {
 	font-size: 0.9rem;
 }
 
+.form[popover] {
+	border: 1px solid var(--fg);
+	color: var(--fg);
+	/* --bg-soft is translucent, so it needs an opaque backdrop */
+	background: linear-gradient(var(--bg-soft) 0 0) var(--bg);
+}
+
+/* .input-grid's display would otherwise override the UA's hidden state */
+.form[popover]:not(:popover-open) {
+	display: none;
+}
+
+/* the popovertarget button acts as an implicit anchor */
+@supports (position-area: bottom) {
+	.form[popover] {
+		inset: auto;
+		margin: 0.5rem 0;
+		position-area: block-end span-inline-start;
+		position-try-fallbacks: flip-block;
+	}
+}
+
 .input-grid {
 	display: grid;
 	grid-template-columns: min-content auto min-content;
