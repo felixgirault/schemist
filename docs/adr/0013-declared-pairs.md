@@ -232,11 +232,13 @@ Contrast and Difference modes stay, to explore before declaring.
 - **Selection in memory only** (`feature-combination-grid`): lost
   on reload, and one tick cannot say what the pair is for.
 - **Roles with default targets**: deferred until free targets
-  show which values repeat.
+  show which values repeat. Since done as uses (ADR 14); "role"
+  now names a group of colors (ADR 16).
 
 ## Later
 
-- Default targets or roles (text, border, distinct).
+- Default targets (text, border, distinct): done as uses (ADR
+  14).
 - Presets declaring their pairs (`semanticPairs`: each color and
   its `On $` child).
 - Eval cases checking the tree's own pairs instead of
