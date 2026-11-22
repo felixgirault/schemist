@@ -144,10 +144,15 @@ Difference:
 - A grid with backgrounds as rows and foregrounds as columns,
   built from the difference matrix (ADR 12): compact cells, swatch
   headers, sticky row headers, a details card.
-- An undeclared cell is empty; activating it opens the card with
-  empty target fields. A declared cell shows whether the pair
-  meets all its targets (worst case of the selected simulations),
-  with an icon besides color.
+- Every cell is drawn as its pair, "Aa" in the foreground on the
+  background, so the grid is a map of the palette before any pair
+  is declared (empty cells looked like nothing to do); activating
+  one opens the card with empty target fields. A declared cell
+  gets a border and a corner badge in the panel's colors, a check
+  or a warning icon with a dashed border, showing whether the
+  pair meets all its targets (worst case of the selected
+  simulations). Marks drawn in the pair's own colors would vanish
+  on the pairs that fail.
 - The card shows each target's field and measured levels, per
   simulation, and a **Remove pair** button.
 - The heading counts passing pairs / declared pairs, hidden pairs

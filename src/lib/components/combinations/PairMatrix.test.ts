@@ -51,6 +51,18 @@ test('shows the status of every cell besides its color', () => {
 	expect(html).not.toContain('Remove pair');
 });
 
+test('draws every cell as its pair, declared or not', () => {
+	const html = render(PairMatrix).body;
+	// 3 visible colors: 6 ordered pairs, 2 of them declared
+	const cells = html.match(/class="preview/g) ?? [];
+
+	expect(cells).toHaveLength(6);
+	expect(html).toContain(
+		'--cell-bg: #000000; --cell-fg: #eeeeee;'
+	);
+	expect(html).toContain('title="Grey on Black, 18.1:1"');
+});
+
 test('opens the details of a declared pair', () => {
 	const fg = node('Grey');
 	const bg = palette.root!;

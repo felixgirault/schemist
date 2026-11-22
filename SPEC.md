@@ -775,27 +775,31 @@ it; the panel is a single root element, as the global
 `.data-layout` grid needs): a full grid, backgrounds as rows and
 foregrounds as columns, of compact cells, with swatch-only
 headers (name as tooltip and accessible name) and sticky row
-headers. Nothing is drawn on the diagonal. A declared cell shows
-a check, or a warning icon with a dashed outline when the pair
-misses one of its targets in the worst case of the selected
-simulations; an undeclared cell is empty. Each button's
-accessible name says whether the pair meets its targets, misses
-them, or is not declared. Activating a cell (it is a button, so
-keyboard accessible) opens, in an `elevated` card under the grid,
-one number field per target (WCAG 2 contrast, APCA contrast,
-color difference; a value is applied on change, clearing every
-field removes the pair), and for each declared target the
-measured level for normal vision and each simulation with an icon
-and a text alternative for met or not met, and a **Remove pair**
-button. The panel closes the card when a color is no longer
-compared. Pairs with a hidden color are listed under the grid as
-not checked. A notice names the colors to rename when pairs
-cannot be saved (§8.1). The heading counts passing pairs /
-declared pairs (`pairChecks`; hidden pairs are in neither).
-Filters: **Colors** restricts the grid's rows and columns,
-**Color blindness simulation** and **Luminosity analysis** work
-as in the other modes; **Contrast type** and the minimum fields
-are hidden, since each pair has its own targets.
+headers. Nothing is drawn on the diagonal. Every other cell is
+drawn as its pair: "Aa" in the foreground on the background, with
+the names and the WCAG 2 contrast as tooltip. A declared cell
+gets a border in the panel's text color and a corner badge in the
+panel's colors: a check, or a warning icon with a dashed border
+when the pair misses one of its targets in the worst case of the
+selected simulations. Marks are in the panel's colors so they
+stay readable on any pair, and on the border so that the outline
+stays the focus ring. Each button's accessible name says whether
+the pair meets its targets, misses them, or is not declared.
+Activating a cell (it is a button, so keyboard accessible) opens,
+in an `elevated` card under the grid, one number field per target
+(WCAG 2 contrast, APCA contrast, color difference; a value is
+applied on change, clearing every field removes the pair), and
+for each declared target the measured level for normal vision and
+each simulation with an icon and a text alternative for met or
+not met, and a **Remove pair** button. The panel closes the card
+when a color is no longer compared. Pairs with a hidden color are
+listed under the grid as not checked. A notice names the colors
+to rename when pairs cannot be saved (§8.1). The heading counts
+passing pairs / declared pairs (`pairChecks`; hidden pairs are in
+neither). Filters: **Colors** restricts the grid's rows and
+columns, **Color blindness simulation** and **Luminosity
+analysis** work as in the other modes; **Contrast type** and the
+minimum fields are hidden, since each pair has its own targets.
 
 ### 11.6 Theming
 

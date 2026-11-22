@@ -1,4 +1,5 @@
 <script lang="ts">
+	import {wcag2Contrast} from '#lib/color/contrast.js';
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import type {RgbColor} from '#lib/color/types.js';
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
@@ -82,8 +83,9 @@
 
 	{#if colors.length > 1}
 		<p class="hint">
-			Rows are backgrounds, columns are foregrounds. Activate
-			a cell to declare its pair.
+			Each cell shows a foreground (column) on a background
+			(row). Activate one to declare the pair and set its
+			targets.
 		</p>
 
 		<div class="scroller">
@@ -117,9 +119,22 @@
 											`${row.id}-${column.id}`
 										)}
 										<button
-											class="cell"
-											class:cell--below={check &&
+											class="cell pair-cell"
+											class:pair-cell--declared={check}
+											class:pair-cell--off={check &&
 												!check.pass}
+											style="--cell-bg: {hex(
+												row.rgbColor
+											)}; --cell-fg: {hex(
+												column.rgbColor
+											)};"
+											title="{column.name} on {row.name}, {round(
+												wcag2Contrast(
+													row.rgbColor,
+													column.rgbColor
+												),
+												1
+											)}:1"
 											aria-pressed={open?.fg.id ===
 												column.id &&
 												open?.bg.id === row.id}
@@ -134,10 +149,21 @@
 													row.id
 												)}
 										>
-											{#if check?.pass}
-												<CheckIcon />
-											{:else if check}
-												<WarningIcon />
+											<span
+												class="preview"
+												aria-hidden="true"
+											>
+												Aa
+											</span>
+											{#if check}
+												<!-- drawn in the panel's colors, readable whatever the pair -->
+												<span class="badge">
+													{#if check.pass}
+														<CheckIcon />
+													{:else}
+														<WarningIcon />
+													{/if}
+												</span>
 											{/if}
 										</button>
 									{/if}
@@ -242,6 +268,62 @@
 </div>
 
 <style>
+	.matrix-panel :global(.matrix) {
+		border-spacing: 4px;
+	}
+
+	/* The border marks declared pairs, so that the outline stays
+	the focus ring. */
+	.matrix-panel .pair-cell {
+		position: relative;
+		border: 2px solid transparent;
+	}
+
+	.preview {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		border-radius: calc(var(--radius) - 2px);
+		background: var(--cell-bg);
+		color: var(--cell-fg);
+		font-family: var(--font-sans);
+		font-weight: 600;
+	}
+
+	.matrix-panel .pair-cell--declared {
+		border-color: var(--fg);
+	}
+
+	.matrix-panel .pair-cell--off {
+		border-style: dashed;
+	}
+
+	.matrix-panel .pair-cell[aria-pressed='true'] {
+		z-index: 1;
+		transform: scale(1.15);
+	}
+
+	.badge {
+		position: absolute;
+		top: -0.45rem;
+		right: -0.45rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 0.9rem;
+		height: 0.9rem;
+		border-radius: 50%;
+		background: var(--bg);
+		color: var(--fg);
+	}
+
+	.matrix-panel .badge :global(svg) {
+		width: 0.65rem;
+		height: 0.65rem;
+	}
+
 	.targets {
 		display: grid;
 		gap: 0.5rem;
