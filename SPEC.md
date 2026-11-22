@@ -418,6 +418,7 @@ expensive combination computations during slider drags.
 | `checkUse(fg, bg)`            | `checkPair` of the use's targets on a pair, as is and per selected simulation                                                                                                                     |
 | `toggleUse(fg, bg, use)`      | Sets every target of a built-in use (an entry of `uses`, not the filter's) on the pair, keeping its others, or removes them if it has them all at those values                                  |
 | `cellCount`, `passingCells`   | Ordered pairs of compared colors, and those passing `passesUse` (every target of the use met in the worst case)                                                                                   |
+| `requirements`                | The declared pairs of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                    |
 | `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                  |
 | `openPair`                    | `{fg, bg, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                                   |
 | `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                                 |
@@ -823,10 +824,10 @@ its accessible name says whether it reaches the minimum.
 Activating a cell (a button, so keyboard accessible) only opens
 its card, or closes it when it is open already. The `elevated`
 card, a labelled region (`<section>`) docked in a column beside
-the grid when one is open (the grid scrolling on its own, the
-card sticky at the top), or under the grid when the panel is
-narrower than 48rem (container query); with no pair open the grid
-has the whole width. It has: a large sample with both names in
+the grid (the grid scrolling on its own, the column sticky at the
+top), or under the grid when the panel is narrower than 48rem
+(container query). With no pair open the column is the
+requirements list (below); with one, the card. The card has: a large sample with both names in
 the foreground on the background; each target of the use (grade
 and level, or difference) for normal vision and each simulation,
 each row in its simulated colors with an icon and a text
@@ -840,8 +841,16 @@ applied on change, clearing every field removes the pair); for
 each declared target the measured levels; **Remove pair**; a
 **Preview** button toggling `previewedUid` to `<bgId>-<fgId>`
 (§11.5); and **Close**. The panel closes the card when a color is
-no longer compared. Pairs with a hidden color are listed under
-the grid as not checked. Opening the card leaves the focus on the
+no longer compared. The requirements list is a labelled
+region titled **Requirements**: the declared pairs by use
+(`requirements`, Custom last, a pair under each use it holds),
+each a button with both swatches and names (foreground on
+background) and an icon with a text alternative for met or not
+met in the worst case of the selected simulations; activating
+one sets `openPairIds`, and **Close** comes back to the list.
+Pairs with a hidden color follow as **Not checked, a color is
+hidden**. With no declared pair, a hint says to open a cell and
+pick a use. Opening the card leaves the focus on the
 cell, so that the next cell is one key away; Esc (from anywhere),
 **Close** or the open cell close it. A notice names the colors to
 rename when pairs cannot be saved (§8.1). The heading counts

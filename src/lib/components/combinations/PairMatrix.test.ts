@@ -237,3 +237,27 @@ test('docks the card as a labelled region beside the grid', () => {
 
 	combinations.openPairIds = null;
 });
+
+test('lists the declared pairs by use when none is open', () => {
+	const id = node('Grey').id;
+
+	palette.setPair(id, node('Black').id, {wcag2: 4.5, apca: 75});
+
+	const html = render(PairMatrix).body;
+
+	expect(html).toContain('Requirements');
+	expect(html).toContain(
+		'<h4 class="h3 svelte-ezwuto">Body text</h4>'
+	);
+	// declared with a lone target: Custom, listed last
+	expect(html).toContain('>Custom</h4>');
+	expect(html).toContain('Not checked, a color is hidden');
+	expect(html).toContain('Secret on White');
+	expect(html).not.toContain('pair-card-title');
+	expect(combinations.requirements.map((r) => r.id)).toEqual([
+		'body',
+		'custom'
+	]);
+
+	palette.setPair(id, node('Black').id, {});
+});

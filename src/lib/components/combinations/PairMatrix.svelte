@@ -166,7 +166,7 @@
 		</p>
 
 		<div class="layout">
-			<div class="body" class:body--open={open}>
+			<div class="body">
 				<div class="scroller">
 					<table class="matrix">
 						<caption class="hidden">
@@ -514,18 +514,70 @@
 							Close
 						</button>
 					</section>
+				{:else}
+					<section
+						class="details elevated"
+						aria-labelledby="requirements-title"
+					>
+						<h3 class="h3" id="requirements-title">
+							Requirements
+						</h3>
+
+						{#each combinations.requirements as { id, name, checks } (id)}
+							<h4 class="h3">{name}</h4>
+							<ul class="requirements">
+								{#each checks as { id, fg, bg, pass } (id)}
+									<li>
+										<button
+											class="button"
+											onclick={() =>
+												(combinations.openPairIds = {
+													fg: fg.id,
+													bg: bg.id
+												})}
+										>
+											{@render swatch(fg.rgbColor)}
+											{fg.name} on
+											{@render swatch(bg.rgbColor)}
+											{bg.name}
+											{#if pass}
+												<CheckIcon />
+												<span class="hidden">
+													met
+												</span>
+											{:else}
+												<WarningIcon />
+												<span class="hidden">
+													not met
+												</span>
+											{/if}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{/each}
+
+						{#if combinations.hiddenPairs.length}
+							<h4 class="h3">
+								Not checked, a color is hidden
+							</h4>
+							<ul>
+								{#each combinations.hiddenPairs as { id, fg, bg } (id)}
+									<li>{fg} on {bg}</li>
+								{/each}
+							</ul>
+						{/if}
+
+						{#if !combinations.requirements.length && !combinations.hiddenPairs.length}
+							<p class="hint">
+								Open a cell and pick a use to declare a
+								pair: the requirements are listed here.
+							</p>
+						{/if}
+					</section>
 				{/if}
 			</div>
 		</div>
-
-		{#if combinations.hiddenPairs.length}
-			<h3 class="h3">Not checked, a color is hidden</h3>
-			<ul>
-				{#each combinations.hiddenPairs as { id, fg, bg } (id)}
-					<li>{fg} on {bg}</li>
-				{/each}
-			</ul>
-		{/if}
 	{:else}
 		<p>Select at least two colors to compare.</p>
 	{/if}
@@ -615,12 +667,12 @@
 	}
 
 	@container (min-width: 48rem) {
-		.body--open {
+		.body {
 			grid-template-columns: minmax(0, 1fr) 32ch;
 			align-items: start;
 		}
 
-		.body--open .details {
+		.body .details {
 			position: sticky;
 			top: 0;
 			max-height: 100vh;
@@ -669,6 +721,11 @@
 	.matrix-panel .badge :global(svg) {
 		width: 0.65rem;
 		height: 0.65rem;
+	}
+
+	.requirements {
+		padding: 0;
+		list-style: none;
 	}
 
 	.targets {

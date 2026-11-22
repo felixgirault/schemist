@@ -183,6 +183,27 @@ class Combinations {
 		});
 	});
 
+	// The declared pairs by use, Custom last; a pair is under each use
+	// it holds. Empty uses are left out.
+	requirements = $derived(
+		[
+			...uses.map((use) => ({
+				id: use.id,
+				name: use.name,
+				checks: this.pairChecks.filter(({for: f}) =>
+					f.uses.includes(use)
+				)
+			})),
+			{
+				id: 'custom',
+				name: 'Custom',
+				checks: this.pairChecks.filter(
+					({for: f}) => f.custom
+				)
+			}
+		].filter(({checks}) => checks.length)
+	);
+
 	// The cell shown in the details: its colors, and its pair if it
 	// is declared. `null` once a color is gone.
 	openPair = $derived.by(() => {
