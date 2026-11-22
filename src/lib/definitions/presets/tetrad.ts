@@ -1,6 +1,6 @@
+import type {Preset} from '#lib/core/nodes.js';
 import tetradLeft from '#lib/definitions/nodes/tetradLeft.js';
 import tetradRight from '#lib/definitions/nodes/tetradRight.js';
-import type {Preset} from '#lib/presets.js';
 
 export default {
 	label: 'Tetrad',

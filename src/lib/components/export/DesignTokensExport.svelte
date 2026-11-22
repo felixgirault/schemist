@@ -1,7 +1,6 @@
 <script lang="ts">
-	import {formatSchemistToHex} from '#lib/color/formatting.js';
-	import {permalink} from '#lib/routing.js';
-	import type {Entry} from '#lib/stores/combinations.svelte.js';
+	import type {Entry} from '#lib/core/evaluate.js';
+	import {exportTokens} from '#lib/core/export.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import CodeArea from './CodeArea.svelte';
 
@@ -11,28 +10,7 @@
 
 	let {entries}: Props = $props();
 
-	let tokens = $derived(
-		Object.fromEntries(
-			entries.map(({name, color}) => [
-				name,
-				{
-					'$type': 'color',
-					'$value': formatSchemistToHex(color)
-				}
-			])
-		)
-	);
-
-	let json = $derived({
-		'Colors': {
-			'$description': `Build with Schemist (${permalink(
-				palette.root
-			)})`,
-			...tokens
-		}
-	});
-
-	let code = $derived(JSON.stringify(json, null, 2));
+	let code = $derived(exportTokens(entries, palette.permalink));
 </script>
 
 <CodeArea {code} />

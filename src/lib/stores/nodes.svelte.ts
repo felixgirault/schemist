@@ -1,72 +1,15 @@
-import {formatSchemistToHex} from '#lib/color/formatting.js';
-import nearestColor from '#lib/color/nearest.js';
 import {parseColor} from '#lib/color/parsing.js';
-import type {SchemistColor} from '#lib/color/types.js';
+import type {
+	Args,
+	NodeDef,
+	NodeOutput
+} from '#lib/core/nodes.js';
+import {defaultArgs, generateName} from '#lib/core/nodes.js';
 import defs from '#lib/definitions/nodes/index.js';
 import {withoutIndex} from '#lib/utils/arrays.js';
 import {uid} from '#lib/utils/generators.js';
-import {sentenceCase} from '#lib/utils/strings.js';
 
-export type SampleType = 'single' | 'discrete' | 'continuous';
-
-export type BooleanParam = {
-	type: 'boolean';
-	name: string;
-	label: string;
-	default: boolean;
-};
-
-export type ColorParam = {
-	type: 'color';
-	name: string;
-	label: string;
-	default: SchemistColor;
-};
-
-export type RangeParam = {
-	type: 'range';
-	name: string;
-	label: string;
-	unit?: string;
-	min: number;
-	max: number;
-	default: number;
-};
-
-export type Param = BooleanParam | ColorParam | RangeParam;
-
-export type Args = {
-	[name: string]: any;
-};
-
-export type NodeDef = {
-	type: string;
-	label: string;
-	argsLabel?: (args: Args) => string;
-	description?: string;
-	params: Param[];
-	samples: SampleType;
-	apply: (color: SchemistColor, args: Args) => SchemistColor;
-};
-
-export type NodeOutput = [color: SchemistColor, name: string];
 export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
-
-export const defaultArgs = (def: NodeDef) =>
-	Object.fromEntries(
-		def.params.map(({name, default: d}) => [name, d])
-	);
-
-export const generateName = (
-	token: string,
-	color: SchemistColor,
-	parentColorName?: string
-) =>
-	token
-		? parentColorName
-			? token.replace('$', parentColorName)
-			: token
-		: sentenceCase(nearestColor(formatSchemistToHex(color)));
 
 const defaultInput: NodeOutput = [parseColor('#fff')[1]!, ''];
 

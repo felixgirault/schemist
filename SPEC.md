@@ -22,29 +22,31 @@ Production URL: <https://schemist.fglt.fr>.
 
 ## 2. Tech stack
 
-| Concern     | Choice                                                                            |
-| ----------- | --------------------------------------------------------------------------------- |
-| Framework   | SvelteKit 3, Svelte 5 (runes everywhere, no `svelte/store`)                       |
-| Build       | Vite 8, `@sveltejs/adapter-static`, every route prerendered                       |
-| Language    | TypeScript 6                                                                      |
-| Color math  | `culori` (tree-shaken `culori/fn` build)                                          |
-| Contrast    | `culori` `wcagContrast` (WCAG 2), `apca-w3` (APCA)                                |
-| Color names | `color-name-list` (`bestof` list) + `nearest-color`                               |
-| Dialogs     | `svelte-accessible-dialog`                                                        |
-| Tests       | Vitest 5 (`src/**/*.{test,spec}.{js,ts}`)                                         |
-| Formatting  | oxfmt (`.oxfmtrc.json`: tabs, width 3, 65 columns, single quotes, sorted imports) |
-| CI          | GitHub Actions, Node 24: `npm ci` then `npm test`, on `main` pushes and PRs       |
+| Concern     | Choice                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| Framework   | SvelteKit 3, Svelte 5 (runes everywhere, no `svelte/store`)                                  |
+| Build       | Vite 8, `@sveltejs/adapter-static`, every route prerendered                                  |
+| Language    | TypeScript 6                                                                                 |
+| Color math  | `culori` (tree-shaken `culori/fn` build)                                                     |
+| Contrast    | `culori` `wcagContrast` (WCAG 2), `apca-w3` (APCA)                                           |
+| Color names | `color-name-list` (`bestof` list) + `nearest-color`                                          |
+| Dialogs     | `svelte-accessible-dialog`                                                                   |
+| Tests       | Vitest 5 (`src/**/*.{test,spec}.{js,ts}`)                                                    |
+| Formatting  | oxfmt (`.oxfmtrc.json`: tabs, width 3, 65 columns, single quotes, sorted imports)            |
+| CI          | GitHub Actions, Node 24: `npm ci`, `npm test` then `npm run check`, on `main` pushes and PRs |
 
 Scripts:
 
-| Script           | Effect                                     |
-| ---------------- | ------------------------------------------ |
-| `npm start`      | Dev server                                 |
-| `npm run build`  | Static build into `build/`                 |
-| `npm run check`  | `svelte-kit sync` + `svelte-check` (types) |
-| `npm test`       | Unit tests                                 |
-| `npm run lint`   | `oxfmt --check`                            |
-| `npm run format` | `oxfmt` (writes)                           |
+| Script              | Effect                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| `npm start`         | Dev server                                                            |
+| `npm run build`     | Static build into `build/`                                            |
+| `npm run check`     | `svelte-kit sync` + `svelte-check` (types)                            |
+| `npm test`          | Unit tests                                                            |
+| `npm run lint`      | `oxfmt --check`                                                       |
+| `npm run format`    | `oxfmt` (writes)                                                      |
+| `npm run cli:build` | `svelte-kit sync` + builds the CLI into `build-cli/schemist.js` (§14) |
+| `npm run cli`       | `node build-cli/schemist.js` (§14)                                    |
 
 Kit configuration lives in `vite.config.js`
 (`sveltekit({adapter: adapter()})`); there is no
@@ -56,6 +58,7 @@ Kit configuration lives in `vite.config.js`
 src/
   app.html                 HTML shell (title, fonts.css, favicon)
   global.css               Global styles, consume theme variables (§11.6)
+  cli/                     Command-line interface (§14)
   routes/
     +layout.server.ts      prerender = true
     +layout.svelte         Wraps pages in Layout
@@ -64,6 +67,12 @@ src/
   lib/
     color/                 Color model, conversions, parsing, formatting,
                            manipulation, contrast, simulation, naming
+    core/                  Svelte-free logic, shared with the CLI (no runes):
+                           nodes.ts (NodeDef, Param, Args, NodeOutput,
+                           PresetNode, Preset, defaultArgs, generateName),
+                           evaluate.ts (evaluate(PresetNode) → entries),
+                           contrast.ts (combine, §9.1),
+                           export.ts (export formatters and defaults, §11.8)
     definitions/nodes/     Node types (§6)
     definitions/presets/   Presets (§7)
     stores/                Reactive state, `.svelte.ts` modules (§8)
@@ -72,11 +81,13 @@ src/
     utils/                 Generic helpers (arrays, css, math, strings, …)
     presets.ts             parseTree / serializeTree (tree ⇄ PresetNode)
     palette.ts             getRootNode (initial tree from URL or random)
-    routing.ts             permalink(node)
+    routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
     features.ts            Dark scheme preference (localStorage)
+    testing/               Fixtures shared by tests
 static/                    Fonts, favicon, favicon template, demo GIF
+vite.cli.config.js         CLI build (§14)
 ```
 
 ## 4. Color model
@@ -178,19 +189,28 @@ Operations: `addChild(child)` (detaches it from its previous
 parent first), `removeChild(child)`, `destroy()` (removes the
 node and its subtree from its parent).
 
+`generateName` and the `NodeDef`, `Param`, `Args` and
+`NodeOutput` types live in `#lib/core/nodes.ts`.
+
 ### 5.2 Outputs
 
 `collectOutputs(root)` walks the tree depth-first, parent before
 children, and returns `{[id]: [color, name]}` for every
 **visible** node. Children of a hidden node are still collected.
 
+`evaluate(PresetNode)` (`#lib/core/evaluate.ts`) computes the
+same visible outputs without the store, as
+`{id, name, color, rgbColor}` entries. Ids are depth-first
+indexes (`'0'`, `'1'`, …).
+
 ### 5.3 Tree serialization (`#lib/presets.ts`)
 
-`PresetNode = {type, token?, args?, children?, isHidden?}` is the
-plain form of a tree, used by presets and permalinks.
-`parseTree(PresetNode) → Node` merges given `args` over the type
-defaults; `serializeTree(Node) → PresetNode` omits empty tokens,
-args and children.
+`PresetNode = {type, token?, args?, children?, isHidden?}`
+(`#lib/core/nodes.ts`) is the plain form of a tree, used by
+presets and permalinks. `parseTree(PresetNode) → Node` merges
+given `args` over the type defaults;
+`serializeTree(Node) → PresetNode` omits empty tokens, args and
+children.
 
 ## 6. Node types
 
@@ -199,7 +219,8 @@ Defined in `src/lib/definitions/nodes/`, registered in `index.ts`
 short `type` code (used in permalinks), a `label`, an optional
 `description` and `argsLabel`, `params`, a `samples` style for
 previews (`single`, `discrete`, `continuous`) and
-`apply(color, args)`.
+`apply(color, args)` (the `NodeDef` type, in
+`#lib/core/nodes.ts`).
 
 | Type  | Label                     | Params (min–max, default)                                  | Result                                 |
 | ----- | ------------------------- | ---------------------------------------------------------- | -------------------------------------- |
@@ -265,6 +286,7 @@ each exporting a single reactive object.
 | `root`             | Root `Node`, set when the palette component mounts                                                  |
 | `outputs`          | `collectOutputs(root)`, updated synchronously                                                       |
 | `debouncedOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms) |
+| `permalink`        | `permalink(serializeTree(root), window.location.origin)` (§10.1)                                    |
 | `rootColor`        | Root's color in `debouncedOutputs`, else the first output, else `#feffff`                           |
 
 The debounce keeps single edits snappy while throttling the
@@ -282,7 +304,7 @@ expensive combination computations during slider drags.
 | `previewedUid`                | Combination applied to the app theme, or `null`                                        |
 | `colorEntries`                | `{id, name, color, rgbColor}` from `palette.debouncedOutputs`, in tree order           |
 | `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root |
-| `all`                         | Every combination (§9.1)                                                               |
+| `all`                         | `combine(...)` of the filtered colors (§9.1)                                           |
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                           |
 | `previewed`                   | The combination matching `previewedUid`                                                |
 
@@ -298,13 +320,20 @@ under `darkSchemeFeature` = `'1'` / `'0'`) and `colorInputFormat`
 `format` (`table` | `tokens` | `css` | `sass`, default `table`),
 `colorFormat` (default `hex`), `casing` (`dash` | `camel`,
 default `dash`), `precision` (default 3), `prefix` (default
-`''`).
+`''`), from `defaultExportSettings` (`#lib/core/export.ts`).
+
+The `ExportFormat`, `ExportCasing` and `ExportEntry` types live
+in `#lib/core/export.ts`.
 
 None of this state is persisted except the dark scheme.
 
 ## 9. Contrast and accessibility
 
 ### 9.1 Combinations
+
+Computed by `combine` (`#lib/core/contrast.ts`), which also holds
+the `Combination`, `CombinationContrast` and `BlindnessType`
+types.
 
 For each color in the filtered set (as background) and every
 other color (as foreground), one combination with
@@ -356,8 +385,10 @@ by eye.
 
 ### 10.1 Flow
 
-- `permalink(root)` =
-  `<origin>?preset=<encodeURI(pack(serializeTree(root)))>`.
+- `permalink(tree, origin)`, with `tree` a `PresetNode`
+  (`serializeTree(root)` for a store node), =
+  `<origin>?preset=<encodeURI(pack(tree))>`. `palette.permalink`
+  is the store's shortcut, using `window.location.origin`.
 - **Share** navigates to that URL (the address bar then holds the
   link; nothing is copied to the clipboard).
 - On load, `getRootNode()` unpacks `?preset=`. If it is missing
@@ -480,7 +511,9 @@ with a red channel of 0, 128 and 255) with Lightness 20, 70 and
 | Prefix       | CSS, Sass           | Free text, prepended to names   |
 | Precision    | HSL/LCH, not tokens | Decimals                        |
 
-Outputs (visible colors, tree order):
+Outputs (visible colors, tree order). The formatting lives in
+`#lib/core/export.ts` (`toExportEntries`, `exportVariables`,
+`exportTokens`); the components only wire it to the stores:
 
 - **Table**: swatch, name, value.
 - **Design tokens**: JSON
@@ -490,15 +523,27 @@ Outputs (visible colors, tree order):
   lines.
 - **Sass**: same with `$<name>: <value>;`.
 
-Variable names are split on spaces, stripped of every character
-but `a-z A-Z 0-9 _ -`, then joined in the chosen casing.
+Variable names are split on runs of spaces, slashes and dots (so
+`button/primary/bg` gives `button-primary-bg`), stripped of every
+character but `a-z A-Z 0-9 _ -`, then joined in the chosen
+casing.
 
 ## 12. Testing
 
 Unit tests cover utils, color parsing, color deficiency
 simulation and packing (snapshots of every node type and preset,
-and round trips). There are no component or end-to-end tests. CI
-runs the unit tests only (not `check`, `lint` or `build`).
+and round trips). Characterization snapshots cover the outputs
+(hex values and names) of every preset under a few root colors,
+`combinations.all` (WCAG 2 and APCA, with and without
+simulations) and the CSS, Sass and design tokens exports. Export
+components are rendered server-side; there are no browser or
+end-to-end tests. A core test asserts that `evaluate` matches
+`collectOutputs` for every preset. CLI tests cover tree
+validation and argument handling, and build the CLI to run it
+under plain Node (it crashes on runes if a store leaks into
+`core/`), comparing `eval` with the core and checking that an
+invalid tree fails with its path. CI runs the unit tests and
+`check` (not `lint` or `build`).
 
 ## 13. Known issues and limits
 
@@ -520,3 +565,53 @@ runs the unit tests only (not `check`, `lint` or `build`).
 - **`#lib` bare import** points to `src/lib/index.js`, which does
   not exist (only `#lib/*` is used).
 - **Alpha** is dropped by permalinks and design tokens.
+
+## 14. Command-line interface
+
+`src/cli/`, repo-local (not published), built by
+`vite.cli.config.js` (no SvelteKit plugin, `build.ssr`, all
+dependencies bundled) into the git-ignored
+`build-cli/schemist.js`. `npm run cli:build` builds it,
+`npm run cli -- <command>` runs it under Node. It only uses
+`#lib/core/` and the definitions, so it runs without Svelte.
+Output is JSON on stdout (`export` prints the text as is); errors
+go to stderr as `error: <message>` with exit code 1. Arguments
+are parsed with `node:util` `parseArgs`.
+
+| Command                            | Output                                                                                                                        |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `types`                            | Node types: `type`, `label`, `description`, `params` (`name`, `kind`, `min`, `max`, `unit`, `default`; color defaults as hex) |
+| `presets`                          | Presets: `label`, `description`, `nodes` (color args as hex)                                                                  |
+| `eval <tree.json\|->`              | `{colors: [{name, hex}], combinations: [{bg, fg, level, grade, simulated: [{type, level, grade}]}], permalink}`               |
+| `export <tree.json\|-> --format F` | CSS, Sass or design tokens text, as the app produces it                                                                       |
+
+`eval` options: `--contrast wcag2|apca` (default `wcag2`; `apca`
+is the internal `wcag3`), `--blindness` (comma list of
+`protanomaly`, `deuteranomaly`, `tritanomaly`), `--min <level>`
+(default 0, keeps combinations whose exact `minLevel` is at least
+that), `--pair 'fg/bg'` (repeatable: keeps only those
+combinations, in the order given, after `--min`; `\/` and `\\`
+escape a `/` or `\` in a name; a value without exactly one
+unescaped `/`, with a name not in the palette, with a name shared
+by several colors, or with the same name on both sides is
+rejected naming it). Levels (`level`, simulated `level`,
+`minLevel`) are truncated to 2 decimals, never rounded up past a
+threshold (4.496 stays 4.49, not the 4.5 AA). With `--blindness`,
+each combination also has `minLevel` and `minGrade` (worst of
+base and simulated); without it they are omitted. Combinations
+are computed over all visible colors. `export` options:
+`--format css|sass|tokens` (required), `--color-format`,
+`--casing`, `--prefix`, `--precision`, defaulting to
+`defaultExportSettings` (`#lib/core/export.ts`). `--origin`
+(default `https://schemist.fglt.fr`) sets the permalink origin.
+
+Input is a `PresetNode` JSON tree (file path, or `-` for stdin),
+validated in `src/cli/tree.ts`: unknown keys, node types and
+params, non-integers or integers outside `min`–`max` for ranges,
+and non-booleans are rejected; tokens containing `,` or `@` are
+rejected too (they break permalinks, §13); missing args take the
+type's defaults; color params are CSS color strings converted
+with `parseColor`, invalid ones rejected. Errors name the node
+path and the param, e.g.
+`root.children[2].args.amount: expected an integer between 0 and 100`.
+Usage text is printed only for command line errors.

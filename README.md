@@ -44,6 +44,110 @@ color.
 Yes, it is probably wrong on many levels, but to me it yielded
 the best results overall, in terms of ergonomics and outputs.
 
+## Command-line interface
+
+Schemist also runs from the command line, so that agents (or
+scripts) can generate and check color schemes: describe a palette
+as a JSON tree, read its colors and contrasts, export it, and
+hand back a permalink. It runs on the same code as the app, so
+results match.
+
+```sh
+npm ci
+npm run cli:build
+npm run cli -- <command>
+```
+
+Commands (JSON on stdout, errors on stderr with a non-zero exit
+code):
+
+- `types`: the node types and their params.
+- `presets`: the presets, as lists of nodes to reuse.
+- `eval <tree.json|->`: colors, contrast combinations and a
+  permalink.
+- `export <tree.json|-> --format css|sass|tokens`: the same text
+  as the app's export.
+
+A tree is nodes with a `type`, optional `token` (the name, where
+`$` stands for the parent's name), `args`, `children` and
+`isHidden`. Each node derives its color from its parent, like in
+the app. Get the available types and params from `types`, and
+ideas from `presets`. Color args are CSS color strings, range
+args are integers within their bounds, and tokens can't contain
+`,` or `@`. Invalid trees are rejected with the path of the
+problem, e.g. `root.children[2].args.amount`.
+
+```json
+{
+	"type": "clr",
+	"token": "Brand",
+	"args": {"color": "#3b82f6"},
+	"children": [
+		{"type": "ctr", "token": "$ text", "args": {"amount": 90}},
+		{"type": "l", "token": "$ light", "args": {"amount": 90}},
+		{"type": "cmp", "token": "Accent"}
+	]
+}
+```
+
+```sh
+$ npm run cli -- eval palette.json --contrast apca \
+    --blindness protanomaly,deuteranomaly --pair 'Brand light/Brand text'
+{
+  "colors": [
+    {"name": "Brand", "hex": "#3b82f6"},
+    {"name": "Brand text", "hex": "#000921"},
+    {"name": "Brand light", "hex": "#d3e4fe"},
+    {"name": "Accent", "hex": "#af7d0d"}
+  ],
+  "combinations": [
+    {
+      "bg": "Brand text",
+      "fg": "Brand light",
+      "level": 89.21,
+      "grade": "5",
+      "minLevel": 88.24,
+      "minGrade": "5",
+      "simulated": [
+        {"type": "protanomaly", "level": 90.6, "grade": "5"},
+        {"type": "deuteranomaly", "level": 88.24, "grade": "5"}
+      ]
+    }
+  ],
+  "permalink": "https://schemist.fglt.fr?preset=1@3@4526x5a,..."
+}
+
+$ npm run cli -- export palette.json --format css --prefix color
+/* @see https://schemist.fglt.fr?preset=1@3@4526x5a,... */
+--color-brand: #3b82f6;
+--color-brand-text: #000921;
+--color-brand-light: #d3e4fe;
+--color-accent: #af7d0d;
+```
+
+`eval` takes `--contrast wcag2|apca`,
+`--blindness protanomaly,deuteranomaly,tritanomaly` (adds
+`minLevel` and `minGrade`, the worst case with the simulations),
+`--min <level>` (hides combinations whose worst level is below)
+and `--pair 'fg/bg'`, repeatable, to get only the pairs you care
+about, in that order (`\/` stands for a `/` in a name). Levels
+are truncated to 2 decimals. `export` takes `--color-format`,
+`--casing`, `--prefix` and `--precision`. Both take `--origin`
+for the permalink.
+
+A good loop for an agent: read `types` and `presets`, write a
+tree, then check it before exporting. `eval` the pairs the design
+uses (`--pair`) with both `--contrast wcag2` and
+`--contrast apca`, each with
+`--blindness protanomaly,deuteranomaly,tritanomaly`, and read
+`minLevel`, the worst case. Aim for 4.5 (AA) and Lc 60 for body
+text, and 3 for large text and non-text UI such as input borders
+and focus rings. What you usually tune is the `amount` of
+Lightness (`l`) and Saturation (`s`) nodes: adjust, re-run, and
+repeat until every pair passes. Then `export` it and give the
+permalinks back so the palettes can be opened and tweaked in the
+app. See [SPEC.md](SPEC.md) (section 14) for details.
+
 ## Kudos
 
 Schemist is build upon these fabulous projects and resources:

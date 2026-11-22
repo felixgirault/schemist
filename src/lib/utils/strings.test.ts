@@ -9,9 +9,20 @@ test('sentenceCase', () => {
 test('dashCase', () => {
 	expect(dashCase('HeLlO')).toBe('hello');
 	expect(dashCase('HeLlO wOrLd')).toBe('hello-world');
+	expect(dashCase('button/primary/bg-hover')).toBe(
+		'button-primary-bg-hover'
+	);
+	expect(dashCase('Primary / hover')).toBe('primary-hover');
+	expect(dashCase('button.primary.bg')).toBe(
+		'button-primary-bg'
+	);
+	expect(dashCase(' status/ ')).toBe('status');
 });
 
 test('camelCase', () => {
 	expect(camelCase('hElLo')).toBe('hello');
 	expect(camelCase('HeLlO wOrLd')).toBe('helloWorld');
+	expect(camelCase('status/error/subtle-bg')).toBe(
+		'statusErrorSubtle-bg'
+	);
 });

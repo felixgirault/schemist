@@ -1,4 +1,6 @@
 import {parseColor} from '#lib/color/parsing.js';
+import {serializeTree} from '#lib/presets.js';
+import {permalink} from '#lib/routing.js';
 import type {
 	Node,
 	NodeOutputRecord
@@ -30,6 +32,13 @@ class Palette {
 			Object.values(this.debouncedOutputs).shift()?.[0] ??
 			parseColor('#feffff')[1]! // not fully white so there is a hue to pick up
 	);
+
+	get permalink() {
+		return permalink(
+			serializeTree(this.root),
+			window.location.origin
+		);
+	}
 
 	constructor() {
 		const update = debounce(

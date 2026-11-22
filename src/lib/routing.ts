@@ -1,8 +1,5 @@
+import type {PresetNode} from '#lib/core/nodes.js';
 import {pack} from '#lib/packing/index.js';
-import {serializeTree} from '#lib/presets.js';
-import type {Node} from '#lib/stores/nodes.svelte.js';
 
-export const permalink = (node: Node) =>
-	`${window.location.origin}?preset=${encodeURI(
-		pack(serializeTree(node))
-	)}`;
+export const permalink = (tree: PresetNode, origin: string) =>
+	`${origin}?preset=${encodeURI(pack(tree))}`;

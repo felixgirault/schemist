@@ -1,0 +1,1948 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`outputs of preset Harmonies under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#199e7c",
+    "Left Sky dancer tetrad",
+  ],
+  [
+    "#469e2e",
+    "Left Sky dancer triad",
+  ],
+  [
+    "#8d8d0f",
+    "Left Sky dancer complementary",
+  ],
+  [
+    "#d06410",
+    "Right Sky dancer complementary",
+  ],
+  [
+    "#f12e4b",
+    "Right Sky dancer triad",
+  ],
+  [
+    "#e81f9c",
+    "Right Sky dancer tetrad",
+  ],
+]
+`;
+
+exports[`outputs of preset Harmonies under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Left Grey tetrad",
+  ],
+  [
+    "#808080",
+    "Left Grey triad",
+  ],
+  [
+    "#808080",
+    "Left Grey complementary",
+  ],
+  [
+    "#808080",
+    "Right Grey complementary",
+  ],
+  [
+    "#808080",
+    "Right Grey triad",
+  ],
+  [
+    "#808080",
+    "Right Grey tetrad",
+  ],
+]
+`;
+
+exports[`outputs of preset Harmonies under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#a058ff",
+    "Left Red tetrad",
+  ],
+  [
+    "#597bff",
+    "Left Red triad",
+  ],
+  [
+    "#0092d4",
+    "Left Red complementary",
+  ],
+  [
+    "#009f8a",
+    "Right Red complementary",
+  ],
+  [
+    "#00a447",
+    "Right Red triad",
+  ],
+  [
+    "#7f9400",
+    "Right Red tetrad",
+  ],
+]
+`;
+
+exports[`outputs of preset Material dark under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#b7c8e4",
+    "Primary",
+  ],
+  [
+    "#202e46",
+    "On Primary",
+  ],
+  [
+    "#324666",
+    "Primary container",
+  ],
+  [
+    "#dae3f2",
+    "On Primary container",
+  ],
+  [
+    "#dac39e",
+    "Complementary",
+  ],
+  [
+    "#382c19",
+    "On Complementary",
+  ],
+  [
+    "#534329",
+    "Complementary container",
+  ],
+  [
+    "#eee1cd",
+    "On Complementary container",
+  ],
+  [
+    "#e3bbba",
+    "Error",
+  ],
+  [
+    "#432424",
+    "On Error",
+  ],
+  [
+    "#633838",
+    "Error container",
+  ],
+  [
+    "#f2dddc",
+    "On Error container",
+  ],
+  [
+    "#14161a",
+    "Surface",
+  ],
+  [
+    "#e0e3e7",
+    "On surface",
+  ],
+  [
+    "#41464e",
+    "Surface variant",
+  ],
+  [
+    "#c2c7cf",
+    "On surface variant",
+  ],
+  [
+    "#8a919d",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material dark under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#e3bac5",
+    "Primary",
+  ],
+  [
+    "#43232d",
+    "On Primary",
+  ],
+  [
+    "#623644",
+    "Primary container",
+  ],
+  [
+    "#f1dce2",
+    "On Primary container",
+  ],
+  [
+    "#9fd3c8",
+    "Complementary",
+  ],
+  [
+    "#1b342f",
+    "On Complementary",
+  ],
+  [
+    "#2c4d47",
+    "Complementary container",
+  ],
+  [
+    "#cbebe3",
+    "On Complementary container",
+  ],
+  [
+    "#e3bcb5",
+    "Error",
+  ],
+  [
+    "#422520",
+    "On Error",
+  ],
+  [
+    "#623933",
+    "Error container",
+  ],
+  [
+    "#f1deda",
+    "On Error container",
+  ],
+  [
+    "#1a1516",
+    "Surface",
+  ],
+  [
+    "#e7e1e2",
+    "On surface",
+  ],
+  [
+    "#4d4345",
+    "Surface variant",
+  ],
+  [
+    "#cec3c6",
+    "On surface variant",
+  ],
+  [
+    "#9c8c90",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material dark under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#e3bcb6",
+    "Primary",
+  ],
+  [
+    "#432521",
+    "On Primary",
+  ],
+  [
+    "#623933",
+    "Primary container",
+  ],
+  [
+    "#f1ddda",
+    "On Primary container",
+  ],
+  [
+    "#9fd1d9",
+    "Complementary",
+  ],
+  [
+    "#1a3337",
+    "On Complementary",
+  ],
+  [
+    "#2a4c52",
+    "Complementary container",
+  ],
+  [
+    "#cde9ed",
+    "On Complementary container",
+  ],
+  [
+    "#e3bcb6",
+    "Error",
+  ],
+  [
+    "#432521",
+    "On Error",
+  ],
+  [
+    "#623933",
+    "Error container",
+  ],
+  [
+    "#f1ddda",
+    "On Error container",
+  ],
+  [
+    "#1a1514",
+    "Surface",
+  ],
+  [
+    "#e7e1e0",
+    "On surface",
+  ],
+  [
+    "#4e4341",
+    "Surface variant",
+  ],
+  [
+    "#cfc4c2",
+    "On surface variant",
+  ],
+  [
+    "#9c8d8a",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material light under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#465e86",
+    "Primary",
+  ],
+  [
+    "#ffffff",
+    "On Primary",
+  ],
+  [
+    "#dae3f2",
+    "Primary container",
+  ],
+  [
+    "#0e1625",
+    "On Primary container",
+  ],
+  [
+    "#6e5b3a",
+    "Complementary",
+  ],
+  [
+    "#ffffff",
+    "On Complementary",
+  ],
+  [
+    "#eee1cd",
+    "Complementary container",
+  ],
+  [
+    "#1c150a",
+    "On Complementary container",
+  ],
+  [
+    "#824d4d",
+    "Error",
+  ],
+  [
+    "#ffffff",
+    "On Error",
+  ],
+  [
+    "#f2dddc",
+    "Error container",
+  ],
+  [
+    "#231010",
+    "On Error container",
+  ],
+  [
+    "#fcfcfd",
+    "Surface",
+  ],
+  [
+    "#14161a",
+    "On surface",
+  ],
+  [
+    "#e0e3e7",
+    "Surface variant",
+  ],
+  [
+    "#41464e",
+    "On surface variant",
+  ],
+  [
+    "#717783",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material light under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#814b5c",
+    "Primary",
+  ],
+  [
+    "#ffffff",
+    "On Primary",
+  ],
+  [
+    "#f1dce2",
+    "Primary container",
+  ],
+  [
+    "#230f16",
+    "On Primary container",
+  ],
+  [
+    "#3d675f",
+    "Complementary",
+  ],
+  [
+    "#ffffff",
+    "On Complementary",
+  ],
+  [
+    "#cbebe3",
+    "Complementary container",
+  ],
+  [
+    "#0b1917",
+    "On Complementary container",
+  ],
+  [
+    "#814e46",
+    "Error",
+  ],
+  [
+    "#ffffff",
+    "On Error",
+  ],
+  [
+    "#f1deda",
+    "Error container",
+  ],
+  [
+    "#23110e",
+    "On Error container",
+  ],
+  [
+    "#fdfcfc",
+    "Surface",
+  ],
+  [
+    "#1a1516",
+    "On surface",
+  ],
+  [
+    "#e7e1e2",
+    "Surface variant",
+  ],
+  [
+    "#4d4345",
+    "On surface variant",
+  ],
+  [
+    "#817276",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material light under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#814e47",
+    "Primary",
+  ],
+  [
+    "#ffffff",
+    "On Primary",
+  ],
+  [
+    "#f1ddda",
+    "Primary container",
+  ],
+  [
+    "#23110e",
+    "On Primary container",
+  ],
+  [
+    "#3b666d",
+    "Complementary",
+  ],
+  [
+    "#ffffff",
+    "On Complementary",
+  ],
+  [
+    "#cde9ed",
+    "Complementary container",
+  ],
+  [
+    "#0a191b",
+    "On Complementary container",
+  ],
+  [
+    "#814e47",
+    "Error",
+  ],
+  [
+    "#ffffff",
+    "On Error",
+  ],
+  [
+    "#f1ddda",
+    "Error container",
+  ],
+  [
+    "#23110e",
+    "On Error container",
+  ],
+  [
+    "#fdfcfc",
+    "Surface",
+  ],
+  [
+    "#1a1514",
+    "On surface",
+  ],
+  [
+    "#e7e1e0",
+    "Surface variant",
+  ],
+  [
+    "#4e4341",
+    "On surface variant",
+  ],
+  [
+    "#827371",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material neutral dark under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#14161a",
+    "Surface",
+  ],
+  [
+    "#e0e3e7",
+    "On surface",
+  ],
+  [
+    "#41464e",
+    "Surface variant",
+  ],
+  [
+    "#c2c7cf",
+    "On surface variant",
+  ],
+  [
+    "#8a919d",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material neutral dark under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#1a1516",
+    "Surface",
+  ],
+  [
+    "#e7e1e2",
+    "On surface",
+  ],
+  [
+    "#4d4345",
+    "Surface variant",
+  ],
+  [
+    "#cec3c6",
+    "On surface variant",
+  ],
+  [
+    "#9c8c90",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material neutral dark under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#1a1514",
+    "Surface",
+  ],
+  [
+    "#e7e1e0",
+    "On surface",
+  ],
+  [
+    "#4e4341",
+    "Surface variant",
+  ],
+  [
+    "#cfc4c2",
+    "On surface variant",
+  ],
+  [
+    "#9c8d8a",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material neutral light under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#fcfcfd",
+    "Surface",
+  ],
+  [
+    "#14161a",
+    "On surface",
+  ],
+  [
+    "#e0e3e7",
+    "Surface variant",
+  ],
+  [
+    "#41464e",
+    "On surface variant",
+  ],
+  [
+    "#717783",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material neutral light under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#fdfcfc",
+    "Surface",
+  ],
+  [
+    "#1a1516",
+    "On surface",
+  ],
+  [
+    "#e7e1e2",
+    "Surface variant",
+  ],
+  [
+    "#4d4345",
+    "On surface variant",
+  ],
+  [
+    "#817276",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material neutral light under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#fdfcfc",
+    "Surface",
+  ],
+  [
+    "#1a1514",
+    "On surface",
+  ],
+  [
+    "#e7e1e0",
+    "Surface variant",
+  ],
+  [
+    "#4e4341",
+    "On surface variant",
+  ],
+  [
+    "#827371",
+    "Outline",
+  ],
+]
+`;
+
+exports[`outputs of preset Material tones dark under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#a7c8fe",
+    "Sky dancer",
+  ],
+  [
+    "#042a65",
+    "On Sky dancer",
+  ],
+  [
+    "#0a4092",
+    "Sky dancer container",
+  ],
+  [
+    "#d3e4fe",
+    "On Sky dancer container",
+  ],
+]
+`;
+
+exports[`outputs of preset Material tones dark under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#c7c7c7",
+    "Grey",
+  ],
+  [
+    "#2e2e2e",
+    "On Grey",
+  ],
+  [
+    "#464646",
+    "Grey container",
+  ],
+  [
+    "#e2e2e2",
+    "On Grey container",
+  ],
+]
+`;
+
+exports[`outputs of preset Material tones dark under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#ffafa3",
+    "Red",
+  ],
+  [
+    "#5e0000",
+    "On Red",
+  ],
+  [
+    "#880000",
+    "Red container",
+  ],
+  [
+    "#ffd8d2",
+    "On Red container",
+  ],
+]
+`;
+
+exports[`outputs of preset Material tones light under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#1257c0",
+    "Sky dancer",
+  ],
+  [
+    "#ffffff",
+    "On Sky dancer",
+  ],
+  [
+    "#d3e4fe",
+    "Sky dancer container",
+  ],
+  [
+    "#011437",
+    "On Sky dancer container",
+  ],
+]
+`;
+
+exports[`outputs of preset Material tones light under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#5e5e5e",
+    "Grey",
+  ],
+  [
+    "#ffffff",
+    "On Grey",
+  ],
+  [
+    "#e2e2e2",
+    "Grey container",
+  ],
+  [
+    "#161616",
+    "On Grey container",
+  ],
+]
+`;
+
+exports[`outputs of preset Material tones light under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#b30000",
+    "Red",
+  ],
+  [
+    "#ffffff",
+    "On Red",
+  ],
+  [
+    "#ffd8d2",
+    "Red container",
+  ],
+  [
+    "#330000",
+    "On Red container",
+  ],
+]
+`;
+
+exports[`outputs of preset Neutral under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#f9f9fa",
+    "Neutral white",
+  ],
+  [
+    "#d3d5d8",
+    "Neutral light",
+  ],
+  [
+    "#74777d",
+    "Neutral",
+  ],
+  [
+    "#212225",
+    "Neutral dark",
+  ],
+  [
+    "#010202",
+    "Neutral black",
+  ],
+]
+`;
+
+exports[`outputs of preset Neutral under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#faf9f9",
+    "Neutral white",
+  ],
+  [
+    "#d7d3d4",
+    "Neutral light",
+  ],
+  [
+    "#7c7577",
+    "Neutral",
+  ],
+  [
+    "#252122",
+    "Neutral dark",
+  ],
+  [
+    "#020102",
+    "Neutral black",
+  ],
+]
+`;
+
+exports[`outputs of preset Neutral under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#faf9f9",
+    "Neutral white",
+  ],
+  [
+    "#d8d3d3",
+    "Neutral light",
+  ],
+  [
+    "#7d7574",
+    "Neutral",
+  ],
+  [
+    "#252221",
+    "Neutral dark",
+  ],
+  [
+    "#020101",
+    "Neutral black",
+  ],
+]
+`;
+
+exports[`outputs of preset Rainbow under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#8a66fb",
+    "Periwinkle",
+  ],
+  [
+    "#c92de9",
+    "Flamingo queen",
+  ],
+  [
+    "#e81f9c",
+    "Fanatic fuchsia",
+  ],
+  [
+    "#f12e4b",
+    "Red radish",
+  ],
+  [
+    "#d06410",
+    "Cinnamon",
+  ],
+  [
+    "#af7d0d",
+    "Falafel",
+  ],
+  [
+    "#8d8d0f",
+    "Densetsu green",
+  ],
+  [
+    "#469e2e",
+    "La palma",
+  ],
+  [
+    "#199e7c",
+    "Bejewelled",
+  ],
+  [
+    "#11999f",
+    "Silken jade",
+  ],
+  [
+    "#1193c1",
+    "Swimmer",
+  ],
+]
+`;
+
+exports[`outputs of preset Rainbow under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Grey",
+  ],
+]
+`;
+
+exports[`outputs of preset Rainbow under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#c86e00",
+    "Fire ant",
+  ],
+  [
+    "#a78300",
+    "Bronze",
+  ],
+  [
+    "#7f9400",
+    "Green thumb",
+  ],
+  [
+    "#00a447",
+    "Fennel fiasco",
+  ],
+  [
+    "#009f8a",
+    "Green dynasty",
+  ],
+  [
+    "#009aac",
+    "Munsell blue",
+  ],
+  [
+    "#0092d4",
+    "Blue ocean",
+  ],
+  [
+    "#597bff",
+    "Skinny jeans",
+  ],
+  [
+    "#a058ff",
+    "Orion nebula",
+  ],
+  [
+    "#dd00da",
+    "Drunk-tank pink",
+  ],
+  [
+    "#f40084",
+    "Feasty fuchsia",
+  ],
+]
+`;
+
+exports[`outputs of preset Scale under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#000000",
+    "Black",
+  ],
+  [
+    "#011437",
+    "Infinite night",
+  ],
+  [
+    "#042a65",
+    "Marine",
+  ],
+  [
+    "#0a4092",
+    "Pacific depths",
+  ],
+  [
+    "#1257c0",
+    "Flying fish blue",
+  ],
+  [
+    "#206feb",
+    "Bluerocratic",
+  ],
+  [
+    "#4c8ef9",
+    "Polar glow",
+  ],
+  [
+    "#7aacfd",
+    "Fennel flower",
+  ],
+  [
+    "#a7c8fe",
+    "Night snow",
+  ],
+  [
+    "#d3e4fe",
+    "Veiling waterfalls",
+  ],
+  [
+    "#ffffff",
+    "White",
+  ],
+]
+`;
+
+exports[`outputs of preset Scale under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#000000",
+    "Black",
+  ],
+  [
+    "#161616",
+    "Dark void",
+  ],
+  [
+    "#2e2e2e",
+    "Carbon fibre",
+  ],
+  [
+    "#464646",
+    "Onyx",
+  ],
+  [
+    "#5e5e5e",
+    "Iron",
+  ],
+  [
+    "#777777",
+    "Lucky grey",
+  ],
+  [
+    "#919191",
+    "Tin",
+  ],
+  [
+    "#ababab",
+    "Ultimate grey",
+  ],
+  [
+    "#c7c7c7",
+    "Weathered stone",
+  ],
+  [
+    "#e2e2e2",
+    "Jupiter",
+  ],
+  [
+    "#ffffff",
+    "White",
+  ],
+]
+`;
+
+exports[`outputs of preset Scale under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#000000",
+    "Black",
+  ],
+  [
+    "#330000",
+    "3am breakup",
+  ],
+  [
+    "#5e0000",
+    "Spikey red",
+  ],
+  [
+    "#880000",
+    "Sacrifice altar",
+  ],
+  [
+    "#b30000",
+    "All systems red",
+  ],
+  [
+    "#e00000",
+    "Red pegasus",
+  ],
+  [
+    "#ff3d2f",
+    "Hotspot",
+  ],
+  [
+    "#ff806f",
+    "Hipster salmon",
+  ],
+  [
+    "#ffafa3",
+    "Apricot haze",
+  ],
+  [
+    "#ffd8d2",
+    "Girlie",
+  ],
+  [
+    "#ffffff",
+    "White",
+  ],
+]
+`;
+
+exports[`outputs of preset Schemist theme under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#469e2e",
+    "Secondary",
+  ],
+  [
+    "#48be3b",
+    "Secondary light",
+  ],
+  [
+    "#318129",
+    "Secondary dark",
+  ],
+  [
+    "#f12e4b",
+    "Tertiary",
+  ],
+  [
+    "#fc6b77",
+    "Tertiary light",
+  ],
+  [
+    "#c81a3d",
+    "Tertiary dark",
+  ],
+  [
+    "#168eda",
+    "Info",
+  ],
+  [
+    "#011b30",
+    "On Info",
+  ],
+  [
+    "#469e2e",
+    "Success",
+  ],
+  [
+    "#091f04",
+    "On Success",
+  ],
+  [
+    "#d06410",
+    "Warning",
+  ],
+  [
+    "#2d1000",
+    "On Warning",
+  ],
+  [
+    "#f12e4b",
+    "Error",
+  ],
+  [
+    "#360209",
+    "On Error",
+  ],
+  [
+    "#f9f9fa",
+    "Neutral white",
+  ],
+  [
+    "#d3d5d8",
+    "Neutral light",
+  ],
+  [
+    "#74777d",
+    "Neutral",
+  ],
+  [
+    "#212225",
+    "Neutral dark",
+  ],
+  [
+    "#010202",
+    "Neutral black",
+  ],
+]
+`;
+
+exports[`outputs of preset Schemist theme under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Secondary",
+  ],
+  [
+    "#9a9a9a",
+    "Secondary light",
+  ],
+  [
+    "#676767",
+    "Secondary dark",
+  ],
+  [
+    "#808080",
+    "Tertiary",
+  ],
+  [
+    "#9a9a9a",
+    "Tertiary light",
+  ],
+  [
+    "#676767",
+    "Tertiary dark",
+  ],
+  [
+    "#808080",
+    "Info",
+  ],
+  [
+    "#181818",
+    "On Info",
+  ],
+  [
+    "#808080",
+    "Success",
+  ],
+  [
+    "#181818",
+    "On Success",
+  ],
+  [
+    "#808080",
+    "Warning",
+  ],
+  [
+    "#181818",
+    "On Warning",
+  ],
+  [
+    "#808080",
+    "Error",
+  ],
+  [
+    "#181818",
+    "On Error",
+  ],
+  [
+    "#faf9f9",
+    "Neutral white",
+  ],
+  [
+    "#d7d3d4",
+    "Neutral light",
+  ],
+  [
+    "#7c7577",
+    "Neutral",
+  ],
+  [
+    "#252122",
+    "Neutral dark",
+  ],
+  [
+    "#020102",
+    "Neutral black",
+  ],
+]
+`;
+
+exports[`outputs of preset Schemist theme under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#597bff",
+    "Secondary",
+  ],
+  [
+    "#7e9dff",
+    "Secondary light",
+  ],
+  [
+    "#3b52ff",
+    "Secondary dark",
+  ],
+  [
+    "#00a447",
+    "Tertiary",
+  ],
+  [
+    "#00c35f",
+    "Tertiary light",
+  ],
+  [
+    "#008540",
+    "Tertiary dark",
+  ],
+  [
+    "#0092d4",
+    "Info",
+  ],
+  [
+    "#001c2e",
+    "On Info",
+  ],
+  [
+    "#00a447",
+    "Success",
+  ],
+  [
+    "#002109",
+    "On Success",
+  ],
+  [
+    "#c86e00",
+    "Warning",
+  ],
+  [
+    "#2a1300",
+    "On Warning",
+  ],
+  [
+    "#ff0000",
+    "Error",
+  ],
+  [
+    "#390000",
+    "On Error",
+  ],
+  [
+    "#faf9f9",
+    "Neutral white",
+  ],
+  [
+    "#d8d3d3",
+    "Neutral light",
+  ],
+  [
+    "#7d7574",
+    "Neutral",
+  ],
+  [
+    "#252221",
+    "Neutral dark",
+  ],
+  [
+    "#020101",
+    "Neutral black",
+  ],
+]
+`;
+
+exports[`outputs of preset Semantic color pairs under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#168eda",
+    "Info",
+  ],
+  [
+    "#011b30",
+    "On Info",
+  ],
+  [
+    "#469e2e",
+    "Success",
+  ],
+  [
+    "#091f04",
+    "On Success",
+  ],
+  [
+    "#d06410",
+    "Warning",
+  ],
+  [
+    "#2d1000",
+    "On Warning",
+  ],
+  [
+    "#f12e4b",
+    "Error",
+  ],
+  [
+    "#360209",
+    "On Error",
+  ],
+]
+`;
+
+exports[`outputs of preset Semantic color pairs under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Info",
+  ],
+  [
+    "#181818",
+    "On Info",
+  ],
+  [
+    "#808080",
+    "Success",
+  ],
+  [
+    "#181818",
+    "On Success",
+  ],
+  [
+    "#808080",
+    "Warning",
+  ],
+  [
+    "#181818",
+    "On Warning",
+  ],
+  [
+    "#808080",
+    "Error",
+  ],
+  [
+    "#181818",
+    "On Error",
+  ],
+]
+`;
+
+exports[`outputs of preset Semantic color pairs under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#0092d4",
+    "Info",
+  ],
+  [
+    "#001c2e",
+    "On Info",
+  ],
+  [
+    "#00a447",
+    "Success",
+  ],
+  [
+    "#002109",
+    "On Success",
+  ],
+  [
+    "#c86e00",
+    "Warning",
+  ],
+  [
+    "#2a1300",
+    "On Warning",
+  ],
+  [
+    "#ff0000",
+    "Error",
+  ],
+  [
+    "#390000",
+    "On Error",
+  ],
+]
+`;
+
+exports[`outputs of preset Semantic colors under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#168eda",
+    "Info",
+  ],
+  [
+    "#469e2e",
+    "Success",
+  ],
+  [
+    "#d06410",
+    "Warning",
+  ],
+  [
+    "#f12e4b",
+    "Error",
+  ],
+]
+`;
+
+exports[`outputs of preset Semantic colors under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Info",
+  ],
+  [
+    "#808080",
+    "Success",
+  ],
+  [
+    "#808080",
+    "Warning",
+  ],
+  [
+    "#808080",
+    "Error",
+  ],
+]
+`;
+
+exports[`outputs of preset Semantic colors under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#0092d4",
+    "Info",
+  ],
+  [
+    "#00a447",
+    "Success",
+  ],
+  [
+    "#c86e00",
+    "Warning",
+  ],
+  [
+    "#ff0000",
+    "Error",
+  ],
+]
+`;
+
+exports[`outputs of preset Split complementary under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#8d8d0f",
+    "Left Sky dancer complementary",
+  ],
+  [
+    "#d06410",
+    "Right Sky dancer complementary",
+  ],
+]
+`;
+
+exports[`outputs of preset Split complementary under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Left Grey complementary",
+  ],
+  [
+    "#808080",
+    "Right Grey complementary",
+  ],
+]
+`;
+
+exports[`outputs of preset Split complementary under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#0092d4",
+    "Left Red complementary",
+  ],
+  [
+    "#009f8a",
+    "Right Red complementary",
+  ],
+]
+`;
+
+exports[`outputs of preset States under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#69a1fc",
+    "Sky dancer light",
+  ],
+  [
+    "#1a65dc",
+    "Sky dancer dark",
+  ],
+]
+`;
+
+exports[`outputs of preset States under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#9a9a9a",
+    "Grey light",
+  ],
+  [
+    "#676767",
+    "Grey dark",
+  ],
+]
+`;
+
+exports[`outputs of preset States under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#ff6e62",
+    "Red light",
+  ],
+  [
+    "#d10012",
+    "Red dark",
+  ],
+]
+`;
+
+exports[`outputs of preset Tetrad under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#199e7c",
+    "Left Sky dancer tetrad",
+  ],
+  [
+    "#e81f9c",
+    "Right Sky dancer tetrad",
+  ],
+]
+`;
+
+exports[`outputs of preset Tetrad under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Left Grey tetrad",
+  ],
+  [
+    "#808080",
+    "Right Grey tetrad",
+  ],
+]
+`;
+
+exports[`outputs of preset Tetrad under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#a058ff",
+    "Left Red tetrad",
+  ],
+  [
+    "#7f9400",
+    "Right Red tetrad",
+  ],
+]
+`;
+
+exports[`outputs of preset Triad under #3b82f6 1`] = `
+[
+  [
+    "#3b82f6",
+    "Sky dancer",
+  ],
+  [
+    "#469e2e",
+    "Left Sky dancer triad",
+  ],
+  [
+    "#f12e4b",
+    "Right Sky dancer triad",
+  ],
+]
+`;
+
+exports[`outputs of preset Triad under #808080 1`] = `
+[
+  [
+    "#808080",
+    "Grey",
+  ],
+  [
+    "#808080",
+    "Left Grey triad",
+  ],
+  [
+    "#808080",
+    "Right Grey triad",
+  ],
+]
+`;
+
+exports[`outputs of preset Triad under #ff0000 1`] = `
+[
+  [
+    "#ff0000",
+    "Red",
+  ],
+  [
+    "#597bff",
+    "Left Red triad",
+  ],
+  [
+    "#00a447",
+    "Right Red triad",
+  ],
+]
+`;

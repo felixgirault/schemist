@@ -1,5 +1,5 @@
 import {orangeishColor} from '#lib/color/manipulation.js';
-import type {NodeDef} from '#lib/stores/nodes.svelte.js';
+import type {NodeDef} from '#lib/core/nodes.js';
 
 export default {
 	type: 'wrn',

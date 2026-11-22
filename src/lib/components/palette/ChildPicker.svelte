@@ -2,9 +2,9 @@
 	import {formatSchemist} from '#lib/color/formatting.js';
 	import ChildOption from '#lib/components/palette/ChildOption.svelte';
 	import Sample from '#lib/components/Sample.svelte';
+	import type {Preset} from '#lib/core/nodes.js';
 	import {defList as defs} from '#lib/definitions/nodes/index.js';
 	import presets from '#lib/definitions/presets/index.js';
-	import type {Preset} from '#lib/presets.js';
 	import {
 		presetSamples,
 		sample,

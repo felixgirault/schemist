@@ -1,22 +1,17 @@
 <script lang="ts">
-	import {formatSchemistTo} from '#lib/color/formatting.js';
 	import TableExport from '#lib/components/export/TableExport.svelte';
 	import VariablesExport from '#lib/components/export/VariablesExport.svelte';
+	import {toExportEntries} from '#lib/core/export.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
-	import {type ExportEntry} from '#lib/stores/export.svelte.js';
 	import {exportSettings} from '#lib/stores/export.svelte.js';
 	import DesignTokensExport from './DesignTokensExport.svelte';
 
-	const entries: ExportEntry[] = $derived(
-		combinations.colorEntries.map(({color, ...entry}) => ({
-			...entry,
-			color,
-			cssColor: formatSchemistTo(
-				color,
-				exportSettings.colorFormat,
-				exportSettings.precision
-			)
-		}))
+	const entries = $derived(
+		toExportEntries(
+			combinations.colorEntries,
+			exportSettings.colorFormat,
+			exportSettings.precision
+		)
 	);
 </script>
 

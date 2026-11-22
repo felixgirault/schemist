@@ -1,5 +1,5 @@
+import type {Preset} from '#lib/core/nodes.js';
 import contrasting from '#lib/definitions/nodes/contrasting.js';
-import type {Preset} from '#lib/presets.js';
 import semantics from './semantics';
 
 export default {

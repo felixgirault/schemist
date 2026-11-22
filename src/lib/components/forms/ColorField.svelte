@@ -5,7 +5,8 @@
 	import HslColorField from '#lib/components/forms/HslColorField.svelte';
 	import LchColorField from '#lib/components/forms/LchColorField.svelte';
 	import RgbColorField from '#lib/components/forms/RgbColorField.svelte';
-	import type {Node, Param} from '#lib/stores/nodes.svelte.js';
+	import type {Param} from '#lib/core/nodes.js';
+	import type {Node} from '#lib/stores/nodes.svelte.js';
 
 	type InputFormat = 'css' | 'rgb' | 'hsl' | 'lch';
 
