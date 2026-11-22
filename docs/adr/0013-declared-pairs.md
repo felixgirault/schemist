@@ -36,7 +36,7 @@ Schemist knows the colors, not the pairs:
 ### Format
 
 The root node gets an optional `pairs`, in the tree JSON and
-`PresetNode`:
+`NodeData`:
 
 ```json
 {
@@ -233,7 +233,7 @@ Contrast and Difference modes stay, to explore before declaring.
 Built on `feature-difference-view`, which is not merged yet, then
 rebased on the port of `feature-v2` (ADR 5).
 
-1. Core: `PresetNode.pairs`, `resolvePairs`, and the check of a
+1. Core: `NodeData.pairs`, `resolvePairs`, and the check of a
    pair against its targets, with tests; SPEC §9.
 2. CLI: tree validation, `eval` reporting declared pairs,
    `--pair` through the resolver; README and SPEC §14.

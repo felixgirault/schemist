@@ -136,3 +136,71 @@ test('dims the cells that miss the brush minimum', () => {
 
 	combinations.minLevel = 0;
 });
+
+test('draws one strip per simulation in every cell', () => {
+	combinations.blindnessTypes = ['protanomaly', 'tritanomaly'];
+
+	const html = render(PairMatrix).body;
+
+	expect(html.match(/class="strip[ "]/g)).toHaveLength(12);
+	expect(html).toContain(', protanomaly ');
+	expect(html).toContain('pair-cell--tall');
+
+	combinations.blindnessTypes = [];
+	expect(render(PairMatrix).body).not.toContain(
+		'class="strip"'
+	);
+});
+
+test('a click opens the card without declaring', () => {
+	const before = palette.pairs.length;
+	const html = render(PairMatrix).body;
+
+	expect(html).toContain('aria-pressed="false"');
+	expect(palette.pairs).toHaveLength(before);
+});
+
+test('the card has the lens, Require and Preview', () => {
+	combinations.brush = 'contrast';
+	combinations.minLevel = 4.5;
+	combinations.blindnessTypes = ['protanomaly'];
+	combinations.openPairIds = {
+		fg: node('Grey').id,
+		bg: node('Black').id
+	};
+
+	let html = render(PairMatrix).body;
+
+	expect(html).toContain('Require ≥ 4.5');
+	expect(html).toContain('protanomaly');
+	expect(html).toContain('Preview');
+
+	// Require toggles the brush target on the pair
+	combinations.toggleBrush(
+		palette.colors.find((e) => e.id === node('Grey').id)!,
+		palette.colors.find((e) => e.id === node('Black').id)!
+	);
+	html = render(PairMatrix).body;
+	expect(html).toContain('Remove ≥ 4.5 requirement');
+
+	// Preview finds the pair
+	combinations.previewedUid = `${node('Black').id}-${node('Grey').id}`;
+	expect(combinations.previewed).toBeTruthy();
+	expect(render(PairMatrix).body).toContain('Stop preview');
+
+	combinations.previewedUid = null;
+	combinations.openPairIds = null;
+	combinations.blindnessTypes = [];
+	combinations.minLevel = 0;
+	palette.setPair(node('Grey'), node('Black'), {});
+});
+
+test('counts the cells reaching the brush', () => {
+	combinations.brush = 'contrast';
+	combinations.minLevel = 4.5;
+
+	expect(combinations.cellCount).toBe(6);
+	expect(combinations.passingCells).toBe(4);
+
+	combinations.minLevel = 0;
+});

@@ -36,7 +36,7 @@
 				value="pairs"
 				bind:group={combinations.mode}
 			/>
-			<label class="button" for="mode-pairs">Pairs</label>
+			<label class="button" for="mode-pairs">Grid</label>
 		</div>
 	</div>
 </fieldset>

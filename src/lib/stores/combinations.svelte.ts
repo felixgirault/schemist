@@ -186,18 +186,36 @@ class Combinations {
 		};
 	});
 
+	// What the brush measures, whatever its minimum.
+	brushMetric = $derived.by(() =>
+		this.brush === 'difference'
+			? ({
+					name: 'difference',
+					value: this.minDifference
+				} as const)
+			: this.contrastType === 'wcag2'
+				? ({name: 'wcag2', value: this.minLevel} as const)
+				: ({name: 'apca', value: this.minLevel} as const)
+	);
+
 	// The brush's target, or null when its minimum is 0 and there is
 	// nothing to declare.
-	brushTarget = $derived.by(() => {
-		const [name, value] =
-			this.brush === 'difference'
-				? (['difference', this.minDifference] as const)
-				: this.contrastType === 'wcag2'
-					? (['wcag2', this.minLevel] as const)
-					: (['apca', this.minLevel] as const);
+	brushTarget = $derived(
+		this.brushMetric.value > 0 ? this.brushMetric : null
+	);
 
-		return value > 0 ? {name, value} : null;
-	});
+	// The brush's metric on a pair, as is and per selected simulation.
+	brushLevels(fg: PaletteColor, bg: PaletteColor) {
+		const {name} = this.brushMetric;
+		const {level, simulated} = checkPair(
+			{[name]: 0},
+			fg.rgbColor,
+			bg.rgbColor,
+			this.blindnessTypes
+		)[0];
+
+		return {name, level, simulated};
+	}
 
 	// Whether a pair reaches the brush's minimum, worst case of the
 	// selected simulations.
@@ -213,6 +231,23 @@ class Combinations {
 				)[0].pass
 			: true;
 	}
+
+	// Ordered pairs of compared colors, and those reaching the brush.
+	cellCount = $derived(
+		this.comparedColors.length *
+			(this.comparedColors.length - 1)
+	);
+	passingCells = $derived(
+		this.comparedColors.reduce(
+			(n, bg) =>
+				n +
+				this.comparedColors.filter(
+					(fg) =>
+						fg.id !== bg.id && this.passesBrush(fg, bg)
+				).length,
+			0
+		)
+	);
 
 	// Sets the brush's target on a pair, or removes it if the pair
 	// has it at that value already, so a target typed in the card is

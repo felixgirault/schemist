@@ -411,6 +411,9 @@ expensive combination computations during slider drags.
 | `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                    |
 | `brush`                       | `'contrast'` (default) or `'difference'`: the filter that dims and declares pairs in pairs mode                                                                                                 |
 | `brushTarget`                 | `{name, value}`: `wcag2` or `apca` (from `contrastType`) with `minLevel`, or `difference` with `minDifference`; `null` when the value is 0                                                      |
+| `brushMetric`                 | The brush's `{name, value}` whatever the value; `brushTarget` is it when the value is above 0                                                                                                   |
+| `brushLevels(fg, bg)`         | `{name, level, simulated}`: the brush metric on a pair                                                                                                                                          |
+| `cellCount`, `passingCells`   | Ordered pairs of compared colors, and those passing `passesBrush`                                                                                                                               |
 | `openPairIds`                 | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                |
 | `openPair`                    | `{fg, bg, nodes, check?}` for `openPairIds`, `null` once a color is no longer compared                                                                                                          |
 | `openDifference`              | The difference matching `openDifferenceId`, `null` once the pair no longer exists                                                                                                               |
@@ -559,7 +562,7 @@ marks need more, points more than bars or lines (Szafir,
 
 ### 9.7 Declared pairs
 
-The root of a tree (`PresetNode.pairs`, `#lib/core/nodes.ts`) may
+The root of a tree (`NodeData.pairs`, `#lib/core/nodes.ts`) may
 declare the pairs that must work together:
 `{fg, bg, wcag2?, apca?, difference?}`, the names of two colors
 and at least one target (free numbers, no defaults). Pairs are
@@ -744,8 +747,9 @@ change.
 
 ### 11.5 Combinations panel
 
-- A **Contrast | Difference | Pairs** switch (`mode`). Difference
-  and Pairs modes are described below the contrast one.
+- A **Contrast | Difference | Grid** switch (`mode`, value
+  `'pairs'`). Difference and Pairs modes are described below the
+  contrast one.
 - Filters, shown with at least two colors: **Colors** (background
   restriction, with Reset), **Contrast type**, **Minimum contrast
   level**, **Color blindness simulation**, **Luminosity
@@ -771,50 +775,57 @@ change.
   panel. With fewer than two compared colors the panel asks to
   select at least two.
 
-**Pairs mode** shows the pairs declared in the palette (§9.7),
-built on the difference matrix pieces (`matrix.css`, shared with
-it; the panel is a single root element, as the global
+**Grid mode** (`'pairs'`) shows the pairs declared in the palette
+(§9.7), built on the difference matrix pieces (`matrix.css`,
+shared with it; the panel is a single root element, as the global
 `.data-layout` grid needs): a full grid, backgrounds as rows and
 foregrounds as columns, of compact cells, with swatch-only
 headers (name as tooltip and accessible name) and sticky row
 headers. The grid takes at least the panel's width, its cells
 stretching from 2rem, and scrolls when the colors do not fit.
 Nothing is drawn on the diagonal. Every other cell is drawn as
-its pair: "Aa" in the foreground on the background, with the
-names and the WCAG 2 contrast as tooltip. A declared cell gets a
-border in the panel's text color and a corner badge in the
-panel's colors: a check, or a warning icon with a dashed border
-when the pair misses one of its targets in the worst case of the
-selected simulations. Marks are in the panel's colors so they
-stay readable on any pair, and on the border so that the outline
-stays the focus ring. Each button's accessible name says whether
-the pair meets its targets, misses them, or is not declared. The
-filters are a brush: **Check** picks **Contrast** (with
-**Contrast type** and **Minimum contrast level**) or
-**Difference** (with **Minimum difference**). A cell whose pair
-misses the brush's minimum, in the worst case of the selected
-simulations, has its colors dimmed (not its marks), and its
-accessible name says whether it reaches the minimum. Activating a
-cell (it is a button, so keyboard accessible) toggles the brush's
-target on the pair (`toggleBrush`): it adds `wcag2`, `apca` or
-`difference` at the current minimum, replacing a target of
-another value, or removes it when the pair has it at that value,
-the pair going with its last target, so a click never removes a
-target typed in the card. With a minimum of 0 nothing is
-declared, and the hint asks for a minimum. It then opens, in an
-`elevated` card under the grid, one number field per target (WCAG
-2 contrast, APCA contrast, color difference; a value is applied
-on change, clearing every field removes the pair), and for each
-declared target the measured level for normal vision and each
-simulation with an icon and a text alternative for met or not
-met, a **Remove pair** button and a **Close** button. The panel
-closes the card when a color is no longer compared. Pairs with a
-hidden color are listed under the grid as not checked. A notice
-names the colors to rename when pairs cannot be saved (§8.1). The
-heading counts passing pairs / declared pairs (`pairChecks`;
-hidden pairs are in neither). **Colors** restricts the grid's
-rows and columns, **Color blindness simulation** and **Luminosity
-analysis** work as in the other modes.
+its pair: "Aa" in the foreground on the background and, when
+simulations are selected, under it one aria-hidden strip per
+simulation, side by side, each the simulated background with a
+bar in the simulated foreground (cells then are 2.75rem high).
+The tooltip has the names and the WCAG 2 contrast, then the brush
+metric per simulation, which the accessible name repeats. A
+declared cell gets a border in the panel's text color and a
+corner badge in the panel's colors: a check, or a warning icon
+with a dashed border when the pair misses one of its targets in
+the worst case of the selected simulations. Marks are in the
+panel's colors so they stay readable on any pair, and on the
+border so that the outline stays the focus ring. Each button's
+accessible name says whether the pair meets its targets, misses
+them, or is not declared. The filters are a brush (the lens):
+**Check** picks **Contrast** (with **Contrast type** and
+**Minimum contrast level**) or **Difference** (with **Minimum
+difference**). A cell whose pair misses the brush's minimum, in
+the worst case of the selected simulations, has its colors dimmed
+(not its marks), and its accessible name says whether it reaches
+the minimum. Activating a cell (a button, so keyboard accessible)
+only opens its card, or closes it when it is open already. The
+`elevated` card under the grid has: a large sample with both
+names in the foreground on the background; the brush metric
+(grade and level, or difference) for normal vision and each
+simulation, each row in its simulated colors with an icon and a
+text alternative for met or not met; a **Require ≥ value** button
+that calls `toggleBrush` (adds `wcag2`, `apca` or `difference` at
+the current minimum, replacing a target of another value;
+**Remove ≥ value requirement** when the pair has it at that
+value; disabled with a hint when the minimum is 0); one number
+field per target (a value is applied on change, clearing every
+field removes the pair); for each declared target the measured
+levels; **Remove pair**; a **Preview** button toggling
+`previewedUid` to `<bgId>-<fgId>` (§11.5); and **Close**. The
+panel closes the card when a color is no longer compared. Pairs
+with a hidden color are listed under the grid as not checked. A
+notice names the colors to rename when pairs cannot be saved
+(§8.1). The heading counts cells reaching the brush / cells
+(`passingCells`, `cellCount`); the hint gives the declared count.
+**Colors** restricts the grid's rows and columns, **Color
+blindness simulation** and **Luminosity analysis** work as in the
+other modes.
 
 ### 11.6 Theming
 

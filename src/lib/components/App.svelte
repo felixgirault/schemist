@@ -112,8 +112,7 @@
 			<h2 class="h2">
 				Combinations <span>
 					{#if combinations.mode === 'pairs'}
-						({combinations.passingPairs} / {combinations
-							.pairChecks.length})
+						({combinations.passingCells} / {combinations.cellCount})
 					{:else if combinations.mode === 'difference'}
 						({combinations.differences.filter(
 							({minLevel}) =>
