@@ -16,9 +16,21 @@ const isObject = (
 	value !== null &&
 	!Array.isArray(value);
 
+// Conversions overshoot by float noise (pure green has
+// s = 100.0000013), so bounds are checked with some tolerance.
+const Tolerance = 0.001;
+
+const within = (value: unknown, max: number) =>
+	typeof value === 'number' &&
+	value >= -Tolerance &&
+	value <= max + Tolerance;
+
+// The ranges of SPEC §4.1, as links and storage can hold anything.
 const isColor = (value: unknown): value is SchemistColor =>
 	isObject(value) &&
-	['h', 's', 'l'].every((key) => Number.isFinite(value[key]));
+	within(value.h, 360) &&
+	within(value.s, 100) &&
+	within(value.l, 100);
 
 const nodeKeys = [
 	'type',
@@ -54,6 +66,12 @@ const validateArg = (
 			// Colors that are not strings come from permalinks.
 			if (isColor(value)) {
 				return {h: value.h, s: value.s, l: value.l};
+			}
+
+			if (isObject(value)) {
+				throw new Error(
+					`${path}: expected h within 0–360, s and l within 0–100`
+				);
 			}
 
 			const [, color] =

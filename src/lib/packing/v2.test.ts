@@ -51,6 +51,15 @@ test.each([
 	);
 });
 
+test.each(['-720_500_-300', '361_50_50', '0_101_50', '0_50_-1'])(
+	'out of range color %j is rejected',
+	(color) => {
+		expect(() =>
+			unpack(`0@01223@clr,,color,${color}`)
+		).toThrow('expected h within 0–360');
+	}
+);
+
 test('v1 permalinks are still supported', () => {
 	expect(
 		unpackVersioned('1@0@01223@clr,,color,ffc208')

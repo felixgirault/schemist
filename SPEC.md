@@ -574,7 +574,8 @@ Version `2` rejects color entries that are not exactly three
 finite numbers. Whatever the version, `unpack` returns the tree
 checked by `validateTree` (§5.3), which accepts colors given as
 `{h, s, l}` objects for this purpose (the CLI only documents CSS
-strings).
+strings), within the ranges of §4.1 with a 0.001 tolerance for
+conversion noise: an out-of-range color fails the link.
 
 Examples, a Custom color alone: `1@0@01223@clr,,color,ffc208`,
 `2@0@01223@clr,,color,90_50_50`.
