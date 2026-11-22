@@ -35,8 +35,10 @@
 </div>
 
 <style>
+	/* Stretches like the code area alone would in the export grid. */
 	div {
 		display: flex;
 		flex-direction: column;
+		align-self: stretch;
 	}
 </style>

@@ -15,6 +15,7 @@
 
 <style>
 	textarea {
+		flex: 1;
 		align-self: stretch;
 		border: 0;
 		border-radius: var(--radius);
