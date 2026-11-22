@@ -111,8 +111,15 @@
 		<header>
 			<h2 class="h2">
 				Combinations <span>
-					({combinations.filtered.length} / {combinations
-						.all.length})
+					{#if combinations.mode === 'difference'}
+						({combinations.differences.filter(
+							({minLevel}) =>
+								minLevel >= combinations.minDifference
+						).length} / {combinations.differences.length})
+					{:else}
+						({combinations.filtered.length} / {combinations
+							.all.length})
+					{/if}
 				</span>
 			</h2>
 		</header>

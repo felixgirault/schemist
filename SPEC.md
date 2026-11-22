@@ -371,6 +371,7 @@ expensive combination computations during slider drags.
 | `sortedColors`                | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root                                                                                                          |
 | `all`                         | `combine(...)` of the filtered colors (§9.1)                                                                                                                                                    |
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                    |
+| `comparedColors`              | `sortedColors` restricted to the Colors filter (all when empty)                                                                                                                                 |
 | `previewed`                   | The combination matching `previewedUid`                                                                                                                                                         |
 | `mode`                        | `'contrast'` (default) or `'difference'` (§11.5); not persisted                                                                                                                                 |
 | `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                     |
@@ -597,7 +598,9 @@ compressing links is recorded in
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
 - Two sections: **Palette** (tree, Export, Share, Undo and Redo
-  buttons) and **Combinations (filtered / total)**.
+  buttons) and **Combinations (filtered / total)**; in difference
+  mode the count is (pairs at or above the minimum difference /
+  pairs compared).
 - Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
   `Z` redoes, except while editing text (text inputs, textareas,
   the editable node name), where native undo applies. Undo and
@@ -653,6 +656,8 @@ change.
 
 ### 11.5 Combinations panel
 
+- A **Contrast | Difference** switch (`mode`). Difference mode is
+  described below the contrast one.
 - Filters, shown with at least two colors: **Colors** (background
   restriction, with Reset), **Contrast type**, **Minimum contrast
   level**, **Color blindness simulation**, **Luminosity
@@ -662,6 +667,18 @@ change.
   APCA mode), and one row per simulation.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button.
+- Difference mode hides **Contrast type** and swaps **Minimum
+  contrast level** for **Minimum difference** (number field). The
+  cards give way to a lower-triangle matrix with a row and a
+  column per compared color (swatch and name). Each cell is a
+  button with both colors and `minLevel` rounded to 1 decimal in
+  the panel's text color; cells below the minimum get a dashed
+  outline and a warning icon. Activating a cell shows, under the
+  matrix, a row for normal vision and one per simulation (the two
+  simulated colors and the level); the panel closes it when the
+  pair no longer exists. The matrix scrolls horizontally when
+  wider than the panel. With fewer than two compared colors the
+  panel asks to select at least two.
 
 ### 11.6 Theming
 

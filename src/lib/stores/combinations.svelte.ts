@@ -58,7 +58,7 @@ class Combinations {
 		return sorted.slice(pivot).concat(sorted.slice(0, pivot));
 	});
 
-	#filteredColors = $derived(
+	comparedColors = $derived(
 		this.colorFilters.length
 			? this.sortedColors.filter(({id}) =>
 					this.colorFilters.includes(id)
@@ -68,7 +68,7 @@ class Combinations {
 
 	all = $derived(
 		combine(
-			this.#filteredColors,
+			this.comparedColors,
 			palette.colors,
 			this.contrastType,
 			this.blindnessTypes
@@ -81,8 +81,8 @@ class Combinations {
 
 	// one per unordered pair of the compared colors
 	differences = $derived(
-		this.#filteredColors.flatMap((a, i) =>
-			this.#filteredColors
+		this.comparedColors.flatMap((a, i) =>
+			this.comparedColors
 				.slice(i + 1)
 				.map((b): PairDifference => ({
 					id: `${a.id}-${b.id}`,
