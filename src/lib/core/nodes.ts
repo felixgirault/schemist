@@ -211,12 +211,21 @@ export const applyDef = (
 };
 
 export type NodeData = {
-	// Set to restore a node with the id it had, e.g. when a preset
-	// is expanded into the nodes it generated.
+	// Set when serializing a tree, to restore it as is, and when a
+	// preset is expanded into the nodes it generated.
 	id?: string;
 	type: NodeType;
 	token?: string;
 	args?: Args;
 	children?: NodeData[];
 	isHidden?: boolean;
+};
+
+// A tree whose ids are all set, once serialized or numbered.
+export type IdentifiedNodeData = Omit<
+	NodeData,
+	'id' | 'children'
+> & {
+	id: string;
+	children?: IdentifiedNodeData[];
 };

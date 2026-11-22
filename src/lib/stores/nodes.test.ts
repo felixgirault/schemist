@@ -1,6 +1,9 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import {evaluate} from '#lib/core/evaluate.js';
+import type {IdentifiedNodeData} from '#lib/core/nodes.js';
+import {changedArg} from '#lib/core/tree.js';
 import defs from '#lib/definitions/index.js';
+import {pack, unpack} from '#lib/packing/index.js';
 import {
 	collectOutputs,
 	createNode
@@ -11,6 +14,7 @@ import {
 	parseTree,
 	serializeTree
 } from '#lib/tree.js';
+import {History} from '#lib/utils/history.svelte.js';
 import {expect, test} from 'vitest';
 
 const hexes = (node: ReturnType<typeof parseTree>) =>
@@ -61,6 +65,7 @@ test('a preset round trips through serialization', () => {
 
 	expect(serializeTree(parseTree(tree)).children).toEqual([
 		{
+			id: expect.any(String),
 			type: 'lsc',
 			isHidden: false,
 			token: 'Step',
@@ -180,4 +185,47 @@ test('setType refuses to make a preset of a node with children', () => {
 
 	expect(() => node.setType('stt')).toThrow('children');
 	expect(node.def).toBe(defs.l);
+});
+
+test('serialized trees are restored with the same ids', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [
+			{
+				type: 'l',
+				token: 'Dark $',
+				isHidden: true,
+				args: {amount: 20}
+			}
+		]
+	});
+
+	const restored = parseTree(serializeTree(tree));
+
+	expect(serializeTree(restored)).toEqual(serializeTree(tree));
+	expect(restored.children[0].id).toBe(tree.children[0].id);
+});
+
+test('a swap is one undo step that survives packing', () => {
+	const tree = parseTree({
+		type: 'clr',
+		children: [{type: 'l', args: {amount: 20}}]
+	});
+
+	let restored = tree;
+	const history = new History<IdentifiedNodeData>({
+		restore: (snapshot) => {
+			restored = parseTree(unpack(pack(snapshot)));
+		},
+		group: changedArg
+	});
+
+	history.reset(serializeTree(tree));
+	tree.children[0].setType('s');
+	history.record(serializeTree(tree));
+	expect(history.past).toHaveLength(1);
+
+	history.undo();
+	expect(restored.children[0].def.type).toBe('l');
+	expect(restored.children[0].args).toEqual({amount: 20});
 });

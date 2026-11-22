@@ -1,4 +1,7 @@
-import type {NodeData} from '#lib/core/nodes.js';
+import type {
+	IdentifiedNodeData,
+	NodeData
+} from '#lib/core/nodes.js';
 import {isPresetDef} from '#lib/core/nodes.js';
 import {hideTree, withIds} from '#lib/core/tree.js';
 import type {Node} from '#lib/stores/nodes.svelte.js';
@@ -24,7 +27,8 @@ export const parseTree = (data: NodeData) => {
 
 export const serializeTree = (node: Node) => {
 	const {token, args, children} = node;
-	const data: NodeData = {
+	const data: IdentifiedNodeData = {
+		id: node.id,
 		type: node.def.type,
 		isHidden: node.isHidden
 	};

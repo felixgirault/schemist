@@ -86,7 +86,7 @@ src/
     components/            UI (§11)
     utils/                 Generic helpers (arrays, css, math, strings, …)
     tree.ts                parseTree / serializeTree (tree ⇄ NodeData)
-    palette.ts             getRootNode (initial tree from URL or random)
+    palette.ts             getRootNode (initial tree from URL, storage or random)
     routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
@@ -228,12 +228,15 @@ visible outputs without the store, as `PaletteColor`s
 
 ### 5.3 Tree data (`#lib/tree.ts`, `#lib/core/tree.ts`)
 
-`NodeData = {type, token?, args?, children?, isHidden?}`
+`NodeData = {id?, type, token?, args?, children?, isHidden?}`
 (`#lib/core/nodes.ts`) is the plain form of a tree, used by
-presets, permalinks and the CLI, with `type` a `NodeType` (§6).
-`parseTree(NodeData) → Node` merges given `args` over the type
-defaults; `serializeTree(Node) → NodeData` omits empty tokens,
-args and children.
+presets, permalinks, history snapshots and the CLI, with `type` a
+`NodeType` (§6). `parseTree(NodeData) → Node` merges given `args`
+over the type defaults and reuses `id` when set;
+`serializeTree(Node) → IdentifiedNodeData` (a tree whose ids are
+all set) includes ids and omits empty tokens, args and children.
+Permalinks don't store ids. `changedArg` and `withIds` live in
+`#lib/core/tree.ts`.
 
 `validateTree(data, path)` (`#lib/core/tree.ts`) checks data from
 outside and returns a `NodeData`: unknown keys, node types and
@@ -387,7 +390,48 @@ default `dash`), `precision` (default 3), `prefix` (default
 `ExportSettings` and the `ExportFormat`, `ExportCasing` and
 `ExportEntry` types live in `#lib/core/export.ts`.
 
-None of this state is persisted except the dark scheme.
+### 8.5 `history`
+
+Undo and redo of the palette tree, see ADR 9. A generic `History`
+class (`#lib/utils/history.svelte.ts`) holds `past` and `future`
+stacks of snapshots (`serializeTree` of the root, with ids,
+frozen by `$state.snapshot`), capped at 100 entries.
+
+`startHistory(root)` (`#lib/stores/history.svelte.ts`, called
+when the palette mounts) resets the history to the tree, syncs
+the URL and starts an effect that records every change of the
+tree, and returns a function that stops it. Changes made in the
+same tick form one change. A change starts a new step, unless it
+only touches one arg of one node (`changedArg`) and the previous
+change touched the same arg less than 1 s ago, so that a slider
+drag is one step. A step that ends where it started is dropped,
+as are identical consecutive snapshots.
+
+| Member   | Effect                                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `past`   | Snapshots to undo to                                                                                                    |
+| `future` | Snapshots to redo to, cleared by any new step                                                                           |
+| `undo()` | Restores the last `past` snapshot (rebuilding the `Node` tree with the same ids) and pushes the current one to `future` |
+| `redo()` | The opposite                                                                                                            |
+
+Restoring keeps node ids, so components update in place (open
+panels are kept), and a restored state never merges with the
+changes that follow it.
+
+Every new state replaces the URL query with its `?preset=`
+(`goto` with `replaceState`, shallow, no browser history entry)
+and is stored in `localStorage` under `palette` (packed, like a
+permalink), 300 ms after the last change. Loading does not store
+anything, so opening a link keeps the palette stored from a
+previous session, but the URL is synced right away.
+
+### 8.6 Persistence
+
+The palette persists through the URL and `localStorage` (§8.5),
+the dark scheme through `localStorage` (§8.3). The undo history,
+combination filters and export settings are not persisted. Ids
+are stable in memory only: permalinks and storage don't hold
+them.
 
 ## 9. Contrast and accessibility
 
@@ -473,12 +517,16 @@ marks need more, points more than bars or lines (Szafir,
   `+` also percent-encoded so they survive the query string.
   `palette.permalink` is the store's shortcut, using
   `window.location.origin`.
-- **Share** navigates to that URL (the address bar then holds the
-  link; nothing is copied to the clipboard).
+- The address bar always holds the permalink of the palette, as
+  it is updated on every change (§8.5).
+- **Share** copies the permalink to the clipboard and shows "Link
+  copied" (or a hint to copy it from the address bar if the
+  clipboard is unavailable) for 2 seconds.
 - On load, `getRootNode()` unpacks `?preset=`, which validates
-  the tree with `validateTree` (§5.3). If it is missing or
-  invalid (the error is logged), the tree is a single Custom
-  color node with a random usable color.
+  the tree with `validateTree` (§5.3), else the palette stored in
+  `localStorage`. If both are missing or invalid (errors are
+  logged), the tree is a single Custom color node with a random
+  usable color.
 - Exports embed the permalink (CSS/Sass comment, design tokens
   description).
 
@@ -523,8 +571,12 @@ Example, a Custom color `#ffc208` alone:
 - Header: app name and baseline, **Dark/Light theme** toggle,
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
-- Two sections: **Palette** (tree, Export and Share buttons) and
-  **Combinations (filtered / total)**.
+- Two sections: **Palette** (tree, Export, Share, Undo and Redo
+  buttons) and **Combinations (filtered / total)**.
+- Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
+  `Z` redoes, except while editing text (text inputs, textareas,
+  the editable node name), where native undo applies. Undo and
+  Redo are disabled when their stack is empty.
 
 ### 11.2 Palette tree
 
@@ -642,15 +694,17 @@ casing.
 
 Unit tests cover utils, color parsing, color deficiency
 simulation, the highlight temperature, packing (snapshots of
-every node type and preset, and round trips) and permalinks
-(tokens with special characters). Characterization snapshots
-cover the outputs (hex values and names) of every preset under a
-few root colors, `combinations.all` (WCAG 2 and APCA, with and
-without simulations) and the CSS, Sass and design tokens exports.
-Unit tests of `exportTokens` cover nesting, empty parts, `$`
-parts, conflicts and duplicates (with no color dropped, whatever
-the tree order); `names.test.ts` renders the tokens export and
-its conflict notice. Export components are rendered server-side;
+every node type and preset, and round trips), permalinks (tokens
+with special characters), tree serialization (ids), the undo
+history and the initial palette source (link, storage, random).
+Characterization snapshots cover the outputs (hex values and
+names) of every preset under a few root colors,
+`combinations.all` (WCAG 2 and APCA, with and without
+simulations) and the CSS, Sass and design tokens exports. Unit
+tests of `exportTokens` cover nesting, empty parts, `$` parts,
+conflicts and duplicates (with no color dropped, whatever the
+tree order); `names.test.ts` renders the tokens export and its
+conflict notice. Export components are rendered server-side;
 there are no browser or end-to-end tests. A core test asserts
 that `evaluate` matches `collectOutputs` for every preset, and
 store tests cover preset outputs, children and expanding. CLI

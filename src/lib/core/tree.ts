@@ -1,5 +1,6 @@
 import {parseColor} from '#lib/color/parsing.js';
 import type {
+	IdentifiedNodeData,
 	NodeData,
 	Param,
 	ParamValue
@@ -150,7 +151,7 @@ export const withIds = (
 	nodes: NodeData[],
 	prefix: string,
 	counter = {next: 0}
-): NodeData[] =>
+): IdentifiedNodeData[] =>
 	nodes.map(({children, ...node}) => ({
 		...node,
 		id: `${prefix}.${counter.next++}`,
@@ -166,3 +167,59 @@ export const hideTree = (tree: NodeData): NodeData => ({
 	isHidden: true,
 	children: tree.children?.map(hideTree)
 });
+
+const flattenTree = (
+	tree: IdentifiedNodeData,
+	nodes = new Map<string, IdentifiedNodeData>()
+) => {
+	nodes.set(tree.id, tree);
+	tree.children?.forEach((child) => flattenTree(child, nodes));
+	return nodes;
+};
+
+const childIds = ({children}: IdentifiedNodeData) =>
+	children?.map(({id}) => id).join() ?? '';
+
+// Names the only arg that differs between two serialized trees
+// (as `nodeId.argName`), or nothing if anything else changed.
+export const changedArg = (
+	previous: IdentifiedNodeData,
+	next: IdentifiedNodeData
+) => {
+	const before = flattenTree(previous);
+	const after = flattenTree(next);
+	let changed: string | undefined;
+
+	if (before.size !== after.size) {
+		return;
+	}
+
+	for (const [id, node] of after) {
+		const old = before.get(id);
+
+		if (
+			!old ||
+			old.type !== node.type ||
+			old.token !== node.token ||
+			old.isHidden !== node.isHidden ||
+			childIds(old) !== childIds(node)
+		) {
+			return;
+		}
+
+		for (const name of Object.keys(node.args ?? {})) {
+			if (
+				JSON.stringify(old.args?.[name]) !==
+				JSON.stringify(node.args?.[name])
+			) {
+				if (changed) {
+					return;
+				}
+
+				changed = `${id}.${name}`;
+			}
+		}
+	}
+
+	return changed;
+};

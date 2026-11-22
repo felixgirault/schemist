@@ -28,6 +28,10 @@ While building your palette, you'll be able to review the
 contrast of each color combination to ensure that they are
 accessible to everyone.
 
+Your palette follows you: the address bar always holds a link to
+it, it is kept in your browser between visits, and changes can be
+undone and redone (`Ctrl+Z`, `Ctrl+Shift+Z`).
+
 The whole thing is reactive, so play around!
 
 ## How it works
