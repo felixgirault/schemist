@@ -108,8 +108,10 @@ the number, and an outline. The pair details keep 1 decimal.
 The first version repeated both swatches and 1 decimal in every
 cell, and full names in column headers: about 7rem per column, so
 15 colors were two to three screens wide. Compact, a column is
-about 2.5rem: 15 colors take about 43rem, 30 about 80rem
-(estimated from the CSS).
+2rem plus 2px of spacing, without the global table padding (which
+had made it about 4.75rem): 15 colors take about 31rem, 30 about
+63rem (estimated from the CSS). Cells stay above the 24 px
+minimum target size of WCAG 2.2 (2.5.8).
 
 Activating a cell shows the pair below the matrix: one row for
 normal vision and one per simulation, each with the two colors as

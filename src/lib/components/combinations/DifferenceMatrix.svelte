@@ -129,14 +129,20 @@
 		overflow-x: auto;
 	}
 
+	/* Overrides the global table styles, made for data tables. */
 	.matrix {
+		width: auto;
 		border-collapse: separate;
-		border-spacing: 0.25rem;
+		border-spacing: 2px;
 	}
 
-	th {
+	th,
+	td {
+		padding: 0;
+		border: 0;
 		font-weight: normal;
-		text-align: left;
+		text-align: center;
+		vertical-align: middle;
 		white-space: nowrap;
 	}
 
@@ -160,13 +166,15 @@
 		align-items: center;
 		justify-content: center;
 		box-sizing: border-box;
-		width: 2.5rem;
-		padding: 0.25rem 0;
+		width: 2rem;
+		height: 1.75rem;
+		padding: 0;
 		color: inherit;
 		background: transparent;
 		border: 1px solid transparent;
 		border-radius: var(--radius);
 		font: inherit;
+		font-size: 0.875rem;
 		white-space: nowrap;
 		cursor: pointer;
 	}
