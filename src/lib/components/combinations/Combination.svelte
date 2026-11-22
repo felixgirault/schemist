@@ -1,19 +1,36 @@
+<script lang="ts" module>
+	import type {RgbColor} from '#lib/color/types.js';
+	import type {BlindnessType} from '#lib/core/contrast.js';
+
+	// A level with its grade, and whether it meets the goal (none
+	// when there is no goal).
+	export interface Row {
+		name: string;
+		level: number;
+		met?: boolean;
+	}
+
+	export interface Simulation {
+		type: BlindnessType;
+		bg: RgbColor;
+		fg: RgbColor;
+		rows: Row[];
+	}
+</script>
+
 <script lang="ts">
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
-	import type {
-		CombinationContrast,
-		SimulatedContrast
-	} from '#lib/core/contrast.js';
-	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {round} from '#lib/utils/math.js';
 
 	interface Props {
 		uid: string;
 		bgName: string;
 		fgName: string;
-		contrast: CombinationContrast;
-		simulatedContrasts: SimulatedContrast[];
+		bg: RgbColor;
+		fg: RgbColor;
+		rows: Row[];
+		simulations: Simulation[];
 		onPreview: (uid: string) => void;
 	}
 
@@ -21,19 +38,34 @@
 		uid,
 		bgName,
 		fgName,
-		contrast,
-		simulatedContrasts,
+		bg,
+		fg,
+		rows,
+		simulations,
 		onPreview
 	}: Props = $props();
-
-	let hexFg = $derived(formatRgbToHex(contrast.fg));
 </script>
+
+{#snippet levels(list: Row[])}
+	{#each list as { name, level, met }}
+		<span class="level">
+			<span class="grade">{name}</span>
+			({round(level, 1)}){#if met !== undefined}
+				{' '}
+				<span class="status">
+					{met ? 'met' : 'not met'}
+				</span>
+			{/if}
+		</span>
+		{' '}
+	{/each}
+{/snippet}
 
 <div
 	class="combination elevated"
 	style="background: {formatRgbToHex(
-		contrast.bg
-	)}; color: {hexFg};"
+		bg
+	)}; color: {formatRgbToHex(fg)};"
 >
 	<div class="inner">
 		<p class="colors">
@@ -43,14 +75,8 @@
 		</p>
 
 		<p class="level level--withPreview">
-			<span>
-				<span class="grade">
-					{#if combinations.contrastType === 'wcag3'}
-						APCA
-					{/if}
-					{contrast.grade}
-				</span>
-				({round(contrast.level, 1)})
+			<span class="levels">
+				{@render levels(rows)}
 			</span>
 
 			<button
@@ -63,9 +89,9 @@
 		</p>
 	</div>
 
-	{#if simulatedContrasts.length}
+	{#if simulations.length}
 		<ul>
-			{#each simulatedContrasts as { type, bg, fg, level, grade }}
+			{#each simulations as { type, bg, fg, rows }}
 				<li
 					class="simulation simulation--{type}"
 					style="background: {formatRgbToHex(
@@ -76,14 +102,8 @@
 						{type}
 					</strong>
 					{' '}
-					<span class="level">
-						<span class="grade">
-							{#if combinations.contrastType === 'wcag3'}
-								APCA
-							{/if}
-							{grade}
-						</span>
-						({round(level, 1)})
+					<span class="levels">
+						{@render levels(rows)}
 					</span>
 				</li>
 			{/each}
@@ -129,9 +149,17 @@
 		gap: 1ch;
 	}
 
+	.levels {
+		display: grid;
+	}
+
 	.grade {
 		font-size: 1.5rem;
 		font-weight: 900;
+	}
+
+	.status {
+		font-size: 0.9rem;
 	}
 
 	.simulation {

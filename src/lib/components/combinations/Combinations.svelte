@@ -2,6 +2,7 @@
 	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
 	import ColorFilter from '#lib/components/combinations/ColorFilter.svelte';
 	import Combination from '#lib/components/combinations/Combination.svelte';
+	import type {Row} from '#lib/components/combinations/Combination.svelte';
 	import ContrastFilter from '#lib/components/combinations/ContrastFilter.svelte';
 	import ContrastTypeFilter from '#lib/components/combinations/ContrastTypeFilter.svelte';
 	import DifferenceFilter from '#lib/components/combinations/DifferenceFilter.svelte';
@@ -11,6 +12,7 @@
 	import PairMatrix from '#lib/components/combinations/PairMatrix.svelte';
 	import Result from '#lib/components/combinations/Result.svelte';
 	import UseFilter from '#lib/components/combinations/UseFilter.svelte';
+	import type {CombinationContrast} from '#lib/core/contrast.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
@@ -18,6 +20,16 @@
 		combinations.previewedUid =
 			combinations.previewedUid === uid ? null : uid;
 	};
+
+	const rowOf = ({
+		level,
+		grade
+	}: CombinationContrast): Row[] => [
+		{
+			name: `${combinations.contrastType === 'wcag3' ? 'APCA ' : ''}${grade}`,
+			level
+		}
+	];
 
 	let colorCount = $derived(palette.colors?.length || 0);
 </script>
@@ -58,8 +70,13 @@
 					{uid}
 					{bgName}
 					{fgName}
-					{contrast}
-					{simulatedContrasts}
+					bg={contrast.bg}
+					fg={contrast.fg}
+					rows={rowOf(contrast)}
+					simulations={simulatedContrasts.map((s) => ({
+						...s,
+						rows: rowOf(s)
+					}))}
 					onPreview={handlePreview}
 				/>
 			{:else}

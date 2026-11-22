@@ -434,7 +434,7 @@ expensive combination computations during slider drags.
 | `all`                         | `combine(...)` of the filtered colors (§9.1)                                                                                                                                                                                          |
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                                                          |
 | `comparedColors`              | `sortedColors` restricted to the Colors filter (all when empty)                                                                                                                                                                       |
-| `previewed`                   | The combination matching `previewedUid`                                                                                                                                                                                               |
+| `previewed`                   | The combination matching `previewedUid`, or the checked pair of that id                                                                                                                                                               |
 | `mode`                        | `'contrast'` (default), `'difference'`, `'pairs'` or `'result'` (§11.5); not persisted                                                                                                                                                |
 | `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                                                           |
 | `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b`                                       |
@@ -849,9 +849,12 @@ change.
   restriction, with Reset), **Contrast type**, **Minimum contrast
   level**, **Color blindness simulation**, **Luminosity
   analysis**.
-- Each combination card is drawn in its own colors, with names,
-  grade and level (rounded to 1 decimal, prefixed by `APCA` in
-  APCA mode), and one row per simulation.
+- Each combination card (`Combination.svelte`, also used by the
+  Result mode) is drawn in its own colors, with names, and a row
+  per target (`{name, level, met?}`): grade and level (rounded to
+  1 decimal, prefixed by `APCA` in APCA mode), followed by "met"
+  or "not met" when the target has a goal (none in this mode);
+  then one strip per simulation with its own rows.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button.
 - Difference mode hides **Contrast type** and swaps **Minimum
@@ -973,21 +976,25 @@ its use, with the Requirements column beside it (same layout as
 the grid: a container query at 48rem, under it when narrower).
 The Colors and Check filters are not shown. A section per rule,
 titled as in the requirements, reads the rule's `pairChecks`
-(`ruleChecks`, nothing is measured again) and repeats once per
-variant when simulations are selected: "Without simulation", then
-one headed block per simulation, colors simulated. A role among
-itself (Categories) is a list of its colors, each a swatch beside
-a bar with its name, then each pair with its difference; Large
-text and UI has, per surface (a block in its color, titled by its
-name), a stroke, an outline and a large sample per foreground
-color; any other rule (Body text, Custom) has, per surface, a
-short paragraph per foreground color, starting with its token
-name, in that color. Each specimen is followed by a list "X on Y:
-met (or not met) (WCAG 2 4.8 of 4.5, ...)" for that variant.
-Hidden colors and pairs not checked are left out. A final
+(`ruleChecks`, nothing is measured again), once, in the real
+colors. A role among itself (Categories) is a list of its colors,
+each a swatch beside a bar with its name, then each pair as "X
+and Y: met (or not met) (Difference 12 of 10; protanomaly 9,
+...)", the simulated levels inline. Large text and UI has, per
+surface (a block in its color, titled by its name), a stroke, an
+outline and a large sample per foreground color; any other rule
+(Body text, Custom) has, per surface, a short paragraph per
+foreground color, starting with its token name, in that color.
+Under each surface block, one combination card (§11.5 Contrast
+cards) per foreground color: each target with its grade, level
+and "met" or "not met", and one strip per selected simulation in
+simulated colors with its levels. Its Preview button toggles
+`previewedUid` to `<bgId>-<fgId>`; `previewed` falls back to the
+`pairChecks` pair when `all` (limited by the Colors filter) lacks
+it. Hidden colors and pairs not checked are left out. A final
 **One-off pairs** section shows the one-off pairs
-(`oneOffChecks`) as text specimens. With nothing declared a hint
-asks to declare rules or pairs.
+(`oneOffChecks`) as text specimens with their cards. With nothing
+declared a hint asks to declare rules or pairs.
 
 ### 11.6 Theming
 

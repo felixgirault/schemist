@@ -423,11 +423,29 @@ class Combinations {
 		palette.setPair(fg.id, bg.id, targets);
 	}
 
-	previewed = $derived(
-		this.previewedUid
-			? this.all.find(({uid}) => uid === this.previewedUid)
-			: null
-	);
+	// A pair of the Result mode may not be in `all` (Colors filter).
+	previewed = $derived.by(() => {
+		const uid = this.previewedUid;
+
+		if (!uid) return null;
+
+		const found = this.all.find((c) => c.uid === uid);
+		const check = found
+			? undefined
+			: this.pairChecks.find(({id}) => id === uid);
+
+		return (
+			found ??
+			(check && {
+				bgName: check.bg.name,
+				fgName: check.fg.name,
+				contrast: {
+					bg: check.bg.rgbColor,
+					fg: check.fg.rgbColor
+				}
+			})
+		);
+	});
 }
 
 export const combinations = new Combinations();

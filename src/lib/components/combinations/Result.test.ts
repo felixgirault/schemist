@@ -46,24 +46,34 @@ beforeAll(() => {
 const text = (html: string) =>
 	html.replace(/<!--.*?-->|<[^>]*>/g, '').replace(/\s+/g, ' ');
 
-test('shows each rule with its specimen and status', () => {
+test('shows each rule with its specimen and cards', () => {
 	const html = text(render(Result).body);
 
 	expect(html).toContain('Black: Pack my box');
 	expect(html).toContain(
-		'Black on White: met (WCAG 2 21 of 4.5, APCA 106 of 75)'
+		'Black &amp; White AAA (21) met APCA 5 (106) met'
 	);
-	expect(html).toContain(
-		'Grey on White: not met (WCAG 2 1.2 of 4.5'
-	);
+	expect(html).toContain('Grey &amp; White KO (1.2) not met');
 	expect(html).toContain('Red and Blue: met (Difference');
 });
 
-test('repeats the specimens per simulation', () => {
+test('shows the simulations in the cards, once', () => {
 	combinations.blindnessTypes = ['protanomaly'];
 	const html = render(Result).body;
+	const plain = text(html);
 
 	combinations.blindnessTypes = [];
-	expect(html).toContain('Without simulation');
-	expect(html).toContain('protanomaly');
+	expect(plain).toContain('protanomaly');
+	expect(plain).not.toContain('Without simulation');
+	expect(html.split('Pack my box').length).toBe(3);
+});
+
+test('previews a pair the Colors filter leaves out', () => {
+	combinations.colorFilters = [id('Red')];
+	combinations.previewedUid = `${palette.root!.id}-${id('Black')}`;
+	const previewed = combinations.previewed;
+
+	combinations.colorFilters = [];
+	combinations.previewedUid = null;
+	expect(previewed?.fgName).toBe('Black');
 });

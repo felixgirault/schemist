@@ -5,7 +5,11 @@
 	import {duoThemeStyle} from '#lib/style.js';
 
 	interface Props {
-		combination: Combination;
+		combination: {
+			bgName: string;
+			fgName: string;
+			contrast: Pick<Combination['contrast'], 'bg' | 'fg'>;
+		};
 		onClose: () => void;
 	}
 
