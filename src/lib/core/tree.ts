@@ -5,10 +5,17 @@ import type {
 	NodeData,
 	Param,
 	ParamValue,
-	PresetPair
+	PresetPair,
+	Role,
+	Rule
 } from '#lib/core/nodes.js';
 import {defaultArgs, isPresetDef} from '#lib/core/nodes.js';
-import {targetNames} from '#lib/core/pairs.js';
+import {
+	hasTarget,
+	ruleTargets,
+	targetNames,
+	uses
+} from '#lib/core/pairs.js';
 import defs, {isNodeType} from '#lib/definitions/index.js';
 
 const isObject = (
@@ -41,6 +48,8 @@ const nodeKeys = [
 	'children',
 	'isHidden'
 ];
+
+const rootKeys = ['pairs', 'roles', 'rules'];
 
 const pairKeys = ['fg', 'bg', ...targetNames];
 
@@ -76,6 +85,100 @@ const validatePairs = (value: unknown, path: string) => {
 		}
 
 		return pair as PresetPair;
+	});
+};
+
+const isStrings = (value: unknown): value is string[] =>
+	Array.isArray(value) &&
+	value.every((item) => typeof item === 'string');
+
+const validateRoles = (value: unknown, path: string) => {
+	if (!Array.isArray(value)) {
+		throw new Error(`${path}: expected an array`);
+	}
+
+	return value.map((role, i): Role => {
+		const at = `${path}[${i}]`;
+
+		if (!isObject(role)) {
+			throw new Error(`${at}: expected an object`);
+		}
+
+		for (const key of Object.keys(role)) {
+			if (key !== 'name' && key !== 'colors') {
+				throw new Error(`${at}: unknown key "${key}"`);
+			}
+		}
+
+		if (typeof role.name !== 'string' || !role.name) {
+			throw new Error(`${at}.name: expected a name`);
+		}
+
+		if (!isStrings(role.colors)) {
+			throw new Error(`${at}.colors: expected color names`);
+		}
+
+		return {name: role.name, colors: role.colors};
+	});
+};
+
+const ruleKeys = ['fg', 'bg', 'use', ...targetNames];
+
+const validateRules = (value: unknown, path: string) => {
+	if (!Array.isArray(value)) {
+		throw new Error(`${path}: expected an array`);
+	}
+
+	return value.map((rule, i): Rule => {
+		const at = `${path}[${i}]`;
+
+		if (!isObject(rule)) {
+			throw new Error(`${at}: expected an object`);
+		}
+
+		for (const [key, v] of Object.entries(rule)) {
+			if (!ruleKeys.includes(key)) {
+				throw new Error(`${at}: unknown key "${key}"`);
+			}
+
+			if (key === 'fg' || key === 'bg' || key === 'use') {
+				if (typeof v !== 'string') {
+					throw new Error(
+						`${at}.${key}: expected a string`
+					);
+				}
+			} else if (
+				typeof v !== 'number' ||
+				!Number.isFinite(v)
+			) {
+				throw new Error(`${at}.${key}: expected a number`);
+			}
+		}
+
+		if (typeof rule.fg !== 'string') {
+			throw new Error(`${at}.fg: expected a role name`);
+		}
+
+		if (rule.bg === '' || rule.fg === '') {
+			throw new Error(`${at}: expected a role name`);
+		}
+
+		if (
+			rule.use !== undefined &&
+			!uses.some(({id}) => id === rule.use)
+		) {
+			throw new Error(
+				`${at}.use: expected ${uses.map(({id}) => id).join(', ')}`
+			);
+		}
+
+		if (!hasTarget(ruleTargets(rule as Rule))) {
+			throw new Error(
+				`${at}: expected a use or at least one target: wcag2, apca or difference`
+			);
+		}
+
+		return rule as Rule;
 	});
 };
 
@@ -141,13 +244,22 @@ export const validateTree = (
 	for (const key of Object.keys(node)) {
 		if (
 			!nodeKeys.includes(key) &&
-			!(isRoot && key === 'pairs')
+			!(isRoot && rootKeys.includes(key))
 		) {
 			throw new Error(`${path}: unknown key "${key}"`);
 		}
 	}
 
-	const {type, token, args, children, isHidden, pairs} = node;
+	const {
+		type,
+		token,
+		args,
+		children,
+		isHidden,
+		pairs,
+		roles,
+		rules
+	} = node;
 
 	if (typeof type !== 'string' || !isNodeType(type)) {
 		throw new Error(
@@ -215,6 +327,14 @@ export const validateTree = (
 
 	if (pairs !== undefined) {
 		result.pairs = validatePairs(pairs, `${path}.pairs`);
+	}
+
+	if (roles !== undefined) {
+		result.roles = validateRoles(roles, `${path}.roles`);
+	}
+
+	if (rules !== undefined) {
+		result.rules = validateRules(rules, `${path}.rules`);
 	}
 
 	return result;

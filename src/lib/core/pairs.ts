@@ -6,7 +6,12 @@ import type {RgbColor} from '#lib/color/types.js';
 import type {BlindnessType} from '#lib/core/contrast.js';
 import {simulation} from '#lib/core/contrast.js';
 import {difference} from '#lib/core/difference.js';
-import type {PairTargets, PresetPair} from '#lib/core/nodes.js';
+import type {
+	PairTargets,
+	PresetPair,
+	Role,
+	Rule
+} from '#lib/core/nodes.js';
 
 export type PairError = {
 	index: number;
@@ -80,6 +85,60 @@ export const usesOf = (pair: PairTargets) => {
 export const hasTarget = (targets: PairTargets) =>
 	targetNames.some((name) => targets[name] !== undefined);
 
+// The name of a color to the only color that has it.
+const findColor = <T extends {name: string}>(
+	name: string,
+	colors: T[]
+): {color: T} | {error: string} => {
+	const found = colors.filter((c) => c.name === name);
+
+	return !found.length
+		? {error: `unknown color "${name}"`}
+		: found.length > 1
+			? {
+					error: `"${name}" names ${found.length} colors, give them distinct tokens`
+				}
+			: {color: found[0]};
+};
+
+export type RoleError = {index: number; message: string};
+
+// Maps the names of roles' colors, as `resolvePairs` does. A color
+// that does not resolve is reported and left out of its role, a role
+// named twice is left out.
+export const resolveRoles = <T extends {name: string}>(
+	roles: Role[],
+	colors: T[]
+) => {
+	const resolved: Role<T>[] = [];
+	const errors: RoleError[] = [];
+
+	roles.forEach(({name, colors: names}, index) => {
+		if (resolved.some((role) => role.name === name)) {
+			return errors.push({
+				index,
+				message: `role "${name}" declared twice`
+			});
+		}
+
+		const members: T[] = [];
+
+		for (const member of names) {
+			const found = findColor(member, colors);
+
+			if ('error' in found) {
+				errors.push({index, message: found.error});
+			} else {
+				members.push(found.color);
+			}
+		}
+
+		resolved.push({name, colors: members});
+	});
+
+	return {roles: resolved, errors};
+};
+
 // The only place where names are mapped to colors. `colors` are all
 // the colors of the tree, hidden ones included. Pairs that do not
 // resolve are reported in `errors`, and left out of `pairs`.
@@ -98,18 +157,12 @@ export const resolvePairs = <T extends {name: string}>(
 		) => errors.push({index, field, message});
 
 		const find = (field: 'fg' | 'bg') => {
-			const name = pair[field];
-			const found = colors.filter((c) => c.name === name);
+			const found = findColor(pair[field], colors);
 
-			if (!found.length) {
-				fail(`unknown color "${name}"`, field);
-			} else if (found.length > 1) {
-				fail(
-					`"${name}" names ${found.length} colors, give them distinct tokens`,
-					field
-				);
+			if ('error' in found) {
+				fail(found.error, field);
 			} else {
-				return found[0];
+				return found.color;
 			}
 		};
 
@@ -141,6 +194,163 @@ export const resolvePairs = <T extends {name: string}>(
 	});
 
 	return {pairs: resolved, errors};
+};
+
+export type RuleError = {
+	index: number;
+	field?: 'fg' | 'bg' | 'use';
+	message: string;
+};
+
+// Where the targets of a pair come from: the rules by index, and the
+// one-off pair that replaces them.
+export type PairSources = {rules: number[]; oneOff: boolean};
+
+export type ExpandedPair<T> = ResolvedPair<T> & {
+	sources: PairSources;
+};
+
+// The targets of a rule: its use's, which its own targets override.
+export const ruleTargets = (rule: Rule): PairTargets => {
+	const use = uses.find(({id}) => id === rule.use);
+
+	return Object.fromEntries(
+		targetNames.flatMap((name) => {
+			const value =
+				rule[name] ??
+				use?.targets[name as keyof Use['targets']];
+			return value === undefined ? [] : [[name, value]];
+		})
+	);
+};
+
+// The only place where rules become pairs: each color of the fg role
+// on each one of the bg role, none on itself; a role among itself
+// (no bg) gives each couple once. Rules on the same couple combine,
+// the highest goal of each target winning. A one-off pair replaces
+// what rules give its couple. Roles are the resolved ones; a rule
+// that does not hold is reported in `errors`, and left out.
+export const expandRules = <T>(
+	roles: Role<T>[],
+	rules: Rule[],
+	oneOff: ResolvedPair<T>[]
+) => {
+	type Entry = ExpandedPair<T> & {among: boolean};
+	const entries: Entry[] = [];
+	const couples = new Map<T, Map<T, Entry>>();
+	const errors: RuleError[] = [];
+	const get = (fg: T, bg: T) => couples.get(fg)?.get(bg);
+	const put = (entry: Entry) => {
+		const row = couples.get(entry.fg) ?? new Map<T, Entry>();
+
+		couples.set(entry.fg, row.set(entry.bg, entry));
+	};
+
+	rules.forEach((rule, index) => {
+		const fail = (
+			message: string,
+			field?: RuleError['field']
+		) => errors.push({index, field, message});
+		const find = (field: 'fg' | 'bg', name: string) => {
+			const role = roles.find((r) => r.name === name);
+
+			if (!role) fail(`unknown role "${name}"`, field);
+
+			return role;
+		};
+
+		if (
+			rule.use !== undefined &&
+			!uses.some(({id}) => id === rule.use)
+		) {
+			return fail(`unknown use "${rule.use}"`, 'use');
+		}
+
+		const targets = ruleTargets(rule);
+
+		if (!hasTarget(targets)) {
+			return fail('expected a use or at least one target');
+		}
+
+		const from = find('fg', rule.fg);
+		const to =
+			rule.bg === undefined || rule.bg === rule.fg
+				? from
+				: find('bg', rule.bg);
+
+		if (!from || !to) return;
+
+		const among = from === to;
+		const fgs = [...new Set(from.colors)];
+		const bgs = [...new Set(to.colors)];
+
+		fgs.forEach((fg, i) =>
+			bgs.forEach((bg, j) => {
+				if (fg === bg || (among && j <= i)) return;
+
+				const entry = get(fg, bg);
+
+				if (!entry) {
+					const added = {
+						fg,
+						bg,
+						...targets,
+						sources: {rules: [index], oneOff: false},
+						among
+					};
+
+					entries.push(added);
+					return put(added);
+				}
+
+				for (const name of targetNames) {
+					if (targets[name] !== undefined) {
+						entry[name] = Math.max(
+							entry[name] ?? 0,
+							targets[name]
+						);
+					}
+				}
+
+				entry.sources.rules.push(index);
+				entry.among &&= among;
+			})
+		);
+	});
+
+	for (const pair of oneOff) {
+		const {fg, bg, wcag2, apca, difference} = pair;
+		// a difference ignores order, so does a couple from a role
+		// among itself
+		const reversed = get(bg, fg);
+		const replaced =
+			get(fg, bg) ?? (reversed?.among ? reversed : undefined);
+		const entry: Entry = {
+			fg,
+			bg,
+			wcag2,
+			apca,
+			difference,
+			sources: {rules: [], oneOff: true},
+			among: false
+		};
+
+		if (replaced) {
+			entries[entries.indexOf(replaced)] = entry;
+			couples.get(replaced.fg)!.delete(replaced.bg);
+		} else {
+			entries.push(entry);
+		}
+
+		put(entry);
+	}
+
+	return {
+		pairs: entries.map(
+			({among, ...pair}): ExpandedPair<T> => pair
+		),
+		errors
+	};
 };
 
 export type TargetCheck = {

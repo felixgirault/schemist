@@ -219,6 +219,19 @@ export type PairTargets = {
 // A pair as saved: the names of its two colors, and its targets.
 export type PresetPair = PairTargets & {fg: string; bg: string};
 
+// A named group of colors: names as saved, ids in the app.
+export type Role<T = string> = {name: string; colors: T[]};
+
+// A rule: the colors of role `fg` on those of role `bg`, or a role
+// among itself with no `bg`. Roles are named. Targets are the
+// `use`'s (ADR 14), which the explicit ones override, so a Custom
+// rule has no `use`.
+export type Rule = PairTargets & {
+	fg: string;
+	bg?: string;
+	use?: string;
+};
+
 export type NodeData = {
 	// Set when serializing a tree, to restore it as is, and when a
 	// preset is expanded into the nodes it generated.
@@ -230,6 +243,8 @@ export type NodeData = {
 	isHidden?: boolean;
 	// root only
 	pairs?: PresetPair[];
+	roles?: Role[];
+	rules?: Rule[];
 };
 
 // A tree whose ids are all set, once serialized or numbered.

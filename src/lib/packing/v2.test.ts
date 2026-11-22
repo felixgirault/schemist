@@ -112,3 +112,31 @@ test('ignores unknown or malformed targets', () => {
 		unpackVersioned(packed.replace('wcag2', 'nope')).pairs
 	).toEqual([{fg: 'A', bg: 'B'}]);
 });
+
+test('packs roles and rules, and reads links without them', () => {
+	const tree: NodeData = {
+		...pairsTree,
+		roles: [
+			{name: 'Surfaces', colors: ['Bg']},
+			{name: 'Text', colors: ['On Bg', 'Chart 1']},
+			{name: 'Empty', colors: []}
+		],
+		rules: [
+			{fg: 'Text', bg: 'Surfaces', use: 'body'},
+			{fg: 'Text', use: 'categories', wcag2: 3.5},
+			{fg: 'Text', bg: 'Surfaces', apca: 60.5}
+		]
+	};
+	const unpacked = unpackVersioned(packVersioned(tree));
+
+	expect(unpacked).toMatchObject(tree);
+	// links packed with pairs only, before roles and rules
+	expect(
+		unpackVersioned(
+			packVersioned(pairsTree).replace('@@@', '@')
+		)
+	).toMatchObject(pairsTree);
+	expect(
+		unpackVersioned(packVersioned(pairsTree))
+	).not.toHaveProperty('roles');
+});

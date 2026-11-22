@@ -1,7 +1,13 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
 import {expect, test} from 'vitest';
-import {checkPair, resolvePairs, usesOf} from './pairs';
+import {
+	checkPair,
+	expandRules,
+	resolvePairs,
+	resolveRoles,
+	usesOf
+} from './pairs';
 
 const colors = [
 	{name: 'A'},
@@ -107,4 +113,146 @@ test('infers the uses of a pair from its targets', () => {
 		'large',
 		'custom'
 	]);
+});
+
+test('resolves roles, reporting what does not resolve', () => {
+	const {roles, errors} = resolveRoles(
+		[
+			{name: 'Text', colors: ['A', 'X', 'C']},
+			{name: 'Text', colors: []},
+			{name: 'Both', colors: ['B']}
+		],
+		colors
+	);
+
+	expect(roles).toEqual([
+		{name: 'Text', colors: [colors[0], colors[3]]},
+		{name: 'Both', colors: []}
+	]);
+	expect(errors.map(({index}) => index)).toEqual([0, 1, 2]);
+});
+
+const ids = ['a', 'b', 'c', 'd'];
+const roles = [
+	{name: 'Text', colors: ['a', 'b']},
+	{name: 'Surfaces', colors: ['b', 'c', 'd']}
+];
+
+test('expands a rule to each fg on each bg, never on itself', () => {
+	const {pairs, errors} = expandRules(
+		roles,
+		[{fg: 'Text', bg: 'Surfaces', use: 'body'}],
+		[]
+	);
+
+	expect(errors).toEqual([]);
+	expect(pairs.map(({fg, bg}) => fg + bg)).toEqual([
+		'ab',
+		'ac',
+		'ad',
+		'bc',
+		'bd'
+	]);
+	expect(pairs[0]).toMatchObject({
+		wcag2: 4.5,
+		apca: 75,
+		sources: {rules: [0], oneOff: false}
+	});
+});
+
+test('expands a role among itself to unordered pairs', () => {
+	const {pairs} = expandRules(
+		[{name: 'Series', colors: ids}],
+		[{fg: 'Series', use: 'categories'}],
+		[]
+	);
+
+	expect(pairs).toHaveLength(6);
+	expect(pairs[0]).toMatchObject({
+		fg: 'a',
+		bg: 'b',
+		difference: 10
+	});
+});
+
+test('combines overlapping rules with the strictest targets', () => {
+	const {pairs} = expandRules(
+		roles,
+		[
+			{fg: 'Text', bg: 'Surfaces', use: 'body'},
+			{
+				fg: 'Text',
+				bg: 'Surfaces',
+				use: 'large',
+				difference: 5
+			}
+		],
+		[]
+	);
+
+	expect(pairs[0]).toMatchObject({
+		wcag2: 4.5,
+		apca: 75,
+		difference: 5,
+		sources: {rules: [0, 1], oneOff: false}
+	});
+});
+
+test('a one-off pair replaces what rules give its couple', () => {
+	const {pairs} = expandRules(
+		roles,
+		[{fg: 'Text', bg: 'Surfaces', use: 'body'}],
+		[
+			{fg: 'a', bg: 'c', wcag2: 3},
+			{fg: 'a', bg: 'z', wcag2: 3}
+		]
+	);
+	const ac = pairs.find(({bg}) => bg === 'c')!;
+
+	expect(pairs).toHaveLength(6);
+	expect(ac.apca).toBeUndefined();
+	expect(ac).toMatchObject({
+		wcag2: 3,
+		sources: {rules: [], oneOff: true}
+	});
+	expect(pairs.at(-1)).toMatchObject({bg: 'z'});
+});
+
+test('a one-off pair replaces a couple of a role among itself', () => {
+	const {pairs} = expandRules(
+		[{name: 'Series', colors: ['a', 'b']}],
+		[{fg: 'Series', use: 'categories'}],
+		[{fg: 'b', bg: 'a', difference: 20}]
+	);
+
+	expect(pairs).toEqual([
+		{
+			fg: 'b',
+			bg: 'a',
+			difference: 20,
+			sources: {rules: [], oneOff: true}
+		}
+	]);
+});
+
+test('reports rules that do not hold, and keeps the others', () => {
+	const {pairs, errors} = expandRules(
+		roles,
+		[
+			{fg: 'Nope', bg: 'Surfaces', use: 'body'},
+			{fg: 'Text', bg: 'Surfaces', use: 'nope'},
+			{fg: 'Text', bg: 'Surfaces'},
+			{fg: 'Text', bg: 'Surfaces', wcag2: 3}
+		],
+		[]
+	);
+
+	expect(
+		errors.map(({index, field}) => [index, field])
+	).toEqual([
+		[0, 'fg'],
+		[1, 'use'],
+		[2, undefined]
+	]);
+	expect(pairs[0].sources.rules).toEqual([3]);
 });

@@ -1,6 +1,6 @@
 import {expect, test} from 'vitest';
 import type {IdentifiedNodeData} from './nodes';
-import {changedArg, withIds} from './tree';
+import {changedArg, validateTree, withIds} from './tree';
 
 test('withIds numbers template nodes depth-first', () => {
 	expect(
@@ -77,4 +77,28 @@ test('names no arg when a type changes', () => {
 			tree({type: 's', args: {amount: 20}})
 		)
 	).toBeUndefined();
+});
+
+test('validates roles and rules of the root only', () => {
+	const roles = [{name: 'Text', colors: ['A']}];
+	const rules = [{fg: 'Text', use: 'categories', wcag2: 3}];
+
+	expect(
+		validateTree({type: 'clr', roles, rules}, 'root', true)
+	).toMatchObject({roles, rules});
+	expect(() =>
+		validateTree({type: 'clr', roles}, 'root')
+	).toThrow('unknown key "roles"');
+});
+
+test.each([
+	[{roles: [{name: '', colors: []}]}, 'expected a name'],
+	[{roles: [{name: 'A', colors: [1]}]}, 'expected color names'],
+	[{rules: [{fg: 'A', use: 'nope'}]}, 'rules[0].use'],
+	[{rules: [{fg: 'A', bg: 'B'}]}, 'expected a use or at least'],
+	[{rules: [{fg: 'A', use: 'body', x: 1}]}, 'unknown key "x"']
+])('rejects %j', (data, message) => {
+	expect(() =>
+		validateTree({type: 'clr', ...data}, 'root', true)
+	).toThrow(message);
 });

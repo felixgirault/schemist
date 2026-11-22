@@ -1,11 +1,6 @@
 import {formatSchemistToHex} from '#lib/color/formatting.js';
 import type {SchemistColor} from '#lib/color/types.js';
-import type {
-	Args,
-	NodeData,
-	Param,
-	PresetPair
-} from '#lib/core/nodes.js';
+import type {Args, NodeData, Param} from '#lib/core/nodes.js';
 import {validateTree} from '#lib/core/tree.js';
 import defs, {isNodeType} from '#lib/definitions/index.js';
 
@@ -52,12 +47,12 @@ const escapeEntry = (entry: string) =>
 const unescapeEntry = (entry: string) =>
 	entry.replace(/%(25|2C|40)/gi, decodeURIComponent);
 
-// `packExtra` adds a section between the nodes and the dictionary,
-// which version 2 uses for the pairs.
+// `packExtra` adds sections between the nodes and the dictionary,
+// which version 2 uses for the pairs, roles and rules.
 export const pack = (
 	node: NodeData,
 	colorCodec = hexCodec,
-	packExtra?: (indice: (key: string) => number) => string
+	packExtra?: (indice: (key: string) => number) => string[]
 ): string => {
 	const packed: string[] = [];
 	// A Map keeps insertion order, unlike an object which lists
@@ -124,20 +119,21 @@ export const pack = (
 	return [
 		rootIndex,
 		packed.join(','),
-		...(packExtra ? [packExtra(indice)] : []),
+		...(packExtra?.(indice) ?? []),
 		[...index.keys()].map(escapeEntry).join(',')
 	].join('@');
 };
 
 // What comes out of a permalink is validated like any outside data.
-// With `unpackExtra`, reads the section `pack` got `packExtra` for.
+// With `unpackExtra`, reads the sections `pack` got `packExtra` for,
+// as the root's keys they give.
 export const unpack = (
 	data: string,
 	colorCodec = hexCodec,
 	unpackExtra?: (
-		section: string,
+		sections: string[],
 		index: string[]
-	) => PresetPair[]
+	) => Partial<NodeData>
 ) => {
 	const [rootIndex, inlinePacked, ...rest] = data.split('@');
 	const inlineIndex = rest.pop()!;
@@ -214,10 +210,9 @@ export const unpack = (
 	const tree = inflateNode(
 		nodes[parseInt(rootIndex, 16)]
 	) as object;
-	const pairs = unpackExtra?.(rest[0], index);
 
 	return validateTree(
-		pairs?.length ? {...tree, pairs} : tree,
+		{...tree, ...unpackExtra?.(rest, index)},
 		'permalink',
 		true
 	);

@@ -230,7 +230,7 @@ visible outputs without the store, as `PaletteColor`s
 
 ### 5.3 Tree data (`#lib/tree.ts`, `#lib/core/tree.ts`)
 
-`NodeData = {id?, type, token?, args?, children?, isHidden?, pairs?}`
+`NodeData = {id?, type, token?, args?, children?, isHidden?, pairs?, roles?, rules?}`
 (`#lib/core/nodes.ts`) is the plain form of a tree, used by
 presets, permalinks, history snapshots and the CLI, with `type` a
 `NodeType` (§6). `parseTree(NodeData) → Node` merges given `args`
@@ -242,12 +242,12 @@ store ids. `changedArg` and `withIds` live in
 `#lib/core/tree.ts`.
 
 `validateTree(data, path, isRoot?)` (`#lib/core/tree.ts`, which
-also accepts the root's `pairs`) checks data from outside and
-returns a `NodeData`: unknown keys, node types and params, and
-invalid values are rejected naming their path. Color args are CSS
-strings, converted to colors. The CLI (§14) validates its input
-with it, and `unpack` (§10) validates what a permalink holds
-before building the tree.
+also accepts the root's `pairs`, `roles` and `rules`) checks data
+from outside and returns a `NodeData`: unknown keys, node types
+and params, and invalid values are rejected naming their path.
+Color args are CSS strings, converted to colors. The CLI (§14)
+validates its input with it, and `unpack` (§10) validates what a
+permalink holds before building the tree.
 
 ## 6. Node types
 
@@ -602,6 +602,42 @@ returns `{uses, custom}`, the built-in uses whose targets the
 pair holds at those values (`holdsUse(pair, use)`), and whether
 targets are left over, which are Custom.
 
+#### Roles and rules (ADR 16)
+
+The root also holds `roles`, `{name, colors}` with free,
+non-empty names (a role stays until deleted, used or not; a color
+can have several), and `rules`,
+`{fg, bg?, use?, wcag2?, apca?, difference?}`: the colors of role
+`fg` on those of role `bg`, or a role among itself without `bg`.
+Rules name roles; roles name colors (color ids in the app and in
+snapshots). A rule stores the **use id** (§9.7 `uses`) and, for
+Custom or to adjust a use, explicit targets which override the
+use's per target (`ruleTargets(rule)`); it needs at least one
+target, which `validateTree` checks along with the structure and
+the use id.
+
+`resolveRoles(roles, colors)` maps member names to colors like
+`resolvePairs` (same unknown or ambiguous messages, per role
+`{index, message}`; a role named twice is left out).
+
+`expandRules(roles, rules, oneOff)` is the only place where rules
+become pairs. It takes resolved roles and the resolved one-off
+pairs (`T` is the color, an id in the app) and returns
+`{pairs, errors}`: each color of `fg` on each one of `bg`, never
+on itself; a role among itself gives each couple once, in role
+order (`bg` equal to `fg` means the same). Rules on a couple
+combine with the highest goal of each target. A one-off pair on a
+couple replaces what rules give it (for a role among itself, in
+either order). Each pair has `sources: {rules, oneOff}`: the
+**indexes** in `rules` of the rules it comes from (so a rule has
+no id; editing rules keeps indexes in sync), or `oneOff: true`
+with no rules when a declared pair replaced them. Order: rules'
+couples by rule, one-off pairs replacing in place, others last.
+`errors` are `{index, field?, message}` for unknown roles (`fg`
+or `bg`), an unknown use, or no target; the rule is left out. An
+unknown role is an error here, not in `validateTree`, so that the
+app stays lenient like for pairs.
+
 ## 10. Permalinks
 
 ### 10.1 Flow
@@ -641,17 +677,19 @@ payload of version `1`, which version `2` extends, is:
 <root>@<nodes>@<dictionary>
 ```
 
-Version `2` adds the pairs (§9.7) after the nodes, and writes
-colors differently (see values):
+Version `2` adds the pairs, roles and rules (§9.7) after the
+nodes, and writes colors differently (see values):
 
 ```
-<root>@<nodes>@<pairs>@<dictionary>
+<root>@<nodes>@<pairs>@<roles>@<rules>@<dictionary>
 ```
 
 | Part         | Content                                                                                                                                                                                   |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dictionary` | Comma-separated strings, in order of first use: type codes, tokens, param names, colors (v2: also pair names, targets and values). `%`, `,` and `@` are escaped as `%25`, `%2C` and `%40` |
 | `pairs`      | v2 only: comma-separated pair records, empty without pairs                                                                                                                                |
+| `roles`      | v2 only: records of dictionary indexes, the role name then its color names                                                                                                                |
+| `rules`      | v2 only: records of the indexes of `fg`, `bg` and `use` (the empty string for none), then (target name, value) indexes as in pairs                                                        |
 | `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                                                                   |
 | `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                                                                       |
 
