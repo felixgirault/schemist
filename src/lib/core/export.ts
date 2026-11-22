@@ -83,30 +83,39 @@ const useName = (pair: PairTargets) => {
 	return (custom ? [...names, 'custom'] : names).join(', ');
 };
 
-// The pairs of each exported color, in the order they are declared.
+// The pairs of the exported colors, in the order they are declared.
 // Pairs with a color out of `entries` (hidden) or no target are left
 // out.
-export const requirementsByColor = (
+const exportedPairs = (
 	entries: PaletteColor[],
 	{pairs}: Requirements
 ) => {
 	const byId = new Map(entries.map((e) => [e.id, e]));
-	const byColor = new Map<string, Requirement[]>();
 
-	for (const pair of pairs) {
+	return pairs.flatMap((pair) => {
 		const fg = byId.get(pair.fg);
 		const bg = byId.get(pair.bg);
 		const targets = targetsOf(pair);
 
-		if (!fg || !bg || !Object.keys(targets).length) continue;
+		return fg && bg && Object.keys(targets).length
+			? [{fg, bg, targets, use: useName(targets)}]
+			: [];
+	});
+};
 
-		const use = useName(targets);
-		const add = (id: string, requirement: Requirement) =>
-			byColor.set(id, [
-				...(byColor.get(id) ?? []),
-				requirement
-			]);
+// The pairs of each exported color.
+const requirementsByColor = (
+	entries: PaletteColor[],
+	requirements: Requirements
+) => {
+	const byColor = new Map<string, Requirement[]>();
+	const add = (id: string, requirement: Requirement) =>
+		byColor.set(id, [...(byColor.get(id) ?? []), requirement]);
 
+	for (const {fg, bg, use, targets} of exportedPairs(
+		entries,
+		requirements
+	)) {
 		add(fg.id, {color: bg, side: 'fg', use, targets});
 		add(bg.id, {color: fg, side: 'bg', use, targets});
 	}
@@ -140,33 +149,22 @@ const describe = (
 export const requirementRows = (
 	entries: PaletteColor[],
 	requirements: Requirements
-) => {
-	const byId = new Map(entries.map((e) => [e.id, e]));
-
-	return requirements.pairs.flatMap((pair) => {
-		const fg = byId.get(pair.fg);
-		const bg = byId.get(pair.bg);
-		const targets = targetsOf(pair);
-
-		if (!fg || !bg || !Object.keys(targets).length) return [];
-
-		return [
-			{
-				id: `${bg.id}-${fg.id}`,
-				fg: fg.name,
-				bg: bg.name,
-				use: useName(targets),
-				targets: formatTargets(targets),
-				pass: checkPair(
-					targets,
-					fg.rgbColor,
-					bg.rgbColor,
-					[]
-				).every(({pass}) => pass)
-			}
-		];
-	});
-};
+) =>
+	exportedPairs(entries, requirements).map(
+		({fg, bg, use, targets}) => ({
+			id: `${bg.id}-${fg.id}`,
+			fg: fg.name,
+			bg: bg.name,
+			use,
+			targets: formatTargets(targets),
+			pass: checkPair(
+				targets,
+				fg.rgbColor,
+				bg.rgbColor,
+				[]
+			).every(({pass}) => pass)
+		})
+	);
 
 export const toExportEntries = (
 	entries: PaletteColor[],
@@ -300,14 +298,20 @@ const placeFlatToken = (
 	}
 
 	colors[free] = token;
+	return free;
 };
 
 // The key of Schemist's data in `$extensions`, a reverse domain
 // name as DTCG asks.
 export const tokenExtensionKey = 'fr.fglt.schemist';
 
-// The roles and pairs of a token, nothing if it has none.
-const extensionsOf = (roles: string[], pairs: Requirement[]) =>
+// The roles and pairs of a token, nothing if it has none, the other
+// color of a pair being `reference`d by its token.
+const extensionsOf = (
+	roles: string[],
+	pairs: Requirement[],
+	reference: (color: PaletteColor) => string
+) =>
 	roles.length || pairs.length
 		? {
 				$extensions: {
@@ -317,7 +321,7 @@ const extensionsOf = (roles: string[], pairs: Requirement[]) =>
 							? {
 									pairs: pairs.map(
 										({color, side, use, targets}) => ({
-											color: color.name,
+											color: reference(color),
 											side,
 											use,
 											targets
@@ -331,11 +335,7 @@ const extensionsOf = (roles: string[], pairs: Requirement[]) =>
 		: {};
 
 // A token's final path, and why it can't be nested, if so.
-const toTokenItems = (
-	entries: PaletteColor[],
-	requirements: Requirements
-) => {
-	const byColor = requirementsByColor(entries, requirements);
+const toTokenItems = (entries: PaletteColor[]) => {
 	const paths = entries.map(({name}) => tokenPath(name));
 	const repeated = repeatedKeys(paths.map(pathKey));
 	const uniquePaths = withUniquePaths(paths);
@@ -344,17 +344,12 @@ const toTokenItems = (
 	);
 
 	return entries.map(({id, name, color}, i) => ({
+		id,
 		name,
 		path: uniquePaths[i],
 		token: {
 			'$type': 'color',
-			'$value': formatSchemistToHex(color),
-			...extensionsOf(
-				requirements.roles
-					.filter(({colors}) => colors.includes(id))
-					.map((role) => role.name),
-				byColor.get(id) ?? []
-			)
+			'$value': formatSchemistToHex(color)
 		} as Token,
 		isRepeated: repeated.has(pathKey(paths[i])),
 		isFlat:
@@ -383,21 +378,45 @@ export const exportTokens = (
 	link: string,
 	requirements = noRequirements
 ) => {
-	const items = toTokenItems(entries, requirements);
+	const items = toTokenItems(entries);
 	const colors: TokenGroup = {
 		'$description': `Build with Schemist (${link})`
 	};
+	// where each token lands, so that pairs can point at it
+	const paths = new Map<string, string[]>();
 
 	items
 		.filter(({isFlat}) => !isFlat)
-		.forEach(({path, token}) =>
-			nestToken(colors, path, token)
-		);
+		.forEach(({id, path, token}) => {
+			nestToken(colors, path, token);
+			paths.set(id, path);
+		});
 	items
 		.filter(({isFlat}) => isFlat)
-		.forEach(({name, token}) =>
-			placeFlatToken(colors, flatKey(name), token)
+		.forEach(({id, name, token}) =>
+			paths.set(id, [
+				placeFlatToken(colors, flatKey(name), token)
+			])
 		);
+
+	// A DTCG alias. shortcut: a flat key holding a dot reads as two
+	// segments, upgrade if conflicts with dots come up.
+	const reference = ({id}: PaletteColor) =>
+		`{${['Colors', ...paths.get(id)!].join('.')}}`;
+	const byColor = requirementsByColor(entries, requirements);
+
+	items.forEach(({id, token}) =>
+		Object.assign(
+			token,
+			extensionsOf(
+				requirements.roles
+					.filter(({colors}) => colors.includes(id))
+					.map((role) => role.name),
+				byColor.get(id) ?? [],
+				reference
+			)
+		)
+	);
 
 	return {
 		json: JSON.stringify({'Colors': colors}, null, 2),

@@ -221,13 +221,13 @@ test('tokens list roles and pairs under a reverse domain key', () => {
 			roles: ['Surfaces'],
 			pairs: [
 				{
-					color: 'Text',
+					color: '{Colors.Text}',
 					side: 'bg',
 					use: 'body text',
 					targets: {wcag2: 4.5, apca: 75}
 				},
 				{
-					color: 'Pale',
+					color: '{Colors.Pale}',
 					side: 'bg',
 					use: 'body text',
 					targets: {wcag2: 4.5, apca: 75}
@@ -238,6 +238,36 @@ test('tokens list roles and pairs under a reverse domain key', () => {
 	expect(
 		Colors.Text.$extensions['fr.fglt.schemist'].roles
 	).toBe(undefined);
+});
+
+test('tokens point at the token a pair names, not its name', () => {
+	const same = evaluate(
+		rootTree('#ffffff', [
+			named('Brand', '#000000'),
+			named('Brand', '#222222'),
+			named('bg/page', '#eeeeee')
+		])
+	);
+	const [, first, second, page] = same;
+	const {Colors} = JSON.parse(
+		exportTokens(same, link, {
+			pairs: [
+				{fg: second.id, bg: page.id, wcag2: 3},
+				{fg: first.id, bg: page.id, wcag2: 3}
+			],
+			roles: []
+		}).json
+	);
+
+	expect(
+		Colors.bg.page.$extensions['fr.fglt.schemist'].pairs.map(
+			({color}: {color: string}) => color
+		)
+	).toEqual(['{Colors.Brand (2)}', '{Colors.Brand}']);
+	expect(
+		Colors['Brand (2)'].$extensions['fr.fglt.schemist']
+			.pairs[0].color
+	).toBe('{Colors.bg.page}');
 });
 
 test('tokens are unchanged without requirements', () => {

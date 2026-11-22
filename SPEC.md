@@ -1043,10 +1043,12 @@ Outputs (visible colors, tree order). The formatting lives in
   `"$extensions": {"fr.fglt.schemist": {"roles": [...], "pairs": [{"color", "side", "use", "targets"}]}}`
   (DTCG's reverse-domain key for tool data; `roles` and `pairs`
   omitted when empty, the whole `$extensions` when both are): the
-  role names, and each pair of the token: `color` the other
-  color's name, `side` the token's (`fg` or `bg`), `use` the
-  lowercase names of the uses the targets hold (`body text`,
-  `custom` for others), `targets` the pair's.
+  role names, and each pair of the token: `color` a DTCG alias of
+  the other color's token where it is placed (`{Colors.bg.page}`,
+  `{Colors.Brand (2)}`), so that colors sharing a name stay
+  apart, `side` the token's (`fg` or `bg`), `use` the lowercase
+  names of the uses the targets hold (`body text`, `custom` for
+  others), `targets` the pair's.
 - **CSS**: `/* @see <permalink> */` then `--<name>: <value>;`
   lines.
 - **Sass**: same with `$<name>: <value>;`.
