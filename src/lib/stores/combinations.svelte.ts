@@ -214,8 +214,9 @@ class Combinations {
 			: true;
 	}
 
-	// Adds the brush's target to a pair, or removes it if the pair
-	// has it already.
+	// Sets the brush's target on a pair, or removes it if the pair
+	// has it at that value already, so a target typed in the card is
+	// never removed by a click.
 	toggleBrush(fg: PaletteColor, bg: PaletteColor) {
 		const target = this.brushTarget;
 
@@ -232,9 +233,9 @@ class Combinations {
 			apca,
 			difference,
 			[target.name]:
-				pair?.[target.name] === undefined
-					? target.value
-					: undefined
+				pair?.[target.name] === target.value
+					? undefined
+					: target.value
 		});
 	}
 

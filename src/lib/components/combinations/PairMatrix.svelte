@@ -261,6 +261,15 @@
 						Set a target to declare this pair.
 					</p>
 				{/if}
+
+				<button
+					class="button"
+					onclick={() => {
+						combinations.openPairIds = null;
+					}}
+				>
+					Close
+				</button>
 			</section>
 		{/if}
 

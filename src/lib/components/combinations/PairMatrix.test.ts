@@ -79,9 +79,7 @@ test('opens the details of a declared pair', () => {
 
 test('toggles the brush target on a pair', () => {
 	const entry = (token: string) =>
-		palette.colors.find(
-			({id}) => id === node(token).id
-		)!;
+		palette.colors.find(({id}) => id === node(token).id)!;
 	const pairOf = () =>
 		palette.pairs.find(
 			({fg, bg}) =>
@@ -104,6 +102,16 @@ test('toggles the brush target on a pair', () => {
 	expect(pairOf()).toMatchObject({difference: 10});
 	expect(pairOf()?.wcag2).toBeUndefined();
 	combinations.brush = 'difference';
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toBeUndefined();
+
+	// a target at another value, typed in the card, is set to the
+	// brush's value rather than removed
+	palette.setPair(node('Grey'), node('Black'), {wcag2: 7});
+	combinations.brush = 'contrast';
+	combinations.minLevel = 4.5;
+	combinations.toggleBrush(entry('Grey'), entry('Black'));
+	expect(pairOf()).toMatchObject({wcag2: 4.5});
 	combinations.toggleBrush(entry('Grey'), entry('Black'));
 	expect(pairOf()).toBeUndefined();
 

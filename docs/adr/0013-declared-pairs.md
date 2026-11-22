@@ -153,7 +153,7 @@ Difference:
   simulations). Marks drawn in the pair's own colors would vanish
   on the pairs that fail.
 - The card shows each target's field and measured levels, per
-  simulation, and a **Remove pair** button.
+  simulation, a **Remove pair** button and a **Close** button.
 - The heading counts passing pairs / declared pairs, hidden pairs
   left out of both.
 - **The filters are a brush.** A **Check** switch picks
@@ -165,12 +165,13 @@ Difference:
   pass before anything is declared.
 - **Activating a cell toggles the brush's target on its pair**:
   it adds `wcag2`, `apca` or `difference` with the current
-  minimum, or removes it when the pair has it already (the pair
-  goes with its last target), and opens the card for fine edits.
-  With a minimum of 0 (KO) there is no target to add: cells only
-  open the card, and a hint asks for a minimum. One brush at a
-  time, so that declaring text pairs does not also give them the
-  default difference target.
+  minimum, replacing another value, or removes it when the pair
+  has it at that value (the pair goes with its last target), so a
+  click never removes a target typed in the card, and opens the
+  card for fine edits. With a minimum of 0 (KO) there is no
+  target to add: cells only open the card, and a hint asks for a
+  minimum. One brush at a time, so that declaring text pairs does
+  not also give them the default difference target.
 - Other filters: **Colors** restricts the grid's rows and
   columns, **Color blindness simulation** and **Luminosity
   analysis** work as in the other modes.

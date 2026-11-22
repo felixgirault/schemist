@@ -797,23 +797,24 @@ simulations, has its colors dimmed (not its marks), and its
 accessible name says whether it reaches the minimum. Activating a
 cell (it is a button, so keyboard accessible) toggles the brush's
 target on the pair (`toggleBrush`): it adds `wcag2`, `apca` or
-`difference` with the current minimum, or removes it when the
-pair has it, the pair going with its last target. With a minimum
-of 0 nothing is declared, and the hint asks for a minimum. It
-then opens, in an `elevated` card under the grid, one number
-field per target (WCAG 2 contrast, APCA contrast, color
-difference; a value is applied on change, clearing every field
-removes the pair), and for each declared target the measured
-level for normal vision and each simulation with an icon and a
-text alternative for met or not met, and a **Remove pair**
-button. The panel closes the card when a color is no longer
-compared. Pairs with a hidden color are listed under the grid as
-not checked. A notice names the colors to rename when pairs
-cannot be saved (§8.1). The heading counts passing pairs /
-declared pairs (`pairChecks`; hidden pairs are in neither).
-**Colors** restricts the grid's rows and columns, **Color
-blindness simulation** and **Luminosity analysis** work as in the
-other modes.
+`difference` at the current minimum, replacing a target of
+another value, or removes it when the pair has it at that value,
+the pair going with its last target, so a click never removes a
+target typed in the card. With a minimum of 0 nothing is
+declared, and the hint asks for a minimum. It then opens, in an
+`elevated` card under the grid, one number field per target (WCAG
+2 contrast, APCA contrast, color difference; a value is applied
+on change, clearing every field removes the pair), and for each
+declared target the measured level for normal vision and each
+simulation with an icon and a text alternative for met or not
+met, a **Remove pair** button and a **Close** button. The panel
+closes the card when a color is no longer compared. Pairs with a
+hidden color are listed under the grid as not checked. A notice
+names the colors to rename when pairs cannot be saved (§8.1). The
+heading counts passing pairs / declared pairs (`pairChecks`;
+hidden pairs are in neither). **Colors** restricts the grid's
+rows and columns, **Color blindness simulation** and **Luminosity
+analysis** work as in the other modes.
 
 ### 11.6 Theming
 
