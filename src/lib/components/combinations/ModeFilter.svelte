@@ -37,6 +37,15 @@
 				bind:group={combinations.mode}
 			/>
 			<label class="button" for="mode-pairs">Grid</label>
+
+			<input
+				class="button-trigger hidden"
+				id="mode-result"
+				type="radio"
+				value="result"
+				bind:group={combinations.mode}
+			/>
+			<label class="button" for="mode-result">Result</label>
 		</div>
 	</div>
 </fieldset>

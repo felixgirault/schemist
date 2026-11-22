@@ -435,7 +435,7 @@ expensive combination computations during slider drags.
 | `filtered`                    | `all` with `minLevel ≥` the selected minimum                                                                                                                                                                                          |
 | `comparedColors`              | `sortedColors` restricted to the Colors filter (all when empty)                                                                                                                                                                       |
 | `previewed`                   | The combination matching `previewedUid`                                                                                                                                                                                               |
-| `mode`                        | `'contrast'` (default), `'difference'` or `'pairs'` (§11.5); not persisted                                                                                                                                                            |
+| `mode`                        | `'contrast'` (default), `'difference'`, `'pairs'` or `'result'` (§11.5); not persisted                                                                                                                                                |
 | `minDifference`               | Minimum difference to accept in difference mode, default 10                                                                                                                                                                           |
 | `differences`                 | `difference(a, b, blindnessTypes)` (§9.6) once per unordered pair of the compared colors (the Colors filter, or all), in `sortedColors` order, with `id` `<idA>-<idB>` and the entries `a`, `b`                                       |
 | `openDifferenceId`            | Id of the pair shown in the matrix details, or `null`                                                                                                                                                                                 |
@@ -842,9 +842,9 @@ change.
 
 ### 11.5 Combinations panel
 
-- A **Contrast | Difference | Grid** switch (`mode`, value
-  `'pairs'`). Difference and Pairs modes are described below the
-  contrast one.
+- A **Contrast | Difference | Grid | Result** switch (`mode`,
+  values `'pairs'` and `'result'`). The other modes are described
+  below the contrast one.
 - Filters, shown with at least two colors: **Colors** (background
   restriction, with Reset), **Contrast type**, **Minimum contrast
   level**, **Color blindness simulation**, **Luminosity
@@ -967,6 +967,27 @@ the use / cells (`passingCells`, `cellCount`); the hint gives the
 declared count. **Colors** restricts the grid's rows and columns,
 **Color blindness simulation** and **Luminosity analysis** work
 as in the other modes.
+
+**Result mode** (`'result'`, `Result.svelte`) shows each rule as
+its use, with the Requirements column beside it (same layout as
+the grid: a container query at 48rem, under it when narrower).
+The Colors and Check filters are not shown. A section per rule,
+titled as in the requirements, reads the rule's `pairChecks`
+(`ruleChecks`, nothing is measured again) and repeats once per
+variant when simulations are selected: "Without simulation", then
+one headed block per simulation, colors simulated. A role among
+itself (Categories) is a list of its colors, each a swatch beside
+a bar with its name, then each pair with its difference; Large
+text and UI has, per surface (a block in its color, titled by its
+name), a stroke, an outline and a large sample per foreground
+color; any other rule (Body text, Custom) has, per surface, a
+short paragraph per foreground color, starting with its token
+name, in that color. Each specimen is followed by a list "X on Y:
+met (or not met) (WCAG 2 4.8 of 4.5, ...)" for that variant.
+Hidden colors and pairs not checked are left out. A final
+**One-off pairs** section shows the one-off pairs
+(`oneOffChecks`) as text specimens. With nothing declared a hint
+asks to declare rules or pairs.
 
 ### 11.6 Theming
 

@@ -9,6 +9,7 @@
 	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
 	import ModeFilter from '#lib/components/combinations/ModeFilter.svelte';
 	import PairMatrix from '#lib/components/combinations/PairMatrix.svelte';
+	import Result from '#lib/components/combinations/Result.svelte';
 	import UseFilter from '#lib/components/combinations/UseFilter.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
@@ -26,13 +27,15 @@
 		{#if colorCount > 1}
 			<div class="data-options form">
 				<ModeFilter />
-				<ColorFilter />
+				{#if combinations.mode !== 'result'}
+					<ColorFilter />
+				{/if}
 				{#if combinations.mode === 'contrast'}
 					<ContrastTypeFilter />
 					<ContrastFilter />
 				{:else if combinations.mode === 'difference'}
 					<DifferenceFilter />
-				{:else}
+				{:else if combinations.mode === 'pairs'}
 					<UseFilter />
 				{/if}
 				<BlindnessFilter />
@@ -43,6 +46,8 @@
 
 	{#if combinations.mode === 'pairs'}
 		<PairMatrix />
+	{:else if combinations.mode === 'result'}
+		<Result />
 	{:else if combinations.mode === 'difference'}
 		<DifferenceMatrix />
 	{:else}

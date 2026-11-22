@@ -39,7 +39,7 @@ export type PairCheck = {
 };
 
 class Combinations {
-	mode = $state<'contrast' | 'difference' | 'pairs'>(
+	mode = $state<'contrast' | 'difference' | 'pairs' | 'result'>(
 		'contrast'
 	);
 	openPairIds = $state<{fg: string; bg: string} | null>(null);
