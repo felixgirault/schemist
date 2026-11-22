@@ -99,15 +99,15 @@ A tree is nodes with a `type`, optional `token` (the name, where
 `$` stands for the parent's name), `args`, `children` and
 `isHidden`. Each node derives its color from its parent, like in
 the app. Get the available types and params from `types`, and
-ideas from `presets`. Presets can't have children. Color args
-are CSS color strings, range args are integers within their
-bounds. The root can also declare the `pairs` that must work
-together, each with the names of its two colors (`fg` on `bg`)
-and its own targets, any of `wcag2`, `apca` and `difference`;
-`eval` then reports whether each pair meets them, in the worst
-case of `--blindness`. A pair on an unknown or ambiguous name
-makes the tree invalid. Invalid trees are rejected with the path
-of the problem, e.g. `root.children[2].args.amount`.
+ideas from `presets`. Presets can't have children. Color args are
+CSS color strings, range args are integers within their bounds.
+The root can also declare the `pairs` that must work together,
+each with the names of its two colors (`fg` on `bg`) and its own
+targets, any of `wcag2`, `apca` and `difference`; `eval` then
+reports whether each pair meets them, in the worst case of
+`--blindness`. A pair on an unknown or ambiguous name makes the
+tree invalid. Invalid trees are rejected with the path of the
+problem, e.g. `root.children[2].args.amount`.
 
 ```json
 {

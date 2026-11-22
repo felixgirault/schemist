@@ -105,13 +105,25 @@ into nodes when it is loaded.
   and is left out of the permalink until then. Nothing else is
   dropped.
 
+### History and persistence
+
+Undo snapshots (ADR 9) hold the pairs by node ids, which the tree
+keeps once restored: undoing rebuilds the nodes with `parseTree`
+and maps the pair ids onto them, so each state gets back exactly
+its own pairs. Declaring or removing a pair is a recorded change.
+Swapping a color's type (ADR 8) keeps the node object, so its
+pairs stay. `localStorage` and the URL hold the packed palette,
+pairs included, and loading from either goes through the
+resolver, leniently as above.
+
 A round-trip test (serialize, pack, unpack, parse) after renames,
 parent renames, moves, removals and hides checks that every
 saveable pair comes back on the same colors.
 
 ### Permalink
 
-Packing version `2` adds the pairs after the nodes:
+Packing version `2` (with lossless colors, below) adds the pairs
+after the nodes:
 
 ```
 2@<root>@<nodes>@<pairs>@<dictionary>
@@ -124,6 +136,11 @@ a name mostly costs an index. Packing stays structural: it does
 not evaluate colors, and the resolver checks the names on load.
 Version `1` still unpacks, with no pairs. New links are always
 version `2`.
+
+Version `2` is the one of the port of `feature-v2` (ADR 5): its
+colors are lossless (`h_s_l` entries instead of hex), and the
+pairs section extends it. No version `3`, since no version `2`
+link was ever published.
 
 ### CLI
 
@@ -142,8 +159,8 @@ A **Pairs** mode in the Combinations panel, next to Contrast and
 Difference:
 
 - A grid with backgrounds as rows and foregrounds as columns,
-  built from the difference matrix (ADR 12): compact cells, swatch
-  headers, sticky row headers, a details card.
+  built from the difference matrix (ADR 12): compact cells,
+  swatch headers, sticky row headers, a details card.
 - Every cell is drawn as its pair, "Aa" in the foreground on the
   background, so the grid is a map of the palette before any pair
   is declared (empty cells looked like nothing to do). A declared
@@ -213,7 +230,8 @@ Contrast and Difference modes stay, to explore before declaring.
 
 ## Plan
 
-Built on `feature-difference-view`, which is not merged yet.
+Built on `feature-difference-view`, which is not merged yet, then
+rebased on the port of `feature-v2` (ADR 5).
 
 1. Core: `PresetNode.pairs`, `resolvePairs`, and the check of a
    pair against its targets, with tests; SPEC §9.
