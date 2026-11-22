@@ -1,6 +1,6 @@
 import {randomUsableColor} from '#lib/color/manipulation.js';
 import {unpack} from '#lib/packing/index.js';
-import {parsePairs, parseTree} from '#lib/tree.js';
+import {parsePairs, parseRoles, parseTree} from '#lib/tree.js';
 
 const StorageKey = 'palette';
 
@@ -20,7 +20,8 @@ export const storePalette = (packed: string) => {
 };
 
 // Restores the palette from the URL, else from the last session,
-// with its declared pairs. The ones that don't resolve are dropped.
+// with its declared pairs, roles and rules. The pairs and role
+// members that don't resolve are dropped.
 export const loadPalette = () => {
 	const query = new URLSearchParams(location.search);
 	const presets = [query.get('preset'), storedPalette()];
@@ -31,7 +32,12 @@ export const loadPalette = () => {
 				const data = unpack(preset);
 				const root = parseTree(data);
 
-				return {root, pairs: parsePairs(data, root)};
+				return {
+					root,
+					pairs: parsePairs(data, root),
+					roles: parseRoles(data, root),
+					rules: data.rules ?? []
+				};
 			} catch (e) {
 				console.error(
 					`Error parsing preset \`${preset}\`: ${e}`
@@ -47,6 +53,8 @@ export const loadPalette = () => {
 				color: randomUsableColor()
 			}
 		}),
-		pairs: []
+		pairs: [],
+		roles: [],
+		rules: []
 	};
 };

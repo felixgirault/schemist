@@ -1,7 +1,8 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
-import type {PairTargets} from '#lib/core/nodes.js';
+import type {PairTargets, Role, Rule} from '#lib/core/nodes.js';
+import {expandRules} from '#lib/core/pairs.js';
 import {permalink} from '#lib/routing.js';
 import type {
 	Node,
@@ -37,6 +38,24 @@ class Palette {
 			({fg, bg}) => ids.has(fg) && ids.has(bg)
 		);
 	});
+	// Roles and rules as set (ADR 16): roles hold color ids, rules
+	// name roles. Nothing edits them yet, but loading, undo and saving
+	// keep them.
+	storedRoles = $state.raw<Role[]>([]);
+	rules = $state.raw<Rule[]>([]);
+	// The roles without the colors since removed.
+	roles = $derived.by(() => {
+		const ids = new Set(this.allColors.map(({id}) => id));
+
+		return this.storedRoles.map(({name, colors}) => ({
+			name,
+			colors: colors.filter((id) => ids.has(id))
+		}));
+	});
+	// What is checked: the declared pairs and the ones rules give.
+	expandedPairs = $derived(
+		expandRules(this.roles, this.rules, this.pairs).pairs
+	);
 	// The pairs a permalink cannot hold until a color is renamed
 	unsavedPairs = $derived(
 		this.root ? namePairs(this.root, this.pairs).unsaved : []
@@ -77,7 +96,12 @@ class Palette {
 
 		return this.root
 			? permalink(
-					serializeTree(this.root, this.pairs),
+					serializeTree(
+						this.root,
+						this.pairs,
+						this.roles,
+						this.rules
+					),
 					origin
 				)
 			: origin;

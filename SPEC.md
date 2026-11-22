@@ -87,8 +87,8 @@ src/
     components/            UI (§11)
     utils/                 Generic helpers (arrays, css, math, strings, …)
     tree.ts                parseTree / serializeTree (tree ⇄ NodeData),
-                           parsePairs / namePairs (pairs ⇄ names, §8.1)
-    palette.ts             loadPalette (initial tree and pairs from URL, storage or random)
+                           parsePairs / namePairs / parseRoles (pairs and roles ⇄ names, §8.1)
+    palette.ts             loadPalette (initial tree, pairs, roles and rules from URL, storage or random)
     routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
@@ -235,11 +235,11 @@ visible outputs without the store, as `PaletteColor`s
 presets, permalinks, history snapshots and the CLI, with `type` a
 `NodeType` (§6). `parseTree(NodeData) → Node` merges given `args`
 over the type defaults and reuses `id` when set;
-`serializeTree(Node, pairs?) → IdentifiedNodeData` (a tree whose
-ids are all set) includes ids, omits empty tokens, args and
-children, and writes the root's pairs (§8.1). Permalinks don't
-store ids. `changedArg` and `withIds` live in
-`#lib/core/tree.ts`.
+`serializeTree(Node, pairs?, roles?, rules?) → IdentifiedNodeData`
+(a tree whose ids are all set) includes ids, omits empty tokens,
+args and children, and writes the root's pairs, roles and rules
+(§8.1). Permalinks don't store ids. `changedArg` and `withIds`
+live in `#lib/core/tree.ts`.
 
 `validateTree(data, path, isRoot?)` (`#lib/core/tree.ts`, which
 also accepts the root's `pairs`, `roles` and `rules`) checks data
@@ -357,13 +357,25 @@ each exporting a single reactive object.
 | `settledOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms)                 |
 | `storedPairs`    | Declared pairs as set, `{fg: string, bg: string, wcag2?, apca?, difference?}` (`ColorPair`, color ids), set on load |
 | `pairs`          | `storedPairs` whose two colors are still in the tree (hidden and generated ones included)                           |
+| `storedRoles`    | Roles as set, `{name, colors: string[]}` (color ids), set on load (ADR 16)                                          |
+| `roles`          | `storedRoles` without the colors since removed; a role stays until deleted, even empty                              |
+| `rules`          | Rules as set, `{fg, bg?, use?, ...targets}` naming roles (§9.7), set on load                                        |
+| `expandedPairs`  | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off pairs and the ones rules give, with `sources`    |
 | `unsavedPairs`   | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                   |
-| `permalink`      | `permalink(serializeTree(root, pairs), window.location.origin)` (§10.1)                                             |
+| `permalink`      | `permalink(serializeTree(root, pairs, roles, rules), window.location.origin)` (§10.1)                               |
 | `colors`         | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                  |
 | `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                                             |
 
 `setPair(fg, bg, targets)` declares or replaces a pair, or
-removes it when it has no target.
+removes it when it has no target. It only touches one-off pairs
+(`pairs`): `combinations.pairChecks`, the hidden pairs and the
+requirements list read `expandedPairs`, so rules loaded from a
+link are checked. The app has no way to edit roles and rules yet
+(ADR 16, step 2); they are kept by load, undo and saving.
+`parseRoles(tree, root)` and `rolesOn` map saved role names to
+ids and drop what is not a color of the tree, like pairs; a role
+member whose name is shared by several colors is left out of the
+saved roles until renamed (not listed in `unsavedPairs`).
 
 **Pairs hold color ids, never names.** `ColorPair` has no name
 field, so a pair cannot go out of sync with its colors: a rename
@@ -445,14 +457,16 @@ default `dash`), `precision` (default 3), `prefix` (default
 Undo and redo of the palette tree, see ADR 9. A generic `History`
 class (`#lib/utils/history.svelte.ts`) holds `past` and `future`
 stacks of snapshots, capped at 100 entries. A snapshot is
-`{tree, pairs}`: the `serializeTree` of the root (with ids) and
-the declared pairs (§8.1) by color ids, frozen by
-`$state.snapshot`. Undoing rebuilds the nodes with `parseTree`,
-which keeps the ids, so the ids of the pairs still point to the
-same colors, so each state gets back exactly its own pairs.
-`setPair` is a change like any other. What goes to `localStorage`
-and to the URL is the packed palette of the snapshot, pairs
-included (by names, §10).
+`{tree, pairs, roles, rules}`: the `serializeTree` of the root
+(with ids), the declared pairs (§8.1) and roles by color ids, and
+the rules, frozen by `$state.snapshot`. Undoing rebuilds the
+nodes with `parseTree`, which keeps the ids, so the ids of the
+pairs still point to the same colors, so each state gets back
+exactly its own pairs. `setPair` is a change like any other, and
+so is a change to roles or rules (they are in the snapshot and in
+the grouping test). What goes to `localStorage` and to the URL is
+the packed palette of the snapshot, pairs included (by names,
+§10).
 
 `startHistory(root)` (`#lib/stores/history.svelte.ts`, called
 when the palette mounts, after `palette.storedPairs` is set)
@@ -710,6 +724,10 @@ index. The dictionary entry of a color is:
 | ------- | ------------------------------------------------------------------------------- |
 | `1`     | 6-digit hex code without `#`, which rounds the color (lossy)                    |
 | `2`     | `h_s_l` of the `SchemistColor`, as full precision JavaScript numbers (lossless) |
+
+The sections of roles and rules are left out when empty and after
+the last non-empty one (a link with pairs only is as it was, and
+a link without the sections is read as having none).
 
 Version `2` rejects color entries that are not exactly three
 finite numbers. Whatever the version, `unpack` returns the tree

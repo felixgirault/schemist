@@ -4,6 +4,7 @@ import {collectNodes} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
 import {
 	parsePairs,
+	parseRoles,
 	parseTree,
 	serializeTree
 } from '#lib/tree.js';
@@ -26,7 +27,13 @@ const pairs = () =>
 const token = (id: string) =>
 	collectNodes(palette.root!).find((n) => n.id === id)!.token;
 
-const snapshot = () => read(palette.root!, palette.pairs);
+const snapshot = () =>
+	read(
+		palette.root!,
+		palette.pairs,
+		palette.roles,
+		palette.rules
+	);
 
 const node = (token: string) =>
 	collectNodes(palette.root!).find((n) => n.token === token)!;
@@ -42,6 +49,8 @@ beforeEach(() => {
 		]
 	});
 	palette.storedPairs = [];
+	palette.storedRoles = [];
+	palette.rules = [];
 	history.reset(snapshot());
 });
 
@@ -120,4 +129,49 @@ test('the saved palette holds the pairs', () => {
 	expect(
 		parsePairs(data, root).map(({wcag2}) => wcag2)
 	).toEqual([4.5]);
+});
+
+test('undo, redo and saving keep roles and rules', () => {
+	const roles = [
+		{name: 'Surfaces', colors: [node('Bg').id]},
+		{name: 'Content', colors: [node('Text').id]}
+	];
+	const rules = [{fg: 'Content', bg: 'Surfaces', use: 'body'}];
+
+	step(() => {
+		palette.storedRoles = roles;
+		palette.rules = rules;
+	});
+	step(() => {
+		palette.rules = [];
+	});
+
+	history.undo();
+	expect(palette.roles).toEqual(roles);
+	expect(palette.rules).toEqual(rules);
+	// the rule is checked, with no one-off pair
+	expect(palette.expandedPairs).toMatchObject([
+		{fg: node('Text').id, bg: node('Bg').id, wcag2: 4.5}
+	]);
+
+	const data = unpack(
+		pack(
+			serializeTree(
+				palette.root!,
+				palette.pairs,
+				palette.roles,
+				palette.rules
+			)
+		)
+	);
+
+	expect(data.rules).toEqual(rules);
+	expect(data.roles).toEqual([
+		{name: 'Surfaces', colors: ['Bg']},
+		{name: 'Content', colors: ['Text']}
+	]);
+	expect(parseRoles(data, parseTree(data))).toHaveLength(2);
+
+	history.undo();
+	expect(palette.roles).toEqual([]);
 });

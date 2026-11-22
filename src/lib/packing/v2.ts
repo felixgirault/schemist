@@ -75,32 +75,44 @@ const records = (section: string | undefined) =>
 	section ? section.split(',').map(decodeNumbers) : [];
 
 export const pack = (node: NodeData) =>
-	packV1(node, preciseCodec, (indice) => [
-		(node.pairs ?? [])
-			.map((pair) =>
-				encodeNumbers([
-					indice(pair.fg),
-					indice(pair.bg),
-					...packTargets(pair, indice)
-				])
-			)
-			.join(','),
-		(node.roles ?? [])
-			.map(({name, colors}) =>
-				encodeNumbers([indice(name), ...colors.map(indice)])
-			)
-			.join(','),
-		(node.rules ?? [])
-			.map((rule) =>
-				encodeNumbers([
-					indice(rule.fg),
-					indice(rule.bg ?? ''),
-					indice(rule.use ?? ''),
-					...packTargets(rule, indice)
-				])
-			)
-			.join(',')
-	]);
+	packV1(node, preciseCodec, (indice) => {
+		const sections = [
+			(node.pairs ?? [])
+				.map((pair) =>
+					encodeNumbers([
+						indice(pair.fg),
+						indice(pair.bg),
+						...packTargets(pair, indice)
+					])
+				)
+				.join(','),
+			(node.roles ?? [])
+				.map(({name, colors}) =>
+					encodeNumbers([
+						indice(name),
+						...colors.map(indice)
+					])
+				)
+				.join(','),
+			(node.rules ?? [])
+				.map((rule) =>
+					encodeNumbers([
+						indice(rule.fg),
+						indice(rule.bg ?? ''),
+						indice(rule.use ?? ''),
+						...packTargets(rule, indice)
+					])
+				)
+				.join(',')
+		];
+
+		// links without roles and rules stay as they were
+		while (sections.length > 1 && !sections.at(-1)) {
+			sections.pop();
+		}
+
+		return sections;
+	});
 
 export const unpack = (data: string) =>
 	unpackV1(

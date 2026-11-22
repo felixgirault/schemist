@@ -136,31 +136,33 @@ class Combinations {
 	pairChecks = $derived.by(() => {
 		const byId = new Map(palette.colors.map((e) => [e.id, e]));
 
-		return palette.pairs.flatMap((pair): PairCheck[] => {
-			const fg = byId.get(pair.fg);
-			const bg = byId.get(pair.bg);
+		return palette.expandedPairs.flatMap(
+			(pair): PairCheck[] => {
+				const fg = byId.get(pair.fg);
+				const bg = byId.get(pair.bg);
 
-			if (!fg || !bg) return [];
+				if (!fg || !bg) return [];
 
-			const checks = checkPair(
-				pair,
-				fg.rgbColor,
-				bg.rgbColor,
-				this.blindnessTypes
-			);
-
-			return [
-				{
-					id: `${bg.id}-${fg.id}`,
+				const checks = checkPair(
 					pair,
-					fg,
-					bg,
-					checks,
-					pass: checks.every(({pass}) => pass),
-					for: usesOf(pair)
-				}
-			];
-		});
+					fg.rgbColor,
+					bg.rgbColor,
+					this.blindnessTypes
+				);
+
+				return [
+					{
+						id: `${bg.id}-${fg.id}`,
+						pair,
+						fg,
+						bg,
+						checks,
+						pass: checks.every(({pass}) => pass),
+						for: usesOf(pair)
+					}
+				];
+			}
+		);
 	});
 
 	passingPairs = $derived(
@@ -173,7 +175,7 @@ class Combinations {
 			palette.allColors.map((c) => [c.id, c])
 		);
 
-		return palette.pairs.flatMap(({fg, bg}) => {
+		return palette.expandedPairs.flatMap(({fg, bg}) => {
 			const from = byId.get(fg);
 			const to = byId.get(bg);
 

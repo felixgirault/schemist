@@ -130,7 +130,8 @@ test('packs roles and rules, and reads links without them', () => {
 	const unpacked = unpackVersioned(packVersioned(tree));
 
 	expect(unpacked).toMatchObject(tree);
-	// links packed with pairs only, before roles and rules
+	// no section is written for roles and rules when there are none
+	expect(packVersioned(pairsTree)).not.toContain('@@');
 	expect(
 		unpackVersioned(
 			packVersioned(pairsTree).replace('@@@', '@')

@@ -6,10 +6,12 @@
 	import {onMount} from 'svelte';
 
 	onMount(() => {
-		const {root, pairs} = loadPalette();
+		const {root, pairs, roles, rules} = loadPalette();
 
 		palette.root = root;
 		palette.storedPairs = pairs;
+		palette.storedRoles = roles;
+		palette.rules = rules;
 		return startHistory(palette.root);
 	});
 </script>
