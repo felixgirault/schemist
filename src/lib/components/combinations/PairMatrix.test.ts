@@ -204,3 +204,11 @@ test('counts the cells reaching the brush', () => {
 
 	combinations.minLevel = 0;
 });
+
+test('renders the card as a manual popover dialog', () => {
+	const html = render(PairMatrix).body;
+
+	expect(html).toMatch(
+		/<div[^>]*popover="manual"[^>]*role="dialog"/
+	);
+});

@@ -805,27 +805,33 @@ the worst case of the selected simulations, has its colors dimmed
 (not its marks), and its accessible name says whether it reaches
 the minimum. Activating a cell (a button, so keyboard accessible)
 only opens its card, or closes it when it is open already. The
-`elevated` card under the grid has: a large sample with both
-names in the foreground on the background; the brush metric
-(grade and level, or difference) for normal vision and each
-simulation, each row in its simulated colors with an icon and a
-text alternative for met or not met; a **Require ≥ value** button
-that calls `toggleBrush` (adds `wcag2`, `apca` or `difference` at
-the current minimum, replacing a target of another value;
-**Remove ≥ value requirement** when the pair has it at that
-value; disabled with a hint when the minimum is 0); one number
-field per target (a value is applied on change, clearing every
-field removes the pair); for each declared target the measured
-levels; **Remove pair**; a **Preview** button toggling
-`previewedUid` to `<bgId>-<fgId>` (§11.5); and **Close**. The
-panel closes the card when a color is no longer compared. Pairs
-with a hidden color are listed under the grid as not checked. A
-notice names the colors to rename when pairs cannot be saved
-(§8.1). The heading counts cells reaching the brush / cells
-(`passingCells`, `cellCount`); the hint gives the declared count.
-**Colors** restricts the grid's rows and columns, **Color
-blindness simulation** and **Luminosity analysis** work as in the
-other modes.
+`elevated` card, a manual popover (`role="dialog"`) anchored to
+the open cell with CSS anchor positioning (below it, flipped when
+there is no room; centered by the browser where anchors are not
+supported), has: a large sample with both names in the foreground
+on the background; the brush metric (grade and level, or
+difference) for normal vision and each simulation, each row in
+its simulated colors with an icon and a text alternative for met
+or not met; a **Require ≥ value** button that calls `toggleBrush`
+(adds `wcag2`, `apca` or `difference` at the current minimum,
+replacing a target of another value; **Remove ≥ value
+requirement** when the pair has it at that value; disabled with a
+hint when the minimum is 0); one number field per target (a value
+is applied on change, clearing every field removes the pair); for
+each declared target the measured levels; **Remove pair**; a
+**Preview** button toggling `previewedUid` to `<bgId>-<fgId>`
+(§11.5); and **Close**. The panel closes the card when a color is
+no longer compared. Pairs with a hidden color are listed under
+the grid as not checked. Opening the card focuses it; Esc,
+**Close** or the open cell close it and give the focus back to
+the cell. It is manual, not light dismissed: pressing the open
+cell would close it and the click reopen it. A notice names the
+colors to rename when pairs cannot be saved (§8.1). The heading
+counts cells reaching the brush / cells (`passingCells`,
+`cellCount`); the hint gives the declared count. **Colors**
+restricts the grid's rows and columns, **Color blindness
+simulation** and **Luminosity analysis** work as in the other
+modes.
 
 ### 11.6 Theming
 

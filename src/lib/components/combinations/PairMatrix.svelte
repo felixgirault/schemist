@@ -34,15 +34,47 @@
 		)
 	]);
 
+	let card = $state<HTMLElement>();
+	// the cell that opened the card, to give it focus back
+	let invoker: HTMLElement | undefined;
+
 	// Shows the pair, or closes it when it is shown already.
-	const handleCell = (fg: PaletteColor, bg: PaletteColor) => {
+	const handleCell = (
+		fg: PaletteColor,
+		bg: PaletteColor,
+		event: Event
+	) => {
 		const same =
 			open?.fg.id === fg.id && open?.bg.id === bg.id;
 
+		invoker = event.currentTarget as HTMLElement;
 		combinations.openPairIds = same
 			? null
 			: {fg: fg.id, bg: bg.id};
 	};
+
+	const handleClose = () => {
+		combinations.openPairIds = null;
+	};
+
+	// The card is a manual popover anchored to the open cell (CSS
+	// anchor), following the open pair: shown and focused when one
+	// opens, hidden when it closes or its colors are gone. Manual,
+	// as light dismiss would close it on pressing the open cell,
+	// which the click would then reopen.
+	$effect(() => {
+		if (!card) return;
+
+		const isShown = card.matches(':popover-open');
+
+		if (open && !isShown) {
+			card.showPopover();
+			card.focus();
+		} else if (!open && isShown) {
+			card.hidePopover();
+			invoker?.focus();
+		}
+	});
 
 	const previewUid = $derived(
 		open ? `${open.bg.id}-${open.fg.id}` : null
@@ -224,8 +256,12 @@
 														`, ${s.type} ${round(s.level, 1)}`
 												)
 												.join('')}"
-											onclick={() =>
-												handleCell(column, row)}
+											onclick={(event) =>
+												handleCell(
+													column,
+													row,
+													event
+												)}
 										>
 											<span
 												class="preview"
@@ -273,8 +309,18 @@
 			</table>
 		</div>
 
-		{#if open}
-			<section class="details elevated" aria-live="polite">
+		<div
+			bind:this={card}
+			class="details elevated"
+			popover="manual"
+			role="dialog"
+			tabindex="-1"
+			aria-label="Pair details"
+			onkeydown={(event) => {
+				if (event.key === 'Escape') handleClose();
+			}}
+		>
+			{#if open}
 				<h3 class="h3">{open.fg.name} on {open.bg.name}</h3>
 
 				<p
@@ -426,16 +472,11 @@
 						: 'Preview'}
 				</button>
 
-				<button
-					class="button"
-					onclick={() => {
-						combinations.openPairIds = null;
-					}}
-				>
+				<button class="button" onclick={handleClose}>
 					Close
 				</button>
-			</section>
-		{/if}
+			{/if}
+		</div>
 
 		{#if combinations.hiddenPairs.length}
 			<h3 class="h3">Not checked, a color is hidden</h3>
@@ -516,6 +557,34 @@
 		color: var(--cell-fg);
 		font-family: var(--font-sans);
 		font-weight: 600;
+	}
+
+	/* Next to the open cell where anchors are supported, centered by
+	the browser otherwise. */
+	.matrix-panel :global(.pair-cell[aria-pressed='true']) {
+		anchor-name: --open-pair-cell;
+	}
+
+	.matrix-panel .details {
+		width: 32ch;
+		max-width: calc(100vw - 2rem);
+		max-height: calc(100vh - 2rem);
+		overflow: auto;
+		border: 1px solid var(--fg);
+		color: var(--fg);
+	}
+
+	@supports (anchor-name: --a) {
+		.matrix-panel .details {
+			inset: auto;
+			margin: 0.5rem;
+			position-anchor: --open-pair-cell;
+			position-area: block-end span-inline-end;
+			position-try-fallbacks:
+				flip-block,
+				flip-inline,
+				flip-block flip-inline;
+		}
 	}
 
 	/* Dims the colors only, not the marks of a declared pair. */
