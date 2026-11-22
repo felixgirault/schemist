@@ -105,6 +105,21 @@ into nodes when it is loaded.
   and is left out of the permalink until then. Nothing else is
   dropped.
 
+**Amended: color ids, not nodes.** A preset is one node that
+generates several colors, so its colors had no node to pair, and
+pairs on them were dropped as soon as set. Pairs now hold color
+ids: a node's id for its own color, `<preset id>.<index>` for a
+generated one (`Node.generated`).
+
+- Ids survive renames and moves, and expanding a preset keeps the
+  ids of its colors (`withIds`), so its pairs stay.
+- `palette.pairs` keeps the stored pairs whose two ids are colors
+  of the tree, hidden ones included, as above.
+- A preset generating fewer colors (fewer scale steps) hides the
+  pairs on the ones gone; they come back with them.
+- Snapshots already held ids; permalinks still hold names. No
+  format change.
+
 ### History and persistence
 
 Undo snapshots (ADR 9) hold the pairs by node ids, which the tree
