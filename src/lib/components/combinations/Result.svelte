@@ -72,62 +72,69 @@
 		palette.setPair(fg.id, bg.id, targets);
 	};
 
+	// Each variant's checks by pair id, so that a cell finds its pair
+	// without walking the list.
+	let variants = $derived(
+		combinations.allChecks.map(({name, checks}) => ({
+			name,
+			byId: new Map(checks.map((check) => [check.id, check]))
+		}))
+	);
+
 	const handlePreview = (uid: string) => {
 		combinations.previewedUid =
 			combinations.previewedUid === uid ? null : uid;
 	};
 </script>
 
-{#snippet cell(check: PairCheck | undefined, name: string)}
-	{#if check}
-		{@const isDifference =
-			check.checks.length > 0 &&
-			check.checks.every(
-				({target}) => target === 'difference'
-			)}
-		<td
-			class="cell"
-			class:cell--difference={isDifference}
-			style={isDifference
-				? ''
-				: `background: ${formatRgbToHex(check.bg.rgbColor)}; color: ${formatRgbToHex(check.fg.rgbColor)};`}
-		>
-			{#if isDifference}
-				<span class="swatches" aria-hidden="true">
-					<span
-						style="background: {formatRgbToHex(
-							check.fg.rgbColor
-						)};"
-					></span>
-					<span
-						style="background: {formatRgbToHex(
-							check.bg.rgbColor
-						)};"
-					></span>
+{#snippet cell(check: PairCheck, name: string)}
+	{@const isDifference =
+		check.checks.length > 0 &&
+		check.checks.every(({target}) => target === 'difference')}
+	<td
+		class="cell"
+		class:cell--difference={isDifference}
+		style={isDifference
+			? ''
+			: `background: ${formatRgbToHex(check.bg.rgbColor)}; color: ${formatRgbToHex(check.fg.rgbColor)};`}
+	>
+		{#if isDifference}
+			<span class="swatches" aria-hidden="true">
+				<span
+					style="background: {formatRgbToHex(
+						check.fg.rgbColor
+					)};"
+				></span>
+				<span
+					style="background: {formatRgbToHex(
+						check.bg.rgbColor
+					)};"
+				></span>
+			</span>
+		{/if}
+		{#each rowsOf(check.checks, (c) => c.level) as { name, level, met } (name)}
+			<span class="level">
+				<span class="grade">{name}</span>
+				({round(level, 1)})
+				<span class="status">
+					{met ? 'met' : '✗ not met'}
 				</span>
-			{/if}
-			{#each rowsOf(check.checks, (c) => c.level) as { name, level, met } (name)}
-				<span class="level">
-					<span class="grade">{name}</span>
-					({round(level, 1)})
-					<span class="status">
-						{met ? 'met' : '✗ not met'}
-					</span>
-				</span>
-			{/each}
+			</span>
+		{/each}
+		<!-- Preview shows the selected variant's colors (ADR 20, step 3
+				gives each cell its own) -->
+		{#if !name || name === palette.selectedVariant?.name}
 			<button
 				class="button button--icon"
 				title="Preview color combination"
 				aria-label="Preview {check.fg.name} on {check.bg
-					.name}{name ? ` in ${name}` : ''}"
+					.name}"
 				onclick={() => handlePreview(check.id)}
 			>
 				<PreviewIcon />
 			</button>
-		</td>
-	{:else}
-		<td class="cell"></td>
-	{/if}
+		{/if}
+	</td>
 {/snippet}
 
 {#snippet cards(checks: PairCheck[])}
@@ -139,7 +146,7 @@
 						<th scope="col">
 							<span class="hidden">Pair</span>
 						</th>
-						{#each combinations.allChecks as { name }}
+						{#each variants as { name }}
 							<th scope="col">
 								{#if name}{name}{:else}<span
 										class="hidden"
@@ -199,13 +206,8 @@
 									</button>
 								{/if}
 							</th>
-							{#each combinations.allChecks as { name, checks: inVariant }}
-								{@render cell(
-									inVariant.find(
-										({id}) => id === check.id
-									),
-									name
-								)}
+							{#each variants as { name, byId }}
+								{@render cell(byId.get(check.id)!, name)}
 							{/each}
 						</tr>
 					{/each}

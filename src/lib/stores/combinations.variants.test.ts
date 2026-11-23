@@ -81,6 +81,8 @@ test('draws a table with a column per variant', () => {
 	// One cell per variant, the failing one marked by its text
 	expect(html.match(/<td class="cell/g)).toHaveLength(2);
 	expect(text(html)).toContain('✗ not met');
+	// Preview shows the selected variant: only in its column
+	expect(html.match(/aria-label="Preview /g)).toHaveLength(1);
 });
 
 test('counts a variant without colors yet from the next settle on', () => {
