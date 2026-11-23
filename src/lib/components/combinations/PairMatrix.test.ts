@@ -331,3 +331,44 @@ test('groups the grid by role, Other collapsed once a role exists', () => {
 	palette.deleteRole(surfaces);
 	palette.deleteRole(text);
 });
+
+test('dims the cells missing the focused rule use, nothing otherwise', () => {
+	const root = palette.root!;
+	const surfaces = palette.addRole('Surfaces', [root.id])!;
+	const text = palette.addRole('Text', [
+		node('Grey').id,
+		node('Black').id
+	])!;
+	const rule = palette.addRule(text, surfaces, 'body');
+
+	expect(combinations.dimmedCells.size).toBe(0);
+	expect(render(PairMatrix).body).not.toContain(
+		'pair-cell--dim'
+	);
+
+	combinations.ruleId = rule;
+
+	// Grey on White (1.2:1) and White on Grey miss body text
+	expect([...combinations.dimmedCells].toSorted()).toEqual(
+		[
+			`${root.id}-${node('Grey').id}`,
+			`${node('Grey').id}-${root.id}`
+		].toSorted()
+	);
+
+	const html = render(PairMatrix).body;
+
+	expect(html.match(/pair-cell--dim/g)).toHaveLength(2);
+	expect(html).toContain(', misses the focused rule');
+
+	// a simulation can only add misses (worst case)
+	combinations.blindnessTypes = ['protanomaly', 'tritanomaly'];
+	expect(combinations.dimmedCells.size).toBeGreaterThanOrEqual(
+		2
+	);
+
+	combinations.blindnessTypes = [];
+	combinations.ruleId = null;
+	palette.deleteRole(surfaces);
+	palette.deleteRole(text);
+});

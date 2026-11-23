@@ -90,6 +90,9 @@
 		class:pair-cell--tall={combinations.blindnessTypes.length}
 		class:pair-cell--declared={check}
 		class:pair-cell--off={check && !check.pass}
+		class:pair-cell--dim={combinations.dimmedCells.has(
+			`${row.id}-${column.id}`
+		)}
 		class:pair-cell--rule={combinations.outlinedCells?.has(
 			`${row.id}-${column.id}`
 		)}
@@ -110,6 +113,10 @@
 				: 'does not meet its targets'
 			: 'not declared'}{simulations(check?.checks)}{check
 			? ', for ' + forNames(check)
+			: ''}{combinations.dimmedCells.has(
+			`${row.id}-${column.id}`
+		)
+			? ', misses the focused rule'
 			: ''}"
 		onclick={() => handleCell(column, row)}
 	>
@@ -170,7 +177,8 @@
 {#if colors.length > 1}
 	<p class="hint">
 		Each cell shows a foreground (column) on a background
-		(row). Activate one to open it. {combinations.pairChecks
+		(row). Activate one to open it. Hover or focus a rule to
+		dim the cells that miss its use. {combinations.pairChecks
 			.length} declared.
 	</p>
 
@@ -343,6 +351,11 @@
 		color: var(--cell-fg);
 		font-family: var(--font-sans);
 		font-weight: 600;
+	}
+
+	/* Dims the colors only, not the marks of a declared pair. */
+	.pair-cell--dim .preview {
+		opacity: 0.25;
 	}
 
 	:global(.matrix-panel) .pair-cell--declared {

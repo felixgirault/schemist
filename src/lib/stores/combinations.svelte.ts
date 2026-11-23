@@ -6,6 +6,7 @@ import type {TargetCheck, Use} from '#lib/core/pairs.js';
 import {
 	checkPair,
 	holdsUse,
+	ruleTargets,
 	targetNames,
 	usesOf,
 	uses
@@ -162,6 +163,38 @@ class Combinations {
 		this.ruleId ? this.ruleCells.get(this.ruleId) : undefined
 	);
 
+	// The grid cells that miss the focused rule's use, in the worst
+	// case of the selected simulations; empty without a rule. Computed
+	// once per rule, not per cell.
+	dimmedCells = $derived.by(() => {
+		const rule = palette.rules.find(
+			({id}) => id === this.ruleId
+		);
+		const dimmed = new Set<string>();
+
+		if (!rule) return dimmed;
+
+		const targets = ruleTargets(rule);
+
+		for (const bg of this.sortedColors) {
+			for (const fg of this.sortedColors) {
+				if (
+					fg.id !== bg.id &&
+					!checkPair(
+						targets,
+						fg.rgbColor,
+						bg.rgbColor,
+						this.blindnessTypes
+					).every(({pass}) => pass)
+				) {
+					dimmed.add(`${bg.id}-${fg.id}`);
+				}
+			}
+		}
+
+		return dimmed;
+	});
+
 	// The names of a rule: "Muted on Surfaces", and its use's.
 	describeRule(rule: AppRule) {
 		const name = (id?: string) =>
@@ -229,7 +262,9 @@ class Combinations {
 		);
 	});
 
-	pairColors = $derived(this.groups.flatMap(({colors}) => colors));
+	pairColors = $derived(
+		this.groups.flatMap(({colors}) => colors)
+	);
 
 	// The groups the user flipped from their default: Other starts
 	// collapsed once a role exists. Not saved.

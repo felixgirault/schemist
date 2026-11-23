@@ -437,6 +437,7 @@ expensive combination computations during slider drags.
 | `ruleChecks`                                             | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                              |
 | `ruleCells`                                              | `Map` rule id → `Set` of grid cells `<bgId>-<fgId>` of its pairs, plus the reverse of each for a role among itself                                                                                                                    |
 | `ruleId`, `outlinedCells`                                | The rule hovered or focused in the requirements (or `null`), and its cells, which the grid outlines                                                                                                                                   |
+| `dimmedCells`                                            | `Set` of cells `<bgId>-<fgId>` that miss the use of the rule `ruleId` (its `ruleTargets`, every target met in the worst case of the selected simulations); empty without a rule; computed once per rule                               |
 | `describeRule(rule)`                                     | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                     |
 | `groups`, `pairColors`                                   | The grid's colors by role (`{id, name, isOther, colors}`): a color is under its first role (the sorted order kept), those with none in a last **Other** group, empty groups left out; `pairColors` is their flat list                 |
 | `rolesOf`                                                | The names of all the roles of each color id                                                                                                                                                                                           |
@@ -940,15 +941,20 @@ rules" when shared, and **Delete role** (which also deletes its
 rules). Hovering or focusing a rule sets `ruleId`, and the grid
 draws a ring (`pair-cell--rule`, a box shadow in the highlight
 color) around exactly the cells of the rule's pairs, both orders
-for a role among itself. **Add a rule** is a form: the role (all
-roles, **New role…** with a name field), **On** (all roles,
-**Among itself**, **New role…**) and the use; a new role needs a
-free name, else an alert and nothing is added. The new rule opens
-expanded. **One-off pairs** follow: the declared pairs that
-replace or add to rules, by use (`requirements`, Custom last, a
-pair under each use it holds), with their cards. Pairs with a
-hidden color follow as **Not checked, a color is hidden**. With
-nothing declared, a hint says to add a rule or open a cell.
+for a role among itself. It also dims (`pair-cell--dim`, the
+colors only, not the marks) the cells of `dimmedCells`, which
+miss the rule's use whether declared or not; their accessible
+name says "misses the focused rule". Nothing is dimmed without a
+focused rule. The ring and the dimming mean one thing each: the
+rule's cells, and missing its use. **Add a rule** is a form: the
+role (all roles, **New role…** with a name field), **On** (all
+roles, **Among itself**, **New role…**) and the use; a new role
+needs a free name, else an alert and nothing is added. The new
+rule opens expanded. **One-off pairs** follow: the declared pairs
+that replace or add to rules, by use (`requirements`, Custom
+last, a pair under each use it holds), with their cards. Pairs
+with a hidden color follow as **Not checked, a color is hidden**.
+With nothing declared, a hint says to add a rule or open a cell.
 
 ### 11.6 Theming
 
