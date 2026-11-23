@@ -53,6 +53,30 @@ export const uses = [
 
 export type Use = (typeof uses)[number];
 
+// The roles and rules a palette without requirements starts with
+// (ADR 21), in the saved format. Roles start empty.
+export const defaultRequirements: {
+	roles: Role[];
+	rules: Rule[];
+} = {
+	roles: [
+		'Surfaces',
+		'Text',
+		'Borders',
+		'Accents',
+		'Text on accents',
+		'Categories'
+	].map((name) => ({name, colors: []})),
+	rules: [
+		{fg: 'Text', bg: 'Surfaces', use: 'body'},
+		{fg: 'Borders', bg: 'Surfaces', use: 'large'},
+		{fg: 'Accents', bg: 'Surfaces', use: 'large'},
+		{fg: 'Text on accents', bg: 'Accents', use: 'body'},
+		{fg: 'Categories', use: 'categories'},
+		{fg: 'Categories', bg: 'Surfaces', use: 'large'}
+	]
+};
+
 // Whether a pair has every target of the use at its value.
 export const holdsUse = (
 	pair: PairTargets | undefined,

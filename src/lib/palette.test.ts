@@ -37,6 +37,62 @@ test('the stored palette is used without a link', () => {
 	expect(load(null, packed('#0000ff'))).toBe('#0000ff');
 });
 
+const loaded = (preset: string | null) => {
+	vi.stubGlobal('location', {
+		search: preset
+			? `?preset=${encodeURIComponent(preset)}`
+			: ''
+	});
+
+	vi.stubGlobal('localStorage', {getItem: () => null});
+	return loadPalette();
+};
+
+const color1 = () => parseColor('#ff0000')[1]!;
+
+test('a new palette gets the default requirements', () => {
+	const {roles, rules, pairs} = loaded(null);
+
+	expect(roles.map((r) => r.name)).toEqual([
+		'Surfaces',
+		'Text',
+		'Borders',
+		'Accents',
+		'Text on accents',
+		'Categories'
+	]);
+	expect(roles.every((r) => !r.colors.length)).toBe(true);
+	expect(rules).toHaveLength(6);
+	expect(rules.every((r) => r.use)).toBe(true);
+	expect(pairs).toEqual([]);
+});
+
+test('a palette without requirements gets the defaults', () => {
+	expect(loaded(packed('#ff0000')).roles).toHaveLength(6);
+});
+
+test('a palette with some requirements keeps them', () => {
+	const rolesOnly = loaded(
+		pack({
+			type: 'clr',
+			args: {color: color1()},
+			roles: [{name: 'Mine', colors: []}]
+		})
+	);
+	const pairsOnly = loaded(
+		pack({
+			type: 'clr',
+			args: {color: color1()},
+			pairs: [{fg: 'a', bg: 'b', wcag2: 3}]
+		})
+	);
+	vi.spyOn(console, 'error').mockImplementation(() => {});
+
+	expect(rolesOnly.roles.map((r) => r.name)).toEqual(['Mine']);
+	expect(rolesOnly.rules).toEqual([]);
+	expect(pairsOnly.roles).toEqual([]);
+});
+
 test('invalid palettes fall back to the next source', () => {
 	vi.spyOn(console, 'error').mockImplementation(() => {});
 

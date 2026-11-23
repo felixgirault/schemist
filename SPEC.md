@@ -88,7 +88,7 @@ src/
     utils/                 Generic helpers (arrays, css, math, strings, …)
     tree.ts                parseTree / serializeTree (tree ⇄ NodeData),
                            parsePairs / namePairs / parseRoles (pairs and roles ⇄ names, §8.1)
-    palette.ts             loadPalette (initial tree, pairs, roles and rules from URL, storage or random)
+    palette.ts             loadPalette (initial tree, pairs, roles and rules from URL, storage or random; default requirements if none)
     routing.ts             permalink(tree, origin)
     samples.ts             Color previews for pickers and sliders
     style.ts               Theme CSS variables from a color
@@ -745,7 +745,18 @@ the rule is left out. An unknown role is an error here, not in
   `localStorage` (leniently: a pair that does not resolve is
   dropped and logged, the palette is kept, §8.1). If both are
   missing or invalid (errors are logged), the tree is a single
-  Custom color node with a random usable color.
+  Custom color node with a random usable color. A palette that
+  declares no pairs, roles and rules (a new one, or a link or
+  stored palette without them) gets `defaultRequirements`
+  (`#lib/core/pairs.ts`, ADR 21) in the saved format: the roles
+  Surfaces, Text, Borders, Accents, Text on accents and
+  Categories, all empty, and the rules Text on Surfaces (Body
+  text), Borders and Accents on Surfaces (Large text and UI),
+  Text on accents on Accents (Body text), Categories among
+  themselves (Categories) and on Surfaces (Large text and UI).
+  They are set before the history starts, then ordinary; a
+  palette with any pair, role or rule is left as it is, so
+  deleting all of them brings the defaults back on the next load.
 - Exports embed the permalink (CSS/Sass comment, design tokens
   description).
 
@@ -1109,10 +1120,11 @@ simulation, the highlight temperature, packing (snapshots of
 every node type, round trips, lossless colors and backward
 compatibility), permalinks (tokens with special characters), tree
 serialization (ids), the undo history and the initial palette
-source (link, storage, random). Characterization snapshots cover
-the outputs (hex values and names) of every preset under a few
-root colors and the CSS, Sass and design tokens exports. Declared
-pairs have unit tests of the resolver and of the checks
+source (link, storage, random) and its default requirements (new,
+without requirements, with some). Characterization snapshots
+cover the outputs (hex values and names) of every preset under a
+few root colors and the CSS, Sass and design tokens exports.
+Declared pairs have unit tests of the resolver and of the checks
 (`core/pairs.test.ts`), of the packing (`packing/v2.test.ts`), of
 tree validation and `eval` (CLI tests), of the store round trip
 (serialize, pack, unpack, parse after renames, moves, removals,
