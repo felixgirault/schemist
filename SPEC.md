@@ -399,24 +399,25 @@ each exporting a single reactive object.
 
 ### 8.1 `palette`
 
-| Member            | Description                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `root`            | Root `Node` (`undefined` until the palette component mounts)                                                        |
-| `outputs`         | `collectOutputs(root)`, updated synchronously                                                                       |
-| `settledOutputs`  | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms)                 |
-| `storedPairs`     | Declared pairs as set, `{fg: string, bg: string, wcag2?, apca?, difference?}` (`ColorPair`, color ids), set on load |
-| `pairs`           | `storedPairs` whose two colors are still in the tree (hidden and generated ones included)                           |
-| `storedRoles`     | Roles as set, `{id, name, colors: string[]}` (color ids), set on load (ADR 16)                                      |
-| `roles`           | `storedRoles` without the colors since removed; a role stays until deleted, even empty                              |
-| `rules`           | Rules as set, `{id, fg, bg?, use?, ...targets}` with `fg` and `bg` **role ids** (§9.7), set on load                 |
-| `variants`        | Variants as set, `{id, name}`, base first, `[]` without (§5.4, ADR 19), set on load                                 |
-| `selectedVariant` | The variant shown (`view.variant`), the base if none is chosen or it is gone; `undefined` without variants          |
-| `expandedPairs`   | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off and rule pairs, `sources` holding **rule ids**   |
-| `unsavedPairs`    | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                   |
-| `unsavedMembers`  | Names of role members a permalink cannot hold, shared by several colors (see below)                                 |
-| `permalink`       | `permalink(serializeTree(root, pairs, roles, rules, variants), window.location.origin)` (§10.1)                     |
-| `colors`          | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                  |
-| `rootColor`       | Root's color in `settledOutputs`, else the first output, else `#feffff`                                             |
+| Member            | Description                                                                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `root`            | Root `Node` (`undefined` until the palette component mounts)                                                                                                 |
+| `outputs`         | `collectOutputs(root)`, updated synchronously                                                                                                                |
+| `settledOutputs`  | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms)                                                          |
+| `storedPairs`     | Declared pairs as set, `{fg: string, bg: string, wcag2?, apca?, difference?}` (`ColorPair`, color ids), set on load                                          |
+| `pairs`           | `storedPairs` whose two colors are still in the tree (hidden and generated ones included)                                                                    |
+| `storedRoles`     | Roles as set, `{id, name, colors: string[]}` (color ids), set on load (ADR 16)                                                                               |
+| `roles`           | `storedRoles` without the colors since removed; a role stays until deleted, even empty                                                                       |
+| `rules`           | Rules as set, `{id, fg, bg?, use?, ...targets}` with `fg` and `bg` **role ids** (§9.7), set on load                                                          |
+| `variants`        | Variants as set, `{id, name}`, base first, `[]` without (§5.4, ADR 19), set on load                                                                          |
+| `selectedVariant` | The variant shown (`view.variant`), the base if none is chosen or it is gone; `undefined` without variants                                                   |
+| `expandedPairs`   | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off and rule pairs, `sources` holding **rule ids**                                            |
+| `unsavedPairs`    | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                                                            |
+| `unsavedMembers`  | Names of role members a permalink cannot hold, shared by several colors (see below)                                                                          |
+| `permalink`       | `permalink(serializeTree(root, pairs, roles, rules, variants), window.location.origin)` (§10.1)                                                              |
+| `settledVariants` | `PaletteColor[]` of each variant id, `evaluate`d from the tree once per `settle()` with `settledOutputs` (only with variants), in the same order as `colors` |
+| `colors`          | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                                                           |
+| `rootColor`       | Root's color in `settledOutputs`, else the first output, else `#feffff`                                                                                      |
 
 `addVariant()` adds a variant with no overrides, named "Dark" if
 free, else "Variant 2", "Variant 3"…, selects it and returns its
@@ -485,19 +486,22 @@ expensive combination computations during slider drags.
 
 ### 8.2 `combinations`
 
-| Member                        | Description                                                                                                                                                                                                                           |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                 |
-| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                                                    |
-| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                                                       |
-| `previewed`                   | The pair (`bgName`, `fgName`, `contrast.bg`/`fg`) of the pair `<bgId>-<fgId>` of `previewedUid`, declared or not, or `null`                                                                                                           |
-| `pairChecks`                  | `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
-| `passingPairs`                | Count of `pairChecks` that pass                                                                                                                                                                                                       |
-| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                          |
-| `requirements`                | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                         |
-| `addPair(fg, bg, use)`        | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                     |
-| `ruleChecks`                  | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                              |
-| `describeRule(rule)`          | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                     |
+| Member                        | Description                                                                                                                                                                                                                                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                                                      |
+| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                                                                                         |
+| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                                                                                            |
+| `previewed`                   | The pair (`bgName`, `fgName`, `contrast.bg`/`fg`) of the pair `<bgId>-<fgId>` of `previewedUid`, declared or not, or `null`                                                                                                                                                |
+| `pairChecks`                  | In the selected variant (the cards): `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
+| `allChecks`                   | `{name, checks}` for each variant (one unnamed entry without): the pairs checked in its colors, `pairChecks` for the selected one                                                                                                                                          |
+| `checkedPairs`                | Count of the pairs of `allChecks`, one per variant                                                                                                                                                                                                                         |
+| `ruleStatus(id)`              | `{pass, text}` of a rule over every variant: `met`, `not met` or `not met in Dark`                                                                                                                                                                                         |
+| `passingPairs`                | Count of the pairs of `allChecks` that pass                                                                                                                                                                                                                                |
+| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                                                               |
+| `requirements`                | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                                                              |
+| `addPair(fg, bg, use)`        | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                                                          |
+| `ruleChecks`                  | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                                                                   |
+| `describeRule(rule)`          | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                                                          |
 
 ### 8.3 `features`
 
@@ -838,10 +842,10 @@ compressing links is recorded in
   (tree, Export, Share, Undo and Redo buttons) and **Requirements
   (met / checked)**: the declared pairs that pass
   (`passingPairs`) over the declared pairs of visible colors
-  (`pairChecks`), with the **Simulate** and **Grayscale** toggles
-  (§11.5) in its header, then the requirements (§11.5). From
-  55rem, they are two columns, Palette (60ch, for long names)
-  then Requirements.
+  (`checkedPairs`), each counted once per variant (ADR 19), with
+  the **Simulate** and **Grayscale** toggles (§11.5) in its
+  header, then the requirements (§11.5). From 55rem, they are two
+  columns, Palette (60ch, for long names) then Requirements.
 - Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
   `Z` redoes, except while editing text (text inputs, textareas,
   the editable node name), where native undo applies. Undo and
@@ -968,12 +972,14 @@ the cards. Under the role:
   name, else an alert and nothing is added. Under it, the rules
   where the role is the first one, each a row: "on Surfaces ·
   Body text" or "among themselves · Categories", an icon with a
-  text alternative (met when none of the rule's pairs fails, in
-  the worst case of the selected simulations) and **Remove rule**
-  (`×`); its children are the rule's cards, given as the `pairs`
-  snippet (one combination card per pair, `ruleChecks`, nothing
-  is measured again, in the real colors, each target with its
-  grade, level and "met" or "not met", and one strip per selected
+  text alternative and tooltip (`ruleStatus`: met when none of
+  the rule's pairs fails, in any variant and in the worst case of
+  the selected simulations; else "not met", or "not met in Dark"
+  naming the failing variants) and **Remove rule** (`×`); its
+  children are the rule's cards, given as the `pairs` snippet
+  (one combination card per pair, `ruleChecks`, nothing is
+  measured again, in the real colors, each target with its grade,
+  level and "met" or "not met", and one strip per selected
   simulation in simulated colors with its levels; its Preview
   button toggles `previewedUid` to `<bgId>-<fgId>`; **Override**
   on a card whose pair is not one-off declares it one-off with

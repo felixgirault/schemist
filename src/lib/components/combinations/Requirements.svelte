@@ -75,11 +75,6 @@
 					.includes(query.trim().toLowerCase())
 		);
 
-	const failing = (rule: AppRule) =>
-		(combinations.ruleChecks.get(rule.id) ?? []).some(
-			({pass}) => !pass
-		);
-
 	const handleRename = (role: AppRole, event: Event) => {
 		const input = event.currentTarget as HTMLInputElement;
 
@@ -159,15 +154,15 @@
 	{/if}
 {/snippet}
 
-{#snippet status(pass: boolean)}
-	<span class="status">
+{#snippet status(rule: AppRule)}
+	{@const {pass, text} = combinations.ruleStatus(rule.id)}
+	<span class="status" title={text}>
 		{#if pass}
 			<CheckIcon />
-			<span class="hidden">met</span>
 		{:else}
 			<WarningIcon />
-			<span class="hidden">not met</span>
 		{/if}
+		<span class="hidden">{text}</span>
 	</span>
 {/snippet}
 
@@ -310,7 +305,7 @@
 								<div class="title">
 									<h5 class="name">
 										{where} · {useName}
-										{@render status(!failing(rule))}
+										{@render status(rule)}
 									</h5>
 								</div>
 								<div class="button-list">

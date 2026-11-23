@@ -24,9 +24,9 @@ class Combinations {
 	isLuminosityAnalysisEnabled = $state(false);
 	previewedUid = $state<string | null>(null);
 
-	// declared pairs of visible colors, checked as they are measured
-	pairChecks = $derived.by(() => {
-		const byId = new Map(palette.colors.map((e) => [e.id, e]));
+	// Declared pairs of the given colors, checked as they are measured.
+	#check(colors: PaletteColor[]) {
+		const byId = new Map(colors.map((e) => [e.id, e]));
 
 		return palette.expandedPairs.flatMap(
 			(pair): PairCheck[] => {
@@ -55,11 +55,79 @@ class Combinations {
 				];
 			}
 		);
+	}
+
+	// The pairs in the selected variant: the ones the cards show.
+	pairChecks = $derived(this.#check(palette.colors));
+
+	// The pairs of every variant, by name, the selected one being
+	// `pairChecks`; one unnamed entry without variants (ADR 19). The
+	// settled colors of the others line up with the selected ones, as
+	// the structure is the same.
+	allChecks = $derived.by(() => {
+		const {variants, selectedVariant, settledVariants} =
+			palette;
+
+		return variants.length
+			? variants.map(({id, name}) => ({
+					name,
+					checks:
+						id === selectedVariant?.id
+							? this.pairChecks
+							: this.#check(
+									palette.colors.map((color, i) => {
+										const {color: c, rgbColor} =
+											settledVariants[id][i];
+
+										return {
+											...color,
+											color: c,
+											rgbColor
+										};
+									})
+								)
+				}))
+			: [{name: '', checks: this.pairChecks}];
 	});
 
-	passingPairs = $derived(
-		this.pairChecks.filter(({pass}) => pass).length
+	// Pairs checked and passing, each counted once per variant.
+	checkedPairs = $derived(
+		this.allChecks.reduce(
+			(n, {checks}) => n + checks.length,
+			0
+		)
 	);
+
+	passingPairs = $derived(
+		this.allChecks.reduce(
+			(n, {checks}) =>
+				n + checks.filter((c) => c.pass).length,
+			0
+		)
+	);
+
+	// Whether a rule is met in every variant, and its text: "met",
+	// "not met", or "not met in Dark" naming the variants.
+	ruleStatus(id: string) {
+		const failing = this.allChecks.filter(({checks}) =>
+			checks.some(
+				({pair, pass}) =>
+					!pass && pair.sources.rules.includes(id)
+			)
+		);
+		const names = failing
+			.map(({name}) => name)
+			.filter(Boolean);
+
+		return {
+			pass: !failing.length,
+			text: !failing.length
+				? 'met'
+				: names.length
+					? `not met in ${names.join(', ')}`
+					: 'not met'
+		};
+	}
 
 	// declared pairs left out of the checks, by color names
 	hiddenPairs = $derived.by(() => {

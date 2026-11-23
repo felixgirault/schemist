@@ -15,5 +15,5 @@ export const rootTree = (hex: string, nodes: NodeData[]) => ({
 // are set the way the palette's effect would.
 export const loadPalette = (tree: NodeData) => {
 	palette.root = parseTree(tree);
-	palette.settledOutputs = palette.outputs;
+	palette.settle();
 };

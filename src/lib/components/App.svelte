@@ -118,8 +118,7 @@
 		<header>
 			<h2 class="h2" id="requirements-title">
 				Requirements <span>
-					({combinations.passingPairs} / {combinations
-						.pairChecks.length})
+					({combinations.passingPairs} / {combinations.checkedPairs})
 				</span>
 			</h2>
 			<div class="toggles">

@@ -1,6 +1,7 @@
 import {schemistToRgb} from '#lib/color/conversion.js';
 import {parseColor} from '#lib/color/parsing.js';
 import type {PaletteColor} from '#lib/core/evaluate.js';
+import {evaluate} from '#lib/core/evaluate.js';
 import type {
 	AppRole,
 	AppRule,
@@ -115,6 +116,34 @@ class Palette {
 	// keeping reasonable performance on fast recurring ones
 	// (i.e. when the user drags a range input).
 	settledOutputs: NodeOutputRecord = $state.raw({});
+
+	// The tree as data, to evaluate the variants once per change
+	// instead of in each component: only with variants.
+	#variantTree = $derived(
+		this.root && this.variants.length
+			? serializeTree(this.root)
+			: undefined
+	);
+	// Colors of each variant (by id), settled with the outputs, in
+	// the same order as `colors`.
+	settledVariants = $state.raw<Record<string, PaletteColor[]>>(
+		{}
+	);
+
+	// Takes the current outputs and variants as the settled ones.
+	settle() {
+		const tree = this.#variantTree;
+
+		this.settledOutputs = this.outputs;
+		this.settledVariants = tree
+			? Object.fromEntries(
+					this.variants.map(({id}) => [
+						id,
+						evaluate(tree, false, id)
+					])
+				)
+			: {};
+	}
 
 	// Colors of the settled outputs, as combinations and exports
 	// need them.
@@ -322,16 +351,18 @@ class Palette {
 
 	constructor() {
 		const update = debounce(
-			(outputs: NodeOutputRecord) => {
-				this.settledOutputs = outputs;
-			},
+			() => this.settle(),
 			withElapsedTime(
 				(time) => 10 + clamp(400 - time, 400) / 2
 			)
 		);
 
 		$effect.root(() => {
-			$effect(() => update(this.outputs));
+			$effect(() => {
+				this.outputs;
+				this.#variantTree;
+				update();
+			});
 		});
 	}
 }
