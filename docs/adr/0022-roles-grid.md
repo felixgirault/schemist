@@ -75,6 +75,13 @@ One-off pairs
 - **Removed**: the rules under roles, "+ Rule" with its form and
   "New role…", "Remove rule", "used by …".
 
+Amended after the polish: **Roles** moves to the Palette section,
+under the tree, with a title of its own. A role says what a color
+is, with or without rules, and exports carry it; Requirements
+keep what roles must meet. Setting roles on the tree's nodes was
+rejected: a preset's colors have no row there. A long palette
+puts Roles far from Targets.
+
 Amended after the first build, the polish: selects are styled as
 the other fields and narrow (9.5rem at most), a status icon never
 wraps below, and empty cells are faded by color (not `opacity`,

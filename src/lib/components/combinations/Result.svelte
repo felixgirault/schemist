@@ -264,7 +264,9 @@
 		border: 1px solid currentColor;
 	}
 
+	/* Positioned, to clip the visually hidden texts too */
 	.scroll {
+		position: relative;
 		overflow-x: auto;
 	}
 

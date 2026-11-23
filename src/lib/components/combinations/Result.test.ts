@@ -109,11 +109,10 @@ test('previews a pair, declared or not', () => {
 	expect(combinations.previewed).toBeNull();
 });
 
-test('shows a row per role with its colors, and a grid of its rules', () => {
+test('shows a grid of the rules of the roles, without the roles', () => {
 	const html = render(Result).body;
 	const plain = text(html);
 
-	expect(html).toContain('aria-label="Role name" value="Text"');
 	expect(plain).toContain('Text on Surfaces · Body text');
 	expect(plain).toContain(
 		'Series among themselves · Categories'
@@ -127,20 +126,12 @@ test('shows a row per role with its colors, and a grid of its rules', () => {
 		'Categories'
 	);
 	expect(selected('Surfaces on Text')).toBe('—');
-	expect(html).toContain('aria-label="Delete role Text"');
-	expect(html).toContain('aria-label="Add a color to Series"');
-	expect(html).toContain('aria-label="Remove Black from Text"');
-	expect(html).toContain('+ Role');
-	expect(html).toMatch(/<h3[^>]*>Roles<\/h3>/);
+	expect(html).toMatch(/<h3[^>]*>Targets<\/h3>/);
 	expect(
 		html.match(
 			/<select[^>]*aria-label="Surfaces on Text"[^>]*>/
 		)![0]
 	).toMatch(/class="[^"]*empty/);
-	// Delete role comes after the colors' list, apart from the chips
-	expect(html.indexOf('Add a color to Text')).toBeLessThan(
-		html.indexOf('Delete role Text')
-	);
 });
 
 test('draws a difference cell as two swatches, not text on a background', () => {
