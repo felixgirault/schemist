@@ -33,3 +33,13 @@
 		</label>
 	{/each}
 </div>
+
+<style>
+	.button-list {
+		align-items: center;
+	}
+
+	.button-list > span {
+		margin-right: 0.5ch;
+	}
+</style>

@@ -154,6 +154,20 @@
 		padding: var(--vgap) var(--hgap);
 	}
 
+	/* The title and the toggles share a row, wrapping on narrow panels */
+	.requirements > header {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem 1rem;
+		margin-bottom: var(--vgap);
+	}
+
+	.requirements h2 {
+		margin-bottom: 0;
+	}
+
 	.toggles {
 		display: flex;
 		flex-wrap: wrap;

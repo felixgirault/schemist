@@ -831,7 +831,8 @@ No grid (ADR 18): the requirements are a section of the page
 requirement with its cards underneath.
 
 - **Header toggles** (in `App.svelte`, in the Requirements
-  header, always shown): **Simulate** with one toggle per
+  header beside the title, wrapping under it on narrow panels,
+  always shown): **Simulate** with one toggle per
   simulation, **P**, **D**, **T** (protanomaly, deuteranomaly,
   tritanomaly; `blindnessTypes`), each with its full name as
   tooltip and accessible name, and **Grayscale**
