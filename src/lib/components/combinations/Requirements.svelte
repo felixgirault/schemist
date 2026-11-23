@@ -6,7 +6,10 @@
 	import type {AppRole, AppRule} from '#lib/core/nodes.js';
 	import {targetNames, uses} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
-	import type {CheckGroup} from '#lib/stores/combinations.svelte.js';
+	import type {
+		CheckGroup,
+		PairCheck
+	} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import type {Snippet} from 'svelte';
 
@@ -71,7 +74,8 @@
 	);
 
 	// The groups with checked pairs: a cell's rules in the grid's
-	// order, each pair once, then the one-off pairs by use.
+	// order, each pair once, by background (except among themselves),
+	// then the one-off pairs by use.
 	let groups = $derived(
 		[
 			...palette.roles.flatMap((row) =>
@@ -79,6 +83,11 @@
 					const rules = cellRules(row.id, col.id);
 
 					if (!rules.length) return [];
+
+					const rank = ({bg}: PairCheck) =>
+						row.id === col.id
+							? 0
+							: col.colors.indexOf(bg.id);
 
 					return [
 						{
@@ -97,7 +106,7 @@
 										)
 										.map((check) => [check.id, check])
 								).values()
-							]
+							].sort((a, b) => rank(a) - rank(b))
 						}
 					];
 				})

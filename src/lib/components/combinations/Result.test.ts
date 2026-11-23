@@ -76,6 +76,25 @@ const selected = (label: string) =>
 		)
 	)?.[1];
 
+test('sorts the pairs of two roles by background', () => {
+	const [, role, series] = palette.roles;
+
+	palette.setRule(role.id, series.id, 'large');
+
+	expect(
+		text(render(Result).body).match(
+			/(Black|Grey) on (Red|Blue)(?= )/g
+		)
+	).toEqual([
+		'Black on Red',
+		'Grey on Red',
+		'Black on Blue',
+		'Grey on Blue'
+	]);
+
+	palette.setRule(role.id, series.id);
+});
+
 test('rounds an APCA level down, never up to the goal', () => {
 	const grey = id('Grey');
 	const root = palette.root!.id;

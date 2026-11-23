@@ -1047,7 +1047,9 @@ are two flat sections (ADR 22), then **One-off pairs**.
   and UI", "Custom" for a rule with targets of its own) with its
   status and each pair once, then the one-off pairs by use
   ("One-off pairs · Custom"; `requirements`, Custom last, a pair
-  under each use it holds). Nothing is measured again
+  under each use it holds). Pairs are sorted by background, then
+  foreground, each in its role's order (among themselves, as
+  `expandRules` gives them). Nothing is measured again
   (`ruleChecks`). One hint says a rule is checked once its roles
   have colors, when one has none. The Preview button, named
   "Preview Grey on White", toggles `previewedUid` to
