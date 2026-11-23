@@ -7,7 +7,6 @@
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
-	import '#lib/components/palette/tree.css';
 	import type {AppRole, AppRule} from '#lib/core/nodes.js';
 	import {targetNames, uses} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
@@ -189,131 +188,104 @@
 	{@const count = palette.rules.filter(
 		({fg, bg}) => fg === role.id || bg === role.id
 	).length}
-	<article class="tree-node">
-		<div class="self">
-			<header>
-				<div class="title">
-					<div class="name">
-						<input
-							aria-label="Role name"
-							value={role.name}
-							onchange={(event) =>
-								handleRename(role, event)}
-							size={Math.max(role.name.length, 4)}
-						/>
-					</div>
-				</div>
-
-				<div class="button-list">
+	<li>
+		<div class="role">
+			<input
+				aria-label="Role name"
+				value={role.name}
+				onchange={(event) => handleRename(role, event)}
+				size={Math.max(role.name.length, 4)}
+			/>
+			<ul class="chips">
+				{#each role.colors as id (id)}
+					<li class="chip" class:isHidden={!byId.has(id)}>
+						{@render swatch(id)}
+						{names.get(id)}
+						<button
+							class="button button--icon"
+							type="button"
+							aria-label="Remove {names.get(
+								id
+							)} from {role.name}"
+							title="Remove this color from the role"
+							onclick={() =>
+								palette.removeMember(role.id, id)}
+						>
+							<CloseIcon />
+						</button>
+					</li>
+				{/each}
+				<li>
 					<button
 						class="button button--icon"
 						type="button"
-						aria-label="Delete role {role.name}"
-						title="Delete this role{count
-							? ` and its ${count} rule${count > 1 ? 's' : ''}`
-							: ''}"
-						onclick={() => palette.deleteRole(role.id)}
+						aria-label="Add a color to {role.name}"
+						aria-expanded={picking === role.id}
+						title="Add a color to {role.name}"
+						onclick={() => {
+							picking =
+								picking === role.id ? null : role.id;
+							query = '';
+						}}
 					>
-						<CloseIcon />
+						<AddIcon />
 					</button>
-				</div>
-			</header>
+				</li>
+			</ul>
+			<button
+				class="button button--icon"
+				type="button"
+				aria-label="Delete role {role.name}"
+				title="Delete this role{count
+					? ` and its ${count} rule${count > 1 ? 's' : ''}`
+					: ''}"
+				onclick={() => palette.deleteRole(role.id)}
+			>
+				<CloseIcon />
+			</button>
 		</div>
-
-		<div class="children">
-			{#snippet colorList()}
-				{#if picking === role.id}
-					<div
-						role="group"
-						aria-label="Colors to add to {role.name}"
-					>
-						<input
-							type="search"
-							aria-label="Search colors"
-							onkeydown={(event) => {
-								if (event.key === 'Escape')
-									picking = null;
-							}}
-							placeholder="Search"
-							bind:value={query}
-						/>
-						<ul class="picker">
-							{#each candidates(role) as { id, name } (id)}
-								<li>
-									<button
-										class="button"
-										onclick={() =>
-											palette.addMember(role.id, id)}
-									>
-										{@render swatch(id)}
-										{name}
-									</button>
-								</li>
-							{:else}
-								<li class="hint">No other color.</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
-			{/snippet}
-
-			<div class="members">
-				<div class="colors">
-					<h4 class="name">Colors</h4>
-					<ul class="chips">
-						{#each role.colors as id (id)}
-							<li
-								class="chip"
-								class:isHidden={!byId.has(id)}
-							>
-								{@render swatch(id)}
-								{names.get(id)}
-								<button
-									class="button button--icon"
-									type="button"
-									aria-label="Remove {names.get(
-										id
-									)} from {role.name}"
-									title="Remove this color from the role"
-									onclick={() =>
-										palette.removeMember(role.id, id)}
-								>
-									<CloseIcon />
-								</button>
-							</li>
-						{/each}
+		{#if picking === role.id}
+			<div
+				role="group"
+				aria-label="Colors to add to {role.name}"
+			>
+				<input
+					type="search"
+					aria-label="Search colors"
+					onkeydown={(event) => {
+						if (event.key === 'Escape') picking = null;
+					}}
+					placeholder="Search"
+					bind:value={query}
+				/>
+				<ul class="picker">
+					{#each candidates(role) as { id, name } (id)}
 						<li>
 							<button
-								class="button button--icon"
-								type="button"
-								aria-label="Add a color to {role.name}"
-								aria-expanded={picking === role.id}
-								title="Add a color to {role.name}"
-								onclick={() => {
-									picking =
-										picking === role.id
-											? null
-											: role.id;
-									query = '';
-								}}
+								class="button"
+								onclick={() =>
+									palette.addMember(role.id, id)}
 							>
-								<AddIcon />
+								{@render swatch(id)}
+								{name}
 							</button>
 						</li>
-					</ul>
-				</div>
-				{@render colorList()}
+					{:else}
+						<li class="hint">No other color.</li>
+					{/each}
+				</ul>
 			</div>
-		</div>
-	</article>
+		{/if}
+	</li>
 {/snippet}
 
 <div class="requirements">
-	<div class="roles">
+	<h4 class="h3">Roles</h4>
+	<ul class="roles">
 		{#each palette.roles as role (role.id)}
 			{@render roleRow(role)}
 		{/each}
-	</div>
+	</ul>
 
 	{#if isAddingRole}
 		<form onsubmit={handleAddRole}>
@@ -507,19 +479,17 @@
 	.roles {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.5rem;
 		margin-bottom: 1rem;
+		padding: 0;
+		list-style: none;
 	}
 
-	/* Actions follow their label, not the panel's right edge */
-	.requirements .title {
-		flex-grow: 0;
-	}
-
-	.colors {
+	.role {
 		display: flex;
-		align-items: baseline;
-		gap: 1ch;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem 1rem;
 	}
 
 	.chips {
@@ -542,17 +512,13 @@
 		opacity: 0.6;
 	}
 
-	.name input {
+	.role input {
 		border: 0;
 		padding: 0;
 		background: transparent;
 		font: inherit;
+		font-weight: bold;
 		color: inherit;
-	}
-
-	/* As indented as the Rules row, a tree node without preview */
-	.members {
-		padding-left: 0.75rem;
 	}
 
 	.picker {

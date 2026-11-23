@@ -972,17 +972,16 @@ highlight are still to come).
 are three flat sections (ADR 22; sticky names and fading are
 still to come), then **One-off pairs**.
 
-- **Roles**: one row per role, laid out like the colors tree
-  (`palette/tree.css`), without preview: its name as an input
-  (**Role name**, renamed on change, reverted if empty or taken),
-  **Delete role Role** (also deletes its rules; the tooltip
-  counts them), and its **Colors** on one line: chips (swatch,
-  name and **Remove X from Role**; hidden members dimmed, without
-  swatch), then **Add a color to Role** (`aria-expanded`) opening
-  a picker (a search field and the visible colors not in the
-  role, as wrapping buttons with swatches; Esc closes it). **+
-  Role** opens a form with a name field (**Add role**; a free
-  name, else an alert).
+- **Roles**: one line per role: its name as an input (**Role
+  name**, renamed on change, reverted if empty or taken), its
+  colors as chips (swatch, name and **Remove X from Role**;
+  hidden members dimmed, without swatch), **Add a color to Role**
+  (`aria-expanded`) opening a picker below (a search field and
+  the visible colors not in the role, as wrapping buttons with
+  swatches; Esc closes it), and **Delete role Role** (also
+  deletes its rules; the tooltip counts them). **+ Role** opens a
+  form with a name field (**Add role**; a free name, else an
+  alert).
 - **Targets**, with roles only: a `<table>` of the roles as rows
   (`fg`, `<th scope="row">`) and columns (`bg`, "on Surfaces"),
   in role order. Each cell is a `<select>` labelled by its couple
