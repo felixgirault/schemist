@@ -422,29 +422,19 @@ expensive combination computations during slider drags.
 
 ### 8.2 `combinations`
 
-| Member                                                   | Description                                                                                                                                                                                                                           |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blindnessTypes`                                         | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                 |
-| `isLuminosityAnalysisEnabled`                            | Renders the whole app in grayscale                                                                                                                                                                                                    |
-| `previewedUid`                                           | Combination applied to the app theme, or `null`                                                                                                                                                                                       |
-| `sortedColors`                                           | Entries sorted by `round(h) × 10 + (10 − round(l) / 10)`, rotated to start at the root                                                                                                                                                |
-| `previewed`                                              | The pair (`bgName`, `fgName`, `contrast.bg`/`fg`) of the cell `<bgId>-<fgId>` of `previewedUid`, declared or not, or `null`                                                                                                           |
-| `pairChecks`                                             | `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
-| `passingPairs`                                           | Count of `pairChecks` that pass                                                                                                                                                                                                       |
-| `hiddenPairs`                                            | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                          |
-| `toggleUse(fg, bg, use)`                                 | Sets every target of a built-in use (an entry of `uses`) on the pair, keeping its others, or removes them if it has them all at those values                                                                                          |
-| `requirements`                                           | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                         |
-| `addPair(fg, bg, use)`                                   | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                     |
-| `ruleChecks`                                             | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                              |
-| `ruleCells`                                              | `Map` rule id → `Set` of grid cells `<bgId>-<fgId>` of its pairs, plus the reverse of each for a role among itself                                                                                                                    |
-| `ruleId`, `outlinedCells`                                | The rule hovered or focused in the requirements (or `null`), and its cells, which the grid outlines                                                                                                                                   |
-| `dimmedCells`                                            | `Set` of cells `<bgId>-<fgId>` that miss the use of the rule `ruleId` (its `ruleTargets`, every target met in the worst case of the selected simulations); empty without a rule; computed once per rule                               |
-| `describeRule(rule)`                                     | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                     |
-| `groups`, `pairColors`                                   | The grid's colors by role (`{id, name, isOther, colors}`): a color is under its first role (the sorted order kept), those with none in a last **Other** group, empty groups left out; `pairColors` is their flat list                 |
-| `rolesOf`                                                | The names of all the roles of each color id                                                                                                                                                                                           |
-| `flippedGroups`, `isCollapsed(group)`, `toggleGroup(id)` | The group ids the user flipped from their default (not saved); a group is collapsed by default only if it is Other and a role exists                                                                                                  |
-| `openPairIds`                                            | `{fg, bg}` ids of the cell shown in the pairs details, or `null`                                                                                                                                                                      |
-| `openPair`                                               | `{fg, bg, check?}` for `openPairIds`, `null` once a color is no longer in `sortedColors`                                                                                                                                              |
+| Member                        | Description                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                 |
+| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                                                    |
+| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                                                       |
+| `previewed`                   | The pair (`bgName`, `fgName`, `contrast.bg`/`fg`) of the pair `<bgId>-<fgId>` of `previewedUid`, declared or not, or `null`                                                                                                           |
+| `pairChecks`                  | `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
+| `passingPairs`                | Count of `pairChecks` that pass                                                                                                                                                                                                       |
+| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                          |
+| `requirements`                | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                         |
+| `addPair(fg, bg, use)`        | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                     |
+| `ruleChecks`                  | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                              |
+| `describeRule(rule)`          | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                     |
 
 ### 8.3 `features`
 
@@ -529,8 +519,8 @@ For each color (as background) and every other color (as
 foreground), one combination with `uid = <bgId>-<fgId>`. Both
 orders of a pair are listed. `n` visible colors give
 `n × (n − 1)` combinations. The CLI's `eval` uses it; the app
-does not list them (ADR 17), its grid and cards measure pairs
-with `checkPair` (§9.7).
+does not list them (ADR 17), its cards measure pairs with
+`checkPair` (§9.7).
 
 Each combination holds the base contrast, one contrast per
 selected simulation, and `minLevel`/`minGrade`: the lowest of
@@ -622,8 +612,8 @@ target (`pass`).
 
 `uses` are the named sets of targets a pair can be checked for,
 as data: **Body text** (`wcag2` 4.5, `apca` 75), **Large text and
-UI** (`wcag2` 3), **Categories** (`difference` 10). The grid adds
-a Custom one (§11.5).
+UI** (`wcag2` 3), **Categories** (`difference` 10). A pair with
+targets left over is Custom (§11.5).
 
 A pair's uses are inferred, nothing is stored: `usesOf(pair)`
 returns `{uses, custom}`, the built-in uses whose targets the
@@ -774,15 +764,13 @@ compressing links is recorded in
 - Header: app name and baseline, **Dark/Light theme** toggle,
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
-- Three sections, each under a large title (`h2`): **Palette**
-  (tree, Export, Share, Undo and Redo buttons), **Combinations**
-  (the grid, with the **Simulate** and **Grayscale** toggles,
-  §11.5, in its header) and **Requirements (met / checked)**: the
-  declared pairs that pass (`passingPairs`) over the declared
-  pairs of visible colors (`pairChecks`), then the open cell's
-  card and the requirements (§11.5). From 55rem, Palette is a
-  column beside Combinations, with Requirements under it; from
-  80rem, the three are side by side.
+- Two sections, each under a large title (`h2`): **Palette**
+  (tree, Export, Share, Undo and Redo buttons) and **Requirements
+  (met / checked)**: the declared pairs that pass
+  (`passingPairs`) over the declared pairs of visible colors
+  (`pairChecks`), with the **Simulate** and **Grayscale** toggles
+  (§11.5) in its header, then the requirements (§11.5). From
+  55rem, they are two columns, Palette then Requirements.
 - Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
   `Z` redoes, except while editing text (text inputs, textareas,
   the editable node name), where native undo applies. Undo and
@@ -836,27 +824,21 @@ color (the node's input). The current type is marked with a check
 and `aria-current`. Picking a type calls `setType`, in one
 change.
 
-### 11.5 Combinations panel
+### 11.5 Requirements panel
 
-No mode (ADR 17): the grid beside the requirements, each
-requirement with its cards underneath. The grid
-(`Combinations.svelte` holding `PairMatrix.svelte`) and the
-requirements (`Result.svelte`: the open cell's card, then
-`Requirements.svelte`) are two sections of the page (§11.1), each
-in a `matrix-panel` container, which styles the grid, the card
-and the role chips. Esc, from anywhere, closes the open cell's
-card.
+No grid (ADR 18): the requirements are a section of the page
+(§11.1), `Result.svelte` holding `Requirements.svelte`, each
+requirement with its cards underneath.
 
-- **Header toggles** (in `App.svelte`, always shown):
-  **Simulate** with one toggle per simulation, **P**, **D**,
-  **T** (protanomaly, deuteranomaly, tritanomaly;
-  `blindnessTypes`), each with its full name as tooltip and
-  accessible name, and **Grayscale**
+- **Header toggles** (in `App.svelte`, in the Requirements
+  header, always shown): **Simulate** with one toggle per
+  simulation, **P**, **D**, **T** (protanomaly, deuteranomaly,
+  tritanomaly; `blindnessTypes`), each with its full name as
+  tooltip and accessible name, and **Grayscale**
   (`isLuminosityAnalysisEnabled`, §9.5). Simulations apply to the
-  grid's strips, to the cards and to the levels. There is no
-  other filter: no Colors, Check, Contrast type or difference
-  filter, no Contrast list and no difference matrix (ADR 17; the
-  CLI keeps `combine`, §9.1).
+  cards and to the levels. There is no other filter, no grid and
+  no list of every pair (ADR 17, 18; the CLI keeps `combine`,
+  §9.1).
 - Each combination card (`Combination.svelte`) is drawn in its
   own colors, with names, and a row per target
   (`{name, level, met?}`): grade and level (rounded to 1 decimal,
@@ -865,66 +847,9 @@ card.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
-
-**The grid** shows every pair of visible colors: backgrounds as
-rows and foregrounds as columns, of compact cells, with
-swatch-only headers (name as tooltip and accessible name, the
-tooltip also listing the color's roles) and sticky row headers.
-The grid takes at least its column's width, its cells stretching
-from 2rem, and scrolls when the colors do not fit. Nothing is
-drawn on the diagonal. Every other cell is drawn as its pair:
-"Aa" in the foreground on the background and, when simulations
-are selected, under it one aria-hidden strip per simulation, side
-by side, each the simulated background with a bar in the
-simulated foreground (cells then are 2.75rem high). The tooltip
-has the names and the WCAG 2 contrast, then, for a declared pair,
-each of its targets per simulation and its uses
-(`, for Body text`), which the accessible name repeats. A
-declared cell gets a border in the panel's text color and a
-corner badge in the panel's colors: a check, or a warning icon
-with a dashed border when the pair misses one of its targets in
-the worst case of the selected simulations. Marks are in the
-panel's colors so they stay readable on any pair, and on the
-border so that the outline stays the focus ring. Each button's
-accessible name says whether the pair meets its targets, misses
-them, or is not declared. Rows and columns are grouped by role
-(`groups`): a color once, under its first role, in `sortedColors`
-order; colors with no role are an **Other** group, last. Once a
-role exists, each group has a disclosure button (`aria-expanded`,
-"Surfaces ▾"/"Surfaces ▸", the number of colors as tooltip) in a
-header over its columns and in a cell spanning its rows; a
-collapsed group is one empty column and one empty row, its label
-vertical, and Other starts collapsed; with no role there is no
-group header and every color shows. Collapsed state is in memory
-only (`flippedGroups`). Activating a cell (a button, so keyboard
-accessible) only opens its card, or closes it when it is open
-already; the focus stays on the cell. A notice names the colors
-to rename when pairs cannot be saved (§8.1). The hint gives the
-declared count. The per-cell work is a map lookup of its declared
-pair (`pairChecks` by id). With fewer than two colors the grid
-asks to select at least two.
-
-**The column** (`Result.svelte`) holds, from the top, the open
-cell's card, then the requirements.
-
-**The card** (`PairCard.svelte`, `elevated`, a labelled region)
-has: a large sample with both names in the foreground on the
-background; the uses the pair is for (`usesOf`) or "Not
-declared"; its **sources**, one line each: "Body text, from Text
-on Surfaces" per rule (`describeRule`), "one-off" with ",
-overrides Muted on Surfaces" when it replaced rules; **Override
-for this pair** (when rules are a source), which declares a
-one-off pair with the targets the rules give; one button per
-built-in use, **+ Body text** (accessible name "Require Body
-text") or **Body text ✓** ("Remove Body text") when the pair
-holds its targets, calling `toggleUse` (sets every target of the
-use, replacing a target of another value); one number field per
-target (a value is applied on change, clearing every field
-removes the pair); for each declared target the measured levels,
-for normal vision and each simulation; **Remove pair** (one-off
-pairs only); a **Preview** button toggling `previewedUid` to
-`<bgId>-<fgId>`; and **Close**. The panel closes the card when a
-color is gone.
+- Pairs are declared by rules (roles) or, for an exception, one
+  by one under **One-off pairs**; nothing else opens or edits a
+  pair (its targets are the use's).
 
 **The requirements** (`Requirements.svelte`), in the
 **Requirements** section (§11.1, a region labelled by its title),
@@ -963,25 +888,17 @@ button on the right (`aria-expanded`):
   card has **Remove pair**).
 
 **+ Role**, at the end of the roles, opens a form with a name
-field (**Add role**, same alert). Hovering or focusing a rule's
-row sets `ruleId`, and the grid draws a ring (`pair-cell--rule`,
-a box shadow in the highlight color) around exactly the cells of
-the rule's pairs, both orders for a role among itself. It also
-dims (`pair-cell--dim`, the colors only, not the marks) the cells
-of `dimmedCells`, which miss the rule's use whether declared or
-not; their accessible name says "misses the focused rule".
-Nothing is dimmed without a focused rule. The ring and the
-dimming mean one thing each: the rule's cells, and missing its
-use. **One-off pairs** follow, always shown: **+ Pair** opens a
-compact form, a **Foreground** and a **Background** color (each a
-select of the visible colors by name, with a swatch of the chosen
-one) and **For** (the use), then **Add pair**, which calls
-`addPair` (one color on both sides gives an alert and nothing is
-declared). Under it, the declared pairs that replace or add to
-rules, by use (`requirements`, Custom last, a pair under each use
-it holds), with their cards. Pairs with a hidden color follow as
-**Not checked, a color is hidden**. With nothing declared, a hint
-says to add a rule or declare a pair.
+field (**Add role**, same alert). A rule's row has no hover or
+focus effect. **One-off pairs** follow, always shown: **+ Pair**
+opens a compact form, a **Foreground** and a **Background** color
+(each a select of the visible colors by name, with a swatch of
+the chosen one) and **For** (the use), then **Add pair**, which
+calls `addPair` (one color on both sides gives an alert and
+nothing is declared). Under it, the declared pairs that replace
+or add to rules, by use (`requirements`, Custom last, a pair
+under each use it holds), with their cards. Pairs with a hidden
+color follow as **Not checked, a color is hidden**. With nothing
+declared, a hint says to add a rule or declare a pair.
 
 ### 11.6 Theming
 

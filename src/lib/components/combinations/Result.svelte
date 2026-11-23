@@ -7,9 +7,7 @@
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
-	import PairCard from './PairCard.svelte';
 	import Requirements from './Requirements.svelte';
-	import './matrix.css';
 
 	const gradeOf = (
 		target: TargetCheck['target'],
@@ -98,21 +96,9 @@
 	</div>
 {/snippet}
 
-<!-- The open cell's card, then each requirement with its cards
-underneath -->
-<div class="column">
-	<PairCard />
-	<Requirements pairs={cards} />
-</div>
+<Requirements pairs={cards} />
 
 <style>
-	.column {
-		display: grid;
-		gap: 1rem;
-		align-content: start;
-		min-width: 0;
-	}
-
 	.cards {
 		display: grid;
 		grid-template-columns: repeat(

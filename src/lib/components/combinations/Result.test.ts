@@ -126,3 +126,23 @@ test('declares a pair for a use, two different colors only', () => {
 
 	palette.setPair(grey, red, {});
 });
+
+test('lists one-off pairs by use', () => {
+	const grey = id('Grey');
+	const root = palette.root!.id;
+	const body = uses.find(({id}) => id === 'body')!;
+
+	combinations.addPair(grey, root, body);
+	palette.setPair(id('Red'), root, {wcag2: 4.5, apca: 80});
+
+	const html = render(Result).body;
+
+	expect(html).toContain('<h5 class="h3">Body text</h5>');
+	expect(combinations.requirements.map((r) => r.id)).toEqual([
+		'body',
+		'custom'
+	]);
+
+	palette.setPair(grey, root, {});
+	palette.setPair(id('Red'), root, {});
+});

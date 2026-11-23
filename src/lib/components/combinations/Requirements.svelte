@@ -303,16 +303,7 @@
 						: 'among themselves'}
 					{@const checks =
 						combinations.ruleChecks.get(rule.id) ?? []}
-					<article
-						class="tree-node rule"
-						onpointerenter={() =>
-							(combinations.ruleId = rule.id)}
-						onpointerleave={() =>
-							(combinations.ruleId = null)}
-						onfocusin={() =>
-							(combinations.ruleId = rule.id)}
-						onfocusout={() => (combinations.ruleId = null)}
-					>
+					<article class="tree-node rule">
 						<div class="self">
 							<header>
 								<div class="title">
@@ -540,6 +531,15 @@
 		width: 1em;
 		height: 1em;
 		vertical-align: -0.125em;
+	}
+
+	.swatch {
+		display: inline-block;
+		width: 1rem;
+		height: 1rem;
+		border: 1px solid currentColor;
+		border-radius: 50%;
+		vertical-align: middle;
 	}
 
 	.roles {
