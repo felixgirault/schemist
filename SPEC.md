@@ -992,22 +992,24 @@ the tables. Under the role:
   name, else an alert and nothing is added. Under it, the rules
   where the role is the first one, each a row: "on Surfaces ·
   Body text" or "among themselves · Categories", an icon with a
-  text alternative and tooltip (`ruleStatus`: met when none of
-  the rule's pairs fails, in any variant and in the worst case of
-  the selected simulations; else "not met", or "not met in Dark"
-  naming the failing variants) and **Remove rule** (`×`); its
-  children are the rule's table, given as the `pairs` snippet
-  (`ruleChecks` for the rows, nothing is measured again); the
-  Preview button, named "Preview Grey on White", toggles
-  `previewedUid` to `<bgId>-<fgId>`; it previews the selected
-  variant's colors, so only that variant's column has one for now
-  (ADR 20, step 3); **Override** in the row header of a pair that
-  is not one-off declares it one-off with the targets the rules
-  give, to edit it alone; a one-off pair's row header has a
-  number field per target (**WCAG 2**, **APCA**, **Difference**,
-  empty for none), applied on change, clearing them all removing
-  the pair, and **Remove pair**; buttons and fields name their
-  pair, as "Override Grey on White").
+  text alternative and tooltip, none while the rule has no
+  checked pair (ADR 21; "No pair yet" shows instead)
+  (`ruleStatus`: met when none of the rule's pairs fails, in any
+  variant and in the worst case of the selected simulations; else
+  "not met", or "not met in Dark" naming the failing variants)
+  and **Remove rule** (`×`); its children are the rule's table,
+  given as the `pairs` snippet (`ruleChecks` for the rows,
+  nothing is measured again); the Preview button, named "Preview
+  Grey on White", toggles `previewedUid` to `<bgId>-<fgId>`; it
+  previews the selected variant's colors, so only that variant's
+  column has one for now (ADR 20, step 3); **Override** in the
+  row header of a pair that is not one-off declares it one-off
+  with the targets the rules give, to edit it alone; a one-off
+  pair's row header has a number field per target (**WCAG 2**,
+  **APCA**, **Difference**, empty for none), applied on change,
+  clearing them all removing the pair, and **Remove pair**;
+  buttons and fields name their pair, as "Override Grey on
+  White").
 
 **+ Role**, at the end of the roles, opens a form with a name
 field (**Add role**, same alert). A rule's row has no hover or

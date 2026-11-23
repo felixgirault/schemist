@@ -305,7 +305,9 @@
 								<div class="title">
 									<h5 class="name">
 										{where} · {useName}
-										{@render status(rule)}
+										{#if checks.length}
+											{@render status(rule)}
+										{/if}
 									</h5>
 								</div>
 								<div class="button-list">
