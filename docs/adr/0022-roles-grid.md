@@ -57,11 +57,15 @@ One-off pairs
   contrast.
 - **Checks**: one table (amended after the first build, which had
   a table per rule), the combination first, then a column per
-  variant. Each rule, in the grid's order, then each use of the
+  variant. Each cell, in the grid's order, then each use of the
   one-off pairs, is a title spanning the row ("Text on Surfaces ·
   Body text" and its status) over a row per combination, as ADR
-  20 draws them. A rule without checked pairs is left out: the
+  20 draws them. A cell without checked pairs is left out: the
   grid shows it, and one hint replaces every "No pair yet".
+  (Amended after the first build: a cell with several rules is
+  one group, titled as its extra option, "Body text + Large text
+  and UI", with each combination once, rather than a group per
+  rule listing the same pairs twice.)
 - **Names**: each select is labelled by its couple ("Text on
   Surfaces", "Text among themselves").
 - **Narrow panels**: the grid scrolls sideways, role names

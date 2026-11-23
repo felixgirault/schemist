@@ -101,20 +101,37 @@
 		)
 	);
 
-	// The groups with checked pairs: rules in the grid's order, then
-	// the one-off pairs by use.
+	// The groups with checked pairs: a cell's rules in the grid's
+	// order, each pair once, then the one-off pairs by use.
 	let groups = $derived(
 		[
-			...gridRules.map((rule): CheckGroup => {
-				const {label, use} = combinations.describeRule(rule);
+			...palette.roles.flatMap((row) =>
+				palette.roles.flatMap((col): CheckGroup[] => {
+					const rules = cellRules(row.id, col.id);
 
-				return {
-					id: rule.id,
-					title: `${label} · ${use}`,
-					rules: [rule],
-					checks: combinations.ruleChecks.get(rule.id) ?? []
-				};
-			}),
+					if (!rules.length) return [];
+
+					return [
+						{
+							id: `${row.id}-${col.id}`,
+							title: `${combinations.describeRule(rules[0]).label} · ${labelOf(rules)}`,
+							rules,
+							checks: [
+								...new Map(
+									rules
+										.flatMap(
+											({id}) =>
+												combinations.ruleChecks.get(
+													id
+												) ?? []
+										)
+										.map((check) => [check.id, check])
+								).values()
+							]
+						}
+					];
+				})
+			),
 			...combinations.requirements.map(
 				({id, name, checks}): CheckGroup => ({
 					id,

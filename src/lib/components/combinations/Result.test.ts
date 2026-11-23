@@ -206,10 +206,10 @@ test('a one-off pair edits its targets, buttons name their pair', () => {
 });
 
 test('a cell with several rules offers them as one extra option', () => {
-	const [, text, series] = palette.roles;
+	const [, role, series] = palette.roles;
 
-	palette.addRule(text.id, series.id, 'body');
-	palette.addRule(text.id, series.id, 'large');
+	palette.addRule(role.id, series.id, 'body');
+	palette.addRule(role.id, series.id, 'large');
 
 	const html = render(Result).body;
 
@@ -219,7 +219,15 @@ test('a cell with several rules offers them as one extra option', () => {
 	expect(
 		html.match(/<option[^>]*value="custom"/g)
 	).toHaveLength(1);
+	// one group for the cell, with each pair once
+	const plain = text(html);
 
-	palette.setRule(text.id, series.id);
+	expect(plain).toContain(
+		'Text on Series · Body text + Large text and UI'
+	);
+	expect(plain.match(/Black &amp; Red/g)).toHaveLength(1);
+	expect(plain.match(/Text on Series/g)).toHaveLength(1);
+
+	palette.setRule(role.id, series.id);
 	expect(selected('Text on Series')).toBe('—');
 });

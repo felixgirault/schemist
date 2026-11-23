@@ -999,9 +999,12 @@ still to come), then **One-off pairs**.
   worst case of the selected simulations; else "not met", or "not
   met in Dark" naming the failing variants); none otherwise (ADR
   21).
-- **Checks**: the table, given as the `pairs` snippet: each rule
-  in the grid's order (rows, then columns) that has checked
-  pairs, "Text on Surfaces · Body text" with its status, then the
+- **Checks**: the table, given as the `pairs` snippet: each cell
+  of the grid, in its order (rows, then columns), that has checked
+  pairs, one group for all its rules, titled as the cell's extra
+  option ("Text on Surfaces · Body text + Large text and UI",
+  "Custom" for a rule with targets of its own) with its status
+  and each pair once, then the
   one-off pairs by use ("One-off pairs · Custom"; `requirements`,
   Custom last, a pair under each use it holds). Nothing is
   measured again (`ruleChecks`). One hint says a rule is checked

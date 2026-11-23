@@ -172,7 +172,7 @@ class Combinations {
 		return checks;
 	});
 
-	// The names of a rule: "Muted on Surfaces", and its use's.
+	// The couple of a rule: "Muted on Surfaces".
 	describeRule(rule: AppRule) {
 		const name = (id?: string) =>
 			palette.roles.find((role) => role.id === id)?.name ??
@@ -182,10 +182,7 @@ class Combinations {
 			label:
 				rule.bg === undefined
 					? `${name(rule.fg)} among themselves`
-					: `${name(rule.fg)} on ${name(rule.bg)}`,
-			use:
-				uses.find(({id}) => id === rule.use)?.name ??
-				'Custom'
+					: `${name(rule.fg)} on ${name(rule.bg)}`
 		};
 	}
 
