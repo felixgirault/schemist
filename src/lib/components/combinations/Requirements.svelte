@@ -13,7 +13,6 @@
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
-	import {discreteGradient} from '#lib/utils/css.js';
 	import type {Snippet} from 'svelte';
 
 	interface Props {
@@ -51,13 +50,6 @@
 			? `--output: ${formatRgbToHex(color.rgbColor)};`
 			: '';
 	};
-
-	// The role shows its colors, top to bottom, like a preset.
-	const outputsOf = (role: AppRole) =>
-		`--outputs: ${discreteGradient(
-			role.colors.flatMap((id) => byId.get(id)?.color ?? []),
-			180
-		)};`;
 
 	const rulesOf = (role: AppRole) =>
 		palette.rules.filter(({fg}) => fg === role.id);
@@ -157,8 +149,6 @@
 		({fg, bg}) => fg === role.id || bg === role.id
 	).length}
 	<article class="tree-node">
-		<div class="output isPreset" style={outputsOf(role)}></div>
-
 		<div class="self">
 			<header>
 				<div class="title">
