@@ -84,11 +84,12 @@ version 1 is still read.
   override.** A node with an override shows a mark; a field with
   one has **Reset to Light** (named after the base). The tree
   previews the selected variant's colors.
-- **Requirements** show the cards of the selected variant. A
-  rule's status and the header count (met / checked, each pair
-  counted once per variant) cover every variant: a pair failing
-  in Dark only still shows as failing while Light is selected,
-  the failing variant named in the status's text alternative and
+- **Requirements** show the cards of the selected variant
+  (replaced by ADR 20: every variant, in columns). A rule's
+  status and the header count (met / checked, each pair counted
+  once per variant) cover every variant: a pair failing in Dark
+  only still shows as failing while Light is selected, the
+  failing variant named in the status's text alternative and
   tooltip.
 - **Preview** themes the app with the pair in the selected
   variant. The app's own **Dark theme** button is unrelated.
