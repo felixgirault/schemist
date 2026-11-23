@@ -377,6 +377,30 @@ class Palette {
 		return id;
 	}
 
+	// Replaces the rules of a couple (on the diagonal, `bg` missing
+	// or the same as `fg`) with one of `use`, or with none. In place
+	// of the first one, so one change.
+	setRule(fg: string, bg: string | undefined, use?: string) {
+		bg = bg === fg ? undefined : bg;
+		const same = (rule: {fg: string; bg?: string}) =>
+			rule.fg === fg &&
+			(rule.bg === fg ? undefined : rule.bg) === bg;
+		const next = use
+			? {id: `u${uid()}`, fg, bg, use}
+			: undefined;
+		let placed = false;
+
+		this.rules = [
+			...this.rules.flatMap((rule) => {
+				if (!same(rule)) return [rule];
+				if (!next || placed) return [];
+				placed = true;
+				return [next];
+			}),
+			...(next && !placed ? [next] : [])
+		];
+	}
+
 	removeRule(id: string) {
 		this.rules = this.rules.filter((rule) => rule.id !== id);
 	}

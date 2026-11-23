@@ -156,6 +156,49 @@ test('role members and rules are added, removed and undone', () => {
 	expect(palette.rules).toHaveLength(1);
 });
 
+test('a couple is set in one change, in place, and undone', () => {
+	const id = surfaces();
+	const textId = palette.roles[1].id;
+	const other = palette.addRule(
+		textId,
+		undefined,
+		'categories'
+	);
+
+	palette.addRule(textId, id, 'body');
+	palette.addRule(textId, id, 'large');
+	palette.addRule(id, textId, 'large');
+	const after = palette.addRule(id, undefined, 'categories');
+
+	history.reset(snapshot());
+
+	step(() => palette.setRule(textId, id, 'large'));
+	expect(palette.rules).toMatchObject([
+		{id: other},
+		{fg: textId, bg: id, use: 'large'},
+		{fg: id, bg: textId},
+		{id: after}
+	]);
+	expect(palette.rules).toHaveLength(4);
+
+	history.undo();
+	expect(palette.rules).toHaveLength(5);
+
+	step(() => palette.setRule(textId, id));
+	expect(palette.rules).toHaveLength(3);
+	expect(reload().rules).toHaveLength(3);
+
+	step(() => palette.setRule(id, id, 'body'));
+	expect(palette.rules.at(-1)).toMatchObject({
+		fg: id,
+		bg: undefined,
+		use: 'body'
+	});
+	expect(
+		palette.rules.filter((r) => r.fg === id && !r.bg)
+	).toHaveLength(1);
+});
+
 test('deleting a role deletes its rules', () => {
 	const id = surfaces();
 	const textId = palette.roles[1].id;
