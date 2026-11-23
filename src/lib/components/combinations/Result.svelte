@@ -104,6 +104,7 @@
 				rows={rowsOf(check.checks, (c) => c.level)}
 				simulations={simulationsOf(check)}
 				onPreview={handlePreview}
+				failingIn={combinations.failingElsewhere(check.id)}
 				isDifference={check.checks.length > 0 &&
 					check.checks.every(
 						({target}) => target === 'difference'

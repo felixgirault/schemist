@@ -415,6 +415,7 @@ each exporting a single reactive object.
 | `unsavedPairs`    | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                                                                                                                                                                                                 |
 | `unsavedMembers`  | Names of role members a permalink cannot hold, shared by several colors (see below)                                                                                                                                                                                                               |
 | `permalink`       | `permalink(serializeTree(root, pairs, roles, rules, variants), window.location.origin)` (§10.1)                                                                                                                                                                                                   |
+| `variantColors`   | `{id, name, colors}` for each variant with colors (`[]` without variants): `colors` for the selected one, the settled colors of the others laid over it                                                                                                                                           |
 | `settledVariants` | `PaletteColor[]` of each variant id, `evaluate`d from the tree once per `settle()` with `settledOutputs` (only with variants, the selected one left out as `colors` holds it; `selectVariant` settles), in the same order as `colors`; a variant missing until the next settle is not counted yet |
 | `colors`          | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                                                                                                                                                                                                |
 | `rootColor`       | Root's color in `settledOutputs`, else the first output, else `#feffff`                                                                                                                                                                                                                           |
@@ -495,6 +496,7 @@ expensive combination computations during slider drags.
 | `pairChecks`                  | In the selected variant (the cards): `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
 | `allChecks`                   | `{name, checks}` for each variant (one unnamed entry without): the pairs checked in its colors, `pairChecks` for the selected one                                                                                                                                          |
 | `checkedPairs`                | Count of the pairs of `allChecks`, one per variant                                                                                                                                                                                                                         |
+| `failingElsewhere(pairId)`    | Names of the variants other than the selected one where the pair is not met; the card shows them as "Not met in Dark" (§11.5)                                                                                                                                              |
 | `ruleStatus(id)`              | `{pass, text}` of a rule over every variant: `met`, `not met` or `not met in Dark`                                                                                                                                                                                         |
 | `passingPairs`                | Count of the pairs of `allChecks` that pass                                                                                                                                                                                                                                |
 | `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                                                               |
@@ -940,6 +942,11 @@ requirement with its cards underneath.
   background: its card is in the page's colors, with the two
   colors as swatches side by side, under its names and in each
   strip, so that close colors stay readable.
+- With variants, a card whose pair is not met in another variant
+  than the selected one has a line "Not met in Dark" under its
+  levels (`failingIn`, from `failingElsewhere`), in the app's
+  colors (`--fg` on `--bg`, not the pair's), so the pair can be
+  found without switching.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
@@ -1029,6 +1036,16 @@ with a red channel of 0, 128 and 255) with Lightness 20, 70 and
 Outputs (visible colors, tree order). The formatting lives in
 `#lib/core/export.ts` (`toExportEntries`, `exportVariables`,
 `exportTokens`); the components only wire it to the stores:
+
+With variants (§5.4), **CSS** is one text with a block per
+variant (`exportVariables`' `others`): the base in `:root { }`
+and each other as `[data-theme="<dash-cased name>"] { }`,
+declarations indented by two spaces; the pair comments are in the
+base's block only. Without variants the output has no block, as
+before. **Design tokens** and **Sass** are one file per variant:
+the modal exports the selected variant and says so in a `.hint`
+("Exporting the Dark variant"). The **table** has a Value column
+per variant ("Value in Dark") and a Status column per variant.
 
 - **Table**: swatch, name, value; then, if pairs are declared, a
   **Requirements** table (`requirementRows`): foreground,
@@ -1218,11 +1235,11 @@ in every variant. Names are the base's in every variant
 the base, whatever a color is called in another variant (a name
 derived from its color changes with it). A tree without variants
 has no `variant` field, as before. `export --variant <name>`
-exports one variant (default: the base, the first); it fails on a
-name that is not declared, on a tree without variants and on
-`eval`. CSS has no block per variant yet (ADR 19, later step).
-`types` marks the params a variant can't override with
-`structural: true`.
+exports one variant of tokens or Sass (default: the base, the
+first); it fails on a name that is not declared, on a tree
+without variants and on `eval`. CSS has every block, whatever
+`--variant` says (§11.8). `types` marks the params a variant
+can't override with `structural: true`.
 
 `export --format tokens` nests names split on `/` and `.`
 (§11.8). When `exportTokens` reports conflicts, it fails like a

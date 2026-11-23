@@ -1,19 +1,30 @@
 <script lang="ts">
 	import Sample from '#lib/components/Sample.svelte';
 	import type {
-		ExportEntry,
-		Requirements
+		Requirements,
+		VariantEntries
 	} from '#lib/core/export.js';
 	import {requirementRows} from '#lib/core/export.js';
 
 	interface Props {
-		entries: ExportEntry[];
+		// a column per variant, one unnamed without variants
+		variants: VariantEntries[];
 		requirements: Requirements;
 	}
 
-	let {entries, requirements}: Props = $props();
+	let {variants, requirements}: Props = $props();
 
-	let rows = $derived(requirementRows(entries, requirements));
+	// The colors of the base name the rows.
+	let entries = $derived(variants[0].entries);
+	// The rows of each variant, the same pairs in the same order.
+	let rowsByVariant = $derived(
+		variants.map((v) =>
+			requirementRows(v.entries, requirements)
+		)
+	);
+	let rows = $derived(rowsByVariant[0]);
+	const label = (title: string, name: string) =>
+		name ? `${title} in ${name}` : title;
 
 	const highlight = (color: string) =>
 		color.replace(
@@ -28,17 +39,25 @@
 			<tr>
 				<td></td>
 				<th>Name</th>
-				<th>Value</th>
+				{#each variants as { name }}
+					<th>{label('Value', name)}</th>
+				{/each}
 			</tr>
 		</thead>
 
 		<tbody>
-			{#each entries as { id, cssColor, name } (id)}
-				{#if cssColor}
+			{#each entries as { id, name }, i (id)}
+				{#if variants[0].entries[i].cssColor}
 					<tr>
-						<td><Sample color={cssColor} /></td>
+						<td>
+							<Sample
+								color={variants[0].entries[i].cssColor}
+							/>
+						</td>
 						<td>{name}</td>
-						<td>{@html highlight(cssColor)}</td>
+						{#each variants as { entries: list }}
+							<td>{@html highlight(list[i].cssColor)}</td>
+						{/each}
 					</tr>
 				{/if}
 			{/each}
@@ -55,18 +74,22 @@
 					<th>Background</th>
 					<th>Use</th>
 					<th>Targets</th>
-					<th>Status</th>
+					{#each variants as { name }}
+						<th>{label('Status', name)}</th>
+					{/each}
 				</tr>
 			</thead>
 
 			<tbody>
-				{#each rows as { id, fg, bg, use, targets, pass } (id)}
+				{#each rows as { id, fg, bg, use, targets }, i (id)}
 					<tr>
 						<td>{fg}</td>
 						<td>{bg}</td>
 						<td>{use}</td>
 						<td>{targets}</td>
-						<td>{pass ? 'met' : 'not met'}</td>
+						{#each rowsByVariant as list}
+							<td>{list[i].pass ? 'met' : 'not met'}</td>
+						{/each}
 					</tr>
 				{/each}
 			</tbody>

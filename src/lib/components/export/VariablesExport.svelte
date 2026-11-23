@@ -3,6 +3,7 @@
 		ExportCasing,
 		ExportEntry,
 		ExportFormat,
+		VariantEntries,
 		Requirements
 	} from '#lib/core/export.js';
 	import {exportVariables} from '#lib/core/export.js';
@@ -11,21 +12,29 @@
 
 	interface Props {
 		entries: ExportEntry[];
+		others: VariantEntries[];
 		format: ExportFormat;
 		casing: ExportCasing;
 		prefix: string;
 		requirements: Requirements;
 	}
 
-	let {entries, format, casing, prefix, requirements}: Props =
-		$props();
+	let {
+		entries,
+		others,
+		format,
+		casing,
+		prefix,
+		requirements
+	}: Props = $props();
 
 	let code = $derived(
 		exportVariables(
 			entries,
 			{format, casing, prefix},
 			palette.permalink,
-			requirements
+			requirements,
+			others
 		)
 	);
 </script>

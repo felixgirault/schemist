@@ -38,6 +38,8 @@
 		isDifference?: boolean;
 		// Actions and fields of the pair, under its levels
 		children?: Snippet;
+		// Other variants where the pair is not met
+		failingIn?: string[];
 	}
 
 	let {
@@ -50,7 +52,8 @@
 		simulations,
 		onPreview,
 		isDifference = false,
-		children
+		children,
+		failingIn = []
 	}: Props = $props();
 
 	const colorsOf = (bg: RgbColor, fg: RgbColor) =>
@@ -114,6 +117,10 @@
 		{@render children?.()}
 	</div>
 
+	{#if failingIn.length}
+		<p class="elsewhere">Not met in {failingIn.join(', ')}</p>
+	{/if}
+
 	{#if simulations.length}
 		<ul>
 			{#each simulations as { type, bg, fg, rows }}
@@ -167,6 +174,15 @@
 	}
 
 	.combination--difference .simulation {
+		border-top: 1px solid currentColor;
+	}
+
+	/* The app's colors, not the pair's, so it reads whatever they are. */
+	.elsewhere {
+		padding: 0.5rem 1rem;
+		font-size: 0.9rem;
+		color: var(--fg);
+		background: var(--bg);
 		border-top: 1px solid currentColor;
 	}
 

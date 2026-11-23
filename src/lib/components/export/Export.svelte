@@ -17,6 +17,22 @@
 			exportSettings.precision
 		)
 	);
+	// With variants (ADR 19): each one's entries, the base first.
+	const variants = $derived(
+		palette.variantColors.map(({name, colors}) => ({
+			name,
+			entries: toExportEntries(
+				colors,
+				exportSettings.colorFormat,
+				exportSettings.precision
+			)
+		}))
+	);
+	// Tokens and Sass are one file per variant: the selected one.
+	const isFile = $derived(
+		exportSettings.format === 'tokens' ||
+			exportSettings.format === 'sass'
+	);
 </script>
 
 <section>
@@ -206,11 +222,24 @@
 						/>
 					</div>
 				{/if}
+
+				{#if palette.selectedVariant && isFile}
+					<p class="hint" id="export-variant">
+						Exporting the {palette.selectedVariant.name}
+						variant. Select another in the palette to export
+						it.
+					</p>
+				{/if}
 			</div>
 		</div>
 
 		{#if exportSettings.format === 'table'}
-			<TableExport {entries} {requirements} />
+			<TableExport
+				variants={variants.length
+					? variants
+					: [{name: '', entries}]}
+				{requirements}
+			/>
 		{:else if exportSettings.format === 'tokens'}
 			<DesignTokensExport
 				entries={palette.colors}
@@ -218,7 +247,10 @@
 			/>
 		{:else}
 			<VariablesExport
-				{entries}
+				entries={exportSettings.format === 'css'
+					? (variants[0]?.entries ?? entries)
+					: entries}
+				others={variants.slice(1)}
 				format={exportSettings.format}
 				casing={exportSettings.casing}
 				prefix={exportSettings.prefix}

@@ -34,6 +34,10 @@ beforeAll(() => {
 	palette.settle();
 });
 
+// The text of the page, without tags and comments
+const text = (html: string) =>
+	html.replace(/<!--.*?-->|<[^>]*>/g, '').replace(/\s+/g, ' ');
+
 test('counts each pair once per variant', () => {
 	expect(combinations.checkedPairs).toBe(2);
 	expect(combinations.passingPairs).toBe(1);
@@ -61,6 +65,21 @@ test('shows it in the rule, with the cards of Light', () => {
 	const html = render(Result).body;
 
 	expect(html).toContain('not met in Dark');
+});
+
+test('marks the card of a pair failing in another variant', () => {
+	const {id} = combinations.pairChecks[0];
+
+	expect(combinations.failingElsewhere(id)).toEqual(['Dark']);
+	expect(text(render(Result).body)).toContain(
+		'Not met in Dark'
+	);
+
+	palette.selectVariant(palette.variants[1].id);
+	palette.settle();
+	expect(combinations.failingElsewhere(id)).toEqual([]);
+	palette.selectVariant();
+	palette.settle();
 });
 
 test('counts a variant without colors yet from the next settle on', () => {

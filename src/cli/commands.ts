@@ -240,21 +240,24 @@ export const run = (
 			return tokens;
 		}
 
+		const colorFormat = oneOf(
+			'color-format',
+			values['color-format'],
+			['hex', 'rgb', 'hsl', 'lch'] as ColorFormat[],
+			defaultExportSettings.colorFormat
+		);
+		const precision = number(
+			'precision',
+			values.precision,
+			defaultExportSettings.precision
+		);
+		const formatted = (list: typeof entries) =>
+			toExportEntries(list, colorFormat, precision);
+
 		return exportVariables(
-			toExportEntries(
-				entries,
-				oneOf(
-					'color-format',
-					values['color-format'],
-					['hex', 'rgb', 'hsl', 'lch'] as ColorFormat[],
-					defaultExportSettings.colorFormat
-				),
-				number(
-					'precision',
-					values.precision,
-					defaultExportSettings.precision
-				)
-			),
+			// CSS has a block per variant whatever --variant says, the
+			// base first (Sass has one file each).
+			formatted(format === 'css' ? inVariant(tree) : entries),
 			{
 				format,
 				casing: oneOf(
@@ -266,7 +269,13 @@ export const run = (
 				prefix: values.prefix ?? defaultExportSettings.prefix
 			},
 			link,
-			requirements
+			requirements,
+			format === 'css'
+				? (tree.variants ?? []).slice(1).map((name) => ({
+						name,
+						entries: formatted(inVariant(tree, name))
+					}))
+				: []
 		);
 	}
 

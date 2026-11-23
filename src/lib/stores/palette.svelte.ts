@@ -160,6 +160,34 @@ class Palette {
 		)
 	);
 
+	// The colors of each variant, as `colors` (selected one included),
+	// in variant order. A variant just added or restored by undo has
+	// none until the next settle, and is left out. The structure is
+	// the same, so the settled colors line up with `colors`.
+	variantColors = $derived(
+		this.variants.flatMap(({id, name}) => {
+			if (id === this.selectedVariant?.id) {
+				return [{id, name, colors: this.colors}];
+			}
+
+			const settled = this.settledVariants[id];
+
+			return settled
+				? [
+						{
+							id,
+							name,
+							colors: this.colors.map((color, i) => ({
+								...color,
+								color: settled[i].color,
+								rgbColor: settled[i].rgbColor
+							}))
+						}
+					]
+				: [];
+		})
+	);
+
 	rootColor = $derived(
 		(this.root && this.settledOutputs[this.root.id]?.color) ??
 			Object.values(this.settledOutputs).shift()?.color ??

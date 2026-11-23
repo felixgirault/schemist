@@ -61,40 +61,18 @@ class Combinations {
 	pairChecks = $derived(this.#check(palette.colors));
 
 	// The pairs of every variant, by name, the selected one being
-	// `pairChecks`; one unnamed entry without variants (ADR 19). The
-	// settled colors of the others line up with the selected ones, as
-	// the structure is the same.
-	allChecks = $derived.by(() => {
-		const {variants, selectedVariant, settledVariants} =
-			palette;
-
-		return variants.length
-			? variants.flatMap(({id, name}) => {
-					if (id === selectedVariant?.id) {
-						return [{name, checks: this.pairChecks}];
-					}
-
-					// Counted from the next settle on: a variant just added
-					// or restored by undo has no colors yet.
-					const colors = settledVariants[id];
-
-					return colors
-						? [
-								{
-									name,
-									checks: this.#check(
-										palette.colors.map((color, i) => ({
-											...color,
-											color: colors[i].color,
-											rgbColor: colors[i].rgbColor
-										}))
-									)
-								}
-							]
-						: [];
-				})
-			: [{name: '', checks: this.pairChecks}];
-	});
+	// `pairChecks`; one unnamed entry without variants (ADR 19).
+	allChecks = $derived(
+		palette.variants.length
+			? palette.variantColors.map(({id, name, colors}) => ({
+					name,
+					checks:
+						id === palette.selectedVariant?.id
+							? this.pairChecks
+							: this.#check(colors)
+				}))
+			: [{name: '', checks: this.pairChecks}]
+	);
 
 	// Pairs checked and passing, each counted once per variant.
 	checkedPairs = $derived(
@@ -111,6 +89,18 @@ class Combinations {
 			0
 		)
 	);
+
+	// The variants other than the selected one where a pair is not
+	// met, to point at it from the cards.
+	failingElsewhere(pairId: string) {
+		return this.allChecks
+			.filter(
+				({name, checks}) =>
+					name !== palette.selectedVariant?.name &&
+					checks.some((c) => c.id === pairId && !c.pass)
+			)
+			.map(({name}) => name);
+	}
 
 	// Whether a rule is met in every variant, and its text: "met",
 	// "not met", or "not met in Dark" naming the variants.

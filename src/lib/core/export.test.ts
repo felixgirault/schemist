@@ -336,3 +336,36 @@ test('the table lists each pair with its status', () => {
 		{fg: 'Pale', targets: 'difference 10'}
 	]);
 });
+
+test('css has a block per variant, sass only the one it is given', () => {
+	const entries = (hex: string) =>
+		toExportEntries(evaluate(rootTree(hex, [])), 'hex', 3);
+	const options = {
+		format: 'css' as const,
+		casing: 'dash' as const,
+		prefix: ''
+	};
+	const others = [
+		{name: 'Dark Mode', entries: entries('#000000')}
+	];
+	const css = exportVariables(
+		entries('#ffffff'),
+		options,
+		'link',
+		undefined,
+		others
+	);
+
+	expect(css).toMatch(
+		/^\/\* @see link \*\/\n:root \{\n {2}--[a-z-]+: #ffffff;\n\}\n\n\[data-theme="dark-mode"\] \{\n {2}--[a-z-]+: #000000;\n\}$/
+	);
+	expect(
+		exportVariables(
+			entries('#ffffff'),
+			{...options, format: 'sass'},
+			'link',
+			undefined,
+			others
+		)
+	).not.toContain('data-theme');
+});

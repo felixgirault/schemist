@@ -619,11 +619,31 @@ test('eval of a tree without variants has no variant field', () => {
 });
 
 test('export --variant exports one variant, the base without', () => {
+	const tokens = (...extra: string[]) =>
+		execVariants(
+			'export',
+			'-',
+			'--format',
+			'tokens',
+			...extra
+		);
+
+	expect(tokens()).toBe(tokens('--variant', 'Light'));
+	expect(tokens('--variant', 'Dark')).not.toBe(tokens());
+});
+
+test('css has a block per variant, whatever --variant says', () => {
 	const css = (...extra: string[]) =>
 		execVariants('export', '-', '--format', 'css', ...extra);
+	const blocks = css().split('\n\n');
 
-	expect(css()).toBe(css('--variant', 'Light'));
-	expect(css('--variant', 'Dark')).not.toBe(css());
+	expect(blocks[0]).toContain(':root {\n');
+	expect(blocks[0]).toContain('  --text: #');
+	expect(blocks[1]).toMatch(
+		/^\[data-theme="dark"\] \{\n {2}--bg: /
+	);
+	expect(blocks[1]).not.toContain('/*');
+	expect(css('--variant', 'Dark')).toBe(css());
 });
 
 test('--variant is checked', () => {

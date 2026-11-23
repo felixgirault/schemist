@@ -183,11 +183,29 @@ const comment = (lines: string[]) =>
 		? `/* ${lines[0]} */\n`
 		: `/*\n${lines.map((line) => ` * ${line}\n`).join('')} */\n`;
 
+// A variant's colors, to export along the base.
+export type VariantEntries = {
+	name: string;
+	entries: ExportEntry[];
+};
+
+const indent = (text: string) =>
+	text
+		.split('\n')
+		.map((line) => (line ? `  ${line}` : line))
+		.join('\n');
+
+// `others` are the variants after the base, which `entries` are:
+// CSS gets a block for each, the base in `:root` and the others
+// under their `data-theme`. Their pairs are the same, so only the
+// base's block has the comments. Sass has no blocks: it is one
+// variant's file, `others` is ignored.
 export const exportVariables = (
 	entries: ExportEntry[],
 	{format, casing, prefix}: VariablesOptions,
 	link: string,
-	requirements = noRequirements
+	requirements = noRequirements,
+	others: VariantEntries[] = []
 ) => {
 	const formatRule = format === 'css' ? cssRule : sassRule;
 	const formatCase = casing === 'dash' ? dashCase : camelCase;
@@ -195,23 +213,45 @@ export const exportVariables = (
 		formatCase(prefix ? `${prefix} ${name}` : name);
 	const reference = (color: PaletteColor) =>
 		(format === 'css' ? '--' : '$') + variable(color);
-	const byColor = requirementsByColor(entries, requirements);
-	const variables = entries
-		.map((entry) => {
-			const found = byColor.get(entry.id);
+	const variablesOf = (
+		list: ExportEntry[],
+		withComments: boolean
+	) => {
+		const byColor = requirementsByColor(
+			list,
+			withComments ? requirements : noRequirements
+		);
 
-			return (
-				(found
-					? comment(
-							found.map((r) => describe(r, reference))
-						)
-					: '') +
-				formatRule(variable(entry), entry.cssColor)
-			);
-		})
-		.join('\n');
+		return list
+			.map((entry) => {
+				const found = byColor.get(entry.id);
 
-	return `/* @see ${link} */\n${variables}`;
+				return (
+					(found
+						? comment(
+								found.map((r) => describe(r, reference))
+							)
+						: '') +
+					formatRule(variable(entry), entry.cssColor)
+				);
+			})
+			.join('\n');
+	};
+	const head = `/* @see ${link} */\n`;
+
+	if (format !== 'css' || !others.length) {
+		return head + variablesOf(entries, true);
+	}
+
+	const blocks = [
+		`:root {\n${indent(variablesOf(entries, true))}\n}`,
+		...others.map(
+			({name, entries: list}) =>
+				`[data-theme="${dashCase(name)}"] {\n${indent(variablesOf(list, false))}\n}`
+		)
+	];
+
+	return head + blocks.join('\n\n');
 };
 
 type Token = {
