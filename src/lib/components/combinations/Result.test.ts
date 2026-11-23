@@ -60,13 +60,11 @@ test('shows every rule in one table, its pairs under its title', () => {
 
 	expect(html).not.toContain('Pack my box');
 	expect(html).toContain(
-		'Black &amp; White Override AAA 21 ✓ met· APCA 5 106 ✓ met'
+		'Black &amp; White AAA 21 ✓ met· Lc 106 ✓ met'
 	);
-	expect(html).toContain(
-		'Grey &amp; White Override KO 1.2 ✗ not met'
-	);
+	expect(html).toContain('Grey &amp; White KO 1.2 ✗ not met');
 	expect(html).toMatch(
-		/(Red|Blue) &amp; (Blue|Red) Override Difference [\d.]+ ✓ met/
+		/(Red|Blue) &amp; (Blue|Red) Difference [\d.]+ ✓ met/
 	);
 });
 
@@ -77,6 +75,29 @@ const selected = (label: string) =>
 			`aria-label="${label}".*?<option[^>]*selected[^>]*>(?:<!---->)?([^<]*)`
 		)
 	)?.[1];
+
+test('rounds an APCA level down, never up to the goal', () => {
+	const grey = id('Grey');
+	const root = palette.root!.id;
+
+	palette.setPair(grey, root, {apca: 200});
+
+	const [{level}] = combinations.pairChecks.find(
+		({fg, bg}) => fg.id === grey && bg.id === root
+	)!.checks;
+	const plain = text(render(Result).body);
+
+	expect(level % 1).not.toBe(0);
+	expect(plain).toContain(`Lc ${Math.floor(level)} ✗ not met`);
+
+	// the goal just above the level: the integer part is not the goal
+	palette.setPair(grey, root, {apca: Math.ceil(level)});
+	expect(text(render(Result).body)).toContain(
+		`Lc ${Math.floor(level)} ✗ not met`
+	);
+
+	palette.setPair(grey, root, {});
+});
 
 test('previews a pair, declared or not', () => {
 	combinations.previewedUid = `${palette.root!.id}-${id('Black')}`;

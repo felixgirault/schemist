@@ -65,7 +65,9 @@ One-off pairs
   (Amended after the first build: a cell with several rules is
   one group, titled as its extra option, "Body text + Large text
   and UI", with each combination once, rather than a group per
-  rule listing the same pairs twice.)
+  rule listing the same pairs twice. Also amended: **Override**
+  is an icon button, and an APCA level reads "Lc 105", rounded
+  down, with no grade, to narrow the table.)
 - **Names**: each select is labelled by its couple ("Text on
   Surfaces", "Text among themselves").
 - **Narrow panels**: the grid scrolls sideways, role names

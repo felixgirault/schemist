@@ -1,6 +1,7 @@
 <script lang="ts">
-	import {wcag2Grade, wcag3Grade} from '#lib/color/contrast.js';
+	import {wcag2Grade} from '#lib/color/contrast.js';
 	import {formatRgbToHex} from '#lib/color/formatting.js';
+	import OptionsIcon from '#lib/components/icons/OptionsIcon.svelte';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
 	import type {AppRule, PairTargets} from '#lib/core/nodes.js';
 	import type {TargetCheck} from '#lib/core/pairs.js';
@@ -28,11 +29,12 @@
 		target === 'wcag2'
 			? wcag2Grade(level)
 			: target === 'apca'
-				? `APCA ${wcag3Grade(level)}`
+				? 'Lc'
 				: 'Difference';
 
-	// A level with its grade, and whether it meets the goal. Normal
-	// colors only: simulated levels come back as rows (ADR 20).
+	// A level with its grade, and whether it meets the goal. APCA
+	// rounds down, so that the number never reads as the goal when it
+	// is not met. Normal colors only: simulated levels come back as rows (ADR 20).
 	const rowsOf = (
 		checks: TargetCheck[],
 		levelOf: (check: TargetCheck) => number
@@ -42,7 +44,10 @@
 
 			return {
 				name: gradeOf(check.target, level),
-				level,
+				shown:
+					check.target === 'apca'
+						? Math.floor(level)
+						: round(level, 1),
 				met: level >= check.goal
 			};
 		});
@@ -115,11 +120,11 @@
 				></span>
 			</span>
 		{/if}
-		{#each rowsOf(check.checks, (c) => c.level) as { name, level, met }, i (name)}
+		{#each rowsOf(check.checks, (c) => c.level) as { name, shown, met }, i (name)}
 			{#if i}·{/if}
 			<span class="level">
 				<span class="grade">{name}</span>
-				{round(level, 1)}
+				{shown}
 				<span aria-hidden="true">{met ? '✓' : '✗'}</span>
 				<span class="hidden">{met ? 'met' : 'not met'}</span>
 			</span>
@@ -215,13 +220,13 @@
 										</button>
 									{:else if check.pair.sources.rules.length}
 										<button
-											class="button"
+											class="button button--icon"
 											aria-label="Override {names}"
 											title="Declare this pair with the rule's targets, to edit them here"
 											onclick={() =>
 												handleOverride(check)}
 										>
-											Override
+											<OptionsIcon />
 										</button>
 									{/if}
 								</th>

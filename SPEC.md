@@ -954,13 +954,15 @@ come).
   & White") and the pair's actions, in the panel's colors, on one
   line. A cell is one line in that variant's colors (`allChecks`,
   looked up by pair id): per target (`{name, level, met?}`), the
-  grade in bold and the level (rounded to 1 decimal, APCA
-  prefixed by `APCA`), then ✓ or ✗ with "met" or "not met" as
-  hidden text, targets separated by "·". A pair whose targets are
-  all `difference` is not text on a background: its cell is in
-  the page's colors, with the two colors as a small swatch pair
-  before its level. The table uses the panel's font, not the
-  export table's, and scrolls sideways when wider than the panel.
+  grade in bold and the level (rounded to 1 decimal; APCA as
+  **Lc** and an integer rounded down, so that it never reads as
+  the goal when unmet, with no grade), then ✓ or ✗ with "met" or
+  "not met" as hidden text, targets separated by "·". A pair
+  whose targets are all `difference` is not text on a background:
+  its cell is in the page's colors, with the two colors as a
+  small swatch pair before its level. The table uses the panel's
+  font, not the export table's, and scrolls sideways when wider
+  than the panel.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
@@ -1000,25 +1002,25 @@ still to come), then **One-off pairs**.
   met in Dark" naming the failing variants); none otherwise (ADR
   21).
 - **Checks**: the table, given as the `pairs` snippet: each cell
-  of the grid, in its order (rows, then columns), that has checked
-  pairs, one group for all its rules, titled as the cell's extra
-  option ("Text on Surfaces · Body text + Large text and UI",
-  "Custom" for a rule with targets of its own) with its status
-  and each pair once, then the
-  one-off pairs by use ("One-off pairs · Custom"; `requirements`,
-  Custom last, a pair under each use it holds). Nothing is
-  measured again (`ruleChecks`). One hint says a rule is checked
-  once its roles have colors, when one has none. The Preview
-  button, named "Preview Grey on White", toggles `previewedUid`
-  to `<bgId>-<fgId>`; it previews the selected variant's colors,
-  so only that variant's column has one for now (ADR 20, step 3);
-  **Override** in the row header of a pair that is not one-off
-  declares it one-off with the targets the rules give, to edit it
-  alone; a one-off pair's row header has a number field per
-  target (**WCAG 2**, **APCA**, **Difference**, empty for none),
-  applied on change, clearing them all removing the pair, and
-  **Remove pair**; buttons and fields name their pair, as
-  "Override Grey on White".
+  of the grid, in its order (rows, then columns), that has
+  checked pairs, one group for all its rules, titled as the
+  cell's extra option ("Text on Surfaces · Body text + Large text
+  and UI", "Custom" for a rule with targets of its own) with its
+  status and each pair once, then the one-off pairs by use
+  ("One-off pairs · Custom"; `requirements`, Custom last, a pair
+  under each use it holds). Nothing is measured again
+  (`ruleChecks`). One hint says a rule is checked once its roles
+  have colors, when one has none. The Preview button, named
+  "Preview Grey on White", toggles `previewedUid` to
+  `<bgId>-<fgId>`; it previews the selected variant's colors, so
+  only that variant's column has one for now (ADR 20, step 3);
+  **Override** (an icon button, `OptionsIcon`) in the row header
+  of a pair that is not one-off declares it one-off with the
+  targets the rules give, to edit it alone; a one-off pair's row
+  header has a number field per target (**WCAG 2**, **APCA**,
+  **Difference**, empty for none), applied on change, clearing
+  them all removing the pair, and **Remove pair**; buttons and
+  fields name their pair, as "Override Grey on White".
 
 **One-off pairs** follow, always shown: **+ Pair** opens a
 compact form, a **Foreground** and a **Background** color (each a
