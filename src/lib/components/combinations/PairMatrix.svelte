@@ -1,33 +1,16 @@
 <script lang="ts">
-	import {
-		wcag2Contrast,
-		wcag2Grade,
-		wcag3Grade
-	} from '#lib/color/contrast.js';
+	import {wcag2Contrast} from '#lib/color/contrast.js';
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import type {RgbColor} from '#lib/color/types.js';
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
 	import {simulation} from '#lib/core/contrast.js';
 	import type {PaletteColor} from '#lib/core/evaluate.js';
-	import type {PairTargets} from '#lib/core/nodes.js';
 	import type {TargetCheck} from '#lib/core/pairs.js';
-	import {
-		holdsUse,
-		targetNames,
-		uses
-	} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {round} from '#lib/utils/math.js';
-	import Requirements from './Requirements.svelte';
 	import './matrix.css';
-
-	const labels = {
-		wcag2: 'WCAG 2 contrast',
-		apca: 'APCA contrast',
-		difference: 'Color difference'
-	};
 
 	let colors = $derived(combinations.pairColors);
 	let byId = $derived(
@@ -51,90 +34,8 @@
 			: {fg: fg.id, bg: bg.id};
 	};
 
-	const handleClose = () => {
-		combinations.openPairIds = null;
-	};
-
-	// The open pair is kept in the store, so that leaving the grid
-	// and coming back would reopen the card unasked.
-	$effect(() => () => {
-		combinations.openPairIds = null;
-		combinations.ruleId = null;
-	});
-
-	const previewUid = $derived(
-		open ? `${open.bg.id}-${open.fg.id}` : null
-	);
-
-	// Every target of the use on the open pair.
-	const useChecks = $derived(
-		open ? combinations.checkUse(open.fg, open.bg) : []
-	);
-
-	const grade = (
-		target: TargetCheck['target'],
-		level: number
-	) =>
-		target === 'wcag2'
-			? wcag2Grade(level)
-			: target === 'apca'
-				? `APCA ${wcag3Grade(level)}`
-				: null;
-
-	const handlePreview = () => {
-		combinations.previewedUid =
-			combinations.previewedUid === previewUid
-				? null
-				: previewUid;
-	};
-
-	// Committed on change, so that a half-typed number does not
-	// remove the pair.
-	const handleTarget = (
-		name: (typeof targetNames)[number],
-		event: Event
-	) => {
-		if (!open) return;
-
-		const text = (event.currentTarget as HTMLInputElement)
-			.value;
-		const value =
-			text.trim() === '' ? undefined : Number(text);
-
-		if (value !== undefined && !Number.isFinite(value)) return;
-
-		const targets: PairTargets = {
-			...open.check?.pair,
-			[name]: value
-		};
-
-		palette.setPair(open.fg.id, open.bg.id, targets);
-	};
-
-	const ruleOf = (id: string) => {
-		const rule = palette.rules.find((r) => r.id === id);
-
-		return rule && combinations.describeRule(rule);
-	};
-
-	// Declares the pair with the targets its rules give it, to edit it
-	// alone.
-	const handleOverride = () => {
-		if (open?.check) {
-			palette.setPair(
-				open.fg.id,
-				open.bg.id,
-				open.check.pair
-			);
-		}
-	};
-
-	const handleRemove = () => {
-		if (open) palette.setPair(open.fg.id, open.bg.id, {});
-	};
-
 	// The simulated levels of each target, for tooltips and names.
-	const simulations = (checks: TargetCheck[]) =>
+	const simulations = (checks: TargetCheck[] = []) =>
 		checks
 			.flatMap(({target, simulated}) =>
 				simulated.map(
@@ -144,7 +45,7 @@
 			)
 			.join('');
 
-	// What a declared pair is for, for tooltips, names and the card.
+	// What a declared pair is for, for tooltips and names.
 	const forNames = (check?: {
 		for: {uses: {name: string}[]; custom: boolean};
 	}) =>
@@ -168,448 +69,162 @@
 	<span class="swatch" style="background: {hex(color)};"></span>
 {/snippet}
 
-<!-- On the window, as focus may be on a cell rather than the card -->
-<svelte:window
-	onkeydown={(event) => {
-		if (open && event.key === 'Escape') handleClose();
-	}}
-/>
+{#if unsavedNames.length}
+	<p class="hint" role="status">
+		Pairs and roles on these colors are not in the permalink
+		until they get distinct names: {unsavedNames
+			.map((name) => `"${name}"`)
+			.join(', ')}.
+	</p>
+{/if}
 
-<div class="matrix-panel">
-	{#if unsavedNames.length}
-		<p class="hint" role="status">
-			Pairs and roles on these colors are not in the permalink
-			until they get distinct names: {unsavedNames
-				.map((name) => `"${name}"`)
-				.join(', ')}.
-		</p>
-	{/if}
+{#if colors.length > 1}
+	<p class="hint">
+		Each cell shows a foreground (column) on a background
+		(row). Activate one to open it. {combinations.pairChecks
+			.length} declared.
+	</p>
 
-	{#if colors.length > 1}
-		<p class="hint">
-			Each cell shows a foreground (column) on a background
-			(row), dimmed when it misses the minimum. Activate one
-			to open it. {combinations.pairChecks.length} declared.
-		</p>
-
-		<div class="layout">
-			<div class="body">
-				<div class="scroller">
-					<table class="matrix">
-						<caption class="hidden">
-							Declared pairs, backgrounds in rows and
-							foregrounds in columns
-						</caption>
-						<thead>
-							<tr>
-								<td></td>
-								{#each colors as { id, name, rgbColor } (id)}
-									<th
-										scope="col"
-										title={titleOf(id, name)}
-									>
-										{@render swatch(rgbColor)}
-										<span class="hidden">{name}</span>
-									</th>
-								{/each}
-							</tr>
-						</thead>
-						<tbody>
-							{#each colors as row (row.id)}
-								<tr>
-									<th
-										scope="row"
-										title={titleOf(row.id, row.name)}
-									>
-										{@render swatch(row.rgbColor)}
-										<span class="hidden">
-											{row.name}
-										</span>
-									</th>
-									{#each colors as column (column.id)}
-										<td>
-											{#if column.id !== row.id}
-												{@const check = byId.get(
-													`${row.id}-${column.id}`
-												)}
-												{@const levels =
-													combinations.checkUse(
-														column,
-														row
-													)}
-												{@const passes =
-													combinations.passesUse(
-														column,
-														row
-													)}
-												<button
-													class="cell pair-cell"
-													class:pair-cell--tall={combinations
-														.blindnessTypes.length}
-													class:pair-cell--declared={check}
-													class:pair-cell--off={check &&
-														!check.pass}
-													class:pair-cell--dim={!passes}
-													class:pair-cell--rule={combinations.outlinedCells?.has(
-														`${row.id}-${column.id}`
-													)}
-													style="--cell-bg: {hex(
-														row.rgbColor
-													)}; --cell-fg: {hex(
-														column.rgbColor
-													)};"
-													title="{column.name} on {row.name}, {round(
-														wcag2Contrast(
-															row.rgbColor,
-															column.rgbColor
-														),
-														1
-													)}:1{simulations(
-														levels
-													)}{check
-														? ', for ' +
-															forNames(check)
-														: ''}"
-													aria-pressed={open?.fg
-														.id === column.id &&
-														open?.bg.id === row.id}
-													aria-label="{column.name} on {row.name}: {check
-														? check.pass
-															? 'meets its targets'
-															: 'does not meet its targets'
-														: 'not declared'}, {passes
-														? 'reaches'
-														: 'misses'} the minimum{simulations(
-														levels
-													)}{check
-														? ', for ' +
-															forNames(check)
-														: ''}"
-													onclick={() =>
-														handleCell(
-															column,
-															row
-														)}
-												>
-													<span
-														class="preview"
-														aria-hidden="true"
-													>
-														Aa
-														{#if combinations.blindnessTypes.length}
-															<span
-																class="strips"
-															>
-																{#each combinations.blindnessTypes as type (type)}
-																	{@const simulate =
-																		simulation(
-																			type
-																		)}
-																	<span
-																		class="strip"
-																		style="--cell-bg: {hex(
-																			simulate(
-																				row.rgbColor
-																			)
-																		)}; --cell-fg: {hex(
-																			simulate(
-																				column.rgbColor
-																			)
-																		)};"
-																	></span>
-																{/each}
-															</span>
-														{/if}
-													</span>
-													{#if check}
-														<!-- drawn in the panel's colors, readable whatever the pair -->
-														<span class="badge">
-															{#if check.pass}
-																<CheckIcon />
-															{:else}
-																<WarningIcon />
-															{/if}
-														</span>
-													{/if}
-												</button>
-											{/if}
-										</td>
-									{/each}
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-
-				{#if open}
-					<section
-						class="details elevated"
-						aria-labelledby="pair-card-title"
-					>
-						<h3 class="h3" id="pair-card-title">
-							{open.fg.name} on {open.bg.name}
-						</h3>
-
-						<p
-							class="sample"
-							style="background: {hex(
-								open.bg.rgbColor
-							)}; color: {hex(open.fg.rgbColor)};"
+	<div class="scroller">
+		<table class="matrix">
+			<caption class="hidden">
+				Declared pairs, backgrounds in rows and foregrounds
+				in columns
+			</caption>
+			<thead>
+				<tr>
+					<td></td>
+					{#each colors as { id, name, rgbColor } (id)}
+						<th scope="col" title={titleOf(id, name)}>
+							{@render swatch(rgbColor)}
+							<span class="hidden">{name}</span>
+						</th>
+					{/each}
+				</tr>
+			</thead>
+			<tbody>
+				{#each colors as row (row.id)}
+					<tr>
+						<th
+							scope="row"
+							title={titleOf(row.id, row.name)}
 						>
-							{open.fg.name}
-							<br />
-							& {open.bg.name}
-						</p>
-
-						{#if useChecks.length}
-							<h4 class="h3">{combinations.useName}</h4>
-							{#each useChecks as { target, goal, level, simulated, pass } (target)}
-								<h5 class="h3">
-									{labels[target]}, at least {goal}
-									{#if pass}
-										<CheckIcon />
-										<span class="hidden">met</span>
-									{:else}
-										<WarningIcon />
-										<span class="hidden">not met</span>
-									{/if}
-								</h5>
-								<ul>
-									{#each [{type: null, level}, ...simulated] as { type, level: value } (type)}
-										{@const simulate = type
-											? simulation(type)
-											: null}
-										<li
-											class="row lens-row"
-											style="background: {hex(
-												simulate
-													? simulate(
-															open.bg.rgbColor
-														)
-													: open.bg.rgbColor
-											)}; color: {hex(
-												simulate
-													? simulate(
-															open.fg.rgbColor
-														)
-													: open.fg.rgbColor
-											)};"
-										>
-											<span class="type">
-												{type ?? 'normal vision'}
-											</span>
-											{#if grade(target, value)}<strong
-												>
-													{grade(target, value)}
-												</strong>{/if}
-											({round(value, 1)})
-											{#if value >= goal}
-												<CheckIcon />
-												<span class="hidden">
-													met
-												</span>
-											{:else}
-												<WarningIcon />
-												<span class="hidden">
-													not met
-												</span>
-											{/if}
-										</li>
-									{/each}
-								</ul>
-							{/each}
-						{/if}
-
-						<p>
-							{#if open.check}
-								For {forNames(open.check)}.
-							{:else}
-								Not declared.
-							{/if}
-						</p>
-
-						{#if open.check}
-							{@const {sources} = open.check.pair}
-							<ul class="sources">
-								{#each sources.rules as id (id)}
-									{@const rule = ruleOf(id)}
-									{#if rule}
-										<li>
-											{rule.use}, from {rule.label}
-										</li>
-									{/if}
-								{/each}
-								{#if sources.oneOff}
-									<li>
-										one-off{#if sources.overrides.length},
-											overrides
-											{sources.overrides
-												.map(
-													(id) => ruleOf(id)?.label
-												)
-												.join(', ')}{/if}
-									</li>
-								{/if}
-							</ul>
-							{#if sources.rules.length}
-								<button
-									class="button"
-									onclick={handleOverride}
-								>
-									Override for this pair
-								</button>
-							{/if}
-						{/if}
-
-						<div class="button-list">
-							{#each uses as use (use.id)}
-								{@const isSet = holdsUse(
-									open.check?.pair,
-									use
-								)}
-								<button
-									class="button"
-									aria-label="{isSet
-										? 'Remove'
-										: 'Require'} {use.name}"
-									onclick={() =>
-										combinations.toggleUse(
-											open!.fg,
-											open!.bg,
-											use
+							{@render swatch(row.rgbColor)}
+							<span class="hidden">
+								{row.name}
+							</span>
+						</th>
+						{#each colors as column (column.id)}
+							<td>
+								{#if column.id !== row.id}
+									{@const check = byId.get(
+										`${row.id}-${column.id}`
+									)}
+									<button
+										class="cell pair-cell"
+										class:pair-cell--tall={combinations
+											.blindnessTypes.length}
+										class:pair-cell--declared={check}
+										class:pair-cell--off={check &&
+											!check.pass}
+										class:pair-cell--rule={combinations.outlinedCells?.has(
+											`${row.id}-${column.id}`
 										)}
-								>
-									{isSet
-										? `${use.name} ✓`
-										: `+ ${use.name}`}
-								</button>
-							{/each}
-						</div>
-
-						<div class="targets">
-							{#each targetNames as name (name)}
-								<label>
-									{labels[name]}
-									<input
-										type="number"
-										min={0}
-										step="any"
-										value={open.check?.pair[name] ??
-											''}
-										onchange={(event) =>
-											handleTarget(name, event)}
-									/>
-								</label>
-							{/each}
-						</div>
-
-						{#if open.check}
-							{#each open.check.checks as { target, goal, level, simulated, pass } (target)}
-								{@const rows = [
-									{type: null, level},
-									...simulated
-								]}
-								<h4 class="h3">
-									{labels[target]}, at least {goal}
-									{#if pass}
-										<CheckIcon />
-										<span class="hidden">met</span>
-									{:else}
-										<WarningIcon />
-										<span class="hidden">not met</span>
-									{/if}
-								</h4>
-								<ul>
-									{#each rows as { type, level } (type)}
-										{@const simulate = type
-											? simulation(type)
-											: null}
-										<li class="row">
-											<span class="type">
-												{type ?? 'normal vision'}
-											</span>
-											{@render swatch(
-												simulate
-													? simulate(
-															open.fg.rgbColor
-														)
-													: open.fg.rgbColor
-											)}
-											{@render swatch(
-												simulate
-													? simulate(
-															open.bg.rgbColor
-														)
-													: open.bg.rgbColor
-											)}
-											<strong>
-												{round(level, 1)}
-											</strong>
-											{#if level >= goal}
-												<CheckIcon />
-												<span class="hidden">
-													met
-												</span>
-											{:else}
-												<WarningIcon />
-												<span class="hidden">
-													not met
+										style="--cell-bg: {hex(
+											row.rgbColor
+										)}; --cell-fg: {hex(
+											column.rgbColor
+										)};"
+										title="{column.name} on {row.name}, {round(
+											wcag2Contrast(
+												row.rgbColor,
+												column.rgbColor
+											),
+											1
+										)}:1{simulations(
+											check?.checks
+										)}{check
+											? ', for ' + forNames(check)
+											: ''}"
+										aria-pressed={open?.fg.id ===
+											column.id &&
+											open?.bg.id === row.id}
+										aria-label="{column.name} on {row.name}: {check
+											? check.pass
+												? 'meets its targets'
+												: 'does not meet its targets'
+											: 'not declared'}{simulations(
+											check?.checks
+										)}{check
+											? ', for ' + forNames(check)
+											: ''}"
+										onclick={() =>
+											handleCell(column, row)}
+									>
+										<span
+											class="preview"
+											aria-hidden="true"
+										>
+											Aa
+											{#if combinations.blindnessTypes.length}
+												<span class="strips">
+													{#each combinations.blindnessTypes as type (type)}
+														{@const simulate =
+															simulation(type)}
+														<span
+															class="strip"
+															style="--cell-bg: {hex(
+																simulate(
+																	row.rgbColor
+																)
+															)}; --cell-fg: {hex(
+																simulate(
+																	column.rgbColor
+																)
+															)};"
+														></span>
+													{/each}
 												</span>
 											{/if}
-										</li>
-									{/each}
-								</ul>
-							{/each}
-
-							{#if open.check.pair.sources.oneOff}
-								<button
-									class="button"
-									onclick={handleRemove}
-								>
-									Remove pair
-								</button>
-							{/if}
-						{:else}
-							<p class="hint">
-								Set a target to declare this pair.
-							</p>
-						{/if}
-
-						<button class="button" onclick={handlePreview}>
-							{combinations.previewedUid === previewUid
-								? 'Stop preview'
-								: 'Preview'}
-						</button>
-
-						<button class="button" onclick={handleClose}>
-							Close
-						</button>
-					</section>
-				{:else}
-					<Requirements />
-				{/if}
-			</div>
-		</div>
-	{:else}
-		<p>Select at least two colors to compare.</p>
-	{/if}
-</div>
+										</span>
+										{#if check}
+											<!-- drawn in the panel's colors, readable whatever the pair -->
+											<span class="badge">
+												{#if check.pass}
+													<CheckIcon />
+												{:else}
+													<WarningIcon />
+												{/if}
+											</span>
+										{/if}
+									</button>
+								{/if}
+							</td>
+						{/each}
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{:else}
+	<p>Select at least two colors to compare.</p>
+{/if}
 
 <style>
 	/* At least the panel's width; a table never shrinks below its
 	content, so many colors still scroll. */
-	.matrix-panel :global(.matrix) {
+	:global(.matrix-panel) :global(.matrix) {
 		width: 100%;
 		border-spacing: 4px;
 	}
 
-	.matrix-panel th[scope='row'] {
+	:global(.matrix-panel) th[scope='row'] {
 		width: 1%;
 	}
 
 	/* The border marks declared pairs, so that the outline stays
 	the focus ring. */
-	.matrix-panel .pair-cell {
+	:global(.matrix-panel) .pair-cell {
 		position: relative;
 		width: 100%;
 		min-width: 2rem;
@@ -617,7 +232,7 @@
 		border: 2px solid transparent;
 	}
 
-	.matrix-panel .pair-cell--tall {
+	:global(.matrix-panel) .pair-cell--tall {
 		height: 2.75rem;
 	}
 
@@ -637,17 +252,6 @@
 		border: 1px solid currentColor;
 	}
 
-	.sample {
-		padding: 1rem;
-		border-radius: var(--radius);
-		font-size: 1.25rem;
-		font-style: italic;
-	}
-
-	.lens-row {
-		padding: 0.25rem 0.5rem;
-	}
-
 	.preview {
 		display: flex;
 		align-items: center;
@@ -663,63 +267,23 @@
 		font-weight: 600;
 	}
 
-	.layout {
-		container-type: inline-size;
-	}
-
-	/* The grid scrolls on its own, the card stays in view beside it
-	when the panel has room, under it otherwise. */
-	.body {
-		display: grid;
-		gap: 1rem;
-	}
-
-	.body > :global(.scroller) {
-		min-width: 0;
-	}
-
-	@container (min-width: 48rem) {
-		.body {
-			grid-template-columns: minmax(0, 1fr) 32ch;
-			align-items: start;
-		}
-
-		.body .details {
-			position: sticky;
-			top: 0;
-			max-height: 100vh;
-			margin-top: 0;
-			overflow: auto;
-		}
-	}
-
-	.matrix-panel .details {
-		border: 1px solid var(--fg);
-		color: var(--fg);
-	}
-
-	/* Dims the colors only, not the marks of a declared pair. */
-	.pair-cell--dim .preview {
-		opacity: 0.25;
-	}
-
-	.matrix-panel .pair-cell--declared {
+	:global(.matrix-panel) .pair-cell--declared {
 		border-color: var(--fg);
 	}
 
-	.matrix-panel .pair-cell--off {
+	:global(.matrix-panel) .pair-cell--off {
 		border-style: dashed;
 	}
 
 	/* A rule's cells: a ring around them, where Look at only dims. */
-	.matrix-panel .pair-cell--rule {
+	:global(.matrix-panel) .pair-cell--rule {
 		z-index: 1;
 		box-shadow:
 			0 0 0 3px Highlight,
 			0 0 0 5px var(--bg);
 	}
 
-	.matrix-panel .pair-cell[aria-pressed='true'] {
+	:global(.matrix-panel) .pair-cell[aria-pressed='true'] {
 		z-index: 1;
 		transform: scale(1.15);
 	}
@@ -738,26 +302,8 @@
 		color: var(--fg);
 	}
 
-	.matrix-panel .badge :global(svg) {
+	:global(.matrix-panel) .badge :global(svg) {
 		width: 0.65rem;
 		height: 0.65rem;
-	}
-
-	.targets {
-		display: grid;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	h4 {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 0.75rem;
-	}
-
-	h4 :global(svg) {
-		width: 1rem;
-		height: 1rem;
 	}
 </style>

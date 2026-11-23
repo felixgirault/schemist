@@ -6,6 +6,7 @@ import {palette} from '#lib/stores/palette.svelte.js';
 import {loadPalette, rootTree} from '#lib/testing/tree.js';
 import {render} from 'svelte/server';
 import {beforeAll, expect, test} from 'vitest';
+import Combinations from './Combinations.svelte';
 import PairMatrix from './PairMatrix.svelte';
 
 const named = (
@@ -48,8 +49,13 @@ test('shows the status of every cell besides its color', () => {
 	expect(html).toContain('meets its targets');
 	expect(html).toContain('does not meet its targets');
 	expect(html).toContain('not declared');
-	expect(html).toContain('Secret on');
 	expect(html).not.toContain('Remove pair');
+});
+
+test('lists the pairs left out when a color is hidden', () => {
+	expect(render(Combinations).body).toContain(
+		'Secret on White'
+	);
 });
 
 test('draws every cell as its pair, declared or not', () => {
@@ -70,7 +76,7 @@ test('opens the details of a declared pair', () => {
 
 	combinations.openPairIds = {fg: fg.id, bg: bg.id};
 
-	const html = render(PairMatrix).body;
+	const html = render(Combinations).body;
 
 	expect(html).toContain('Remove pair');
 	expect(html).toContain('normal vision');
@@ -124,29 +130,6 @@ test('toggles the targets of a use on a pair', () => {
 	expect(pairOf()).toBeUndefined();
 });
 
-test('custom starts from the last use and checks what is typed', () => {
-	combinations.use = 'large';
-	combinations.setUse('custom');
-	expect(combinations.custom).toEqual({wcag2: 3});
-
-	combinations.custom = {apca: 75};
-	expect(combinations.useTargets).toEqual({apca: 75});
-
-	combinations.use = 'body';
-});
-
-test('dims the cells that miss the use', () => {
-	combinations.use = 'body';
-
-	const html = render(PairMatrix).body;
-
-	// Grey on White (1.2:1) and White on Grey miss it
-	expect(html.match(/pair-cell--dim/g)).toHaveLength(2);
-	expect(html).toContain(
-		'Grey on White: does not meet its targets, misses the minimum'
-	);
-});
-
 test('draws one strip per simulation in every cell', () => {
 	combinations.blindnessTypes = ['protanomaly', 'tritanomaly'];
 
@@ -170,22 +153,18 @@ test('a click opens the card without declaring', () => {
 	expect(palette.pairs).toHaveLength(before);
 });
 
-test('the card has the lens, a button per use and Preview', () => {
-	combinations.use = 'body';
+test('the card has a button per use, the checks and Preview', () => {
 	combinations.blindnessTypes = ['protanomaly'];
 	combinations.openPairIds = {
 		fg: node('Grey').id,
 		bg: node('Black').id
 	};
 
-	let html = render(PairMatrix).body;
+	let html = render(Combinations).body;
 
 	expect(html).toContain('aria-label="Require Body text"');
 	expect(html).toContain('+ Large text and UI');
 	expect(html).toContain('Not declared.');
-	expect(html).toContain('WCAG 2 contrast, at least 4.5');
-	expect(html).toContain('APCA contrast, at least 75');
-	expect(html).toContain('protanomaly');
 	expect(html).toContain('Preview');
 
 	// a button toggles the use's targets on the pair
@@ -194,16 +173,19 @@ test('the card has the lens, a button per use and Preview', () => {
 		palette.colors.find((e) => e.id === node('Black').id)!,
 		uses[0]
 	);
-	html = render(PairMatrix).body;
+	html = render(Combinations).body;
 	expect(html).toContain('aria-label="Remove Body text"');
 	expect(html).toContain('Body text ✓');
+	expect(html).toContain('WCAG 2 contrast, at least 4.5');
+	expect(html).toContain('APCA contrast, at least 75');
+	expect(html).toContain('protanomaly');
 	expect(html).toContain('For Body text.');
 	expect(html).toContain(', for Body text"');
 
 	// Preview finds the pair
 	combinations.previewedUid = `${node('Black').id}-${node('Grey').id}`;
 	expect(combinations.previewed).toBeTruthy();
-	expect(render(PairMatrix).body).toContain('Stop preview');
+	expect(render(Combinations).body).toContain('Stop preview');
 
 	combinations.previewedUid = null;
 	combinations.openPairIds = null;
@@ -211,15 +193,16 @@ test('the card has the lens, a button per use and Preview', () => {
 	palette.setPair(node('Grey').id, node('Black').id, {});
 });
 
-test('counts the cells meeting the use', () => {
-	combinations.use = 'body';
+test('lays out the grid and the requirements on one page', () => {
+	const html = render(Combinations).body;
 
-	expect(combinations.cellCount).toBe(6);
-	expect(combinations.passingCells).toBe(4);
+	expect(html).toContain('class="matrix"');
+	expect(html).toContain('id="requirements-title"');
+	expect(html).not.toContain('Contrast list');
 });
 
 test('docks the card as a labelled region beside the grid', () => {
-	expect(render(PairMatrix).body).not.toContain(
+	expect(render(Combinations).body).not.toContain(
 		'pair-card-title'
 	);
 
@@ -228,7 +211,7 @@ test('docks the card as a labelled region beside the grid', () => {
 		bg: node('Black').id
 	};
 
-	const html = render(PairMatrix).body;
+	const html = render(Combinations).body;
 
 	expect(html).toMatch(
 		/<section[^>]*aria-labelledby="pair-card-title"/
@@ -243,7 +226,7 @@ test('lists the declared pairs by use when none is open', () => {
 
 	palette.setPair(id, node('Black').id, {wcag2: 4.5, apca: 75});
 
-	const html = render(PairMatrix).body;
+	const html = render(Combinations).body;
 
 	expect(html).toContain('Requirements');
 	expect(html).toContain('One-off pairs');
@@ -270,7 +253,7 @@ test('lists rules, sorts colors by role and names sources', () => {
 	])!;
 	const rule = palette.addRule(text, surfaces, 'body');
 
-	const html = render(PairMatrix).body;
+	const html = render(Combinations).body;
 
 	expect(html).toContain('Text on Surfaces, Body text');
 	expect(html).toContain('title="White, Surfaces"');

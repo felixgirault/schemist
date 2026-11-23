@@ -7,13 +7,11 @@
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
-	import {round} from '#lib/utils/math.js';
 	import type {Snippet} from 'svelte';
 
 	interface Props {
-		// Draws the pairs under each rule and in the one-off groups
-		// (the Result mode); without it the list fits a sidebar.
-		pairs?: Snippet<[PairCheck[]]>;
+		// Draws the pairs under each rule and in the one-off groups.
+		pairs: Snippet<[PairCheck[]]>;
 	}
 
 	let {pairs}: Props = $props();
@@ -99,10 +97,6 @@
 		fg = from;
 		bg = to ?? 'self';
 		newFg = newBg = '';
-	};
-
-	const open = (fg: string, bg: string) => {
-		combinations.openPairIds = {fg, bg};
 	};
 </script>
 
@@ -212,7 +206,7 @@
 {/snippet}
 
 <section
-	class={pairs ? 'requirements' : 'details elevated'}
+	class="requirements"
 	aria-labelledby="requirements-title"
 >
 	<h3 class="h3" id="requirements-title">Requirements</h3>
@@ -267,32 +261,9 @@
 						{#if !checks.length}
 							<p class="hint">No pair yet: add colors.</p>
 						{/if}
-						{#if !pairs}
-							<ul class="failing">
-								{#each failing as { id, fg, bg, checks: levels } (id)}
-									{@const worst = levels.find(
-										({pass}) => !pass
-									)}
-									<li>
-										<button
-											class="button"
-											onclick={() =>
-												open(fg.id, bg.id)}
-										>
-											<WarningIcon />
-											{fg.name} on {bg.name}
-											{#if worst}
-												{worst.target}
-												{round(worst.minLevel, 1)} / {worst.goal}
-											{/if}
-										</button>
-									</li>
-								{/each}
-							</ul>
-						{/if}
 					</div>
 				{/if}
-				{@render pairs?.(checks)}
+				{@render pairs(checks)}
 			</li>
 		{/each}
 	</ul>
@@ -352,26 +323,7 @@
 		<h4 class="h3">One-off pairs</h4>
 		{#each combinations.requirements as { id, name, checks } (id)}
 			<h5 class="h3">{name}</h5>
-			{#if pairs}
-				{@render pairs(checks)}
-			{:else}
-				<ul class="plain">
-					{#each checks as { id, fg, bg, pass } (id)}
-						<li>
-							<button
-								class="button"
-								onclick={() => open(fg.id, bg.id)}
-							>
-								{@render swatch(fg.id)}
-								{fg.name} on
-								{@render swatch(bg.id)}
-								{bg.name}
-								{@render status(pass)}
-							</button>
-						</li>
-					{/each}
-				</ul>
-			{/if}
+			{@render pairs(checks)}
 		{/each}
 	{/if}
 
@@ -386,19 +338,16 @@
 
 	{#if !palette.rules.length && !combinations.requirements.length && !combinations.hiddenPairs.length}
 		<p class="hint">
-			{pairs
-				? 'Add a rule to see its pairs as they will be used.'
-				: 'Add a rule, or open a cell and pick a use to declare a pair: the requirements are listed here.'}
+			Add a rule to see its pairs as they will be used, or
+			open a cell and pick a use to declare a pair.
 		</p>
 	{/if}
 </section>
 
 <style>
 	.rules,
-	.plain,
 	.chips,
-	.picker,
-	.failing {
+	.picker {
 		padding: 0;
 		list-style: none;
 	}

@@ -2,37 +2,34 @@
 	import type {BlindnessType} from '#lib/core/contrast.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 
-	const entries: [string, BlindnessType][] = [
-		['Protanomaly', 'protanomaly'],
-		['Deuteranomaly', 'deuteranomaly'],
-		['Tritanomaly', 'tritanomaly']
+	const entries: [string, string, BlindnessType][] = [
+		['P', 'Protanomaly', 'protanomaly'],
+		['D', 'Deuteranomaly', 'deuteranomaly'],
+		['T', 'Tritanomaly', 'tritanomaly']
 	];
 </script>
 
-<fieldset>
-	<legend>Color blindness simulation</legend>
+<div class="button-list" role="group" aria-label="Simulate">
+	<span>Simulate</span>
+	{#each entries as [short, label, type] (type)}
+		<input
+			class="button-trigger hidden"
+			id="blindness-{type}"
+			type="checkbox"
+			bind:group={combinations.blindnessTypes}
+			value={type}
+		/>
 
-	<div class="fieldset-fields">
-		<div class="button-list button-list--stacked">
-			{#each entries as [label, type] (type)}
-				<input
-					class="button-trigger hidden"
-					id="blindness-{type}"
-					type="checkbox"
-					bind:group={combinations.blindnessTypes}
-					value={type}
-				/>
-
-				<label
-					class="button"
-					class:button--active={combinations.blindnessTypes.includes(
-						type
-					)}
-					for="blindness-{type}"
-				>
-					{label}
-				</label>
-			{/each}
-		</div>
-	</div>
-</fieldset>
+		<label
+			class="button"
+			class:button--active={combinations.blindnessTypes.includes(
+				type
+			)}
+			for="blindness-{type}"
+			title={label}
+		>
+			{short}
+			<span class="hidden">{label}</span>
+		</label>
+	{/each}
+</div>

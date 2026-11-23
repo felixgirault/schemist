@@ -1,5 +1,7 @@
 <script lang="ts">
+	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
 	import Combinations from '#lib/components/combinations/Combinations.svelte';
+	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
 	import Export from '#lib/components/export/Export.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
@@ -111,19 +113,14 @@
 		<header>
 			<h2 class="h2">
 				Combinations <span>
-					{#if combinations.mode === 'pairs'}
-						({combinations.passingCells} / {combinations.cellCount})
-					{:else if combinations.mode === 'difference'}
-						({combinations.differences.filter(
-							({minLevel}) =>
-								minLevel >= combinations.minDifference
-						).length} / {combinations.differences.length})
-					{:else}
-						({combinations.filtered.length} / {combinations
-							.all.length})
-					{/if}
+					({combinations.passingPairs} / {combinations
+						.pairChecks.length})
 				</span>
 			</h2>
+			<div class="toggles">
+				<BlindnessFilter />
+				<LuminosityFilter />
+			</div>
 		</header>
 
 		<Combinations />
@@ -157,6 +154,13 @@
 
 	section {
 		padding: var(--vgap) var(--hgap);
+	}
+
+	.toggles {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 1rem;
 	}
 
 	h2 span {

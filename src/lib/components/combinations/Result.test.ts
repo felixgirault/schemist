@@ -70,12 +70,12 @@ test('shows the simulations in the cards, once', () => {
 	expect(plain.split('Black &amp; White').length).toBe(2);
 });
 
-test('previews a pair the Colors filter leaves out', () => {
-	combinations.colorFilters = [id('Red')];
+test('previews a pair, declared or not', () => {
 	combinations.previewedUid = `${palette.root!.id}-${id('Black')}`;
 	const previewed = combinations.previewed;
 
-	combinations.colorFilters = [];
 	combinations.previewedUid = null;
 	expect(previewed?.fgName).toBe('Black');
+	expect(previewed?.bgName).toBe('White');
+	expect(combinations.previewed).toBeNull();
 });

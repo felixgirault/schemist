@@ -6,6 +6,7 @@
 	import type {TargetCheck} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
+	import PairCard from './PairCard.svelte';
 	import Requirements from './Requirements.svelte';
 	import './matrix.css';
 
@@ -72,13 +73,21 @@
 	</div>
 {/snippet}
 
-<!-- Each requirement with its cards underneath; the panel class
-styles the role chips' swatches -->
-<div class="matrix-panel">
+<!-- The open cell's card, then each requirement with its cards
+underneath -->
+<div class="column">
+	<PairCard />
 	<Requirements pairs={cards} />
 </div>
 
 <style>
+	.column {
+		display: grid;
+		gap: 1rem;
+		align-content: start;
+		min-width: 0;
+	}
+
 	.cards {
 		display: grid;
 		grid-template-columns: repeat(
