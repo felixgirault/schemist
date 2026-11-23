@@ -895,7 +895,9 @@ colors, top to bottom) and name, then actions:
   its name; dimmed on a hidden preset. Hidden template colors
   have no line. Open, the preset's bar is drawn by the lines,
   each its own color at its own height, so that they always line
-  up; closed, it is a gradient along the row.
+  up; closed, it is a gradient along the row. Every bar of the
+  tree has a faint inner shadow (`--fg` at 20%), to see colors
+  close to the background.
 - On narrow screens (under 30rem), a node's actions wrap under
   its name when they don't fit beside it.
 - **Roles on a color** (`ColorRoles.svelte` and

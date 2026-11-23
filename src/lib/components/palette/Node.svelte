@@ -296,9 +296,22 @@
 	}
 
 	.colors ul {
+		position: relative;
 		margin: 0;
 		padding: 0;
 		list-style: none;
+	}
+
+	/* Around the whole bar, not each part */
+	.colors ul::after {
+		position: absolute;
+		inset-block: 0;
+		left: -1.5rem;
+		width: 0.75rem;
+		border-radius: var(--radius);
+		box-shadow: var(--bar-shadow);
+		pointer-events: none;
+		content: '';
 	}
 
 	.mark {
