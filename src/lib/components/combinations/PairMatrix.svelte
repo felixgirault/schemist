@@ -8,11 +8,25 @@
 	import type {PaletteColor} from '#lib/core/evaluate.js';
 	import type {TargetCheck} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
+	import type {PairGroup} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {round} from '#lib/utils/math.js';
 	import './matrix.css';
 
 	let colors = $derived(combinations.pairColors);
+	let groups = $derived(combinations.groups);
+	// Groups only show once a role exists; before, Other is the grid.
+	let hasGroups = $derived(palette.roles.length > 0);
+	let columnCount = $derived(
+		groups.reduce(
+			(n, group) =>
+				n +
+				(combinations.isCollapsed(group)
+					? 1
+					: group.colors.length),
+			0
+		)
+	);
 	let byId = $derived(
 		new Map(combinations.pairChecks.map((c) => [c.id, c]))
 	);
@@ -69,6 +83,81 @@
 	<span class="swatch" style="background: {hex(color)};"></span>
 {/snippet}
 
+{#snippet cell(row: PaletteColor, column: PaletteColor)}
+	{@const check = byId.get(`${row.id}-${column.id}`)}
+	<button
+		class="cell pair-cell"
+		class:pair-cell--tall={combinations.blindnessTypes.length}
+		class:pair-cell--declared={check}
+		class:pair-cell--off={check && !check.pass}
+		class:pair-cell--rule={combinations.outlinedCells?.has(
+			`${row.id}-${column.id}`
+		)}
+		style="--cell-bg: {hex(row.rgbColor)}; --cell-fg: {hex(
+			column.rgbColor
+		)};"
+		title="{column.name} on {row.name}, {round(
+			wcag2Contrast(row.rgbColor, column.rgbColor),
+			1
+		)}:1{simulations(check?.checks)}{check
+			? ', for ' + forNames(check)
+			: ''}"
+		aria-pressed={open?.fg.id === column.id &&
+			open?.bg.id === row.id}
+		aria-label="{column.name} on {row.name}: {check
+			? check.pass
+				? 'meets its targets'
+				: 'does not meet its targets'
+			: 'not declared'}{simulations(check?.checks)}{check
+			? ', for ' + forNames(check)
+			: ''}"
+		onclick={() => handleCell(column, row)}
+	>
+		<span class="preview" aria-hidden="true">
+			Aa
+			{#if combinations.blindnessTypes.length}
+				<span class="strips">
+					{#each combinations.blindnessTypes as type (type)}
+						{@const simulate = simulation(type)}
+						<span
+							class="strip"
+							style="--cell-bg: {hex(
+								simulate(row.rgbColor)
+							)}; --cell-fg: {hex(
+								simulate(column.rgbColor)
+							)};"
+						></span>
+					{/each}
+				</span>
+			{/if}
+		</span>
+		{#if check}
+			<!-- drawn in the panel's colors, readable whatever the pair -->
+			<span class="badge">
+				{#if check.pass}
+					<CheckIcon />
+				{:else}
+					<WarningIcon />
+				{/if}
+			</span>
+		{/if}
+	</button>
+{/snippet}
+
+{#snippet toggle(group: PairGroup, isCollapsed: boolean)}
+	<button
+		class="button group-toggle"
+		aria-expanded={!isCollapsed}
+		title="{group.colors.length} {group.colors.length === 1
+			? 'color'
+			: 'colors'}"
+		onclick={() => combinations.toggleGroup(group.id)}
+	>
+		{group.name}
+		<span aria-hidden="true">{isCollapsed ? '▸' : '▾'}</span>
+	</button>
+{/snippet}
+
 {#if unsavedNames.length}
 	<p class="hint" role="status">
 		Pairs and roles on these colors are not in the permalink
@@ -89,119 +178,96 @@
 		<table class="matrix">
 			<caption class="hidden">
 				Declared pairs, backgrounds in rows and foregrounds
-				in columns
+				in columns, by role
 			</caption>
 			<thead>
+				{#if hasGroups}
+					<tr>
+						<td colspan="2"></td>
+						{#each groups as group (group.id)}
+							{@const isCollapsed =
+								combinations.isCollapsed(group)}
+							<th
+								scope="colgroup"
+								colspan={isCollapsed
+									? 1
+									: group.colors.length}
+								class="group"
+								class:group--collapsed={isCollapsed}
+							>
+								{@render toggle(group, isCollapsed)}
+							</th>
+						{/each}
+					</tr>
+				{/if}
 				<tr>
-					<td></td>
-					{#each colors as { id, name, rgbColor } (id)}
-						<th scope="col" title={titleOf(id, name)}>
-							{@render swatch(rgbColor)}
-							<span class="hidden">{name}</span>
-						</th>
+					<td colspan={hasGroups ? 2 : 1}></td>
+					{#each groups as group (group.id)}
+						{#if combinations.isCollapsed(group)}
+							<td></td>
+						{:else}
+							{#each group.colors as { id, name, rgbColor } (id)}
+								<th
+									scope="col"
+									title={titleOf(id, name)}
+								>
+									{@render swatch(rgbColor)}
+									<span class="hidden">{name}</span>
+								</th>
+							{/each}
+						{/if}
 					{/each}
 				</tr>
 			</thead>
 			<tbody>
-				{#each colors as row (row.id)}
-					<tr>
-						<th
-							scope="row"
-							title={titleOf(row.id, row.name)}
-						>
-							{@render swatch(row.rgbColor)}
-							<span class="hidden">
-								{row.name}
-							</span>
-						</th>
-						{#each colors as column (column.id)}
-							<td>
-								{#if column.id !== row.id}
-									{@const check = byId.get(
-										`${row.id}-${column.id}`
-									)}
-									<button
-										class="cell pair-cell"
-										class:pair-cell--tall={combinations
-											.blindnessTypes.length}
-										class:pair-cell--declared={check}
-										class:pair-cell--off={check &&
-											!check.pass}
-										class:pair-cell--rule={combinations.outlinedCells?.has(
-											`${row.id}-${column.id}`
-										)}
-										style="--cell-bg: {hex(
-											row.rgbColor
-										)}; --cell-fg: {hex(
-											column.rgbColor
-										)};"
-										title="{column.name} on {row.name}, {round(
-											wcag2Contrast(
-												row.rgbColor,
-												column.rgbColor
-											),
-											1
-										)}:1{simulations(
-											check?.checks
-										)}{check
-											? ', for ' + forNames(check)
-											: ''}"
-										aria-pressed={open?.fg.id ===
-											column.id &&
-											open?.bg.id === row.id}
-										aria-label="{column.name} on {row.name}: {check
-											? check.pass
-												? 'meets its targets'
-												: 'does not meet its targets'
-											: 'not declared'}{simulations(
-											check?.checks
-										)}{check
-											? ', for ' + forNames(check)
-											: ''}"
-										onclick={() =>
-											handleCell(column, row)}
+				{#each groups as rowGroup (rowGroup.id)}
+					{#if combinations.isCollapsed(rowGroup)}
+						<tr>
+							{#if hasGroups}
+								<th scope="rowgroup" class="group">
+									{@render toggle(rowGroup, true)}
+								</th>
+							{/if}
+							<td colspan={1 + columnCount}></td>
+						</tr>
+					{:else}
+						{#each rowGroup.colors as row, i (row.id)}
+							<tr>
+								{#if hasGroups && i === 0}
+									<th
+										scope="rowgroup"
+										class="group group--rows"
+										rowspan={rowGroup.colors.length}
 									>
-										<span
-											class="preview"
-											aria-hidden="true"
-										>
-											Aa
-											{#if combinations.blindnessTypes.length}
-												<span class="strips">
-													{#each combinations.blindnessTypes as type (type)}
-														{@const simulate =
-															simulation(type)}
-														<span
-															class="strip"
-															style="--cell-bg: {hex(
-																simulate(
-																	row.rgbColor
-																)
-															)}; --cell-fg: {hex(
-																simulate(
-																	column.rgbColor
-																)
-															)};"
-														></span>
-													{/each}
-												</span>
-											{/if}
-										</span>
-										{#if check}
-											<!-- drawn in the panel's colors, readable whatever the pair -->
-											<span class="badge">
-												{#if check.pass}
-													<CheckIcon />
-												{:else}
-													<WarningIcon />
-												{/if}
-											</span>
-										{/if}
-									</button>
+										{@render toggle(rowGroup, false)}
+									</th>
 								{/if}
-							</td>
+								<th
+									scope="row"
+									title={titleOf(row.id, row.name)}
+								>
+									{@render swatch(row.rgbColor)}
+									<span class="hidden">{row.name}</span>
+								</th>
+								{#each groups as colGroup (colGroup.id)}
+									{#if combinations.isCollapsed(colGroup)}
+										<td></td>
+									{:else}
+										{#each colGroup.colors as column (column.id)}
+											<td>
+												{#if column.id !== row.id}
+													{@render cell(
+														row,
+														column
+													)}
+												{/if}
+											</td>
+										{/each}
+									{/if}
+								{/each}
+							</tr>
 						{/each}
-					</tr>
+					{/if}
 				{/each}
 			</tbody>
 		</table>
@@ -234,6 +300,18 @@
 
 	:global(.matrix-panel) .pair-cell--tall {
 		height: 2.75rem;
+	}
+
+	/* A group's header: a vertical label over a column group once
+	collapsed, and for the rows. */
+	.group {
+		font-size: 0.875rem;
+	}
+
+	.group--collapsed .group-toggle,
+	.group--rows .group-toggle,
+	th[scope='rowgroup'] .group-toggle {
+		writing-mode: vertical-rl;
 	}
 
 	.strips {

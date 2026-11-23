@@ -279,3 +279,55 @@ test('lists rules, sorts colors by role and names sources', () => {
 	palette.deleteRole(surfaces);
 	palette.deleteRole(text);
 });
+
+test('groups the grid by role, Other collapsed once a role exists', () => {
+	// no role yet: no group header, every color shown
+	let html = render(PairMatrix).body;
+
+	expect(html).not.toContain('scope="colgroup"');
+	expect(html.match(/scope="col"/g)).toHaveLength(3);
+
+	const surfaces = palette.addRole('Surfaces', [
+		palette.root!.id
+	])!;
+	const text = palette.addRole('Text', [
+		node('Grey').id,
+		node('Grey').id
+	])!;
+
+	expect(combinations.groups.map(({name}) => name)).toEqual([
+		'Surfaces',
+		'Text',
+		'Other'
+	]);
+	// Black has no role; the hidden color is not a member of any group
+	expect(
+		combinations.groups.map(({colors}) =>
+			colors.map(({name}) => name)
+		)
+	).toEqual([['White'], ['Grey'], ['Black']]);
+	expect(combinations.isCollapsed(combinations.groups[2])).toBe(
+		true
+	);
+
+	html = render(PairMatrix).body;
+	expect(html).toContain('scope="colgroup"');
+	expect(html).toMatch(/aria-expanded="true"[^>]*>\s*Surfaces/);
+	expect(html).toMatch(/aria-expanded="false"[^>]*>\s*Other/);
+	// Other's color is not drawn while collapsed
+	expect(html).not.toContain('title="Black"');
+
+	combinations.toggleGroup('other');
+	combinations.toggleGroup(text);
+	html = render(PairMatrix).body;
+	expect(html).toContain('title="Black"');
+	expect(html).not.toContain('title="Grey, Text"');
+	// a color is drawn once, in its first role
+	expect(html.match(/title="White, Surfaces"/g)).toHaveLength(
+		2
+	);
+
+	combinations.flippedGroups = [];
+	palette.deleteRole(surfaces);
+	palette.deleteRole(text);
+});

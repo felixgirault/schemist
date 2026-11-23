@@ -26,6 +26,14 @@ export type PairCheck = {
 	for: ReturnType<typeof usesOf>;
 };
 
+// The colors of a role of the grid, or of those with none (Other).
+export type PairGroup = {
+	id: string;
+	name: string;
+	isOther: boolean;
+	colors: PaletteColor[];
+};
+
 class Combinations {
 	openPairIds = $state<{fg: string; bg: string} | null>(null);
 	blindnessTypes = $state<BlindnessType[]>([]);
@@ -186,21 +194,59 @@ class Combinations {
 		return roles;
 	});
 
-	pairColors = $derived.by(() => {
-		const first = new Map<string, number>();
+	// The grid's colors by role: a color is under its first role (the
+	// sorted order kept), those with none in Other, last. Roles with no
+	// visible color are left out.
+	groups = $derived.by(() => {
+		const groups = palette.roles.map(({id, name}) => ({
+			id,
+			name,
+			isOther: false,
+			colors: [] as PaletteColor[]
+		}));
+		const other = {
+			id: 'other',
+			name: 'Other',
+			isOther: true,
+			colors: [] as PaletteColor[]
+		};
+		const byColor = new Map<string, PairGroup>();
 
-		palette.roles.forEach(({colors}, i) =>
-			colors.forEach(
-				(id) => first.has(id) || first.set(id, i)
-			)
-		);
+		for (const group of groups) {
+			for (const id of palette.roles.find(
+				(role) => role.id === group.id
+			)!.colors) {
+				if (!byColor.has(id)) byColor.set(id, group);
+			}
+		}
 
-		return this.sortedColors.toSorted(
-			(a, b) =>
-				(first.get(a.id) ?? Infinity) -
-					(first.get(b.id) ?? Infinity) || 0
+		for (const color of this.sortedColors) {
+			(byColor.get(color.id) ?? other).colors.push(color);
+		}
+
+		return [...groups, other].filter(
+			({colors}) => colors.length
 		);
 	});
+
+	pairColors = $derived(this.groups.flatMap(({colors}) => colors));
+
+	// The groups the user flipped from their default: Other starts
+	// collapsed once a role exists. Not saved.
+	flippedGroups = $state<string[]>([]);
+
+	isCollapsed(group: PairGroup) {
+		return (
+			(group.isOther && palette.roles.length > 0) !==
+			this.flippedGroups.includes(group.id)
+		);
+	}
+
+	toggleGroup(id: string) {
+		this.flippedGroups = this.flippedGroups.includes(id)
+			? this.flippedGroups.filter((flipped) => flipped !== id)
+			: [...this.flippedGroups, id];
+	}
 
 	// The one-off pairs by use, Custom last; a pair is under each use
 	// it holds. Empty uses are left out.
