@@ -106,3 +106,30 @@ test('reads as before without variants', () => {
 		text: 'met'
 	});
 });
+
+test('marks no card without variants, even a failing one', () => {
+	loadPalette(
+		rootTree('#ffffff', [
+			{
+				type: 'clr',
+				token: 'Pale',
+				args: {color: parseColor('#eeeeee')[1]!}
+			}
+		])
+	);
+	const [white, pale] = collectNodes(palette.root!);
+
+	// Fresh names: the roles of the first palette are still there.
+	const rule = palette.addRule(
+		palette.addRole('Pale text', [pale.id])!,
+		palette.addRole('Page', [white.id])!,
+		'body'
+	);
+	const check = combinations.pairChecks.find(({pair}) =>
+		pair.sources.rules.includes(rule)
+	)!;
+
+	expect(combinations.ruleStatus(rule).text).toBe('not met');
+	expect(combinations.failingElsewhere(check.id)).toEqual([]);
+	expect(text(render(Result).body)).not.toContain('Not met in');
+});
