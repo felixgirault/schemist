@@ -1292,14 +1292,18 @@ loaded) and a description as body:
 - `check`: re-checks the trees of the case's `expect.json` with
   the built CLI: every tree valid, every pair at its WCAG 2 and
   APCA targets in the worst case of the three color blindness
-  simulations, every expected hex in some tree.
+  simulations, every expected hex in some tree. A tree with
+  variants is checked in each (a `variant` on the pair results,
+  from `eval`), and `expect.json`'s `variants` makes it a problem
+  for a tree to declare others.
 
 A run scores the weighted fraction of its graders passed, a case
 the mean of its runs. The report has a table of graders by run,
 costs, turns, durations, models and the failed pairs.
 
 **Cases.** `smoke` (a canary: build the CLI and write `types` to
-a file), `website` (a light and dark scheme from one color) and
+a file), `website` (a light and dark scheme from one color, as
+one tree with Light and Dark variants and one CSS) and
 `dashboard` (a rebrand with brand colors, AAA text, states,
 status colors and a color blind safe chart palette). Prompts end
 with an output contract (file paths and token names) so that the

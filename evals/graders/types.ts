@@ -11,12 +11,16 @@ export type PairExpect = {
 // What a case expects of the trees an agent writes, from expect.json.
 export type Expect = {
 	trees: string[];
+	// The variants each tree must declare (ADR 19): its pairs are then
+	// checked in every one, instead of one tree per theme.
+	variants?: string[];
 	pairs: PairExpect[];
 	hex?: string[];
 };
 
 export type PairResult = {
 	tree: string;
+	variant?: string;
 	fg: string;
 	bg: string;
 	metric: 'wcag2' | 'apca' | 'difference';

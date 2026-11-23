@@ -492,6 +492,107 @@ test('pair names escape backslashes before slashes', () => {
 	expect(seen.flat()).toContain('b\\/c/a\\\\');
 });
 
+describe('check with variants', () => {
+	// Text is dark in Light and light in Dark, but too dim in Dark
+	// when `dim`.
+	const tree = (dim: boolean, variants = ['Light', 'Dark']) =>
+		JSON.stringify({
+			type: 'clr',
+			token: 'Page',
+			args: {color: '#ffffff'},
+			variants,
+			overrides: {[variants[1]]: {color: '#101418'}},
+			children: [
+				{
+					type: 'l',
+					token: 'Text',
+					args: {amount: 10},
+					overrides: {
+						[variants[1]]: {amount: dim ? 30 : 90}
+					}
+				}
+			]
+		});
+	const pairs = [{fg: 'Text', bg: 'Page', wcag2: 7}];
+	const check = (json: string, variants?: string[]) => {
+		const root = mkdtempSync(
+			join(tmpdir(), 'schemist-eval-test-')
+		);
+
+		try {
+			writeFileSync(join(root, 'p.json'), json);
+
+			return grade(grader('check'), {
+				dir: root,
+				transcript: '',
+				cli,
+				expect: {trees: ['p.json'], variants, pairs}
+			});
+		} finally {
+			rmSync(root, {recursive: true});
+		}
+	};
+
+	test('checks each pair in every variant', () => {
+		const result = check(tree(false), ['Light', 'Dark']);
+
+		expect(result.problems).toEqual([]);
+		expect(result.pass).toBe(true);
+		expect(result.pairs?.map((p) => p.variant)).toEqual([
+			'Light',
+			'Dark'
+		]);
+	});
+
+	test('fails when a pair fails in one variant only', () => {
+		const result = check(tree(true), ['Light', 'Dark']);
+
+		expect(result.pass).toBe(false);
+		expect(
+			result.pairs?.filter(({pass}) => !pass)
+		).toMatchObject([{tree: 'p.json', variant: 'Dark'}]);
+	});
+
+	test('fails on other variants than the expected ones', () => {
+		expect(
+			check(tree(false, ['Day', 'Night']), ['Light', 'Dark'])
+				.problems
+		).toEqual([
+			'p.json: variants: expected Light, Dark, got Day, Night'
+		]);
+		expect(
+			check(
+				JSON.stringify({
+					type: 'clr',
+					token: 'Page',
+					args: {color: '#fff'},
+					children: [
+						{
+							type: 'clr',
+							token: 'Text',
+							args: {color: '#000'}
+						}
+					]
+				}),
+				['Light', 'Dark']
+			).problems
+		).toEqual([
+			'p.json: variants: expected Light, Dark, got none'
+		]);
+	});
+
+	test('the report names the variant', () => {
+		const result = check(tree(true), ['Light', 'Dark']);
+		const text = report([
+			gradeCase('c', {check: 1}, [
+				{name: 'run-1', meta: {}, results: {check: result}}
+			])
+		]);
+
+		expect(text).toContain('p.json (Dark): Text on Page');
+	});
+});
+
 test('events skips lines that are not JSON', () => {
 	expect(events('{"a":1}\n\nnope\n{"b":2}\n')).toEqual([
 		{a: 1},

@@ -14,7 +14,9 @@ import type {
 // when every tree exists and is valid, has every token of the
 // expected pairs, and every pair meets its targets (wcag2, apca) in
 // the worst case of the color blindness simulations, in every tree
-// (`difference` is the CIEDE2000 difference between the two colors).
+// and, for a tree with variants, in each of its variants. The case
+// may require the variants a tree declares. (`difference` is the
+// CIEDE2000 difference between the two colors.)
 // Every expected hex must appear in at least one tree. Takes no
 // settings.
 //
@@ -75,26 +77,29 @@ const checkWorstLevels = (
 	for (const pair of expected) {
 		const {fg, bg} = pair;
 		const target = pair[metric]!;
-		const worst = levels.find(
+		const found = levels.filter(
 			(l) => l.fg === fg && l.bg === bg
 		);
 
-		if (!worst) {
+		if (!found.length) {
 			findings.problems.push(
 				`${tree}: ${fg}/${bg}: no result`
 			);
 			continue;
 		}
 
-		findings.pairs.push({
-			tree,
-			fg,
-			bg,
-			metric,
-			target,
-			level: worst.level,
-			pass: worst.level >= target
-		});
+		for (const {variant, level} of found) {
+			findings.pairs.push({
+				tree,
+				...(variant === undefined ? {} : {variant}),
+				fg,
+				bg,
+				metric,
+				target,
+				level,
+				pass: level >= target
+			});
+		}
 	}
 };
 
@@ -102,6 +107,7 @@ const checkTree = (
 	tree: string,
 	{dir, cli}: Context,
 	expectedPairs: PairExpect[],
+	variants: string[] | undefined,
 	findings: Findings
 ) => {
 	const file = join(dir, tree);
@@ -127,6 +133,16 @@ const checkTree = (
 
 	for (const {hex} of treeColors) {
 		findings.hexes.add(hex);
+	}
+
+	const declared = [
+		...new Set(treeColors.flatMap((c) => c.variant ?? []))
+	];
+
+	if (variants && variants.join() !== declared.join()) {
+		findings.problems.push(
+			`${tree}: variants: expected ${variants.join(', ')}, got ${declared.join(', ') || 'none'}`
+		);
 	}
 
 	const checkable = withBothTokens(
@@ -166,6 +182,7 @@ export const run = (_check: Check, context: Context): Result => {
 	const {
 		trees,
 		pairs,
+		variants,
 		hex: expectedHexes = []
 	} = expectOf(context);
 	const findings: Findings = {
@@ -175,7 +192,7 @@ export const run = (_check: Check, context: Context): Result => {
 	};
 
 	for (const tree of trees) {
-		checkTree(tree, context, pairs, findings);
+		checkTree(tree, context, pairs, variants, findings);
 	}
 
 	for (const hex of expectedHexes) {

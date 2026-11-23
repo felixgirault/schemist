@@ -136,9 +136,18 @@ each pair that has a `wcag2`, `apca` or `difference` target (the
 CIEDE2000 difference, minimum 10 for categorical colors), in the
 worst case of the three color blindness simulations. It fails
 when a tree is missing or invalid, a pair's token is missing, a
-pair is under its target in any tree, or an expected `hex` is in
-no tree. The report lists the problems and each failed pair with
-its level and target.
+pair is under its target in any tree (in any variant of a tree
+that has them, `eval` giving each result a `variant`), a tree
+declares other variants than the `variants` of `expect.json`, or
+an expected `hex` is in no tree. `website` and `dashboard` ask
+for one tree with the variants Light and Dark in
+`out/palette.json`, not a tree per theme. The report lists the
+problems and each failed pair with its level and target.
+
+Results recorded before variants (ADR 19) have `out/light.json`
+and `out/dark.json`: re-graded now, `website` and `dashboard`
+fail on a missing `out/palette.json`, so their old scores can't
+be compared with new runs. Their reports are left as they are.
 
 A run's score is the weighted fraction of graders passed, a
 case's score the mean of its runs.

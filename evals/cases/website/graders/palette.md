@@ -3,4 +3,5 @@ type: check
 weight: 3
 ---
 
-Every pair of expect.json meets its targets in both trees.
+Every pair of expect.json meets its targets in both variants of
+the tree.

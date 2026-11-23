@@ -1,7 +1,6 @@
 ---
 type: file_exists
-path: out/{light,dark}.json
-min: 2
+path: out/palette.json
 ---
 
-Both trees were written.
+The tree was written.

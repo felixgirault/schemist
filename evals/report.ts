@@ -93,7 +93,7 @@ const problems = ({runs}: GradedCase) =>
 					.filter(({pass}) => !pass)
 					.map(
 						(p) =>
-							`${p.tree}: ${p.fg} on ${p.bg}, ${p.metric} ${p.level} < ${p.target}`
+							`${p.tree}${p.variant ? ` (${p.variant})` : ''}: ${p.fg} on ${p.bg}, ${p.metric} ${p.level} < ${p.target}`
 					)
 			].map((line) => `- ${run.name}, ${grader}: ${line}`)
 		)

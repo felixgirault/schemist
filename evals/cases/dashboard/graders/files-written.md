@@ -1,8 +1,8 @@
 ---
 type: file_exists
-path: out/{light.json,dark.json,light.tokens.json,dark.tokens.json,_light.scss,_dark.scss}
-min: 6
+path: out/{palette.json,light.tokens.json,dark.tokens.json,_light.scss,_dark.scss}
+min: 5
 ---
 
-Both trees, both design token files and both Sass files were
+The tree, both design token files and both Sass files were
 written.

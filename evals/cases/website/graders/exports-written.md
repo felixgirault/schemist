@@ -1,7 +1,6 @@
 ---
 type: file_exists
-path: out/{light,dark}.css
-min: 2
+path: out/palette.css
 ---
 
-Both CSS exports were written.
+The CSS export was written.

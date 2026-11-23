@@ -1,5 +1,6 @@
 {
-	"trees": ["out/light.json", "out/dark.json"],
+	"trees": ["out/palette.json"],
+	"variants": ["Light", "Dark"],
 	"pairs": [
 		{
 			"fg": "Text",

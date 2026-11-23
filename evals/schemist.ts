@@ -3,9 +3,19 @@ export type Cli = (args: string[], tree: string) => string;
 
 export type Metric = 'wcag2' | 'apca' | 'difference';
 
-export type Color = {name: string; hex: string};
+// `variant` only for a tree with variants, one entry per variant.
+export type Color = {
+	name: string;
+	hex: string;
+	variant?: string;
+};
 
-export type PairLevel = {fg: string; bg: string; level: number};
+export type PairLevel = {
+	fg: string;
+	bg: string;
+	level: number;
+	variant?: string;
+};
 
 const allBlindnessTypes =
 	'protanomaly,deuteranomaly,tritanomaly';
@@ -48,16 +58,19 @@ export const worstLevels = (
 		({
 			fg,
 			bg,
+			variant,
 			minLevel,
 			difference
 		}: {
 			fg: string;
 			bg: string;
+			variant?: string;
 			minLevel: number;
 			difference?: {minLevel: number};
 		}) => ({
 			fg,
 			bg,
+			...(variant === undefined ? {} : {variant}),
 			level: (difference ?? {minLevel}).minLevel
 		})
 	);
