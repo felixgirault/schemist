@@ -932,6 +932,11 @@ rules; the tooltip counts them). It has two children, tree rows
 without preview, each with an add button on the right
 (`aria-expanded`):
 
+- **Colors**, **Add a color to Role** opening a picker (a search
+  field and the visible colors not in the role, as buttons with
+  swatches; Esc closes it). Under it, the member colors, each a
+  tree row with its color preview, its name (hidden members by
+  name, dimmed, without preview) and **Remove X from Role**.
 - **Rules**, **Add a rule to Role** opening a compact form:
   **on** (the other roles, **Among themselves**, **New role…**
   with a name field), **For** (the use) and **Add rule**; a new
@@ -947,11 +952,6 @@ without preview, each with an add button on the right
   level and "met" or "not met", and one strip per selected
   simulation in simulated colors with its levels; its Preview
   button toggles `previewedUid` to `<bgId>-<fgId>`).
-- **Colors**, **Add a color to Role** opening a picker (a search
-  field and the visible colors not in the role, as buttons with
-  swatches; Esc closes it). Under it, the member colors, each a
-  tree row with its color preview, its name (hidden members by
-  name, dimmed, without preview) and **Remove X from Role**.
 
 **+ Role**, at the end of the roles, opens a form with a name
 field (**Add role**, same alert). Hovering or focusing a rule's

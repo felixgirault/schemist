@@ -389,13 +389,6 @@
 			{/snippet}
 
 			{@render group(
-				'Rules',
-				`Add a rule to ${role.name}`,
-				ruling === role.id,
-				() => toggleRuling(role),
-				ruleList
-			)}
-			{@render group(
 				'Colors',
 				`Add a color to ${role.name}`,
 				picking === role.id,
@@ -404,6 +397,13 @@
 					query = '';
 				},
 				colorList
+			)}
+			{@render group(
+				'Rules',
+				`Add a rule to ${role.name}`,
+				ruling === role.id,
+				() => toggleRuling(role),
+				ruleList
 			)}
 		</div>
 	</article>
