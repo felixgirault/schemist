@@ -66,7 +66,7 @@
 	<label
 		class="button button--icon"
 		for={isHiddenId}
-		title="Don't compare this color"
+		title="Hide this color: kept as a base for others, not exported or checked"
 	>
 		<SvelteComponent />
 	</label>

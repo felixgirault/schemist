@@ -788,15 +788,15 @@ compressing links is recorded in
 Each node shows its color (a preset shows a bar of its generated
 colors, top to bottom) and name, then actions:
 
-| Action     | Tooltip                                      | Effect                                                                                          |
-| ---------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Remove     | Remove this color and all of its derivatives | Not available on the root                                                                       |
-| Visibility | Don't compare this color                     | Toggles `isHidden`                                                                              |
-| Info       | Show color info                              | Popover with the Hex, RGB, HSL and LCH values; name and hex of each generated color for presets |
-| Options    | Tune this color                              | Popover with the parameter fields                                                               |
-| Expand     | Turn into separate colors                    | Presets only, replaces them with plain nodes (§7)                                               |
-| Swap       | Change this color's type                     | Opens the child picker to replace the type; not on the root, replaced by Expand on presets      |
-| Add        | Add matching colors                          | Opens the child picker; disabled on presets                                                     |
+| Action     | Tooltip                                                             | Effect                                                                                          |
+| ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Remove     | Remove this color and all of its derivatives                        | Not available on the root                                                                       |
+| Visibility | Hide this color: kept as a base for others, not exported or checked | Toggles `isHidden`                                                                              |
+| Info       | Show color info                                                     | Popover with the Hex, RGB, HSL and LCH values; name and hex of each generated color for presets |
+| Options    | Tune this color                                                     | Popover with the parameter fields                                                               |
+| Expand     | Turn into separate colors                                           | Presets only, replaces them with plain nodes (§7)                                               |
+| Swap       | Change this color's type                                            | Opens the child picker to replace the type; not on the root, replaced by Expand on presets      |
+| Add        | Add matching colors                                                 | Opens the child picker; disabled on presets                                                     |
 
 - Info and Options open popovers (the native `popover` attribute,
   toggled by `popovertarget` buttons, which close on outside
