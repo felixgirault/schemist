@@ -16,7 +16,6 @@
 	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
 	import RolesButton from './RolesButton.svelte';
-	import Swatch from './Swatch.svelte';
 	import './tree.css';
 
 	interface Props {
@@ -180,8 +179,7 @@
 				</summary>
 				<ul>
 					{#each colors as [colorId, { color, name }] (colorId)}
-						<li>
-							<Swatch id={colorId} {color} />
+						<li style="--output: {formatSchemist(color)};">
 							{name}
 							<span class="label">
 								<ColorRoles id={colorId} {name} />
@@ -262,7 +260,32 @@
 		font-size: 0.9rem;
 	}
 
+	/* Open, each line draws its own part of the bar, as tall as it is */
+	.tree-node:has(> .self > .colors[open]) > .output {
+		visibility: hidden;
+	}
+
+	.colors li::before {
+		position: absolute;
+		inset-block: 0;
+		left: -1.5rem;
+		width: 0.75rem;
+		background: var(--output);
+		content: '';
+	}
+
+	.colors li:first-child::before {
+		border-top-left-radius: var(--radius);
+		border-top-right-radius: var(--radius);
+	}
+
+	.colors li:last-child::before {
+		border-bottom-left-radius: var(--radius);
+		border-bottom-right-radius: var(--radius);
+	}
+
 	.colors li {
+		position: relative;
 		display: flex;
 		align-items: center;
 		gap: 0.5ch;

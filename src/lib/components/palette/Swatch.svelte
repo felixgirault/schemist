@@ -1,30 +1,23 @@
 <script lang="ts">
-	import {
-		formatRgbToHex,
-		formatSchemistToHex
-	} from '#lib/color/formatting.js';
-	import type {SchemistColor} from '#lib/color/types.js';
+	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
 	interface Props {
 		id: string;
-		// Given for a color the palette doesn't list (a hidden one).
-		color?: SchemistColor;
 	}
 
-	let {id, color}: Props = $props();
-	// none for a hidden color, unless given
-	let hex = $derived.by(() => {
-		if (color) return formatSchemistToHex(color);
-
-		const found = palette.colors.find((c) => c.id === id);
-
-		return found && formatRgbToHex(found.rgbColor);
-	});
+	let {id}: Props = $props();
+	// none for a hidden color
+	let color = $derived(
+		palette.colors.find((color) => color.id === id)
+	);
 </script>
 
-{#if hex}
-	<span class="swatch" style="background: {hex};"></span>
+{#if color}
+	<span
+		class="swatch"
+		style="background: {formatRgbToHex(color.rgbColor)};"
+	></span>
 {/if}
 
 <style>

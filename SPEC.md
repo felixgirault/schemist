@@ -892,9 +892,12 @@ colors, top to bottom) and name, then actions:
   native `<details>`, open by default and not saved, summarised
   as "9 colors" ("1 color"), a line each in the order of
   `generated` (flat: ids don't hold the template's nesting) with
-  a swatch (`Swatch` takes the `color` for one the palette
-  doesn't list, a hidden preset's) and its name; dimmed on a
-  hidden preset. Hidden template colors have no line.
+  its name; dimmed on a hidden preset. Hidden template colors
+  have no line. Open, the preset's bar is drawn by the lines,
+  each its own color at its own height, so that they always line
+  up; closed, it is a gradient along the row.
+- On narrow screens (under 30rem), a node's actions wrap under
+  its name when they don't fit beside it.
 - **Roles on a color** (`ColorRoles.svelte` and
   `RolesButton.svelte`, ADR 23), for a node (not a preset's own
   row) and for each line of a preset's list, taking the color's

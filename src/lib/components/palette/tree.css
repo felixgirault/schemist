@@ -42,6 +42,18 @@
 	letter-spacing: 0.04ch;
 }
 
+/* The actions go under the name when they don't fit beside it */
+@media screen and (max-width: 29.99rem) {
+	.tree-node > .self > header {
+		flex-wrap: wrap;
+		gap: 0.25rem 1ch;
+	}
+
+	.tree-node > .self > header > .button-list {
+		margin-left: auto;
+	}
+}
+
 @media screen and (min-width: 30rem) {
 	.tree-node .title {
 		display: flex;

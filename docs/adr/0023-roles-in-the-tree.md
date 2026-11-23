@@ -15,8 +15,10 @@ row for several colors, which have none.
   colors"), open by default. Open or closed is not saved. The
   list is flat, in the order of `generated`: ids don't hold the
   template's nesting. Hidden template colors have no line, as
-  they are not colors of the palette. The preset's own row has no
-  roles: it is not a color.
+  they are not colors of the palette. (Amended after the build:
+  no swatches. Open, each line draws its part of the preset's
+  bar, rather than a gradient that a wrapped name would put out
+  of line.) The preset's own row has no roles: it is not a color.
 - **Roles on a row**: a color's roles are written on its label
   line ("custom color · Text, Borders"). A **Roles** button, an
   icon, the only one on a generated color's line, opens a popover
