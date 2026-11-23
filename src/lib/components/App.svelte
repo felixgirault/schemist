@@ -145,7 +145,7 @@
 	@media screen and (min-width: 55rem) {
 		main {
 			display: grid;
-			grid-template-columns: 45ch minmax(0, 1fr);
+			grid-template-columns: 60ch minmax(0, 1fr);
 			align-items: start;
 		}
 	}

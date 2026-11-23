@@ -220,6 +220,7 @@
 							value={role.name}
 							onchange={(event) =>
 								handleRename(role, event)}
+							size={Math.max(role.name.length, 4)}
 						/>
 					</div>
 					{#if others.length}
@@ -372,50 +373,55 @@
 						</ul>
 					</div>
 				{/if}
-				{#each role.colors as id (id)}
-					<article
-						class="tree-node"
-						class:isHidden={!byId.has(id)}
-					>
-						<div class="output" style={outputOf(id)}></div>
-						<div class="self">
-							<header>
-								<div class="title">
-									<h5 class="name">{names.get(id)}</h5>
-								</div>
-								<div class="button-list">
-									<button
-										class="button button--icon"
-										type="button"
-										aria-label="Remove {names.get(
-											id
-										)} from {role.name}"
-										title="Remove this color from the role"
-										onclick={() =>
-											palette.removeMember(
-												role.id,
-												id
-											)}
-									>
-										<CloseIcon />
-									</button>
-								</div>
-							</header>
-						</div>
-					</article>
-				{/each}
 			{/snippet}
 
-			{@render group(
-				'Colors',
-				`Add a color to ${role.name}`,
-				picking === role.id,
-				() => {
-					picking = picking === role.id ? null : role.id;
-					query = '';
-				},
-				colorList
-			)}
+			<div class="members">
+				<div class="colors">
+					<h4 class="name">Colors</h4>
+					<ul class="chips">
+						{#each role.colors as id (id)}
+							<li
+								class="chip"
+								class:isHidden={!byId.has(id)}
+							>
+								{@render swatch(id)}
+								{names.get(id)}
+								<button
+									class="button button--icon"
+									type="button"
+									aria-label="Remove {names.get(
+										id
+									)} from {role.name}"
+									title="Remove this color from the role"
+									onclick={() =>
+										palette.removeMember(role.id, id)}
+								>
+									<CloseIcon />
+								</button>
+							</li>
+						{/each}
+						<li>
+							<button
+								class="button button--icon"
+								type="button"
+								aria-label="Add a color to {role.name}"
+								aria-expanded={picking === role.id}
+								title="Add a color to {role.name}"
+								onclick={() => {
+									picking =
+										picking === role.id
+											? null
+											: role.id;
+									query = '';
+								}}
+							>
+								<AddIcon />
+							</button>
+						</li>
+					</ul>
+				</div>
+				{@render colorList()}
+			</div>
 			{@render group(
 				'Rules',
 				`Add a rule to ${role.name}`,
@@ -549,8 +555,38 @@
 		margin-bottom: 1rem;
 	}
 
+	/* Actions follow their label, not the panel's right edge */
+	.requirements .title {
+		flex-grow: 0;
+	}
+
+	.colors {
+		display: flex;
+		align-items: baseline;
+		gap: 1ch;
+	}
+
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem 1rem;
+		padding: 0;
+		margin: 0;
+		list-style: none;
+	}
+
+	.chip {
+		display: flex;
+		align-items: center;
+		gap: 0.5ch;
+	}
+
+	.chip.isHidden {
+		opacity: 0.6;
+	}
+
 	.name input {
-		width: 100%;
 		border: 0;
 		padding: 0;
 		background: transparent;
@@ -558,7 +594,15 @@
 		color: inherit;
 	}
 
+	/* As indented as the Rules row, a tree node without preview */
+	.members {
+		padding-left: 0.75rem;
+	}
+
 	.picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
 		max-height: 10rem;
 		overflow: auto;
 		padding: 0;

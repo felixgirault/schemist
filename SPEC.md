@@ -770,7 +770,8 @@ compressing links is recorded in
   (`passingPairs`) over the declared pairs of visible colors
   (`pairChecks`), with the **Simulate** and **Grayscale** toggles
   (§11.5) in its header, then the requirements (§11.5). From
-  55rem, they are two columns, Palette then Requirements.
+  55rem, they are two columns, Palette (60ch, for long names)
+  then Requirements.
 - Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
   `Z` redoes, except while editing text (text inputs, textareas,
   the editable node name), where native undo applies. Undo and
@@ -830,12 +831,12 @@ No grid (ADR 18): the requirements are a section of the page
 (§11.1), `Result.svelte` holding `Requirements.svelte`, each
 requirement with its cards underneath.
 
-- **Header toggles** (in `App.svelte`, in the Requirements
-  header beside the title, wrapping under it on narrow panels,
-  always shown): **Simulate** with one toggle per
-  simulation, **P**, **D**, **T** (protanomaly, deuteranomaly,
-  tritanomaly; `blindnessTypes`), each with its full name as
-  tooltip and accessible name, and **Grayscale**
+- **Header toggles** (in `App.svelte`, in the Requirements header
+  beside the title, wrapping under it on narrow panels, always
+  shown): **Simulate** with one toggle per simulation, **P**,
+  **D**, **T** (protanomaly, deuteranomaly, tritanomaly;
+  `blindnessTypes`), each with its full name as tooltip and
+  accessible name, and **Grayscale**
   (`isLuminosityAnalysisEnabled`, §9.5). Simulations apply to the
   cards and to the levels. There is no other filter, no grid and
   no list of every pair (ADR 17, 18; the CLI keeps `combine`,
@@ -859,29 +860,30 @@ are laid out like the colors tree (`Node.svelte`, sharing
 role's row has no preview (only its colors have one), its name as
 an input (labelled **Role name**, renamed on change, reverted if
 empty or taken), "used by Text on Surfaces" below it for the
-rules where it is only the second role, and on the right **Delete
-role Role** (also deletes its rules; the tooltip counts them). It
-has two children, tree rows without preview, each with an add
-button on the right (`aria-expanded`):
+rules where it is only the second role, and **Delete role Role**
+(also deletes its rules; the tooltip counts them). Actions follow
+their label rather than the panel's right edge, which is left to
+the cards. Under the role:
 
-- **Colors**, **Add a color to Role** opening a picker (a search
-  field and the visible colors not in the role, as buttons with
-  swatches; Esc closes it). Under it, the member colors, each a
-  tree row with its color preview, its name (hidden members by
-  name, dimmed, without preview) and **Remove X from Role**.
-- **Rules**, **Add a rule to Role** opening a compact form:
-  **on** (the other roles, **Among themselves**, **New role…**
-  with a name field), **For** (the use) and **Add rule**; a new
-  role needs a free name, else an alert and nothing is added.
-  Under it, the rules where the role is the first one, each a
-  row: "on Surfaces · Body text" or "among themselves ·
-  Categories", an icon with a text alternative (met when none of
-  the rule's pairs fails, in the worst case of the selected
-  simulations) and **Remove rule** (`×`) on the right; its
-  children are the rule's cards, given as the `pairs` snippet
-  (one combination card per pair, `ruleChecks`, nothing is
-  measured again, in the real colors, each target with its grade,
-  level and "met" or "not met", and one strip per selected
+- **Colors**, one line: the member colors as chips (swatch, name
+  and **Remove X from Role**; hidden members dimmed, without
+  swatch), wrapping, then **Add a color to Role**
+  (`aria-expanded`) opening a picker (a search field and the
+  visible colors not in the role, as wrapping buttons with
+  swatches; Esc closes it).
+- **Rules**, a tree row without preview, **Add a rule to Role**
+  (`aria-expanded`) opening a compact form: **on** (the other
+  roles, **Among themselves**, **New role…** with a name field),
+  **For** (the use) and **Add rule**; a new role needs a free
+  name, else an alert and nothing is added. Under it, the rules
+  where the role is the first one, each a row: "on Surfaces ·
+  Body text" or "among themselves · Categories", an icon with a
+  text alternative (met when none of the rule's pairs fails, in
+  the worst case of the selected simulations) and **Remove rule**
+  (`×`); its children are the rule's cards, given as the `pairs`
+  snippet (one combination card per pair, `ruleChecks`, nothing
+  is measured again, in the real colors, each target with its
+  grade, level and "met" or "not met", and one strip per selected
   simulation in simulated colors with its levels; its Preview
   button toggles `previewedUid` to `<bgId>-<fgId>`; **Override**
   on a card whose pair is not one-off declares it one-off with
