@@ -5,7 +5,6 @@
 	import Export from '#lib/components/export/Export.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
-	import Roles from '#lib/components/palette/Roles.svelte';
 	import VariantSwitch from '#lib/components/palette/VariantSwitch.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {history} from '#lib/stores/history.svelte.js';
@@ -68,7 +67,6 @@
 		</header>
 
 		<Palette />
-		<Roles />
 
 		<footer class="form">
 			<div class="button-list">

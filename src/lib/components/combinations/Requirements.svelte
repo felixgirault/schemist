@@ -1,8 +1,9 @@
 <script lang="ts">
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
 	import Swatch from '#lib/components/palette/Swatch.svelte';
-	import type {AppRule} from '#lib/core/nodes.js';
+	import type {AppRole, AppRule} from '#lib/core/nodes.js';
 	import {targetNames, uses} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {CheckGroup} from '#lib/stores/combinations.svelte.js';
@@ -15,6 +16,11 @@
 	}
 
 	let {pairs}: Props = $props();
+
+	// The role being added.
+	let isAddingRole = $state(false);
+	let newRole = $state('');
+	let roleError = $state('');
 
 	// The one-off pair being added: its colors (ids) and use.
 	let isAddingPair = $state(false);
@@ -106,6 +112,28 @@
 		].filter(({checks}) => checks.length)
 	);
 
+	const handleRename = (role: AppRole, event: Event) => {
+		const input = event.currentTarget as HTMLInputElement;
+
+		if (!palette.renameRole(role.id, input.value)) {
+			input.value = role.name;
+		}
+	};
+
+	const handleAddRole = (event: SubmitEvent) => {
+		event.preventDefault();
+
+		if (!palette.addRole(newRole)) {
+			roleError =
+				'A role needs a name that no other role has.';
+			return;
+		}
+
+		isAddingRole = false;
+		newRole = '';
+		roleError = '';
+	};
+
 	const handleUse = (fg: string, bg: string, event: Event) => {
 		const {value} = event.currentTarget as HTMLSelectElement;
 
@@ -159,8 +187,8 @@
 {/snippet}
 
 <div class="requirements">
+	<h3 class="h3">Targets</h3>
 	{#if palette.roles.length}
-		<h3 class="h3">Targets</h3>
 		<div class="scroll">
 			<table class="targets">
 				<thead>
@@ -173,8 +201,33 @@
 				</thead>
 				<tbody>
 					{#each palette.roles as row (row.id)}
+						{@const count = palette.rules.filter(
+							({fg, bg}) => fg === row.id || bg === row.id
+						).length}
 						<tr>
-							<th scope="row">{row.name}</th>
+							<th scope="row">
+								<div class="role">
+									<input
+										aria-label="Role name"
+										value={row.name}
+										onchange={(event) =>
+											handleRename(row, event)}
+										size={Math.max(row.name.length, 4)}
+									/>
+									<button
+										class="button button--icon"
+										type="button"
+										aria-label="Delete role {row.name}"
+										title="Delete this role{count
+											? ` and its ${count} rule${count > 1 ? 's' : ''}`
+											: ''}"
+										onclick={() =>
+											palette.deleteRole(row.id)}
+									>
+										<CloseIcon />
+									</button>
+								</div>
+							</th>
 							{#each palette.roles as col (col.id)}
 								{@const rules = cellRules(
 									row.id,
@@ -215,7 +268,35 @@
 				</tbody>
 			</table>
 		</div>
+	{:else}
+		<p class="hint">
+			Add a role, then give it to colors with their Roles
+			button in the tree.
+		</p>
 	{/if}
+
+	{#if isAddingRole}
+		<form onsubmit={handleAddRole}>
+			<label>
+				New role name
+				<input type="text" bind:value={newRole} />
+			</label>
+			{#if roleError}
+				<p role="alert">{roleError}</p>
+			{/if}
+			<button class="button" type="submit">Add role</button>
+		</form>
+	{/if}
+	<button
+		class="button"
+		aria-expanded={isAddingRole}
+		onclick={() => {
+			isAddingRole = !isAddingRole;
+			roleError = '';
+		}}
+	>
+		+ Role
+	</button>
 
 	{#if groups.length || palette.rules.length}
 		<h3 class="h3">Checks</h3>
@@ -331,6 +412,21 @@
 		z-index: 1;
 		padding-right: 0.5rem;
 		background: var(--bg);
+	}
+
+	.role {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.role input {
+		border: 0;
+		padding: 0;
+		background: transparent;
+		font: inherit;
+		font-weight: bold;
+		color: inherit;
 	}
 
 	/* Wide enough for any use, not for several */

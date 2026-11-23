@@ -854,8 +854,7 @@ compressing links is recorded in
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
 - Two sections, each under a large title (`h2`): **Palette**
-  (tree, then **Roles** (§11.5) under a title as large, then
-  Export, Share, Undo and Redo buttons) and **Requirements (met /
+  (tree, then Export, Share, Undo and Redo buttons) and **Requirements (met /
   checked)**: the declared pairs that pass (`passingPairs`) over
   the declared pairs of visible colors (`checkedPairs`), each
   counted once per variant (ADR 19), with the **Simulate** and
@@ -960,7 +959,7 @@ No grid (ADR 18): the requirements are a section of the page
 (§11.1), `Result.svelte` holding `Requirements.svelte`, with
 every pair checked in one table (ADR 20, 22; simulation rows,
 sticky headers and the selected column's highlight are still to
-come). Its headings (Roles, Targets, Checks, One-off pairs) are
+come). Its headings (Targets, Checks, One-off pairs) are
 `h3`, under the section's `h2`, larger and with space above.
 
 - **Header toggles** (in `App.svelte`, in the Requirements header
@@ -1000,29 +999,21 @@ come). Its headings (Roles, Targets, Checks, One-off pairs) are
   by one under **One-off pairs**; nothing else opens or edits a
   pair (its targets are the use's).
 
-**The roles** (`palette/Roles.svelte`), in the Palette section
-(§11.1, a region labelled by its title), say what colors are, the
-requirements what roles must meet (ADR 22). They are not in the
-tree, where a preset's colors have no row. One line per role: its
-name as an input (**Role name**, renamed on change, reverted if
-empty or taken), its colors as chips (swatch, name and **Remove X
-from Role**; hidden members dimmed, without swatch), **Add a
-color to Role** (`aria-expanded`) opening a picker below (a
-search field and the visible colors not in the role, as wrapping
-buttons with swatches; Esc closes it), and **Delete role Role**,
-at the end of the line, right-aligned and apart from the chips
-(also deletes its rules; the tooltip counts them). **+ Role**
-opens a form with a name field (**Add role**; a free name, else
-an alert).
-
 **The requirements** (`Requirements.svelte`), in the
 **Requirements** section (§11.1, a region labelled by its title),
 are two flat sections (ADR 22), then **One-off pairs**.
 
-- **Targets**, with roles only: a `<table>` of the roles as rows
-  (`fg`, `<th scope="row">`) and columns (`bg`, "on Surfaces"),
-  in role order, in the panel's font, the row headers sticky when
-  it scrolls sideways. Each cell is a `<select>` labelled by its
+- **Targets** is where roles are managed (ADR 23; what a color's
+  roles are is set on the tree's rows, §11.2): a `<table>` of the
+  roles as rows (`fg`, `<th scope="row">`) and columns (`bg`,
+  text "on Surfaces"), in role order, in the panel's font, the
+  row headers sticky when it scrolls sideways. A row header is
+  the role's name as an input (**Role name**, renamed on change,
+  reverted if empty or taken) and **Delete role Role** (also
+  deletes its rules; the tooltip counts them). **+ Role**, under
+  the table, opens a form with a name field (**Add role**; a
+  free name, else an alert). Without roles the section stays,
+  with a hint and **+ Role**. Each cell is a `<select>` labelled by its
   couple ("Text on Surfaces", "Text among themselves"): "—" or a
   use, styled as the app's other fields (global `select`, with a
   focus ring), as wide as its use (9.5rem at most) and narrower

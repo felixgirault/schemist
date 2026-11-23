@@ -117,7 +117,9 @@ test('shows a grid of the rules of the roles, without the roles', () => {
 	expect(plain).toContain(
 		'Series among themselves · Categories'
 	);
-	expect(html).toMatch(/<th scope="row"[^>]*>Text<\/th>/);
+	expect(html).toMatch(
+		/<th scope="row"[^>]*>.*?aria-label="Role name" value="Text"/
+	);
 	expect(html).toMatch(
 		/<th scope="col"[^>]*>on Surfaces<\/th>/
 	);
@@ -257,4 +259,35 @@ test('a cell with several rules offers them as one extra option', () => {
 
 	palette.setRule(role.id, series.id);
 	expect(selected('Text on Series')).toBe('—');
+});
+
+test('manages roles in Targets: name, delete with its rules, + Role', () => {
+	const html = render(Result).body;
+
+	expect(html.match(/aria-label="Role name"/g)).toHaveLength(3);
+	expect(html).toContain('aria-label="Delete role Text"');
+	// Text has one rule, Surfaces on it too, Series one of its own
+	expect(html).toContain(
+		'title="Delete this role and its 1 rule"'
+	);
+	expect(text(html)).toContain('+ Role');
+	expect(html).not.toContain('New role name');
+});
+
+test('keeps Targets with + Role and a hint when there is no role', () => {
+	const stored = palette.storedRoles;
+	const rules = palette.rules;
+
+	palette.storedRoles = [];
+	palette.rules = [];
+
+	const html = render(Result).body;
+
+	expect(html).toMatch(/<h3[^>]*>Targets<\/h3>/);
+	expect(html).not.toContain('<table class="targets');
+	expect(text(html)).toContain('Add a role');
+	expect(text(html)).toContain('+ Role');
+
+	palette.storedRoles = stored;
+	palette.rules = rules;
 });
