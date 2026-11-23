@@ -13,24 +13,28 @@ export default definePreset({
 		{
 			type: 'boolean',
 			name: 'secondary',
+			isStructural: true,
 			label: 'Secondary',
 			default: true
 		},
 		{
 			type: 'boolean',
 			name: 'tertiary',
+			isStructural: true,
 			label: 'Tertiary',
 			default: true
 		},
 		{
 			type: 'boolean',
 			name: 'semantics',
+			isStructural: true,
 			label: 'Semantic colors',
 			default: true
 		},
 		{
 			type: 'boolean',
 			name: 'neutrals',
+			isStructural: true,
 			label: 'Neutrals',
 			default: true
 		}

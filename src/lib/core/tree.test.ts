@@ -1,6 +1,11 @@
 import {expect, test} from 'vitest';
 import type {IdentifiedNodeData} from './nodes';
-import {changedArg, validateTree, withIds} from './tree';
+import {
+	changedArg,
+	validateTree,
+	withIds,
+	withOverrides
+} from './tree';
 
 test('withIds numbers template nodes depth-first', () => {
 	expect(
@@ -69,6 +74,18 @@ test('names no arg when anything else changed', () => {
 	).toBeUndefined();
 });
 
+test('names no arg when overrides changed', () => {
+	expect(
+		changedArg(
+			tree(),
+			tree({
+				args: {amount: 20},
+				overrides: {Dark: {amount: 5}}
+			})
+		)
+	).toBeUndefined();
+});
+
 test('names no arg when a type changes', () => {
 	// Would name the arg if types were not compared.
 	expect(
@@ -101,4 +118,107 @@ test.each([
 	expect(() =>
 		validateTree({type: 'clr', ...data}, 'root', true)
 	).toThrow(message);
+});
+
+const variantRoot = (
+	child: object,
+	variants = ['Light', 'Dark']
+) => ({
+	type: 'clr',
+	variants,
+	children: [child]
+});
+
+test('validates variants and overrides', () => {
+	const tree = validateTree(
+		variantRoot({type: 'l', overrides: {Dark: {amount: 20}}}),
+		'root',
+		true
+	);
+
+	expect(tree.variants).toEqual(['Light', 'Dark']);
+	expect(tree.children![0].overrides).toEqual({
+		Dark: {amount: 20}
+	});
+});
+
+test.each([
+	[
+		{type: 'l', overrides: {Night: {amount: 20}}},
+		'not declared'
+	],
+	[
+		{type: 'l', overrides: {Light: {amount: 20}}},
+		'base variant'
+	],
+	[{type: 'l', overrides: {Dark: {nope: 20}}}, 'unknown param'],
+	[
+		{type: 'l', overrides: {Dark: {amount: 200}}},
+		'between 0 and 100'
+	],
+	[{type: 'lsc', overrides: {Dark: {steps: 3}}}, 'structure']
+])('rejects override %j', (child, message) => {
+	expect(() =>
+		validateTree(variantRoot(child), 'root', true)
+	).toThrow(message);
+});
+
+test('rejects bad variants, and overrides without any', () => {
+	expect(() =>
+		validateTree(
+			variantRoot({type: 'l'}, ['A', 'A']),
+			'root',
+			true
+		)
+	).toThrow('named twice');
+	expect(() =>
+		validateTree(variantRoot({type: 'l'}, []), 'root', true)
+	).toThrow('expected variant names');
+	expect(() =>
+		validateTree(
+			{
+				type: 'clr',
+				children: [{type: 'l', overrides: {Dark: {}}}]
+			},
+			'root',
+			true
+		)
+	).toThrow('not declared');
+	expect(() =>
+		validateTree({type: 'l', variants: ['A']}, 'root')
+	).toThrow('unknown key "variants"');
+});
+
+test('withOverrides keeps the args each variant builds differently', () => {
+	expect(
+		withOverrides(
+			withIds(
+				[
+					{
+						type: 'hlt',
+						args: {amount: 10},
+						children: [{type: 'l', args: {amount: 5}}]
+					}
+				],
+				'n'
+			),
+			{
+				Dark: [
+					{
+						type: 'hlt',
+						args: {amount: 30},
+						children: [{type: 'l', args: {amount: 5}}]
+					}
+				]
+			}
+		)
+	).toEqual([
+		{
+			id: 'n.0',
+			type: 'hlt',
+			args: {amount: 10},
+			overrides: {Dark: {amount: 30}},
+			children: [{id: 'n.1', type: 'l', args: {amount: 5}}]
+		}
+	]);
 });

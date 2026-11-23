@@ -3,6 +3,8 @@ import type {SchemistColor} from '#lib/color/types.js';
 import type {
 	IdentifiedNodeData,
 	NodeData,
+	NodeDef,
+	Overrides,
 	Param,
 	ParamValue,
 	PresetPair,
@@ -45,11 +47,12 @@ const nodeKeys = [
 	'type',
 	'token',
 	'args',
+	'overrides',
 	'children',
 	'isHidden'
 ];
 
-const rootKeys = ['pairs', 'roles', 'rules'];
+const rootKeys = ['pairs', 'roles', 'rules', 'variants'];
 
 const pairKeys = ['fg', 'bg', ...targetNames];
 
@@ -229,13 +232,100 @@ const validateArg = (
 	}
 };
 
+const validateVariants = (value: unknown, path: string) => {
+	if (
+		!isStrings(value) ||
+		!value.length ||
+		value.some((name) => !name)
+	) {
+		throw new Error(`${path}: expected variant names`);
+	}
+
+	if (new Set(value).size !== value.length) {
+		throw new Error(`${path}: a variant is named twice`);
+	}
+
+	return value;
+};
+
+// The args a variant sets, each of a param of the type, in bounds
+// and not structural.
+const validateOverrides = (
+	value: unknown,
+	path: string,
+	def: NodeDef,
+	variants: string[]
+) => {
+	if (!isObject(value)) {
+		throw new Error(`${path}: expected an object`);
+	}
+
+	const result: Overrides = {};
+
+	for (const [variant, args] of Object.entries(value)) {
+		const at = `${path}.${variant}`;
+
+		if (!variants.includes(variant)) {
+			throw new Error(
+				`${at}: variant not declared in root.variants`
+			);
+		}
+
+		if (variant === variants[0]) {
+			throw new Error(
+				`${at}: the base variant has no overrides, set its args`
+			);
+		}
+
+		if (!isObject(args)) {
+			throw new Error(`${at}: expected an object`);
+		}
+
+		result[variant] = validateArgs(at, def, args, true);
+	}
+
+	return result;
+};
+
+// Args of a node's type, only the given ones. Overrides can't set
+// structural params.
+const validateArgs = (
+	path: string,
+	def: NodeDef,
+	args: Record<string, unknown>,
+	isOverride = false
+) =>
+	Object.fromEntries(
+		Object.entries(args).map(([name, value]) => {
+			const param = def.params.find((p) => p.name === name);
+
+			if (!param) {
+				throw new Error(
+					`${path}.${name}: unknown param for type "${def.type}"`
+				);
+			}
+
+			if (isOverride && param.isStructural) {
+				throw new Error(
+					`${path}.${name}: "${param.label}" changes the structure of "${def.type}", it can't differ by variant`
+				);
+			}
+
+			return [
+				name,
+				validateArg(`${path}.${name}`, param, value)
+			];
+		})
+	);
+
 // Checks data that comes from outside (a file, a permalink) and
 // builds a tree from it. Color params are CSS strings, converted to
-// color objects.
+// color objects. `variants` are the root's, which overrides refer to.
 export const validateTree = (
 	node: unknown,
 	path: string,
-	isRoot = false
+	isRoot = false,
+	variants: string[] = []
 ): NodeData => {
 	if (!isObject(node)) {
 		throw new Error(`${path}: expected an object`);
@@ -254,11 +344,13 @@ export const validateTree = (
 		type,
 		token,
 		args,
+		overrides,
 		children,
 		isHidden,
 		pairs,
 		roles,
-		rules
+		rules,
+		variants: declared
 	} = node;
 
 	if (typeof type !== 'string' || !isNodeType(type)) {
@@ -290,23 +382,26 @@ export const validateTree = (
 		}
 
 		// packing needs every param, not only the given ones
-		result.args = {...defaultArgs(def)};
+		result.args = {
+			...defaultArgs(def),
+			...validateArgs(`${path}.args`, def, args)
+		};
+	}
 
-		for (const [name, value] of Object.entries(args)) {
-			const param = def.params.find((p) => p.name === name);
+	if (declared !== undefined) {
+		result.variants = variants = validateVariants(
+			declared,
+			`${path}.variants`
+		);
+	}
 
-			if (!param) {
-				throw new Error(
-					`${path}.args.${name}: unknown param for type "${type}"`
-				);
-			}
-
-			result.args[name] = validateArg(
-				`${path}.args.${name}`,
-				param,
-				value
-			);
-		}
+	if (overrides !== undefined) {
+		result.overrides = validateOverrides(
+			overrides,
+			`${path}.overrides`,
+			def,
+			variants
+		);
 	}
 
 	if (children !== undefined) {
@@ -321,7 +416,12 @@ export const validateTree = (
 		}
 
 		result.children = children.map((child, i) =>
-			validateTree(child, `${path}.children[${i}]`)
+			validateTree(
+				child,
+				`${path}.children[${i}]`,
+				false,
+				variants
+			)
 		);
 	}
 
@@ -354,6 +454,49 @@ export const withIds = (
 			children: withIds(children, prefix, counter)
 		})
 	}));
+
+const sameValue = (a: unknown, b: unknown) =>
+	JSON.stringify(a) === JSON.stringify(b);
+
+// Gives each node built for the base its overrides: the args that
+// differ in what each variant builds (`byVariant`, the same
+// structure as `nodes`, as structural params can't be overridden).
+export const withOverrides = (
+	nodes: IdentifiedNodeData[],
+	byVariant: Record<string, NodeData[]>
+): IdentifiedNodeData[] =>
+	nodes.map((node, i) => {
+		const overrides: Overrides = {};
+
+		for (const [variant, built] of Object.entries(byVariant)) {
+			const differing = Object.entries(
+				built[i].args ?? {}
+			).filter(
+				([name, value]) =>
+					!sameValue(value, node.args?.[name])
+			);
+
+			if (differing.length) {
+				overrides[variant] = Object.fromEntries(differing);
+			}
+		}
+
+		return {
+			...node,
+			...(Object.keys(overrides).length && {overrides}),
+			...(node.children && {
+				children: withOverrides(
+					node.children,
+					Object.fromEntries(
+						Object.entries(byVariant).map(([v, built]) => [
+							v,
+							built[i].children ?? []
+						])
+					)
+				)
+			})
+		};
+	});
 
 // Hides a whole tree, e.g. to keep a hidden preset hidden once
 // expanded.
@@ -397,6 +540,7 @@ export const changedArg = (
 			old.type !== node.type ||
 			old.token !== node.token ||
 			old.isHidden !== node.isHidden ||
+			!sameValue(old.overrides, node.overrides) ||
 			childIds(old) !== childIds(node)
 		) {
 			return;

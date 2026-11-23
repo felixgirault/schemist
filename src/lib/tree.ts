@@ -1,6 +1,7 @@
 import type {
 	AppRole,
 	AppRule,
+	AppVariant,
 	IdentifiedNodeData,
 	NodeData,
 	PresetPair,
@@ -9,7 +10,11 @@ import type {
 } from '#lib/core/nodes.js';
 import {isPresetDef} from '#lib/core/nodes.js';
 import {resolvePairs, resolveRoles} from '#lib/core/pairs.js';
-import {hideTree, withIds} from '#lib/core/tree.js';
+import {
+	hideTree,
+	withIds,
+	withOverrides
+} from '#lib/core/tree.js';
 import type {ColorPair, Node} from '#lib/stores/nodes.svelte.js';
 import {
 	collectColors,
@@ -177,12 +182,55 @@ export const namePairs = (root: Node, pairs: ColorPair[]) => {
 	};
 };
 
+// The variants of a tree with ids of their own.
+export const parseVariants = (data: NodeData): AppVariant[] =>
+	(data.variants ?? []).map((name) => ({
+		id: `v${uid()}`,
+		name
+	}));
+
+// The tree with its overrides' keys changed by `key`, from names to
+// ids when it is loaded, and back when it is saved.
+export const keyOverrides = <T extends NodeData>(
+	tree: T,
+	key: (variant: string) => string
+): T => ({
+	...tree,
+	...(tree.overrides && {
+		overrides: Object.fromEntries(
+			Object.entries(tree.overrides).map(
+				([variant, args]) => [key(variant), args]
+			)
+		)
+	}),
+	...(tree.children && {
+		children: tree.children.map((child) =>
+			keyOverrides(child, key)
+		)
+	})
+});
+
+// A tree whose overrides are by variant name, on the ids of `variants`.
+export const withVariantIds = (
+	data: NodeData,
+	variants: AppVariant[]
+) =>
+	keyOverrides(
+		data,
+		(name) => variants.find((v) => v.name === name)?.id ?? name
+	);
+
 export const parseTree = (data: NodeData) => {
-	const {id, type, isHidden, token, args, children} = data;
+	const {id, type, isHidden, token, args, overrides, children} =
+		data;
 	const node = createNode(type, isHidden, token, id);
 
 	if (args) {
 		Object.assign(node.args, args);
+	}
+
+	if (overrides) {
+		Object.assign(node.overrides, overrides);
 	}
 
 	// Presets generate their colors, and can't have children.
@@ -195,15 +243,16 @@ export const parseTree = (data: NodeData) => {
 	return node;
 };
 
-// `pairs`, `roles` and `rules` are the root's: pairs and roles are
-// saved by names.
+// `pairs`, `roles`, `rules` and `variants` are the root's: pairs,
+// roles and variants are saved by names, and overrides follow.
 export const serializeTree = (
 	node: Node,
 	pairs?: ColorPair[],
 	roles?: AppRole[],
-	rules?: AppRule[]
+	rules?: AppRule[],
+	variants?: AppVariant[]
 ) => {
-	const {token, args, children} = node;
+	const {token, args, overrides, children} = node;
 	const data: IdentifiedNodeData = {
 		id: node.id,
 		type: node.def.type,
@@ -216,6 +265,10 @@ export const serializeTree = (
 
 	if (Object.keys(args).length) {
 		data.args = args;
+	}
+
+	if (Object.keys(overrides).length) {
+		data.overrides = overrides;
 	}
 
 	if (children.length) {
@@ -240,6 +293,17 @@ export const serializeTree = (
 		data.rules = nameRules(roles, rules);
 	}
 
+	if (variants?.length) {
+		const nameOf = new Map(
+			variants.map((v) => [v.id, v.name])
+		);
+
+		return {
+			...keyOverrides(data, (id) => nameOf.get(id) ?? id),
+			variants: variants.map(({name}) => name)
+		};
+	}
+
 	return data;
 };
 
@@ -247,23 +311,31 @@ export const serializeTree = (
 // change. They keep the ids of the colors they generated, see
 // ADR 7.
 export const expandPreset = (preset: Node) => {
-	const {def, args, token, isHidden} = preset;
+	const {def, args, overrides, token, isHidden} = preset;
 
 	if (!preset.parent || !isPresetDef(def)) {
 		return;
 	}
 
-	const trees = withIds(def.build(args), preset.id).map(
-		(tree) => {
-			// `$` referred to the preset, which is going away.
-			const named =
-				token && tree.token
-					? {...tree, token: tree.token.replace('$', token)}
-					: tree;
-
-			return isHidden ? hideTree(named) : named;
-		}
+	// each variant builds its own colors, only their args can differ
+	const byVariant = Object.fromEntries(
+		Object.entries(overrides).map(([variant, values]) => [
+			variant,
+			def.build({...args, ...values})
+		])
 	);
+	const trees = withOverrides(
+		withIds(def.build(args), preset.id),
+		byVariant
+	).map((tree) => {
+		// `$` referred to the preset, which is going away.
+		const named =
+			token && tree.token
+				? {...tree, token: tree.token.replace('$', token)}
+				: tree;
+
+		return isHidden ? hideTree(named) : named;
+	});
 
 	preset.replaceWith(trees.map(parseTree));
 };

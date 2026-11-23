@@ -15,13 +15,14 @@ import {
 } from './v1';
 
 // Version 1 with colors at full precision instead of hex, so
-// permalinks are lossless, and three sections, each a list of
-// records. Pairs: the dictionary indexes of the two names, then
+// permalinks are lossless, overrides in node records (see `pack`
+// of version 1), and four sections, each a list of records. Pairs: the dictionary indexes of the two names, then
 // (target name, value) indexes, values being dictionary strings
 // since they are free numbers. Roles: the indexes of its name, then
 // of its color names. Rules: the indexes of the fg role, the bg role
 // and the use (the empty string for none), then targets as in
-// pairs. Names are only mapped to colors by `resolvePairs` and
+// pairs. Variants: a single record, the indexes of their names, the
+// base first. Names are only mapped to colors by `resolvePairs` and
 // `resolveRoles`, when the tree is loaded.
 const preciseCodec: ColorCodec = {
 	encode: ({h, s, l}) => [h, s, l].join('_'),
@@ -103,7 +104,8 @@ export const pack = (node: NodeData) =>
 						...packTargets(rule, indice)
 					])
 				)
-				.join(',')
+				.join(','),
+			encodeNumbers((node.variants ?? []).map(indice))
 		];
 
 		// links without roles and rules stay as they were
@@ -118,7 +120,7 @@ export const unpack = (data: string) =>
 	unpackV1(
 		data,
 		preciseCodec,
-		([pairs, roles, rules], index) => {
+		([pairs, roles, rules, variants], index) => {
 			const extra: Partial<NodeData> = {};
 			const pairList = records(pairs).map(
 				([fg, bg, ...targets]): PresetPair => ({
@@ -141,6 +143,14 @@ export const unpack = (data: string) =>
 					...unpackTargets(targets, index)
 				})
 			);
+
+			const [variantList] = records(variants);
+
+			if (variantList) {
+				extra.variants = variantList.map(
+					(name) => index[name]
+				);
+			}
 
 			if (pairList.length) extra.pairs = pairList;
 			if (roleList.length) extra.roles = roleList;

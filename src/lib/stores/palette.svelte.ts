@@ -4,6 +4,7 @@ import type {PaletteColor} from '#lib/core/evaluate.js';
 import type {
 	AppRole,
 	AppRule,
+	AppVariant,
 	PairTargets
 } from '#lib/core/nodes.js';
 import type {ExpandedPair} from '#lib/core/pairs.js';
@@ -44,6 +45,9 @@ class Palette {
 			({fg, bg}) => ids.has(fg) && ids.has(bg)
 		);
 	});
+	// The variants as set (ADR 19), the base first; none for a palette
+	// without. Overrides of the nodes are keyed by their ids.
+	variants = $state.raw<AppVariant[]>([]);
 	// Roles and rules as set (ADR 16), linked by ids: roles hold color
 	// ids, rules hold role ids. Names are only in the saved format.
 	storedRoles = $state.raw<AppRole[]>([]);
@@ -132,7 +136,8 @@ class Palette {
 						this.root,
 						this.pairs,
 						this.roles,
-						this.rules
+						this.rules,
+						this.variants
 					),
 					origin
 				)

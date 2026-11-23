@@ -1,6 +1,6 @@
 import defs from '#lib/definitions/index.js';
 import {expect, test} from 'vitest';
-import {remapArgs} from './nodes';
+import {remapArgs, remapOverrides} from './nodes';
 
 test('keeps args of identical params', () => {
 	expect(
@@ -29,4 +29,30 @@ test('resets args of params with another range or kind', () => {
 	});
 
 	expect(remapArgs(defs.l, defs.cmp, {amount: 80})).toEqual({});
+});
+
+test('keeps overrides of identical, non structural params', () => {
+	expect(
+		remapOverrides(defs.hlt, defs.sdw, {
+			Dark: {amount: 30, shift: 5},
+			Contrast: {amount: 10}
+		})
+	).toEqual({
+		Dark: {amount: 30, shift: 5},
+		Contrast: {amount: 10}
+	});
+
+	// a variant left with no override is dropped
+	expect(
+		remapOverrides(defs.l, defs.hlt, {Dark: {amount: 80}})
+	).toEqual({});
+	expect(
+		remapOverrides(defs.lsc, defs.stt, {Dark: {steps: 3}})
+	).toEqual({});
+});
+
+test('never keeps an override of a structural param', () => {
+	expect(
+		remapOverrides(defs.lsc, defs.lsc, {Dark: {steps: 3}})
+	).toEqual({});
 });

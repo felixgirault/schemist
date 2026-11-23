@@ -94,3 +94,37 @@ test('evaluate ids of nested presets follow their parent', () => {
 	);
 	expect(ids.some((id) => /^1\.\d+\.\d+$/.test(id))).toBe(true);
 });
+
+const variantTree: NodeData = {
+	...rootTree('#3b82f6', [
+		{
+			type: 'l',
+			token: 'Shade',
+			args: {amount: 80},
+			overrides: {Dark: {amount: 20}}
+		},
+		{
+			type: 'stt',
+			token: 'Brand',
+			overrides: {Dark: {amount: 30}}
+		}
+	]),
+	variants: ['Light', 'Dark']
+};
+
+test('a variant applies its overrides, the base never', () => {
+	const hexesOf = (variant?: string) =>
+		evaluate(variantTree, false, variant).map(({color}) =>
+			formatSchemistToHex(color)
+		);
+	const base = hexesOf();
+
+	expect(hexesOf('Light')).toEqual(base);
+	expect(hexesOf('Dark')[0]).toBe(base[0]);
+	expect(hexesOf('Dark')[1]).not.toBe(base[1]);
+	// presets build their colors from the variant's args
+	expect(hexesOf('Dark')[2]).not.toBe(base[2]);
+	expect(
+		evaluate(variantTree, false, 'Dark').map((c) => c.id)
+	).toEqual(evaluate(variantTree).map((c) => c.id));
+});

@@ -11,18 +11,21 @@ export default definePreset({
 		{
 			type: 'boolean',
 			name: 'tetrad',
+			isStructural: true,
 			label: 'Tetrad',
 			default: true
 		},
 		{
 			type: 'boolean',
 			name: 'triad',
+			isStructural: true,
 			label: 'Triad',
 			default: true
 		},
 		{
 			type: 'boolean',
 			name: 'split',
+			isStructural: true,
 			label: 'Split complementary',
 			default: true
 		}

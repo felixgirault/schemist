@@ -190,6 +190,7 @@ A class with reactive fields:
 | `token`     | state    | Name template (§4.4), `''` for an automatic name                                      |
 | `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree                       |
 | `args`      | state    | Parameter values, initialized from the type's defaults                                |
+| `overrides` | state    | Args by variant id, never the base's (§5.4), `{}` without                             |
 | `children`  | getter   | Child nodes, ordered (private state, read-only)                                       |
 | `parent`    | getter   | Parent node, `undefined` for the root (private state)                                 |
 | `input`     | derived  | `parent.output`, or `{color: white, name: ''}` for the root                           |
@@ -214,7 +215,9 @@ place among its siblings). `addChild` throws on presets (§7). The
 arg is kept when the new type has a param with the same name,
 kind and range, and reset to the new type's default otherwise
 (ADR 8). Highlight ↔ Shadow and Lightness ↔ Saturation keep all
-their args.
+their args. Overrides follow with `remapOverrides`: kept for the
+params that `remapArgs` would keep, except structural ones
+(§5.4), a variant left with none being dropped.
 
 ### 5.2 Outputs
 
@@ -223,31 +226,67 @@ children, and returns `{[id]: {color, name}}` for every
 **visible** node, presets replaced by their generated colors
 (§7). Children of a hidden node are still collected.
 
-`evaluate(NodeData)` (`#lib/core/evaluate.ts`) computes the same
-visible outputs without the store, as `PaletteColor`s
+`evaluate(NodeData, withHidden?, variant?)`
+(`#lib/core/evaluate.ts`) computes the same visible outputs
+without the store, as `PaletteColor`s
 (`{id, name, color, rgbColor}`). Ids are depth-first indexes
-(`'0'`, `'1'`, …).
+(`'0'`, `'1'`, …). With a `variant` (a name of the tree's
+`variants`, §5.4) the node's overrides apply over its args, and a
+preset builds its colors from them; ids are the same in every
+variant. The store only evaluates the base for now.
 
 ### 5.3 Tree data (`#lib/tree.ts`, `#lib/core/tree.ts`)
 
-`NodeData = {id?, type, token?, args?, children?, isHidden?, pairs?, roles?, rules?}`
+`NodeData = {id?, type, token?, args?, overrides?, children?, isHidden?, pairs?, roles?, rules?, variants?}`
 (`#lib/core/nodes.ts`) is the plain form of a tree, used by
 presets, permalinks, history snapshots and the CLI, with `type` a
 `NodeType` (§6). `parseTree(NodeData) → Node` merges given `args`
 over the type defaults and reuses `id` when set;
-`serializeTree(Node, pairs?, roles?, rules?) → IdentifiedNodeData`
+`serializeTree(Node, pairs?, roles?, rules?, variants?) → IdentifiedNodeData`
 (a tree whose ids are all set) includes ids, omits empty tokens,
-args and children, and writes the root's pairs, roles and rules
-(§8.1). Permalinks don't store ids. `changedArg` and `withIds`
-live in `#lib/core/tree.ts`.
+args, overrides and children, and writes the root's pairs, roles,
+rules and variants (§8.1). Permalinks don't store ids.
+`changedArg` and `withIds` live in `#lib/core/tree.ts`.
 
 `validateTree(data, path, isRoot?)` (`#lib/core/tree.ts`, which
-also accepts the root's `pairs`, `roles` and `rules`) checks data
-from outside and returns a `NodeData`: unknown keys, node types
-and params, and invalid values are rejected naming their path.
-Color args are CSS strings, converted to colors. The CLI (§14)
-validates its input with it, and `unpack` (§10) validates what a
-permalink holds before building the tree.
+also accepts the root's `pairs`, `roles`, `rules` and `variants`)
+checks data from outside and returns a `NodeData`: unknown keys,
+node types and params, and invalid values are rejected naming
+their path. Color args are CSS strings, converted to colors. The
+CLI (§14) validates its input with it, and `unpack` (§10)
+validates what a permalink holds before building the tree.
+
+### 5.4 Variants (ADR 19)
+
+A palette has variants, such as light and dark: the root's
+`variants` lists their names, the base first (the tree as it is),
+and a palette without it is its base only. A variant changes
+**args only**: a node's `overrides` is
+`{<variant name>: {<param>: value}}` (the same values as `args`,
+colors as CSS strings in files), never for the base. Types,
+tokens, parents, children, visibility, roles, rules and pairs are
+shared, so every token exists in every variant. A node without an
+override keeps its base args in a variant; its color may still
+differ through its parent.
+
+A param that changes a preset's structure is marked
+`isStructural` in its definition, and can't be overridden: Scale
+`steps`, Rainbow `colors`, the Harmonies and Schemist theme
+booleans. `validateTree` rejects an override that names an
+undeclared variant or the base, an unknown param, a value out of
+bounds or a structural param, with its path, and overrides when
+the root declares no variants. Variants are names, not empty,
+each once.
+
+In the app, variants have ids (`AppVariant`, `{id, name}`, like
+roles): `palette.variants` holds them, base first, empty without
+variants, and a node's `overrides` are keyed by id.
+`parseVariants` makes the ids when a tree loads and
+`withVariantIds` keys the overrides by them; `serializeTree` with
+`variants` writes names back. There is no way to edit variants in
+the UI yet. `expandPreset` gives each generated node, per
+variant, the args that differ from the base (`withOverrides`):
+the structure being the same, they line up.
 
 ## 6. Node types
 
@@ -360,10 +399,11 @@ each exporting a single reactive object.
 | `storedRoles`    | Roles as set, `{id, name, colors: string[]}` (color ids), set on load (ADR 16)                                      |
 | `roles`          | `storedRoles` without the colors since removed; a role stays until deleted, even empty                              |
 | `rules`          | Rules as set, `{id, fg, bg?, use?, ...targets}` with `fg` and `bg` **role ids** (§9.7), set on load                 |
+| `variants`       | Variants as set, `{id, name}`, base first, `[]` without (§5.4, ADR 19), set on load                                 |
 | `expandedPairs`  | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off and rule pairs, `sources` holding **rule ids**   |
 | `unsavedPairs`   | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                   |
 | `unsavedMembers` | Names of role members a permalink cannot hold, shared by several colors (see below)                                 |
-| `permalink`      | `permalink(serializeTree(root, pairs, roles, rules), window.location.origin)` (§10.1)                               |
+| `permalink`      | `permalink(serializeTree(root, pairs, roles, rules, variants), window.location.origin)` (§10.1)                     |
 | `colors`         | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                  |
 | `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                                             |
 
@@ -458,16 +498,16 @@ default `dash`), `precision` (default 3), `prefix` (default
 Undo and redo of the palette tree, see ADR 9. A generic `History`
 class (`#lib/utils/history.svelte.ts`) holds `past` and `future`
 stacks of snapshots, capped at 100 entries. A snapshot is
-`{tree, pairs, roles, rules}`: the `serializeTree` of the root
-(with ids), the declared pairs (§8.1) and roles by color ids, and
-the rules, frozen by `$state.snapshot`. Undoing rebuilds the
-nodes with `parseTree`, which keeps the ids, so the ids of the
-pairs still point to the same colors, so each state gets back
-exactly its own pairs. `setPair` is a change like any other, and
-so is a change to roles or rules (they are in the snapshot and in
-the grouping test). What goes to `localStorage` and to the URL is
-the packed palette of the snapshot, pairs included (by names,
-§10).
+`{tree, pairs, roles, rules, variants}`: the `serializeTree` of
+the root (with ids, overrides by variant id), the declared pairs
+(§8.1) and roles by color ids, the rules and the variants, frozen
+by `$state.snapshot`. Undoing rebuilds the nodes with
+`parseTree`, which keeps the ids, so the ids of the pairs still
+point to the same colors, so each state gets back exactly its own
+pairs. `setPair` is a change like any other, and so is a change
+to roles or rules (they are in the snapshot and in the grouping
+test). What goes to `localStorage` and to the URL is the packed
+palette of the snapshot, pairs included (by names, §10).
 
 `startHistory(root)` (`#lib/stores/history.svelte.ts`, called
 when the palette mounts, after `palette.storedPairs` is set)
@@ -696,11 +736,12 @@ payload of version `1`, which version `2` extends, is:
 <root>@<nodes>@<dictionary>
 ```
 
-Version `2` adds the pairs, roles and rules (§9.7) after the
-nodes, and writes colors differently (see values):
+Version `2` adds the pairs, roles, rules (§9.7) and variants
+(§5.4) after the nodes, and writes colors differently (see
+values):
 
 ```
-<root>@<nodes>@<pairs>@<roles>@<rules>@<dictionary>
+<root>@<nodes>@<pairs>@<roles>@<rules>@<variants>@<dictionary>
 ```
 
 | Part         | Content                                                                                                                                                                                   |
@@ -709,6 +750,7 @@ nodes, and writes colors differently (see values):
 | `pairs`      | v2 only: comma-separated pair records, empty without pairs                                                                                                                                |
 | `roles`      | v2 only: records of dictionary indexes, the role name then its color names                                                                                                                |
 | `rules`      | v2 only: records of the indexes of `fg`, `bg` and `use` (the empty string for none), then (target name, value) indexes as in pairs                                                        |
+| `variants`   | v2 only: a single record of dictionary indexes, the names of the variants, the base first                                                                                                 |
 | `nodes`      | Comma-separated node records, children before their parent (post-order)                                                                                                                   |
 | `root`       | Index of the root record in `nodes`, in hexadecimal                                                                                                                                       |
 
@@ -722,6 +764,11 @@ with `x`, 3 digits prefixed with `y`. The numbers are, in order:
 4. `N / 2` pairs of (dictionary index of the param name, value),
 5. record indices of the children.
 
+In version 2, the numbers are followed by one `~` and a block per
+variant with overrides: the dictionary index of the variant's
+name, then (dictionary index of the param name, value) pairs
+(`1@…` records never have them).
+
 Values: booleans `0`/`1`, ranges as is, colors as a dictionary
 index. The dictionary entry of a color is:
 
@@ -730,9 +777,9 @@ index. The dictionary entry of a color is:
 | `1`     | 6-digit hex code without `#`, which rounds the color (lossy)                    |
 | `2`     | `h_s_l` of the `SchemistColor`, as full precision JavaScript numbers (lossless) |
 
-The sections of roles and rules are left out when empty and after
-the last non-empty one (a link with pairs only is as it was, and
-a link without the sections is read as having none).
+The sections of roles, rules and variants are left out when empty
+and after the last non-empty one (a link with pairs only is as it
+was, and a link without the sections is read as having none).
 
 Version `2` rejects color entries that are not exactly three
 finite numbers. Whatever the version, `unpack` returns the tree

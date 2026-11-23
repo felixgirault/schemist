@@ -109,8 +109,24 @@ export const pack = (
 		];
 
 		const packedData = encodeNumbers(data);
+		// Overrides (version 2) follow, each as `~` and the numbers
+		// of its variant's name, then of its args.
+		const overrides = Object.entries(node.overrides ?? {}).map(
+			([variant, values]) =>
+				`~${encodeNumbers([
+					indice(variant),
+					...packArgs(
+						defs[node.type].params.filter(
+							({name}) => name in values
+						),
+						values
+					)
+				])}`
+		);
 
-		packed.push(`${hiddenFlag}${packedData}`);
+		packed.push(
+			`${hiddenFlag}${packedData}${overrides.join('')}`
+		);
 		return i;
 	};
 
@@ -168,7 +184,8 @@ export const unpack = (
 		);
 	};
 
-	const unpackData = (packedData: string) => {
+	const unpackData = (record: string) => {
+		const [packedData, ...packedOverrides] = record.split('~');
 		const data = decodeNumbers(packedData);
 
 		const type = index[data.shift() as number];
@@ -183,14 +200,27 @@ export const unpack = (
 			]);
 		}
 
+		const params = isNodeType(type) ? defs[type].params : [];
+		const overrides = Object.fromEntries(
+			packedOverrides.map((packedOverride) => {
+				const [variant, ...numbers] =
+					decodeNumbers(packedOverride);
+				const entries: [number, number][] = [];
+
+				for (let i = 0; i < numbers.length; i += 2) {
+					entries.push([numbers[i], numbers[i + 1]]);
+				}
+
+				return [index[variant], unpackArgs(params, entries)];
+			})
+		);
+
 		return {
 			type,
 			token,
-			isHidden: packedData.startsWith('!'),
-			args: unpackArgs(
-				isNodeType(type) ? defs[type].params : [],
-				argEntries
-			),
+			isHidden: record.startsWith('!'),
+			args: unpackArgs(params, argEntries),
+			...(packedOverrides.length && {overrides}),
 			children: data
 		};
 	};

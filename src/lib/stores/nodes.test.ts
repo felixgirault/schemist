@@ -12,7 +12,9 @@ import {rootTree} from '#lib/testing/tree.js';
 import {
 	expandPreset,
 	parseTree,
-	serializeTree
+	parseVariants,
+	serializeTree,
+	withVariantIds
 } from '#lib/tree.js';
 import {History} from '#lib/utils/history.svelte.js';
 import {expect, test} from 'vitest';
@@ -228,4 +230,69 @@ test('a swap is one undo step that survives packing', () => {
 	history.undo();
 	expect(restored.children[0].def.type).toBe('l');
 	expect(restored.children[0].args).toEqual({amount: 20});
+});
+
+test('a swap keeps the overrides of the params both types have', () => {
+	const root = parseTree(
+		rootTree('#3b82f6', [
+			{type: 'hlt', overrides: {v1: {amount: 30, shift: 5}}}
+		])
+	);
+	const [node] = root.children;
+
+	node.setType('sdw');
+	expect(node.overrides).toEqual({v1: {amount: 30, shift: 5}});
+
+	node.setType('cmp');
+	expect(node.overrides).toEqual({});
+});
+
+test('expanding a preset gives each color the args its variants differ by', () => {
+	const root = parseTree(
+		rootTree('#3b82f6', [
+			{
+				type: 'stt',
+				token: 'Brand',
+				overrides: {v1: {amount: 30}}
+			}
+		])
+	);
+	const colorsIn = (variant: string) =>
+		evaluate(
+			{...serializeTree(root), variants: ['Light', variant]},
+			false,
+			variant
+		).map(({color}) => formatSchemistToHex(color));
+	const before = [colorsIn('v1'), hexes(root)];
+
+	expandPreset(root.children[0]);
+
+	expect(root.children.map(({overrides}) => overrides)).toEqual(
+		[{v1: {amount: 30}}, {v1: {amount: 30}}]
+	);
+	expect([colorsIn('v1'), hexes(root)]).toEqual(before);
+});
+
+test('variants are saved by name and loaded by id', () => {
+	const data = {
+		...rootTree('#3b82f6', [
+			{type: 'l', overrides: {Dark: {amount: 20}}}
+		]),
+		variants: ['Light', 'Dark']
+	};
+	const variants = parseVariants(data);
+	const root = parseTree(withVariantIds(data, variants));
+
+	expect(Object.keys(root.children[0].overrides)).toEqual([
+		variants[1].id
+	]);
+	expect(
+		serializeTree(
+			root,
+			undefined,
+			undefined,
+			undefined,
+			variants
+		)
+	).toMatchObject(data);
 });

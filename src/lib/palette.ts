@@ -4,7 +4,9 @@ import {
 	parsePairs,
 	parseRoles,
 	parseRules,
-	parseTree
+	parseTree,
+	parseVariants,
+	withVariantIds
 } from '#lib/tree.js';
 
 const StorageKey = 'palette';
@@ -35,14 +37,18 @@ export const loadPalette = () => {
 		if (preset) {
 			try {
 				const data = unpack(preset);
-				const root = parseTree(data);
+				const variants = parseVariants(data);
+				const root = parseTree(
+					withVariantIds(data, variants)
+				);
 				const roles = parseRoles(data, root);
 
 				return {
 					root,
 					pairs: parsePairs(data, root),
 					roles,
-					rules: parseRules(data, roles)
+					rules: parseRules(data, roles),
+					variants
 				};
 			} catch (e) {
 				console.error(
@@ -61,6 +67,7 @@ export const loadPalette = () => {
 		}),
 		pairs: [],
 		roles: [],
-		rules: []
+		rules: [],
+		variants: []
 	};
 };

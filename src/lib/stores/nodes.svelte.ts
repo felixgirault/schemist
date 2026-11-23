@@ -3,14 +3,16 @@ import type {
 	Args,
 	NodeDef,
 	NodeOutput,
-	NodeType
+	NodeType,
+	Overrides
 } from '#lib/core/nodes.js';
 import {
 	applyDef,
 	defaultArgs,
 	defaultInput,
 	isPresetDef,
-	remapArgs
+	remapArgs,
+	remapOverrides
 } from '#lib/core/nodes.js';
 import type {ResolvedPair} from '#lib/core/pairs.js';
 import defs from '#lib/definitions/index.js';
@@ -26,6 +28,8 @@ export class Node {
 	token = $state('');
 	isHidden = $state(false);
 	args: Args = $state({});
+	// By variant id, never the base's (ADR 19).
+	overrides: Overrides = $state({});
 	// Only changed through the tree methods, which keep both ends
 	// of a link in sync.
 	#children: Node[] = $state([]);
@@ -77,6 +81,11 @@ export class Node {
 		}
 
 		this.args = remapArgs(this.def, def, this.args);
+		this.overrides = remapOverrides(
+			this.def,
+			def,
+			this.overrides
+		);
 		this.def = def;
 	}
 

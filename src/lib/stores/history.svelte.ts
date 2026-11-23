@@ -1,6 +1,7 @@
 import type {
 	AppRole,
 	AppRule,
+	AppVariant,
 	IdentifiedNodeData,
 	NodeData,
 	PresetPair
@@ -31,37 +32,48 @@ export type Snapshot = {
 	pairs: PresetPair[];
 	roles: AppRole[];
 	rules: AppRule[];
+	variants: AppVariant[];
 };
 
 export const read = (
 	root: Node,
 	pairs: ColorPair[],
 	roles: AppRole[],
-	rules: AppRule[]
+	rules: AppRule[],
+	variants: AppVariant[] = []
 ) =>
 	$state.snapshot({
 		tree: serializeTree(root),
 		pairs,
 		roles,
-		rules
+		rules,
+		variants
 	}) as Snapshot;
 
 const readPalette = (root: Node) =>
-	read(root, palette.pairs, palette.roles, palette.rules);
+	read(
+		root,
+		palette.pairs,
+		palette.roles,
+		palette.rules,
+		palette.variants
+	);
 
 // What is saved: names instead of ids, see `namePairs`.
 const toData = ({
 	tree,
 	pairs,
 	roles,
-	rules
+	rules,
+	variants
 }: Snapshot): NodeData => {
 	const root = parseTree(tree);
 	return serializeTree(
 		root,
 		pairsOn(root, pairs),
 		rolesOn(root, roles),
-		rules
+		rules,
+		variants
 	);
 };
 
@@ -83,21 +95,29 @@ const persist = debounce((snapshot: Snapshot) => {
 
 // Every change of the palette is recorded, see ADR 9.
 export const history = new History<Snapshot>({
-	restore: ({tree, pairs, roles, rules}) => {
+	restore: ({tree, pairs, roles, rules, variants}) => {
 		const root = parseTree(tree);
 
 		palette.root = root;
 		palette.storedPairs = pairsOn(root, pairs);
 		palette.storedRoles = rolesOn(root, roles);
 		palette.rules = rules;
+		palette.variants = variants;
 	},
 	onChange: persist,
 	group: (previous, next) =>
 		JSON.stringify([
 			previous.pairs,
 			previous.roles,
-			previous.rules
-		]) === JSON.stringify([next.pairs, next.roles, next.rules])
+			previous.rules,
+			previous.variants
+		]) ===
+		JSON.stringify([
+			next.pairs,
+			next.roles,
+			next.rules,
+			next.variants
+		])
 			? changedArg(previous.tree, next.tree)
 			: undefined
 });

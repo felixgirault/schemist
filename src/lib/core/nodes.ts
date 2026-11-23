@@ -54,6 +54,7 @@ export type BooleanParam = {
 	type: 'boolean';
 	name: string;
 	label: string;
+	isStructural?: true;
 	default: boolean;
 };
 
@@ -61,6 +62,7 @@ export type ColorParam = {
 	type: 'color';
 	name: string;
 	label: string;
+	isStructural?: true;
 	default: SchemistColor;
 };
 
@@ -68,6 +70,8 @@ export type RangeParam = {
 	type: 'range';
 	name: string;
 	label: string;
+	// Changes a preset's structure, so no variant overrides it (ADR 19).
+	isStructural?: true;
 	unit?: string;
 	min: number;
 	max: number;
@@ -89,6 +93,10 @@ export type ArgsOf<P extends readonly Param[]> = {
 };
 
 export type Args = Record<string, ParamValue>;
+
+// Args a variant sets on a node, by variant (ADR 19): names in the
+// saved format, ids in the app.
+export type Overrides = Record<string, Args>;
 
 // Args hold values of the kind of their param, as they start
 // from defaults and are only set by fields of that kind.
@@ -180,6 +188,36 @@ export const remapArgs = (
 		})
 	);
 
+// Overrides kept in `to`, by variant: the params it has with the
+// same def, as for args, except structural ones. Variants left with
+// none are dropped.
+export const remapOverrides = (
+	from: NodeDef,
+	to: NodeDef,
+	overrides: Overrides
+): Overrides =>
+	Object.fromEntries(
+		Object.entries(overrides).flatMap(([variant, args]) => {
+			const kept = Object.entries(args).filter(([name]) => {
+				const previous = from.params.find(
+					(p) => p.name === name
+				);
+				const param = to.params.find((p) => p.name === name);
+
+				return (
+					previous &&
+					param &&
+					!param.isStructural &&
+					isSameParam(previous, param)
+				);
+			});
+
+			return kept.length
+				? [[variant, Object.fromEntries(kept)]]
+				: [];
+		})
+	);
+
 export const generateName = (
 	token: string,
 	color: SchemistColor,
@@ -235,6 +273,9 @@ export type Rule = PairTargets & {
 // Roles and rules in the app, where links are ids (ADR 16): a role
 // holds color ids, a rule's `fg` and `bg` are role ids. Names are only
 // in the saved format.
+// Variants in the app (ADR 19): overrides are keyed by id, the base
+// being the first.
+export type AppVariant = {id: string; name: string};
 export type AppRole = Role & {id: string};
 export type AppRule = Rule & {id: string};
 
@@ -245,9 +286,11 @@ export type NodeData = {
 	type: NodeType;
 	token?: string;
 	args?: Args;
+	overrides?: Overrides;
 	children?: NodeData[];
 	isHidden?: boolean;
-	// root only
+	// root only: the variants' names, the base first
+	variants?: string[];
 	pairs?: PresetPair[];
 	roles?: Role[];
 	rules?: Rule[];

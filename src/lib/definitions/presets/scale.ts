@@ -11,6 +11,7 @@ export default definePreset({
 		{
 			type: 'range',
 			name: 'steps',
+			isStructural: true,
 			label: 'Steps',
 			min: 1,
 			max: 10,

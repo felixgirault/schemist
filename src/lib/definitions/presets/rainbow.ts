@@ -11,6 +11,7 @@ export default definePreset({
 		{
 			type: 'range',
 			name: 'count',
+			isStructural: true,
 			label: 'Colors',
 			min: 1,
 			max: 23,

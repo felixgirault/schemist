@@ -29,44 +29,58 @@ export const evaluateNodes = (
 	prefix = '',
 	counter = {next: 0},
 	colors: EvaluatedColor[] = [],
-	withHidden = false
+	withHidden = false,
+	variant?: string
 ) => {
-	nodes.forEach(({type, token, args, isHidden, children}) => {
-		const id = `${prefix}${counter.next++}`;
-		const def = defs[type];
-		const nodeArgs = {...defaultArgs(def), ...args};
-		const output = applyDef(def, nodeArgs, token ?? '', input);
+	nodes.forEach(
+		({type, token, args, overrides, isHidden, children}) => {
+			const id = `${prefix}${counter.next++}`;
+			const def = defs[type];
+			const nodeArgs = {
+				...defaultArgs(def),
+				...args,
+				...(variant && overrides?.[variant])
+			};
+			const output = applyDef(
+				def,
+				nodeArgs,
+				token ?? '',
+				input
+			);
 
-		if (isPresetDef(def)) {
-			if (withHidden || !isHidden) {
-				evaluateNodes(
-					def.build(nodeArgs),
-					output,
-					`${id}.`,
-					undefined,
-					colors,
-					withHidden
-				);
+			if (isPresetDef(def)) {
+				if (withHidden || !isHidden) {
+					evaluateNodes(
+						def.build(nodeArgs),
+						output,
+						`${id}.`,
+						undefined,
+						colors,
+						withHidden,
+						variant
+					);
+				}
+
+				return;
 			}
 
-			return;
-		}
+			if (withHidden || !isHidden) {
+				colors.push({id, ...output});
+			}
 
-		if (withHidden || !isHidden) {
-			colors.push({id, ...output});
+			if (children) {
+				evaluateNodes(
+					children,
+					output,
+					prefix,
+					counter,
+					colors,
+					withHidden,
+					variant
+				);
+			}
 		}
-
-		if (children) {
-			evaluateNodes(
-				children,
-				output,
-				prefix,
-				counter,
-				colors,
-				withHidden
-			);
-		}
-	});
+	);
 
 	return colors;
 };
@@ -78,8 +92,14 @@ export const toPaletteColors = (colors: EvaluatedColor[]) =>
 	}));
 
 // Colors of all visible nodes, in tree order, like
-// `collectOutputs`, or of all nodes with `withHidden`.
-export const evaluate = (tree: NodeData, withHidden = false) =>
+// `collectOutputs`, or of all nodes with `withHidden`. With a
+// `variant` (a name of the tree's `variants`), its overrides apply;
+// without, the base is evaluated.
+export const evaluate = (
+	tree: NodeData,
+	withHidden = false,
+	variant?: string
+) =>
 	toPaletteColors(
 		evaluateNodes(
 			[tree],
@@ -87,6 +107,7 @@ export const evaluate = (tree: NodeData, withHidden = false) =>
 			'',
 			undefined,
 			undefined,
-			withHidden
+			withHidden,
+			variant
 		)
 	);

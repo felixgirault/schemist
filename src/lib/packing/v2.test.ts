@@ -141,3 +141,40 @@ test('packs roles and rules, and reads links without them', () => {
 		unpackVersioned(packVersioned(pairsTree))
 	).not.toHaveProperty('roles');
 });
+
+test('packs variants and overrides, and reads links without them', () => {
+	const tree: NodeData = {
+		type: 'clr',
+		token: 'Bg',
+		args: {color: {h: 85.4, s: 99.9, l: 82.1}},
+		variants: ['Light', 'Dark, high'],
+		children: [
+			{
+				type: 'ctr',
+				args: {amount: 80},
+				overrides: {'Dark, high': {amount: 95}}
+			},
+			{
+				type: 'stt',
+				overrides: {'Dark, high': {amount: 20}}
+			},
+			{
+				type: 'clr',
+				overrides: {
+					'Dark, high': {color: {h: 1.5, s: 2.5, l: 3.5}}
+				}
+			}
+		]
+	};
+	const unpacked = unpackVersioned(packVersioned(tree));
+
+	expect(unpacked).toMatchObject(tree);
+	expect(unpacked.children![1].overrides).toEqual(
+		tree.children![1].overrides
+	);
+	expect(
+		unpackVersioned(packVersioned({type: 'clr'}))
+	).not.toHaveProperty('variants');
+	expect(packVersioned({type: 'clr'})).not.toContain('~');
+	expect(outputHexes(unpacked)).toEqual(outputHexes(tree));
+});
