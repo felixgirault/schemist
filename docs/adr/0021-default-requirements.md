@@ -12,14 +12,14 @@ Most design systems need the same few.
 default ones: a new palette, and a link or stored palette that
 declares none. A palette with any of them is left as it is.
 
-| Role            | Rules                                                          |
-| --------------- | -------------------------------------------------------------- |
-| Surfaces        |                                                                |
-| Text            | on Surfaces, Body text                                         |
-| Borders         | on Surfaces, Large text and UI                                 |
-| Accents         | on Surfaces, Large text and UI                                 |
-| Text on accents | on Accents, Body text                                          |
-| Categories      | among themselves, Categories; on Surfaces, Large text and UI   |
+| Role            | Rules                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Surfaces        |                                                              |
+| Text            | on Surfaces, Body text                                       |
+| Borders         | on Surfaces, Large text and UI                               |
+| Accents         | on Surfaces, Large text and UI                               |
+| Text on accents | on Accents, Body text                                        |
+| Categories      | among themselves, Categories; on Surfaces, Large text and UI |
 
 - **Roles start empty**: nothing is guessed from names or the
   tree (ADR 16). Picking colors is what starts the checks.

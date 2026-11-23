@@ -30,23 +30,23 @@ export const storePalette = (packed: string) => {
 
 // A palette that declares no pairs, roles nor rules gets the
 // default requirements (ADR 21).
-const parsePalette = (data: NodeData) => {
-	const declared =
-		data.pairs?.length ||
-		data.roles?.length ||
-		data.rules?.length;
-	const {roles: namedRoles, rules: namedRules} = declared
-		? data
-		: defaultRequirements;
+const parsePalette = (saved: NodeData) => {
+	const isDeclared =
+		saved.pairs?.length ||
+		saved.roles?.length ||
+		saved.rules?.length;
+	const data = isDeclared
+		? saved
+		: {...saved, ...defaultRequirements};
 	const variants = parseVariants(data);
 	const root = parseTree(withVariantIds(data, variants));
-	const roles = parseRoles({...data, roles: namedRoles}, root);
+	const roles = parseRoles(data, root);
 
 	return {
 		root,
 		pairs: parsePairs(data, root),
 		roles,
-		rules: parseRules({...data, rules: namedRules}, roles),
+		rules: parseRules(data, roles),
 		variants
 	};
 };

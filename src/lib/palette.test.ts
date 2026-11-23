@@ -9,7 +9,10 @@ import {loadPalette} from './palette';
 const packed = (hex: string) =>
 	pack({type: 'clr', args: {color: parseColor(hex)[1]!}});
 
-const load = (preset: string | null, stored: string | null) => {
+const loaded = (
+	preset: string | null,
+	stored: string | null = null
+) => {
 	vi.stubGlobal('location', {
 		search: preset
 			? `?preset=${encodeURIComponent(preset)}`
@@ -17,10 +20,13 @@ const load = (preset: string | null, stored: string | null) => {
 	});
 
 	vi.stubGlobal('localStorage', {getItem: () => stored});
-	return formatSchemistToHex(
-		argOf(loadPalette().root.args, color.params[0])
-	);
+	return loadPalette();
 };
+
+const load = (preset: string | null, stored: string | null) =>
+	formatSchemistToHex(
+		argOf(loaded(preset, stored).root.args, color.params[0])
+	);
 
 afterEach(() => {
 	vi.unstubAllGlobals();
@@ -36,17 +42,6 @@ test('the link wins over the stored palette', () => {
 test('the stored palette is used without a link', () => {
 	expect(load(null, packed('#0000ff'))).toBe('#0000ff');
 });
-
-const loaded = (preset: string | null) => {
-	vi.stubGlobal('location', {
-		search: preset
-			? `?preset=${encodeURIComponent(preset)}`
-			: ''
-	});
-
-	vi.stubGlobal('localStorage', {getItem: () => null});
-	return loadPalette();
-};
 
 const color1 = () => parseColor('#ff0000')[1]!;
 
