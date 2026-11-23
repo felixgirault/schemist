@@ -90,50 +90,32 @@ class Combinations {
 		)
 	);
 
-	// The variants where each pair, and each rule's pairs, are not
-	// met ('' without variants), walked once per change rather than
-	// for each card and rule.
+	// The variants where each rule's pairs are not met ('' without
+	// variants), walked once per change rather than for each rule.
 	#failing = $derived.by(() => {
-		const pairs = new Map<string, string[]>();
 		const rules = new Map<string, string[]>();
-		const add = (
-			map: Map<string, string[]>,
-			key: string,
-			name: string
-		) => {
-			const names = map.get(key) ?? [];
-
-			if (!names.includes(name)) {
-				map.set(key, [...names, name]);
-			}
-		};
 
 		for (const {name, checks} of this.allChecks) {
-			for (const {id, pair, pass} of checks) {
-				if (!pass) {
-					add(pairs, id, name);
-					pair.sources.rules.forEach((rule) =>
-						add(rules, rule, name)
-					);
+			for (const {pair, pass} of checks) {
+				if (pass) continue;
+
+				for (const rule of pair.sources.rules) {
+					const names = rules.get(rule) ?? [];
+
+					if (!names.includes(name)) {
+						rules.set(rule, [...names, name]);
+					}
 				}
 			}
 		}
 
-		return {pairs, rules};
+		return rules;
 	});
-
-	// The variants other than the selected one where a pair is not
-	// met, to point at it from the cards; none without variants.
-	failingElsewhere(pairId: string) {
-		return (this.#failing.pairs.get(pairId) ?? []).filter(
-			(name) => name && name !== palette.selectedVariant?.name
-		);
-	}
 
 	// Whether a rule is met in every variant, and its text: "met",
 	// "not met", or "not met in Dark" naming the variants.
 	ruleStatus(id: string) {
-		const failing = this.#failing.rules.get(id) ?? [];
+		const failing = this.#failing.get(id) ?? [];
 		const names = failing.filter(Boolean);
 
 		return {

@@ -67,19 +67,20 @@ test('shows it in the rule, with the cards of Light', () => {
 	expect(html).toContain('not met in Dark');
 });
 
-test('marks the card of a pair failing in another variant', () => {
-	const {id} = combinations.pairChecks[0];
+test('draws a table with a column per variant', () => {
+	const html = render(Result).body;
 
-	expect(combinations.failingElsewhere(id)).toEqual(['Dark']);
-	expect(text(render(Result).body)).toContain(
-		'Not met in Dark'
+	expect(html).toMatch(
+		/<th scope="col"[^>]*>(<!--.*?-->)?Light/
 	);
-
-	palette.selectVariant(palette.variants[1].id);
-	palette.settle();
-	expect(combinations.failingElsewhere(id)).toEqual([]);
-	palette.selectVariant();
-	palette.settle();
+	expect(html).toMatch(
+		/<th scope="col"[^>]*>(<!--.*?-->)?Dark/
+	);
+	expect(html).toMatch(/<th scope="row"[^>]*>Grey &amp; White/);
+	expect(html).toContain('aria-label="Override Grey on White"');
+	// One cell per variant, the failing one marked by its text
+	expect(html.match(/<td class="cell/g)).toHaveLength(2);
+	expect(text(html)).toContain('✗ not met');
 });
 
 test('counts a variant without colors yet from the next settle on', () => {
@@ -107,7 +108,7 @@ test('reads as before without variants', () => {
 	});
 });
 
-test('marks no card without variants, even a failing one', () => {
+test('has no variant column without variants', () => {
 	loadPalette(
 		rootTree('#ffffff', [
 			{
@@ -125,11 +126,9 @@ test('marks no card without variants, even a failing one', () => {
 		palette.addRole('Page', [white.id])!,
 		'body'
 	);
-	const check = combinations.pairChecks.find(({pair}) =>
-		pair.sources.rules.includes(rule)
-	)!;
 
 	expect(combinations.ruleStatus(rule).text).toBe('not met');
-	expect(combinations.failingElsewhere(check.id)).toEqual([]);
-	expect(text(render(Result).body)).not.toContain('Not met in');
+	expect(
+		render(Result).body.match(/<td class="cell/g)
+	).toHaveLength(1);
 });

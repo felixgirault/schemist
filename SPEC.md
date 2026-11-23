@@ -487,23 +487,22 @@ expensive combination computations during slider drags.
 
 ### 8.2 `combinations`
 
-| Member                        | Description                                                                                                                                                                                                                                                                |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                                                      |
-| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                                                                                         |
-| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                                                                                            |
-| `previewed`                   | The pair (`bgName`, `fgName`, `contrast.bg`/`fg`) of the pair `<bgId>-<fgId>` of `previewedUid`, declared or not, or `null`                                                                                                                                                |
-| `pairChecks`                  | In the selected variant (the cards): `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
-| `allChecks`                   | `{name, checks}` for each variant (one unnamed entry without): the pairs checked in its colors, `pairChecks` for the selected one                                                                                                                                          |
-| `checkedPairs`                | Count of the pairs of `allChecks`, one per variant                                                                                                                                                                                                                         |
-| `failingElsewhere(pairId)`    | Names of the variants other than the selected one where the pair is not met, none without variants; the card shows them as "Not met in Dark" (§11.5). With `ruleStatus`, read from one map of failing variants by pair and by rule, built once per change                  |
-| `ruleStatus(id)`              | `{pass, text}` of a rule over every variant: `met`, `not met` or `not met in Dark`                                                                                                                                                                                         |
-| `passingPairs`                | Count of the pairs of `allChecks` that pass                                                                                                                                                                                                                                |
-| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                                                               |
-| `requirements`                | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                                                              |
-| `addPair(fg, bg, use)`        | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                                                          |
-| `ruleChecks`                  | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                                                                   |
-| `describeRule(rule)`          | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                                                          |
+| Member                        | Description                                                                                                                                                                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blindnessTypes`              | Simulations to compute: `protanomaly`, `deuteranomaly`, `tritanomaly`                                                                                                                                                                                                     |
+| `isLuminosityAnalysisEnabled` | Renders the whole app in grayscale                                                                                                                                                                                                                                        |
+| `previewedUid`                | Combination applied to the app theme, or `null`                                                                                                                                                                                                                           |
+| `previewed`                   | The pair (`bgName`, `fgName`, `contrast.bg`/`fg`) of the pair `<bgId>-<fgId>` of `previewedUid`, declared or not, or `null`                                                                                                                                               |
+| `pairChecks`                  | In the selected variant (the rows): `{id, pair, fg, bg, checks, pass, for}` (`for` being `usesOf(pair)`, §9.7) for each declared pair (`palette.pairs`, §8.1) of two visible colors, `id` `<bgId>-<fgId>`, `checks` from `checkPair` (§9.7) with the selected simulations |
+| `allChecks`                   | `{name, checks}` for each variant (one unnamed entry without): the pairs checked in its colors, `pairChecks` for the selected one                                                                                                                                         |
+| `checkedPairs`                | Count of the pairs of `allChecks`, one per variant                                                                                                                                                                                                                        |
+| `ruleStatus(id)`              | `{pass, text}` of a rule over every variant: `met`, `not met` or `not met in Dark` (from one map of failing variants by rule, built once per change)                                                                                                                      |
+| `passingPairs`                | Count of the pairs of `allChecks` that pass                                                                                                                                                                                                                               |
+| `hiddenPairs`                 | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                                                              |
+| `requirements`                | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                                                             |
+| `addPair(fg, bg, use)`        | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                                                         |
+| `ruleChecks`                  | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                                                                  |
+| `describeRule(rule)`          | `{label, use}`: "Muted on Surfaces" (or "X among themselves") and the use's name (Custom if none)                                                                                                                                                                         |
 
 ### 8.3 `features`
 
@@ -588,7 +587,7 @@ For each color (as background) and every other color (as
 foreground), one combination with `uid = <bgId>-<fgId>`. Both
 orders of a pair are listed. `n` visible colors give
 `n × (n − 1)` combinations. The CLI's `eval` uses it; the app
-does not list them (ADR 17), its cards measure pairs with
+does not list them (ADR 17), its tables measure pairs with
 `checkPair` (§9.7).
 
 Each combination holds the base contrast, one contrast per
@@ -882,9 +881,9 @@ colors, top to bottom) and name, then actions:
   variant"), and for the selected variant a **Name** field
   (commits on change; a blank or taken name is put back) and a
   **Delete <name>** button, disabled for the base. A palette
-  without variants shows only the **+**. The tree, its colors and
-  the Requirements' cards show the selected variant; rule
-  statuses and the count still cover the base only.
+  without variants shows only the **+**. The tree and its colors
+  show the selected variant, the Requirements tables every one;
+  rule statuses and the count still cover the base only.
 - In a variant other than the base, the Options fields write
   overrides. A node with one shows a "●" mark before its type
   (text alternative "Overridden in this variant"), and each field
@@ -921,7 +920,9 @@ change.
 
 No grid (ADR 18): the requirements are a section of the page
 (§11.1), `Result.svelte` holding `Requirements.svelte`, each
-requirement with its cards underneath.
+requirement with a table of its pairs underneath (ADR 20, step 1;
+simulation rows, sticky headers and the selected column's
+highlight are still to come).
 
 - **Header toggles** (in `App.svelte`, in the Requirements header
   beside the title, wrapping under it on narrow panels, always
@@ -930,23 +931,21 @@ requirement with its cards underneath.
   `blindnessTypes`), each with its full name as tooltip and
   accessible name, and **Grayscale**
   (`isLuminosityAnalysisEnabled`, §9.5). Simulations apply to the
-  cards and to the levels. There is no other filter, no grid and
-  no list of every pair (ADR 17, 18; the CLI keeps `combine`,
-  §9.1).
-- Each combination card (`Combination.svelte`) is drawn in its
-  own colors, with names, and a row per target
-  (`{name, level, met?}`): grade and level (rounded to 1 decimal,
-  APCA prefixed by `APCA`), followed by "met" or "not met"; then
-  one strip per simulation with its own rows. A pair whose
-  targets are all `difference` (`isDifference`) is not text on a
-  background: its card is in the page's colors, with the two
-  colors as swatches side by side, under its names and in each
-  strip, so that close colors stay readable.
-- With variants, a card whose pair is not met in another variant
-  than the selected one has a line "Not met in Dark" under its
-  levels (`failingIn`, from `failingElsewhere`), in the app's
-  colors (`--fg` on `--bg`, not the pair's), so the pair can be
-  found without switching.
+  rule statuses and the count; the table does not show simulated
+  levels yet. There is no other filter, no grid and no list of
+  every pair (ADR 17, 18; the CLI keeps `combine`, §9.1).
+- Each rule, and each use under One-off pairs, is a `<table>`
+  (scrolling sideways within its rule): a row per pair, a column
+  per variant of `allChecks` (one column with a visually hidden
+  header "Colors" without variants). The row header
+  (`<th scope="row">`) has the names ("Grey & White") and the
+  pair's actions, in the panel's colors. A cell is the pair in
+  that variant's colors (`allChecks`, empty if a color is hidden
+  there): a row per target (`{name, level, met?}`): grade and
+  level (rounded to 1 decimal, APCA prefixed by `APCA`), followed
+  by "met" or "✗ not met". A pair whose targets are all
+  `difference` is not text on a background: its cell is in the
+  page's colors, with the two colors as swatches side by side.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
@@ -964,7 +963,7 @@ empty or taken), "used by Text on Surfaces" below it for the
 rules where it is only the second role, and **Delete role Role**
 (also deletes its rules; the tooltip counts them). Actions follow
 their label rather than the panel's right edge, which is left to
-the cards. Under the role:
+the tables. Under the role:
 
 - **Colors**, one line: the member colors as chips (swatch, name
   and **Remove X from Role**; hidden members dimmed, without
@@ -983,15 +982,14 @@ the cards. Under the role:
   the rule's pairs fails, in any variant and in the worst case of
   the selected simulations; else "not met", or "not met in Dark"
   naming the failing variants) and **Remove rule** (`×`); its
-  children are the rule's cards, given as the `pairs` snippet
-  (one combination card per pair, `ruleChecks`, nothing is
-  measured again, in the real colors, each target with its grade,
-  level and "met" or "not met", and one strip per selected
-  simulation in simulated colors with its levels; its Preview
-  button toggles `previewedUid` to `<bgId>-<fgId>`; **Override**
-  on a card whose pair is not one-off declares it one-off with
-  the targets the rules give, to edit it alone; a one-off pair's
-  card has a number field per target (**WCAG 2**, **APCA**,
+  children are the rule's table, given as the `pairs` snippet
+  (`ruleChecks` for the rows, nothing is measured again); the
+  Preview button of a cell, named "Preview Grey on White in
+  Dark", toggles `previewedUid` to `<bgId>-<fgId>` (the selected
+  variant's colors for now); **Override** in the row header of a
+  pair that is not one-off declares it one-off with the targets
+  the rules give, to edit it alone; a one-off pair's row header
+  has a number field per target (**WCAG 2**, **APCA**,
   **Difference**, empty for none), applied on change, clearing
   them all removing the pair, and **Remove pair**; buttons and
   fields name their pair, as "Override Grey on White").
@@ -1005,7 +1003,7 @@ the chosen one) and **For** (the use), then **Add pair**, which
 calls `addPair` (one color on both sides gives an alert and
 nothing is declared). Under it, the declared pairs that replace
 or add to rules, by use (`requirements`, Custom last, a pair
-under each use it holds), with their cards. Pairs with a hidden
+under each use it holds), each use a table. Pairs with a hidden
 color follow as **Not checked, a color is hidden**. With nothing
 declared, a hint says to add a rule or declare a pair.
 

@@ -47,28 +47,20 @@ beforeAll(() => {
 const text = (html: string) =>
 	html.replace(/<!--.*?-->|<[^>]*>/g, '').replace(/\s+/g, ' ');
 
-test('shows each rule with its cards', () => {
+test('shows each rule with its pairs as a table', () => {
 	const html = text(render(Result).body);
 
 	expect(html).not.toContain('Pack my box');
 	expect(html).toContain(
-		'Black &amp; White AAA (21) met APCA 5 (106) met'
+		'Black &amp; White Override AAA (21) metAPCA 5 (106) met'
 	);
-	expect(html).toContain('Grey &amp; White KO (1.2) not met');
+	expect(html).toContain(
+		'Grey &amp; White Override KO (1.2) ✗ not met'
+	);
 	expect(html).toMatch(
-		/(Red|Blue) &amp; (Blue|Red) Difference \([\d.]+\) met/
+		/(Red|Blue) &amp; (Blue|Red) Override Difference \([\d.]+\) met/
 	);
-});
-
-test('shows the simulations in the cards, once', () => {
-	combinations.blindnessTypes = ['protanomaly'];
-	const html = render(Result).body;
-	const plain = text(html);
-
-	combinations.blindnessTypes = [];
-	expect(plain).toContain('protanomaly');
-	expect(plain).not.toContain('Without simulation');
-	expect(plain.split('Black &amp; White').length).toBe(2);
+	expect(render(Result).body).toContain('<table');
 });
 
 test('previews a pair, declared or not', () => {
@@ -95,18 +87,16 @@ test('shows a row per role, with its rules and colors', () => {
 	expect(html).toContain('+ Role');
 });
 
-test('draws a difference card as two swatches, not text on a background', () => {
+test('draws a difference cell as two swatches, not text on a background', () => {
 	const html = render(Result).body;
 
 	// Red & Blue, the Series among themselves; Text on Surfaces keeps
 	// its colors.
-	expect(html.match(/combination--difference/g)).toHaveLength(
-		1
-	);
+	expect(html.match(/cell--difference/g)).toHaveLength(1);
 	expect(html.match(/class="swatches\b/g)).toHaveLength(1);
 });
 
-test('offers Override on a rule card, Remove pair on a one-off', () => {
+test('offers Override on a rule pair, Remove pair on a one-off', () => {
 	expect(render(Result).body).toContain('Override');
 	expect(render(Result).body).not.toContain('Remove pair');
 });
@@ -158,7 +148,7 @@ test('lists one-off pairs by use', () => {
 	palette.setPair(id('Red'), root, {});
 });
 
-test('a one-off card edits its targets, buttons name their pair', () => {
+test('a one-off pair edits its targets, buttons name their pair', () => {
 	const red = id('Red');
 	const root = palette.root!.id;
 
