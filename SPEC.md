@@ -895,6 +895,22 @@ colors, top to bottom) and name, then actions:
   takes the `color` for one the palette doesn't list, a hidden
   preset's) and its name; dimmed on a hidden preset. Hidden
   template colors have no line.
+- **Roles on a color** (`ColorRoles.svelte`, ADR 23), for a node
+  (not a preset's own row) and for each line of a preset's list,
+  taking the color's id and name: its roles' names after the
+  label or the name ("custom color · Text, Borders"), then a
+  **Roles of Ink** button (`RolesIcon`; the only action of a
+  line) opening a popover (the native `popover`, id `<color
+  id>-roles`, valid for ids with dots) that is a `fieldset` named
+  by its `legend` "Roles of Ink", with a checkbox per role
+  (`palette.roles` order), checked when the role holds the id and
+  controlled by the store: a click is `addMember` or
+  `removeMember`, one undo, and an undo unchecks it. Without
+  roles it says to add one in Targets. A color that has a role
+  and whose name is in `unsavedMembers` also shows a warning icon
+  with a text (visually hidden, and tooltip) saying its roles
+  won't be saved until one of the colors with that name is
+  renamed.
 - A root without children shows a "Start by adding matching
   colors" call to action.
 - With variants (§5.4), the **Palette** header holds the variant
@@ -1166,8 +1182,9 @@ server-side render of the Pairs panel. Unit tests of
 `exportTokens` cover nesting, empty parts, `$` parts, conflicts
 and duplicates (with no color dropped, whatever the tree order);
 `names.test.ts` renders the tokens export and its conflict
-notice. `palette/Node.test.ts` renders a preset's list of colors
-(ADR 23). Export components are rendered server-side; there are no
+notice. `palette/Node.test.ts` renders a preset's list of colors,
+the roles on a node and on a generated color (label, checkboxes,
+popover ids) and the warning of a shared name (ADR 23). Export components are rendered server-side; there are no
 browser or end-to-end tests. A core test asserts that `evaluate`
 matches `collectOutputs` for every preset, and store tests cover
 preset outputs, children and expanding. CLI tests cover tree

@@ -2,6 +2,7 @@
 	import {formatSchemist} from '#lib/color/formatting.js';
 	import Modal from '#lib/components/Modal.svelte';
 	import ChildPicker from '#lib/components/palette/ChildPicker.svelte';
+	import ColorRoles from '#lib/components/palette/ColorRoles.svelte';
 	import NodeActions from '#lib/components/palette/NodeActions.svelte';
 	import NodeOptions from '#lib/components/palette/NodeOptions.svelte';
 	import {isPresetDef} from '#lib/core/nodes.js';
@@ -114,24 +115,29 @@
 					</p>
 				{/if}
 
-				<p class="label">
-					{#if node.isOverridden()}
-						<span
-							class="mark"
-							role="img"
-							aria-label="Overridden in this variant"
-							title="Overridden in this variant"
-						>
-							●
-						</span>
+				<div class="line">
+					<p class="label">
+						{#if node.isOverridden()}
+							<span
+								class="mark"
+								role="img"
+								aria-label="Overridden in this variant"
+								title="Overridden in this variant"
+							>
+								●
+							</span>
+						{/if}
+						{def.label}
+						{#if def?.argsLabel}
+							<span class="args">
+								{def.argsLabel(node.activeArgs)}
+							</span>
+						{/if}
+					</p>
+					{#if !isPreset}
+						<ColorRoles {id} name={node.output.name} />
 					{/if}
-					{def.label}
-					{#if def?.argsLabel}
-						<span class="args">
-							{def.argsLabel(node.activeArgs)}
-						</span>
-					{/if}
-				</p>
+				</div>
 			</div>
 
 			<NodeActions
@@ -172,6 +178,7 @@
 						<li>
 							<Swatch id={colorId} {color} />
 							{name}
+							<ColorRoles id={colorId} {name} />
 						</li>
 					{/each}
 				</ul>
@@ -245,6 +252,19 @@
 	.colors summary {
 		cursor: pointer;
 		font-size: 0.9rem;
+	}
+
+	.line {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0 0.5ch;
+	}
+
+	.colors li {
+		display: flex;
+		align-items: center;
+		gap: 0.5ch;
 	}
 
 	.colors ul {
