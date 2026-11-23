@@ -133,13 +133,15 @@
 {/snippet}
 
 {#snippet status(pass: boolean)}
-	{#if pass}
-		<CheckIcon />
-		<span class="hidden">met</span>
-	{:else}
-		<WarningIcon />
-		<span class="hidden">not met</span>
-	{/if}
+	<span class="status">
+		{#if pass}
+			<CheckIcon />
+			<span class="hidden">met</span>
+		{:else}
+			<WarningIcon />
+			<span class="hidden">not met</span>
+		{/if}
+	</span>
 {/snippet}
 
 {#snippet group(
@@ -468,6 +470,13 @@
 </section>
 
 <style>
+	/* As tall as the text it follows */
+	.status :global(svg) {
+		width: 1em;
+		height: 1em;
+		vertical-align: -0.125em;
+	}
+
 	.roles {
 		display: flex;
 		flex-direction: column;
@@ -483,7 +492,6 @@
 		font: inherit;
 		color: inherit;
 	}
-
 
 	.picker {
 		max-height: 10rem;
