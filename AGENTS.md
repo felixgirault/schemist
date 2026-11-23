@@ -19,6 +19,12 @@
   (the base first) and per-node `overrides` of args, not a tree
   per theme; `eval` checks every variant (README.md,
   "Command-line interface").
+- For a light and a dark version (or any other variants), write
+  one tree with the root's `variants` (the base first) and the
+  `overrides` each node changes, not a tree per theme. `eval`
+  checks every variant (a `variant` on each pair), and `export`
+  gives CSS with a block per variant, and tokens or Sass with
+  `--variant <name>`.
 - SPEC.md is the reference for the codebase.
 - Compatibility: permalinks already published (`?preset=` v1,
   also embedded in exports) must keep opening. A format change

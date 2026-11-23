@@ -121,8 +121,32 @@ is shared, and the params that change a preset's structure
 (`structural` in `types`) can't be overridden. `eval` checks
 every variant: each color, combination and pair result has a
 `variant`, and a pair passes only if it passes in all of them.
-`export --variant Dark` exports one variant, the base without the
-flag.
+`export --variant Dark` exports one variant of tokens or Sass,
+the base without the flag; CSS has a block for each, `:root` for
+the base and `[data-theme="dark"]` for the others.
+
+```json
+{
+	"type": "clr",
+	"token": "Page",
+	"args": {"color": "#ffffff"},
+	"variants": ["Light", "Dark"],
+	"overrides": {"Dark": {"color": "#101418"}},
+	"children": [
+		{
+			"type": "l",
+			"token": "Text",
+			"args": {"amount": 15},
+			"overrides": {"Dark": {"amount": 90}}
+		}
+	],
+	"roles": [
+		{"name": "Surfaces", "colors": ["Page"]},
+		{"name": "Text", "colors": ["Text"]}
+	],
+	"rules": [{"fg": "Text", "bg": "Surfaces", "use": "body"}]
+}
+```
 
 Rather than pairs one by one, declare the intent. A root's
 `roles` are named lists of colors (`{name, colors}`), and its
