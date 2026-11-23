@@ -29,7 +29,7 @@ Targets      on Surfaces            on Text     on Borders
 Checks
                Light          Dark
   Text on Surfaces · Body text ⚠
-  Ink & Page   AAA 15.8 ✓     AA 5.1 ✗
+  Ink on Page  AAA 15.8 ✓     AA 5.1 ✗
   …
   One-off pairs · Custom
   …

@@ -84,6 +84,7 @@
 						{
 							id: `${row.id}-${col.id}`,
 							title: `${combinations.describeRule(rules[0]).label} · ${labelOf(rules)}`,
+							joint: row.id === col.id ? '&' : 'on',
 							rules,
 							checks: [
 								...new Map(
@@ -105,6 +106,7 @@
 				({id, name, checks}): CheckGroup => ({
 					id,
 					title: `One-off pairs · ${name}`,
+					joint: '&',
 					rules: [],
 					checks
 				})

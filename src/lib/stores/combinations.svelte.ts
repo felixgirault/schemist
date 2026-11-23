@@ -24,6 +24,8 @@ export type PairCheck = {
 export type CheckGroup = {
 	id: string;
 	title: string;
+	// between the names of a pair, as in the title
+	joint: 'on' | '&';
 	rules: AppRule[];
 	checks: PairCheck[];
 };
@@ -180,7 +182,7 @@ class Combinations {
 
 		return {
 			label:
-				rule.bg === undefined
+				rule.bg === undefined || rule.bg === rule.fg
 					? `${name(rule.fg)} among themselves`
 					: `${name(rule.fg)} on ${name(rule.bg)}`
 		};

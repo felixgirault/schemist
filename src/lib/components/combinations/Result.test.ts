@@ -55,14 +55,14 @@ test('shows every rule in one table, its pairs under its title', () => {
 	expect(body.match(/<table/g)).toHaveLength(2);
 	expect(body.match(/scope="rowgroup"/g)).toHaveLength(2);
 	expect(html).toMatch(
-		/Text on Surfaces · Body text not met ?Black &amp; White.*Series among themselves · Categories met ?(Red|Blue) &amp; /
+		/Text on Surfaces · Body text not met ?Black on White.*Series among themselves · Categories met ?(Red|Blue) &amp; /
 	);
 
 	expect(html).not.toContain('Pack my box');
 	expect(html).toContain(
-		'Black &amp; White AAA 21 ✓ met· Lc 106 ✓ met'
+		'Black on White AAA 21 ✓ met· Lc 106 ✓ met'
 	);
-	expect(html).toContain('Grey &amp; White KO 1.2 ✗ not met');
+	expect(html).toContain('Grey on White KO 1.2 ✗ not met');
 	expect(html).toMatch(
 		/(Red|Blue) &amp; (Blue|Red) Difference [\d.]+ ✓ met/
 	);
@@ -254,7 +254,7 @@ test('a cell with several rules offers them as one extra option', () => {
 	expect(plain).toContain(
 		'Text on Series · Body text + Large text and UI'
 	);
-	expect(plain.match(/Black &amp; Red/g)).toHaveLength(1);
+	expect(plain.match(/Black on Red/g)).toHaveLength(1);
 	expect(plain.match(/Text on Series/g)).toHaveLength(1);
 
 	palette.setRule(role.id, series.id);

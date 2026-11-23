@@ -168,7 +168,7 @@
 						{/each}
 					</tr>
 				</thead>
-				{#each groups as { id, title, rules, checks } (id)}
+				{#each groups as { id, title, joint, rules, checks } (id)}
 					<tbody>
 						<tr>
 							<th
@@ -186,7 +186,9 @@
 							{@const names = `${check.fg.name} on ${check.bg.name}`}
 							<tr>
 								<th scope="row">
-									{check.fg.name} & {check.bg.name}
+									{check.fg.name}
+									{joint}
+									{check.bg.name}
 									{#if check.pair.sources.oneOff}
 										<div class="targets">
 											{#each targetNames as name (name)}

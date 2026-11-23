@@ -76,7 +76,9 @@ test('draws a table with a column per variant', () => {
 	expect(html).toMatch(
 		/<th scope="col"[^>]*>(<!--.*?-->)?Dark/
 	);
-	expect(html).toMatch(/<th scope="row"[^>]*>Grey &amp; White/);
+	expect(html).toMatch(
+		/<th scope="row"[^>]*>Grey\s+on\s+White/
+	);
 	expect(html).toContain('aria-label="Override Grey on White"');
 	// One cell per variant, the failing one marked by its text
 	expect(html.match(/<td class="cell/g)).toHaveLength(2);

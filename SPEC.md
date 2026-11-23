@@ -985,20 +985,22 @@ under the section's `h2`, larger and with space above.
   then each use of the one-off pairs, is a `<tbody>` with a title
   spanning the row (`<th scope="rowgroup">`), then a row per
   pair. The row header (`<th scope="row">`) has the names ("Grey
-  & White") and the pair's actions, in the panel's colors, on one
-  line. A cell is one line in that variant's colors (`allChecks`,
-  looked up by pair id): per target (`{name, level, met?}`), the
-  grade in bold and the level (rounded to 1 decimal; APCA as
-  **Lc** and an integer rounded down, so that it never reads as
-  the goal when unmet, with no grade), then ✓ or ✗ with "met" or
-  "not met" as hidden text, targets separated by "·". A pair
-  whose targets are all `difference` is not text on a background:
-  its cell is in the page's colors, with the two colors as a
-  small swatch pair before its level. The table uses the panel's
-  font, not the export table's, and scrolls sideways when wider
-  than the panel, the row headers and the group titles staying at
-  the left (sticky, on the page's background). The scroll
-  container has no `tabindex`: it holds focusable buttons.
+  on White" under an "X on Y" title, "Red & Blue" under "among
+  themselves" and for one-off pairs) and the pair's actions, in
+  the panel's colors, on one line. A cell is one line in that
+  variant's colors (`allChecks`, looked up by pair id): per
+  target (`{name, level, met?}`), the grade in bold and the level
+  (rounded to 1 decimal; APCA as **Lc** and an integer rounded
+  down, so that it never reads as the goal when unmet, with no
+  grade), then ✓ or ✗ with "met" or "not met" as hidden text,
+  targets separated by "·". A pair whose targets are all
+  `difference` is not text on a background: its cell is in the
+  page's colors, with the two colors as a small swatch pair
+  before its level. The table uses the panel's font, not the
+  export table's, and scrolls sideways when wider than the panel,
+  the row headers and the group titles staying at the left
+  (sticky, on the page's background). The scroll container has no
+  `tabindex`: it holds focusable buttons.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
