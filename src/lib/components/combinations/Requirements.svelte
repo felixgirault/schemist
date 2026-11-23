@@ -142,6 +142,39 @@
 	{/if}
 {/snippet}
 
+{#snippet group(
+	title: string,
+	addLabel: string,
+	isOpen: boolean,
+	onAdd: () => void,
+	children: Snippet
+)}
+	<article class="tree-node">
+		<div class="self">
+			<header>
+				<div class="title">
+					<h4 class="name">{title}</h4>
+				</div>
+				<div class="button-list">
+					<button
+						class="button button--icon"
+						type="button"
+						aria-label={addLabel}
+						aria-expanded={isOpen}
+						title={addLabel}
+						onclick={onAdd}
+					>
+						<AddIcon />
+					</button>
+				</div>
+			</header>
+		</div>
+		<div class="children">
+			{@render children()}
+		</div>
+	</article>
+{/snippet}
+
 {#snippet roleRow(role: AppRole)}
 	{@const rules = rulesOf(role)}
 	{@const others = usedOn(role)}
@@ -160,81 +193,20 @@
 								handleRename(role, event)}
 						/>
 					</div>
-
-					<p class="label meta">
-						{#each rules as rule (rule.id)}
-							{@const {use: useName} =
-								combinations.describeRule(rule)}
-							{@const to = palette.roles.find(
-								({id}) => id === rule.bg
-							)}
-							<span
-								class="rule"
-								role="group"
-								aria-label="Rule {role.name} {to
-									? `on ${to.name}`
-									: 'among themselves'}"
-								onpointerenter={() =>
-									(combinations.ruleId = rule.id)}
-								onpointerleave={() =>
-									(combinations.ruleId = null)}
-								onfocusin={() =>
-									(combinations.ruleId = rule.id)}
-								onfocusout={() =>
-									(combinations.ruleId = null)}
-							>
-								{to
-									? `on ${to.name}`
-									: 'among themselves'} · {useName}
-								{@render status(!failing(rule))}
-								<button
-									class="button button--small"
-									aria-label="Remove rule {role.name} {to
-										? `on ${to.name}`
-										: 'among themselves'}, {useName}"
-									onclick={() =>
-										palette.removeRule(rule.id)}
-								>
-									×
-								</button>
-							</span>
-						{/each}
-						{#if others.length}
-							<span>
-								used by {others
-									.map(
-										(rule) =>
-											combinations.describeRule(rule)
-												.label
-									)
-									.join(', ')}
-							</span>
-						{/if}
-						<button
-							class="button button--small"
-							aria-expanded={ruling === role.id}
-							onclick={() => toggleRuling(role)}
-						>
-							+ rule
-						</button>
-					</p>
+					{#if others.length}
+						<p class="label">
+							used by {others
+								.map(
+									(rule) =>
+										combinations.describeRule(rule)
+											.label
+								)
+								.join(', ')}
+						</p>
+					{/if}
 				</div>
 
 				<div class="button-list">
-					<button
-						class="button button--icon"
-						type="button"
-						aria-label="Add a color to {role.name}"
-						aria-expanded={picking === role.id}
-						title="Add a color to this role"
-						onclick={() => {
-							picking =
-								picking === role.id ? null : role.id;
-							query = '';
-						}}
-					>
-						<AddIcon />
-					</button>
 					<button
 						class="button button--icon"
 						type="button"
@@ -248,125 +220,189 @@
 					</button>
 				</div>
 			</header>
-
-			{#if ruling === role.id}
-				<form
-					onsubmit={(event) => handleAddRule(role, event)}
-				>
-					<label>
-						{role.name} on
-						<select bind:value={on}>
-							{#each palette.roles.filter(({id}) => id !== role.id) as { id, name } (id)}
-								<option value={id}>{name}</option>
-							{/each}
-							<option value="self">
-								Among themselves
-							</option>
-							<option value="new">New role…</option>
-						</select>
-					</label>
-					{#if on === 'new'}
-						<label>
-							New role name
-							<input bind:value={newOn} />
-						</label>
-					{/if}
-					<label>
-						For
-						<select bind:value={use}>
-							{#each uses as { id, name } (id)}
-								<option value={id}>{name}</option>
-							{/each}
-						</select>
-					</label>
-					{#if error}
-						<p role="alert">{error}</p>
-					{/if}
-					<button class="button" type="submit">
-						Add rule
-					</button>
-				</form>
-			{/if}
-
-			{#if picking === role.id}
-				<div
-					role="group"
-					aria-label="Colors to add to {role.name}"
-				>
-					<input
-						type="search"
-						aria-label="Search colors"
-						onkeydown={(event) => {
-							if (event.key === 'Escape') picking = null;
-						}}
-						placeholder="Search"
-						bind:value={query}
-					/>
-					<ul class="picker">
-						{#each candidates(role) as { id, name } (id)}
-							<li>
-								<button
-									class="button"
-									onclick={() =>
-										palette.addMember(role.id, id)}
-								>
-									{@render swatch(id)}
-									{name}
-								</button>
-							</li>
-						{:else}
-							<li class="hint">No other color.</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
 		</div>
 
 		<div class="children">
-			{#each role.colors as id (id)}
-				<article
-					class="tree-node"
-					class:isHidden={!byId.has(id)}
-				>
-					<div class="output" style={outputOf(id)}></div>
-					<div class="self">
-						<header>
-							<div class="title">
-								<h4 class="name">{names.get(id)}</h4>
-							</div>
-							<div class="button-list">
-								<button
-									class="button button--icon"
-									type="button"
-									aria-label="Remove {names.get(
-										id
-									)} from {role.name}"
-									title="Remove this color from the role"
-									onclick={() =>
-										palette.removeMember(role.id, id)}
-								>
-									<CloseIcon />
-								</button>
-							</div>
-						</header>
+			{#snippet ruleList()}
+				{#if ruling === role.id}
+					<form
+						onsubmit={(event) =>
+							handleAddRule(role, event)}
+					>
+						<label>
+							{role.name} on
+							<select bind:value={on}>
+								{#each palette.roles.filter(({id}) => id !== role.id) as { id, name } (id)}
+									<option value={id}>{name}</option>
+								{/each}
+								<option value="self">
+									Among themselves
+								</option>
+								<option value="new">New role…</option>
+							</select>
+						</label>
+						{#if on === 'new'}
+							<label>
+								New role name
+								<input bind:value={newOn} />
+							</label>
+						{/if}
+						<label>
+							For
+							<select bind:value={use}>
+								{#each uses as { id, name } (id)}
+									<option value={id}>{name}</option>
+								{/each}
+							</select>
+						</label>
+						{#if error}
+							<p role="alert">{error}</p>
+						{/if}
+						<button class="button" type="submit">
+							Add rule
+						</button>
+					</form>
+				{/if}
+				{#each rules as rule (rule.id)}
+					{@const {use: useName} =
+						combinations.describeRule(rule)}
+					{@const to = palette.roles.find(
+						({id}) => id === rule.bg
+					)}
+					{@const where = to
+						? `on ${to.name}`
+						: 'among themselves'}
+					{@const checks =
+						combinations.ruleChecks.get(rule.id) ?? []}
+					<article
+						class="tree-node rule"
+						onpointerenter={() =>
+							(combinations.ruleId = rule.id)}
+						onpointerleave={() =>
+							(combinations.ruleId = null)}
+						onfocusin={() =>
+							(combinations.ruleId = rule.id)}
+						onfocusout={() => (combinations.ruleId = null)}
+					>
+						<div class="self">
+							<header>
+								<div class="title">
+									<h5 class="name">
+										{where} · {useName}
+										{@render status(!failing(rule))}
+									</h5>
+								</div>
+								<div class="button-list">
+									<button
+										class="button button--icon"
+										type="button"
+										aria-label="Remove rule {role.name} {where}, {useName}"
+										title="Remove this rule"
+										onclick={() =>
+											palette.removeRule(rule.id)}
+									>
+										<CloseIcon />
+									</button>
+								</div>
+							</header>
+						</div>
+						<div class="children">
+							{#if !checks.length}
+								<p class="hint">
+									No pair yet: add colors.
+								</p>
+							{/if}
+							{@render pairs(checks)}
+						</div>
+					</article>
+				{/each}
+			{/snippet}
+
+			{#snippet colorList()}
+				{#if picking === role.id}
+					<div
+						role="group"
+						aria-label="Colors to add to {role.name}"
+					>
+						<input
+							type="search"
+							aria-label="Search colors"
+							onkeydown={(event) => {
+								if (event.key === 'Escape')
+									picking = null;
+							}}
+							placeholder="Search"
+							bind:value={query}
+						/>
+						<ul class="picker">
+							{#each candidates(role) as { id, name } (id)}
+								<li>
+									<button
+										class="button"
+										onclick={() =>
+											palette.addMember(role.id, id)}
+									>
+										{@render swatch(id)}
+										{name}
+									</button>
+								</li>
+							{:else}
+								<li class="hint">No other color.</li>
+							{/each}
+						</ul>
 					</div>
-				</article>
-			{/each}
-			{#each rules as rule (rule.id)}
-				{@const checks =
-					combinations.ruleChecks.get(rule.id) ?? []}
-				{#if rules.length > 1}
-					<h4 class="h3">
-						{combinations.describeRule(rule).label}, {combinations.describeRule(
-							rule
-						).use}
-					</h4>
 				{/if}
-				{#if !checks.length}
-					<p class="hint">No pair yet: add colors.</p>
-				{/if}
-				{@render pairs(checks)}
-			{/each}
+				{#each role.colors as id (id)}
+					<article
+						class="tree-node"
+						class:isHidden={!byId.has(id)}
+					>
+						<div class="output" style={outputOf(id)}></div>
+						<div class="self">
+							<header>
+								<div class="title">
+									<h5 class="name">{names.get(id)}</h5>
+								</div>
+								<div class="button-list">
+									<button
+										class="button button--icon"
+										type="button"
+										aria-label="Remove {names.get(
+											id
+										)} from {role.name}"
+										title="Remove this color from the role"
+										onclick={() =>
+											palette.removeMember(
+												role.id,
+												id
+											)}
+									>
+										<CloseIcon />
+									</button>
+								</div>
+							</header>
+						</div>
+					</article>
+				{/each}
+			{/snippet}
+
+			{@render group(
+				'Rules',
+				`Add a rule to ${role.name}`,
+				ruling === role.id,
+				() => toggleRuling(role),
+				ruleList
+			)}
+			{@render group(
+				'Colors',
+				`Add a color to ${role.name}`,
+				picking === role.id,
+				() => {
+					picking = picking === role.id ? null : role.id;
+					query = '';
+				},
+				colorList
+			)}
 		</div>
 	</article>
 {/snippet}
@@ -448,12 +484,6 @@
 		color: inherit;
 	}
 
-	.meta {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0 1ch;
-	}
 
 	.picker {
 		max-height: 10rem;
