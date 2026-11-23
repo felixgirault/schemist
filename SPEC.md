@@ -993,21 +993,21 @@ are three flat sections (ADR 22), then **One-off pairs**.
   it scrolls sideways. Each cell is a `<select>` labelled by its
   couple ("Text on Surfaces", "Text among themselves"): "—" or a
   use, styled as the app's other fields (global `select`, with a
-  focus ring) and 7.5rem wide, so that four roles fit a wide
-  panel; an empty one is faded (`color-mix`, at least 4.5:1)
-  until hovered or focused. The status icon stays on its line. A
-  cell is a view of the rules of its couple (on the diagonal,
-  `bg` missing or the same as `fg`; `cellRules`); picking
-  replaces them with one rule of the use, "—" removes them
-  (`setRule`, one undo). A cell that holds several rules, or a
-  rule with targets of its own, has one more option naming them
-  ("Body text + Custom"), selected until another is picked;
-  picking it changes nothing. Beside a cell with checked pairs,
-  an icon with a text alternative and tooltip (`ruleStatus`: met
-  when none of its rules' pairs fails, in any variant and in the
-  worst case of the selected simulations; else "not met", or "not
-  met in Dark" naming the failing variants); none otherwise (ADR
-  21).
+  focus ring), as wide as its use (9.5rem at most) and narrower
+  when empty, so that four roles fit a wide panel; an empty one
+  is faded (`color-mix`, at least 4.5:1) until hovered or
+  focused. The status icon stays on its line. A cell is a view of
+  the rules of its couple (on the diagonal, `bg` missing or the
+  same as `fg`; `cellRules`); picking replaces them with one rule
+  of the use, "—" removes them (`setRule`, one undo). A cell that
+  holds several rules, or a rule with targets of its own, has one
+  more option naming them ("Body text + Custom"), selected until
+  another is picked; picking it changes nothing. Beside a cell
+  with checked pairs, an icon with a text alternative and tooltip
+  (`ruleStatus`: met when none of its rules' pairs fails, in any
+  variant and in the worst case of the selected simulations; else
+  "not met", or "not met in Dark" naming the failing variants);
+  none otherwise (ADR 21).
 - **Checks**: the table, given as the `pairs` snippet: each cell
   of the grid, in its order (rows, then columns), that has
   checked pairs, one group for all its rules, titled as the

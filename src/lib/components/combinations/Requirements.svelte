@@ -522,9 +522,15 @@
 		background: var(--bg);
 	}
 
+	/* Wide enough for any use, not for several */
 	.targets select {
-		width: 7.5rem;
+		max-width: 9.5rem;
 		font-size: 0.85rem;
+	}
+
+	.targets select.empty {
+		width: 100%;
+		min-width: 4.5rem;
 	}
 
 	/* Faded, not hidden: still 4.5:1 against the field */

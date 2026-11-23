@@ -76,12 +76,12 @@ One-off pairs
   "New role…", "Remove rule", "used by …".
 
 Amended after the first build, the polish: selects are styled as
-the other fields and narrow (7.5rem), a status icon never wraps
-below, and empty cells are faded by color (not `opacity`, which
-would lower the contrast) to at least 4.5:1, in full on hover and
-focus. Row names and group titles are sticky, on the theme's
-background. Delete role is right-aligned at the end of the line,
-the section headings are `h3` and larger. `addRule` and
+the other fields and narrow (9.5rem at most), a status icon never
+wraps below, and empty cells are faded by color (not `opacity`,
+which would lower the contrast) to at least 4.5:1, in full on
+hover and focus. Row names and group titles are sticky, on the
+theme's background. Delete role is right-aligned at the end of
+the line, the section headings are `h3` and larger. `addRule` and
 `removeRule`, used only by tests, are gone.
 
 Nothing saved changes, nor does the CLI.
