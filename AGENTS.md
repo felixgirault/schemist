@@ -20,6 +20,7 @@
   also embedded in exports) must keep opening. A format change
   adds a new version and keeps reading the old ones; no other
   migration code is needed unless asked.
-- Don't deploy until the declared pairs, roles and rules land on
-  `main` (ADR 5, ADR 16): permalink version 2 is defined by the
-  port of `feature-v2`, the pairs, and the roles and rules.
+- Don't deploy until the declared pairs, roles and rules, and
+  the variants (light, dark, …) land on `main` (ADR 5, ADR 16):
+  permalink version 2 is defined by the port of `feature-v2`, the
+  pairs, the roles and rules, and the variants.
