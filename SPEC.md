@@ -986,10 +986,11 @@ under the section's `h2`, larger and with space above.
   spanning the row (`<th scope="rowgroup">`), then a row per
   pair. The row header (`<th scope="row">`) has the names ("Grey
   on White" under an "X on Y" title, "Red & Blue" under "among
-  themselves" and for one-off pairs) and the pair's actions, in
-  the panel's colors, on one line. A cell is one line in that
-  variant's colors (`allChecks`, looked up by pair id): per
-  target (`{name, level, met?}`), the grade in bold and the level
+  themselves"; a one-off pair reads "on", or "&" with a
+  difference target only) and the pair's actions, in the panel's
+  colors, on one line. A cell is one line in that variant's
+  colors (`allChecks`, looked up by pair id): per target
+  (`{name, level, met?}`), the grade in bold and the level
   (rounded to 1 decimal; APCA as **Lc** and an integer rounded
   down, so that it never reads as the goal when unmet, with no
   grade), then ✓ or ✗ with "met" or "not met" as hidden text,

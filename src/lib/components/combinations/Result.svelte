@@ -52,6 +52,11 @@
 			};
 		});
 
+	// A difference has no foreground nor background.
+	const isDifferenceOnly = ({checks}: PairCheck) =>
+		checks.length > 0 &&
+		checks.every(({target}) => target === 'difference');
+
 	// Declares the pair with the targets its rules give it, to edit
 	// them on this pair alone.
 	const handleOverride = ({fg, bg, pair}: PairCheck) => {
@@ -97,9 +102,7 @@
 </script>
 
 {#snippet cell(check: PairCheck, name: string)}
-	{@const isDifference =
-		check.checks.length > 0 &&
-		check.checks.every(({target}) => target === 'difference')}
+	{@const isDifference = isDifferenceOnly(check)}
 	<td
 		class="cell"
 		style={isDifference
@@ -187,7 +190,10 @@
 							<tr>
 								<th scope="row">
 									{check.fg.name}
-									{joint}
+									{joint ??
+										(isDifferenceOnly(check)
+											? '&'
+											: 'on')}
 									{check.bg.name}
 									{#if check.pair.sources.oneOff}
 										<div class="targets">

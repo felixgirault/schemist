@@ -209,11 +209,9 @@ test('lists one-off pairs by use', () => {
 	const html = text(render(Result).body);
 
 	expect(html).toContain(
-		'One-off pairs · Body text Grey &amp; White'
+		'One-off pairs · Body text Grey on White'
 	);
-	expect(html).toContain(
-		'One-off pairs · Custom Red &amp; White'
-	);
+	expect(html).toContain('One-off pairs · Custom Red on White');
 	expect(combinations.requirements.map((r) => r.id)).toEqual([
 		'body',
 		'custom'
@@ -221,6 +219,18 @@ test('lists one-off pairs by use', () => {
 
 	palette.setPair(grey, root, {});
 	palette.setPair(id('Red'), root, {});
+});
+
+test('a one-off pair of a difference only has no order', () => {
+	const grey = id('Grey');
+	const root = palette.root!.id;
+
+	palette.setPair(grey, root, {difference: 10});
+	expect(text(render(Result).body)).toContain(
+		'One-off pairs · Categories Grey &amp; White'
+	);
+
+	palette.setPair(grey, root, {});
 });
 
 test('a one-off pair edits its targets, buttons name their pair', () => {

@@ -24,8 +24,9 @@ export type PairCheck = {
 export type CheckGroup = {
 	id: string;
 	title: string;
-	// between the names of a pair, as in the title
-	joint: 'on' | '&';
+	// between the names of a pair, as in the title; one-off pairs have
+	// their own
+	joint?: 'on' | '&';
 	rules: AppRule[];
 	checks: PairCheck[];
 };

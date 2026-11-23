@@ -115,7 +115,6 @@
 				({id, name, checks}): CheckGroup => ({
 					id,
 					title: `One-off pairs · ${name}`,
-					joint: '&',
 					rules: [],
 					checks
 				})
