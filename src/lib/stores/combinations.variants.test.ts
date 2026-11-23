@@ -63,6 +63,21 @@ test('shows it in the rule, with the cards of Light', () => {
 	expect(html).toContain('not met in Dark');
 });
 
+test('counts a variant without colors yet from the next settle on', () => {
+	const variants = palette.variants;
+
+	// As undo restores one: no settle in between.
+	palette.variants = [
+		...variants,
+		{id: 'vLater', name: 'Later'}
+	];
+	expect(combinations.checkedPairs).toBe(2);
+	palette.settle();
+	expect(combinations.checkedPairs).toBe(3);
+	palette.variants = variants;
+	palette.settle();
+});
+
 test('reads as before without variants', () => {
 	palette.variants = [];
 	palette.settle();

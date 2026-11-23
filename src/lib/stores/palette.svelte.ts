@@ -130,17 +130,19 @@ class Palette {
 		{}
 	);
 
-	// Takes the current outputs and variants as the settled ones.
+	// Takes the current outputs and variants as the settled ones. The
+	// selected variant's colors are the outputs, so it is skipped.
 	settle() {
 		const tree = this.#variantTree;
 
 		this.settledOutputs = this.outputs;
 		this.settledVariants = tree
 			? Object.fromEntries(
-					this.variants.map(({id}) => [
-						id,
-						evaluate(tree, false, id)
-					])
+					this.variants
+						.filter(
+							({id}) => id !== this.selectedVariant?.id
+						)
+						.map(({id}) => [id, evaluate(tree, false, id)])
 				)
 			: {};
 	}
@@ -332,6 +334,8 @@ class Palette {
 			id && id !== this.variants[0]?.id
 				? this.variants.find((v) => v.id === id)?.id
 				: undefined;
+		// The variant left needs its colors, the one shown doesn't.
+		this.settle();
 	}
 
 	// Without `bg`, a role among itself. Returns the id of the rule.

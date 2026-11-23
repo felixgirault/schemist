@@ -69,24 +69,30 @@ class Combinations {
 			palette;
 
 		return variants.length
-			? variants.map(({id, name}) => ({
-					name,
-					checks:
-						id === selectedVariant?.id
-							? this.pairChecks
-							: this.#check(
-									palette.colors.map((color, i) => {
-										const {color: c, rgbColor} =
-											settledVariants[id][i];
+			? variants.flatMap(({id, name}) => {
+					if (id === selectedVariant?.id) {
+						return [{name, checks: this.pairChecks}];
+					}
 
-										return {
+					// Counted from the next settle on: a variant just added
+					// or restored by undo has no colors yet.
+					const colors = settledVariants[id];
+
+					return colors
+						? [
+								{
+									name,
+									checks: this.#check(
+										palette.colors.map((color, i) => ({
 											...color,
-											color: c,
-											rgbColor
-										};
-									})
-								)
-				}))
+											color: colors[i].color,
+											rgbColor: colors[i].rgbColor
+										}))
+									)
+								}
+							]
+						: [];
+				})
 			: [{name: '', checks: this.pairChecks}];
 	});
 
