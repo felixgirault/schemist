@@ -146,3 +146,30 @@ test('lists one-off pairs by use', () => {
 	palette.setPair(grey, root, {});
 	palette.setPair(id('Red'), root, {});
 });
+
+test('a one-off card edits its targets, buttons name their pair', () => {
+	const red = id('Red');
+	const root = palette.root!.id;
+
+	palette.setPair(red, root, {wcag2: 3});
+
+	const html = render(Result).body;
+
+	expect(html).toContain(
+		'aria-label="WCAG 2 target of Red on White"'
+	);
+	expect(html).toContain(
+		'aria-label="APCA target of Red on White"'
+	);
+	expect(html).toContain(
+		'aria-label="Remove pair Red on White"'
+	);
+	expect(html).toContain(
+		'aria-label="Override Black on White"'
+	);
+	expect(html).not.toContain(
+		'aria-label="Override Red on White"'
+	);
+
+	palette.setPair(red, root, {});
+});

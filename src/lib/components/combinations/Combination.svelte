@@ -22,6 +22,7 @@
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
 	import {round} from '#lib/utils/math.js';
+	import type {Snippet} from 'svelte';
 
 	interface Props {
 		uid: string;
@@ -32,9 +33,8 @@
 		rows: Row[];
 		simulations: Simulation[];
 		onPreview: (uid: string) => void;
-		// Replace the rules' targets on this pair, or remove the pair.
-		onOverride?: (uid: string) => void;
-		onRemove?: (uid: string) => void;
+		// Actions and fields of the pair, under its levels
+		children?: Snippet;
 	}
 
 	let {
@@ -46,8 +46,7 @@
 		rows,
 		simulations,
 		onPreview,
-		onOverride,
-		onRemove
+		children
 	}: Props = $props();
 </script>
 
@@ -93,17 +92,7 @@
 			</button>
 		</p>
 
-		{#if onOverride}
-			<button class="button" onclick={() => onOverride(uid)}>
-				Override
-			</button>
-		{/if}
-
-		{#if onRemove}
-			<button class="button" onclick={() => onRemove(uid)}>
-				Remove pair
-			</button>
-		{/if}
+		{@render children?.()}
 	</div>
 
 	{#if simulations.length}

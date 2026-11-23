@@ -885,7 +885,10 @@ button on the right (`aria-expanded`):
   button toggles `previewedUid` to `<bgId>-<fgId>`; **Override**
   on a card whose pair is not one-off declares it one-off with
   the targets the rules give, to edit it alone; a one-off pair's
-  card has **Remove pair**).
+  card has a number field per target (**WCAG 2**, **APCA**,
+  **Difference**, empty for none), applied on change, clearing
+  them all removing the pair, and **Remove pair**; buttons and
+  fields name their pair, as "Override Grey on White").
 
 **+ Role**, at the end of the roles, opens a form with a name
 field (**Add role**, same alert). A rule's row has no hover or
