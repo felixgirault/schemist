@@ -603,6 +603,10 @@ them, used for filtering.
 | WCAG 2 | Contrast ratio, 1–21 | `AAA` ≥ 7, `AA` ≥ 4.5, `AA18` ≥ 3, else `KO` |
 | APCA   | `                    | Lc                                           | ` (absolute APCA lightness contrast, text = foreground) | `5` ≥ 75, `4` ≥ 60, `3` ≥ 45, `2` ≥ 30, `1` ≥ 15, else `0` |
 
+APCA returns 0 for a channel out of 0–255, which rounding errors
+of the color conversions can give (red has a green of -7e-14), so
+`wcag3Contrast` clamps channels first.
+
 Filter labels: WCAG 2 `AAA`, `AA`, `AA18 (large text)`, `KO`;
 APCA `All` (75), `Body text` (60), `Large text` (45), `Text`
 (30), `Non text` (15), `KO` (0).

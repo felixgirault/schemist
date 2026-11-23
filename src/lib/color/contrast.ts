@@ -1,3 +1,4 @@
+import {clamp} from '#lib/utils/math.js';
 import {APCAcontrast, sRGBtoY} from 'apca-w3';
 import {wcagContrast} from 'culori/fn';
 import {rgbToCulori} from './culori';
@@ -86,14 +87,10 @@ export type ContrastGrade =
 export const wcag2Contrast = (bg: RgbColor, fg: RgbColor) =>
 	wcagContrast(rgbToCulori(bg), rgbToCulori(fg));
 
-export const wcag3Contrast = (bg: RgbColor, fg: RgbColor) => {
-	const {r: bgR, g: bgG, b: bgB} = bg;
-	const {r: fgR, g: fgG, b: fgB} = fg;
+// APCA returns 0 for a channel out of 0–255, which rounding errors
+// of the conversions can give (e.g. -1e-13).
+const toY = ({r, g, b}: RgbColor) =>
+	sRGBtoY([clamp(r, 255), clamp(g, 255), clamp(b, 255)]);
 
-	return Math.abs(
-		APCAcontrast(
-			sRGBtoY([fgR, fgG, fgB]),
-			sRGBtoY([bgR, bgG, bgB])
-		) as number
-	);
-};
+export const wcag3Contrast = (bg: RgbColor, fg: RgbColor) =>
+	Math.abs(APCAcontrast(toY(fg), toY(bg)) as number);
