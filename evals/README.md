@@ -111,6 +111,30 @@ under 10. With it, and the README's target, all 3 passed;
 colors with culori from `node_modules` for speed, then check the
 result with the CLI.
 
+### Variants (cb21a26)
+
+`website` and `dashboard` then asked for one tree with Light and
+Dark variants (ADR 19), graded in every variant.
+
+| Case        | 2026-11-22 (per-theme trees) | cb21a26 |
+| ----------- | ---------------------------- | ------- |
+| `website`   | 1.00                         | 1.00    |
+| `dashboard` | 1.00                         | 1.00    |
+| Cost        | $1.81                        | $1.70   |
+
+Every run wrote one tree with variants, roles and rules, and
+every pair passed in both variants. `website` agents kept their
+derivations and overrode `l.amount` only; `dashboard` agents
+still wrote a flat `clr` per token, overriding its `color`. No
+run needed a structure of its own per variant.
+
+First graded at 0.93 and 0.85: `apca` and `difference` looked for
+"APCA" or `--difference` in the agent's commands, but agents now
+declare rules (`body` carries APCA 75, `categories` a difference
+of 10) and run a plain `eval --blindness`, as AGENTS.md asks.
+Both graders now look for the rule or target in
+`out/palette.json`.
+
 ## How graders work
 
 A grader is a Markdown file in `cases/<name>/graders/`: flat

@@ -1,8 +1,10 @@
 ---
-type: tool_used
-tool: Bash|Write|Edit
-input_match: '[Aa][Pp][Cc][Aa]'
+type: regex
+target: file
+path: out/palette.json
+pattern: '"use"\s*:\s*"body"|"apca"\s*:'
 ---
 
-The agent checked APCA contrast, with the CLI or through a
-script.
+The palette requires APCA contrast: a rule for body text (WCAG 2
+4.5 and APCA 75) or an explicit `apca` target, which `eval` then
+checks.

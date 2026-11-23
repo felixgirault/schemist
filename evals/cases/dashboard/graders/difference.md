@@ -1,8 +1,10 @@
 ---
-type: tool_used
-tool: Bash|Write|Edit
-input_match: '--difference'
+type: regex
+target: file
+path: out/palette.json
+pattern: '"use"\s*:\s*"categories"|"difference"\s*:'
 ---
 
-The agent checked the color difference of the chart colors with
-the CLI.
+The palette requires the chart colors to differ: a Categories rule
+(difference 10) or an explicit `difference` target, which `eval`
+then checks.
