@@ -51,19 +51,16 @@ test('a new palette gets the default requirements', () => {
 	expect(roles.map((r) => r.name)).toEqual([
 		'Surfaces',
 		'Text',
-		'Borders',
-		'Accents',
-		'Text on accents',
-		'Categories'
+		'Borders'
 	]);
 	expect(roles.every((r) => !r.colors.length)).toBe(true);
-	expect(rules).toHaveLength(6);
+	expect(rules).toHaveLength(2);
 	expect(rules.every((r) => r.use)).toBe(true);
 	expect(pairs).toEqual([]);
 });
 
 test('a palette without requirements gets the defaults', () => {
-	expect(loaded(packed('#ff0000')).roles).toHaveLength(6);
+	expect(loaded(packed('#ff0000')).roles).toHaveLength(3);
 });
 
 test('a palette with some requirements keeps them', () => {

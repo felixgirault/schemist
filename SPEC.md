@@ -749,12 +749,9 @@ the rule is left out. An unknown role is an error here, not in
   declares no pairs, roles and rules (a new one, or a link or
   stored palette without them) gets `defaultRequirements`
   (`#lib/core/pairs.ts`, ADR 21) in the saved format: the roles
-  Surfaces, Text, Borders, Accents, Text on accents and
-  Categories, all empty, and the rules Text on Surfaces (Body
-  text), Borders and Accents on Surfaces (Large text and UI),
-  Text on accents on Accents (Body text), Categories among
-  themselves (Categories) and on Surfaces (Large text and UI).
-  They are set before the history starts, then ordinary; a
+  Surfaces, Text and Borders, all empty, and the rules Text on
+  Surfaces (Body text) and Borders on Surfaces (Large text and
+  UI). They are set before the history starts, then ordinary; a
   palette with any pair, role or rule is left as it is, so
   deleting all of them brings the defaults back on the next load.
 - Exports embed the permalink (CSS/Sass comment, design tokens

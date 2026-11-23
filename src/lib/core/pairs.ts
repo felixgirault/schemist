@@ -59,21 +59,13 @@ export const defaultRequirements: {
 	roles: Role[];
 	rules: Rule[];
 } = {
-	roles: [
-		'Surfaces',
-		'Text',
-		'Borders',
-		'Accents',
-		'Text on accents',
-		'Categories'
-	].map((name) => ({name, colors: []})),
+	roles: ['Surfaces', 'Text', 'Borders'].map((name) => ({
+		name,
+		colors: []
+	})),
 	rules: [
 		{fg: 'Text', bg: 'Surfaces', use: 'body'},
-		{fg: 'Borders', bg: 'Surfaces', use: 'large'},
-		{fg: 'Accents', bg: 'Surfaces', use: 'large'},
-		{fg: 'Text on accents', bg: 'Accents', use: 'body'},
-		{fg: 'Categories', use: 'categories'},
-		{fg: 'Categories', bg: 'Surfaces', use: 'large'}
+		{fg: 'Borders', bg: 'Surfaces', use: 'large'}
 	]
 };
 

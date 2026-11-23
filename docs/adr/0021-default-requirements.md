@@ -12,14 +12,11 @@ Most design systems need the same few.
 default ones: a new palette, and a link or stored palette that
 declares none. A palette with any of them is left as it is.
 
-| Role            | Rules                                                        |
-| --------------- | ------------------------------------------------------------ |
-| Surfaces        |                                                              |
-| Text            | on Surfaces, Body text                                       |
-| Borders         | on Surfaces, Large text and UI                               |
-| Accents         | on Surfaces, Large text and UI                               |
-| Text on accents | on Accents, Body text                                        |
-| Categories      | among themselves, Categories; on Surfaces, Large text and UI |
+| Role     | Rules                          |
+| -------- | ------------------------------ |
+| Surfaces |                                |
+| Text     | on Surfaces, Body text         |
+| Borders  | on Surfaces, Large text and UI |
 
 - **Roles start empty**: nothing is guessed from names or the
   tree (ADR 16). Picking colors is what starts the checks.
@@ -32,8 +29,8 @@ declares none. A palette with any of them is left as it is.
   other, in links too. They are set before the history starts, so
   undo doesn't remove them.
 - **A rule without pairs has no status**: it showed ✓ ("met"),
-  which six empty roles would make misleading. Its "No pair yet"
-  hint stays.
+  which empty roles would make misleading. Its "No pair yet" hint
+  stays.
 - The CLI adds nothing: `eval` checks what a tree declares.
 
 Limit: the format doesn't tell "cleared" from "never set", so
@@ -50,6 +47,8 @@ the next load.
 - **Filling roles from token names** (`bg/…`, `text/…`): assumes
   the palette's names (ADR 16).
 - **Muted text as a role**: same rule as Text.
+- **Accents, Text on accents and Categories too**: built first,
+  then dropped on review.
 
 ## Plan
 
