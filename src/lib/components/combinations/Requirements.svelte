@@ -9,7 +9,7 @@
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
 	import '#lib/components/palette/tree.css';
 	import type {AppRole, AppRule} from '#lib/core/nodes.js';
-	import {uses} from '#lib/core/pairs.js';
+	import {targetNames, uses} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
@@ -26,12 +26,6 @@
 	let picking = $state<string | null>(null);
 	let query = $state('');
 
-	// The role a rule is being added to, with the form: the role it is
-	// on (an id, `self` or `new`, named in its field) and the use.
-	let ruling = $state<string | null>(null);
-	let on = $state('self');
-	let newOn = $state('');
-	let use = $state<string>(uses[0].id);
 	let isAddingRole = $state(false);
 	let newRole = $state('');
 	let error = $state('');
@@ -58,14 +52,6 @@
 			: '';
 	};
 
-	const rulesOf = (role: AppRole) =>
-		palette.rules.filter(({fg}) => fg === role.id);
-
-	const usedOn = (role: AppRole) =>
-		palette.rules.filter(
-			({fg, bg}) => bg === role.id && fg !== role.id
-		);
-
 	const candidates = (role: AppRole) =>
 		palette.colors.filter(
 			({id, name}) =>
@@ -75,39 +61,61 @@
 					.includes(query.trim().toLowerCase())
 		);
 
+	// What a cell shows: the rules of its couple, on the diagonal a
+	// missing `bg` or the same as `fg`.
+	const cellRules = (fg: string, bg: string) =>
+		palette.rules.filter(
+			(rule) =>
+				rule.fg === fg &&
+				(fg === bg
+					? !rule.bg || rule.bg === fg
+					: rule.bg === bg)
+		);
+
+	// A rule a use alone describes, with no targets of its own.
+	const plainUse = (rule: AppRule) =>
+		targetNames.some((name) => rule[name] !== undefined)
+			? undefined
+			: uses.find(({id}) => id === rule.use);
+
+	const valueOf = (rules: AppRule[]) =>
+		!rules.length
+			? ''
+			: rules.length === 1 && plainUse(rules[0])
+				? rules[0].use!
+				: 'custom';
+
+	// The extra option of a cell the selects can't offer.
+	const labelOf = (rules: AppRule[]) =>
+		[
+			...new Set(
+				rules.map((rule) => plainUse(rule)?.name ?? 'Custom')
+			)
+		].join(' + ');
+
+	// Every rule in the grid's order: rows, then columns.
+	let gridRules = $derived(
+		palette.roles.flatMap((row) =>
+			palette.roles.flatMap((col) =>
+				cellRules(row.id, col.id)
+			)
+		)
+	);
+
+	const handleUse = (fg: string, bg: string, event: Event) => {
+		const {value} = event.currentTarget as HTMLSelectElement;
+
+		if (value !== 'custom') {
+			palette.setRule(fg, bg, value || undefined);
+		}
+	};
+
 	const handleRename = (role: AppRole, event: Event) => {
 		const input = event.currentTarget as HTMLInputElement;
 
 		if (!palette.renameRole(role.id, input.value)) {
 			input.value = role.name;
 		}
-	};
-
-	const toggleRuling = (role: AppRole) => {
-		ruling = ruling === role.id ? null : role.id;
-		on = 'self';
-		newOn = '';
-		error = '';
-	};
-
-	const handleAddRule = (role: AppRole, event: SubmitEvent) => {
-		event.preventDefault();
-
-		const to =
-			on === 'self'
-				? undefined
-				: on === 'new'
-					? palette.addRole(newOn)
-					: on;
-
-		if (on === 'new' && !to) {
-			error =
-				'A new role needs a name that no other role has.';
-			return;
-		}
-
-		palette.addRule(role.id, to, use);
-		ruling = null;
 	};
 
 	const toggleAddingPair = () => {
@@ -154,54 +162,30 @@
 	{/if}
 {/snippet}
 
-{#snippet status(rule: AppRule)}
-	{@const {pass, text} = combinations.ruleStatus(rule.id)}
-	<span class="status" title={text}>
-		{#if pass}
-			<CheckIcon />
-		{:else}
-			<WarningIcon />
-		{/if}
-		<span class="hidden">{text}</span>
-	</span>
-{/snippet}
-
-{#snippet group(
-	title: string,
-	addLabel: string,
-	isOpen: boolean,
-	onAdd: () => void,
-	children: Snippet
-)}
-	<article class="tree-node">
-		<div class="self">
-			<header>
-				<div class="title">
-					<h4 class="name">{title}</h4>
-				</div>
-				<div class="button-list">
-					<button
-						class="button button--icon"
-						type="button"
-						aria-label={addLabel}
-						aria-expanded={isOpen}
-						title={addLabel}
-						onclick={onAdd}
-					>
-						<AddIcon />
-					</button>
-				</div>
-			</header>
-		</div>
-		<div class="children">
-			{@render children()}
-		</div>
-	</article>
+{#snippet status(rules: AppRule[])}
+	{@const all = rules
+		.filter(({id}) => combinations.ruleChecks.get(id)?.length)
+		.map(({id}) => combinations.ruleStatus(id))}
+	{@const text = all.every(({pass}) => pass)
+		? 'met'
+		: [
+				...new Set(
+					all.filter(({pass}) => !pass).map((s) => s.text)
+				)
+			].join(', ')}
+	{#if all.length}
+		<span class="status" title={text}>
+			{#if text === 'met'}
+				<CheckIcon />
+			{:else}
+				<WarningIcon />
+			{/if}
+			<span class="hidden">{text}</span>
+		</span>
+	{/if}
 {/snippet}
 
 {#snippet roleRow(role: AppRole)}
-	{@const rules = rulesOf(role)}
-	{@const others = usedOn(role)}
 	{@const count = palette.rules.filter(
 		({fg, bg}) => fg === role.id || bg === role.id
 	).length}
@@ -218,17 +202,6 @@
 							size={Math.max(role.name.length, 4)}
 						/>
 					</div>
-					{#if others.length}
-						<p class="label">
-							used by {others
-								.map(
-									(rule) =>
-										combinations.describeRule(rule)
-											.label
-								)
-								.join(', ')}
-						</p>
-					{/if}
 				</div>
 
 				<div class="button-list">
@@ -248,94 +221,6 @@
 		</div>
 
 		<div class="children">
-			{#snippet ruleList()}
-				{#if ruling === role.id}
-					<form
-						onsubmit={(event) =>
-							handleAddRule(role, event)}
-					>
-						<label>
-							{role.name} on
-							<select bind:value={on}>
-								{#each palette.roles.filter(({id}) => id !== role.id) as { id, name } (id)}
-									<option value={id}>{name}</option>
-								{/each}
-								<option value="self">
-									Among themselves
-								</option>
-								<option value="new">New role…</option>
-							</select>
-						</label>
-						{#if on === 'new'}
-							<label>
-								New role name
-								<input bind:value={newOn} />
-							</label>
-						{/if}
-						<label>
-							For
-							<select bind:value={use}>
-								{#each uses as { id, name } (id)}
-									<option value={id}>{name}</option>
-								{/each}
-							</select>
-						</label>
-						{#if error}
-							<p role="alert">{error}</p>
-						{/if}
-						<button class="button" type="submit">
-							Add rule
-						</button>
-					</form>
-				{/if}
-				{#each rules as rule (rule.id)}
-					{@const {use: useName} =
-						combinations.describeRule(rule)}
-					{@const to = palette.roles.find(
-						({id}) => id === rule.bg
-					)}
-					{@const where = to
-						? `on ${to.name}`
-						: 'among themselves'}
-					{@const checks =
-						combinations.ruleChecks.get(rule.id) ?? []}
-					<article class="tree-node rule">
-						<div class="self">
-							<header>
-								<div class="title">
-									<h5 class="name">
-										{where} · {useName}
-										{#if checks.length}
-											{@render status(rule)}
-										{/if}
-									</h5>
-								</div>
-								<div class="button-list">
-									<button
-										class="button button--icon"
-										type="button"
-										aria-label="Remove rule {role.name} {where}, {useName}"
-										title="Remove this rule"
-										onclick={() =>
-											palette.removeRule(rule.id)}
-									>
-										<CloseIcon />
-									</button>
-								</div>
-							</header>
-						</div>
-						<div class="children">
-							{#if !checks.length}
-								<p class="hint">
-									No pair yet: add colors.
-								</p>
-							{/if}
-							{@render pairs(checks)}
-						</div>
-					</article>
-				{/each}
-			{/snippet}
-
 			{#snippet colorList()}
 				{#if picking === role.id}
 					<div
@@ -419,13 +304,6 @@
 				</div>
 				{@render colorList()}
 			</div>
-			{@render group(
-				'Rules',
-				`Add a rule to ${role.name}`,
-				ruling === role.id,
-				() => toggleRuling(role),
-				ruleList
-			)}
 		</div>
 	</article>
 {/snippet}
@@ -459,6 +337,83 @@
 	>
 		+ Role
 	</button>
+
+	{#if palette.roles.length}
+		<h4 class="h3">Targets</h4>
+		<div class="scroll">
+			<table>
+				<thead>
+					<tr>
+						<td></td>
+						{#each palette.roles as col (col.id)}
+							<th scope="col">on {col.name}</th>
+						{/each}
+					</tr>
+				</thead>
+				<tbody>
+					{#each palette.roles as row (row.id)}
+						<tr>
+							<th scope="row">{row.name}</th>
+							{#each palette.roles as col (col.id)}
+								{@const rules = cellRules(
+									row.id,
+									col.id
+								)}
+								{@const value = valueOf(rules)}
+								<td>
+									<select
+										aria-label={row.id === col.id
+											? `${row.name} among themselves`
+											: `${row.name} on ${col.name}`}
+										{value}
+										onchange={(event) =>
+											handleUse(
+												row.id,
+												col.id,
+												event
+											)}
+									>
+										<option value="">—</option>
+										{#each uses as { id, name } (id)}
+											<option value={id}>
+												{name}
+											</option>
+										{/each}
+										{#if value === 'custom'}
+											<option value="custom">
+												{labelOf(rules)}
+											</option>
+										{/if}
+									</select>
+									{@render status(rules)}
+								</td>
+							{/each}
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+
+		<h4 class="h3">Checks</h4>
+		{#each gridRules as rule (rule.id)}
+			{@const checks =
+				combinations.ruleChecks.get(rule.id) ?? []}
+			{#if checks.length}
+				<h5 class="h3">
+					{combinations.describeRule(rule).label} · {combinations.describeRule(
+						rule
+					).use}
+					{@render status([rule])}
+				</h5>
+				{@render pairs(checks)}
+			{/if}
+		{/each}
+		{#if gridRules.some(({id}) => !combinations.ruleChecks.get(id)?.length)}
+			<p class="hint">
+				A rule is checked once its roles have colors.
+			</p>
+		{/if}
+	{/if}
 
 	<h4 class="h3">One-off pairs</h4>
 	{#if isAddingPair}
@@ -522,8 +477,8 @@
 
 	{#if !palette.rules.length && !combinations.requirements.length && !combinations.hiddenPairs.length}
 		<p class="hint">
-			Add a rule to see its pairs as they will be used, or
-			declare a one-off pair.
+			Pick a use in Targets to see pairs as they will be used,
+			or declare a one-off pair.
 		</p>
 	{/if}
 </div>
@@ -543,6 +498,10 @@
 		border: 1px solid currentColor;
 		border-radius: 50%;
 		vertical-align: middle;
+	}
+
+	.scroll {
+		overflow-x: auto;
 	}
 
 	.roles {

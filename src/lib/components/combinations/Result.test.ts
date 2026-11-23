@@ -63,6 +63,14 @@ test('shows each rule with its pairs as a table', () => {
 	expect(render(Result).body).toContain('<table');
 });
 
+// The text of the selected option of a select, by its label
+const selected = (label: string) =>
+	render(Result).body.match(
+		new RegExp(
+			`aria-label="${label}".*?<option[^>]*selected[^>]*>(?:<!---->)?([^<]*)`
+		)
+	)?.[1];
+
 test('previews a pair, declared or not', () => {
 	combinations.previewedUid = `${palette.root!.id}-${id('Black')}`;
 	const previewed = combinations.previewed;
@@ -73,14 +81,22 @@ test('previews a pair, declared or not', () => {
 	expect(combinations.previewed).toBeNull();
 });
 
-test('shows a row per role, with its rules and colors', () => {
+test('shows a row per role with its colors, and a grid of its rules', () => {
 	const html = render(Result).body;
 	const plain = text(html);
 
 	expect(html).toContain('aria-label="Role name" value="Text"');
-	expect(plain).toContain('on Surfaces · Body text');
-	expect(plain).toContain('among themselves · Categories');
-	expect(plain).toContain('used by Text on Surfaces');
+	expect(plain).toContain('Text on Surfaces · Body text');
+	expect(plain).toContain(
+		'Series among themselves · Categories'
+	);
+	expect(html).toContain('<th scope="row">Text</th>');
+	expect(html).toContain('<th scope="col">on Surfaces</th>');
+	expect(selected('Text on Surfaces')).toBe('Body text');
+	expect(selected('Series among themselves')).toBe(
+		'Categories'
+	);
+	expect(selected('Surfaces on Text')).toBe('—');
 	expect(html).toContain('aria-label="Delete role Text"');
 	expect(html).toContain('aria-label="Add a color to Series"');
 	expect(html).toContain('aria-label="Remove Black from Text"');
@@ -175,4 +191,23 @@ test('a one-off pair edits its targets, buttons name their pair', () => {
 	);
 
 	palette.setPair(red, root, {});
+});
+
+test('a cell with several rules offers them as one extra option', () => {
+	const [, text, series] = palette.roles;
+
+	palette.addRule(text.id, series.id, 'body');
+	palette.addRule(text.id, series.id, 'large');
+
+	const html = render(Result).body;
+
+	expect(selected('Text on Series')).toBe(
+		'Body text + Large text and UI'
+	);
+	expect(
+		html.match(/<option[^>]*value="custom"/g)
+	).toHaveLength(1);
+
+	palette.setRule(text.id, series.id);
+	expect(selected('Text on Series')).toBe('—');
 });

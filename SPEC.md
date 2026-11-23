@@ -455,10 +455,13 @@ is empty or taken, names being what a permalink holds),
 `deleteRole(id)` (also deletes its rules),
 `addMember(roleId, colorId)`, `removeMember`,
 `addRule(fg, bg | undefined, use)` (no `bg`, or `bg` equal to
-`fg`, is a role among itself) and `removeRule(id)`. A role member
-whose name is shared by several colors is left out of the saved
-role until renamed, and listed in `unsavedMembers`; the pairs
-notice lists it with the unsaved pairs' names.
+`fg`, is a role among itself), `removeRule(id)` and
+`setRule(fg, bg | undefined, use?)`, which replaces the rules of
+a couple with one of `use` (in place of the first, else at the
+end) or with none, in one change. A role member whose name is
+shared by several colors is left out of the saved role until
+renamed, and listed in `unsavedMembers`; the pairs notice lists
+it with the unsaved pairs' names.
 
 **Pairs hold color ids, never names.** `ColorPair` has no name
 field, so a pair cannot go out of sync with its colors: a rename
@@ -966,60 +969,62 @@ highlight are still to come).
 
 **The requirements** (`Requirements.svelte`), in the
 **Requirements** section (§11.1, a region labelled by its title),
-are laid out like the colors tree (`Node.svelte`, sharing
-`palette/tree.css`): one row per role, then **One-off pairs**. A
-role's row has no preview (only its colors have one), its name as
-an input (labelled **Role name**, renamed on change, reverted if
-empty or taken), "used by Text on Surfaces" below it for the
-rules where it is only the second role, and **Delete role Role**
-(also deletes its rules; the tooltip counts them). Actions follow
-their label rather than the panel's right edge, which is left to
-the tables. Under the role:
+are three flat sections (ADR 22; sticky names and fading are
+still to come), then **One-off pairs**.
 
-- **Colors**, one line: the member colors as chips (swatch, name
-  and **Remove X from Role**; hidden members dimmed, without
-  swatch), wrapping, then **Add a color to Role**
-  (`aria-expanded`) opening a picker (a search field and the
-  visible colors not in the role, as wrapping buttons with
-  swatches; Esc closes it).
-- **Rules**, a tree row without preview, **Add a rule to Role**
-  (`aria-expanded`) opening a compact form: **on** (the other
-  roles, **Among themselves**, **New role…** with a name field),
-  **For** (the use) and **Add rule**; a new role needs a free
-  name, else an alert and nothing is added. Under it, the rules
-  where the role is the first one, each a row: "on Surfaces ·
-  Body text" or "among themselves · Categories", an icon with a
-  text alternative and tooltip, none while the rule has no
-  checked pair (ADR 21; "No pair yet" shows instead)
-  (`ruleStatus`: met when none of the rule's pairs fails, in any
-  variant and in the worst case of the selected simulations; else
-  "not met", or "not met in Dark" naming the failing variants)
-  and **Remove rule** (`×`); its children are the rule's table,
-  given as the `pairs` snippet (`ruleChecks` for the rows,
-  nothing is measured again); the Preview button, named "Preview
-  Grey on White", toggles `previewedUid` to `<bgId>-<fgId>`; it
-  previews the selected variant's colors, so only that variant's
-  column has one for now (ADR 20, step 3); **Override** in the
-  row header of a pair that is not one-off declares it one-off
-  with the targets the rules give, to edit it alone; a one-off
-  pair's row header has a number field per target (**WCAG 2**,
-  **APCA**, **Difference**, empty for none), applied on change,
-  clearing them all removing the pair, and **Remove pair**;
-  buttons and fields name their pair, as "Override Grey on
-  White").
+- **Roles**: one row per role, laid out like the colors tree
+  (`palette/tree.css`), without preview: its name as an input
+  (**Role name**, renamed on change, reverted if empty or taken),
+  **Delete role Role** (also deletes its rules; the tooltip
+  counts them), and its **Colors** on one line: chips (swatch,
+  name and **Remove X from Role**; hidden members dimmed, without
+  swatch), then **Add a color to Role** (`aria-expanded`) opening
+  a picker (a search field and the visible colors not in the
+  role, as wrapping buttons with swatches; Esc closes it). **+
+  Role** opens a form with a name field (**Add role**; a free
+  name, else an alert).
+- **Targets**, with roles only: a `<table>` of the roles as rows
+  (`fg`, `<th scope="row">`) and columns (`bg`, "on Surfaces"),
+  in role order. Each cell is a `<select>` labelled by its couple
+  ("Text on Surfaces", "Text among themselves"): "—" or a use. A
+  cell is a view of the rules of its couple (on the diagonal,
+  `bg` missing or the same as `fg`; `cellRules`); picking
+  replaces them with one rule of the use, "—" removes them
+  (`setRule`, one undo). A cell that holds several rules, or a
+  rule with targets of its own, has one more option naming them
+  ("Body text + Custom"), selected until another is picked;
+  picking it changes nothing. Beside a cell with checked pairs,
+  an icon with a text alternative and tooltip (`ruleStatus`: met
+  when none of its rules' pairs fails, in any variant and in the
+  worst case of the selected simulations; else "not met", or "not
+  met in Dark" naming the failing variants); none otherwise (ADR
+  21).
+- **Checks**: for each rule in the grid's order (rows, then
+  columns) that has checked pairs, "Text on Surfaces · Body text"
+  with its status, then its table, given as the `pairs` snippet
+  (`ruleChecks` for the rows, nothing is measured again). One
+  hint says a rule is checked once its roles have colors, when
+  one has none. The Preview button, named "Preview Grey on
+  White", toggles `previewedUid` to `<bgId>-<fgId>`; it previews
+  the selected variant's colors, so only that variant's column
+  has one for now (ADR 20, step 3); **Override** in the row
+  header of a pair that is not one-off declares it one-off with
+  the targets the rules give, to edit it alone; a one-off pair's
+  row header has a number field per target (**WCAG 2**, **APCA**,
+  **Difference**, empty for none), applied on change, clearing
+  them all removing the pair, and **Remove pair**; buttons and
+  fields name their pair, as "Override Grey on White".
 
-**+ Role**, at the end of the roles, opens a form with a name
-field (**Add role**, same alert). A rule's row has no hover or
-focus effect. **One-off pairs** follow, always shown: **+ Pair**
-opens a compact form, a **Foreground** and a **Background** color
-(each a select of the visible colors by name, with a swatch of
-the chosen one) and **For** (the use), then **Add pair**, which
-calls `addPair` (one color on both sides gives an alert and
-nothing is declared). Under it, the declared pairs that replace
-or add to rules, by use (`requirements`, Custom last, a pair
-under each use it holds), each use a table. Pairs with a hidden
-color follow as **Not checked, a color is hidden**. With nothing
-declared, a hint says to add a rule or declare a pair.
+**One-off pairs** follow, always shown: **+ Pair** opens a
+compact form, a **Foreground** and a **Background** color (each a
+select of the visible colors by name, with a swatch of the chosen
+one) and **For** (the use), then **Add pair**, which calls
+`addPair` (one color on both sides gives an alert and nothing is
+declared). Under it, the declared pairs that replace or add to
+rules, by use (`requirements`, Custom last, a pair under each use
+it holds), each use a table. Pairs with a hidden color follow as
+**Not checked, a color is hidden**. With nothing declared, a hint
+says to pick a use or declare a pair.
 
 ### 11.6 Theming
 
