@@ -930,10 +930,10 @@ change.
 ### 11.5 Requirements panel
 
 No grid (ADR 18): the requirements are a section of the page
-(§11.1), `Result.svelte` holding `Requirements.svelte`, each
-requirement with a table of its pairs underneath (ADR 20, step 1;
-simulation rows, sticky headers and the selected column's
-highlight are still to come).
+(§11.1), `Result.svelte` holding `Requirements.svelte`, with
+every pair checked in one table (ADR 20, 22; simulation rows,
+sticky headers and the selected column's highlight are still to
+come).
 
 - **Header toggles** (in `App.svelte`, in the Requirements header
   beside the title, wrapping under it on narrow panels, always
@@ -945,21 +945,22 @@ highlight are still to come).
   rule statuses and the count; the table does not show simulated
   levels yet. There is no other filter, no grid and no list of
   every pair (ADR 17, 18; the CLI keeps `combine`, §9.1).
-- Each rule, and each use under One-off pairs, is a `<table>`
-  (scrolling sideways within its rule): a row per pair, a column
-  per variant of `allChecks` (one column with a visually hidden
-  header "Colors" without variants). The row header
-  (`<th scope="row">`) has the names ("Grey & White") and the
-  pair's actions, in the panel's colors, on one line. A cell is
-  one line in that variant's colors (`allChecks`, looked up by
-  pair id): per target (`{name, level, met?}`), the grade in bold
-  and the level (rounded to 1 decimal, APCA prefixed by `APCA`),
-  then ✓ or ✗ with "met" or "not met" as hidden text, targets
-  separated by "·". A pair whose targets are all `difference` is
-  not text on a background: its cell is in the page's colors,
-  with the two colors as a small swatch pair before its level.
-  The tables use the panel's font, not the export table's, and
-  scroll sideways within their rule when wider than it.
+- The checks are one `<table>` (`CheckGroup`s): the pair first,
+  then a column per variant of `allChecks` (one column with a
+  visually hidden header "Colors" without variants). Each rule,
+  then each use of the one-off pairs, is a `<tbody>` with a title
+  spanning the row (`<th scope="rowgroup">`), then a row per
+  pair. The row header (`<th scope="row">`) has the names ("Grey
+  & White") and the pair's actions, in the panel's colors, on one
+  line. A cell is one line in that variant's colors (`allChecks`,
+  looked up by pair id): per target (`{name, level, met?}`), the
+  grade in bold and the level (rounded to 1 decimal, APCA
+  prefixed by `APCA`), then ✓ or ✗ with "met" or "not met" as
+  hidden text, targets separated by "·". A pair whose targets are
+  all `difference` is not text on a background: its cell is in
+  the page's colors, with the two colors as a small swatch pair
+  before its level. The table uses the panel's font, not the
+  export table's, and scrolls sideways when wider than the panel.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
@@ -998,32 +999,32 @@ still to come), then **One-off pairs**.
   worst case of the selected simulations; else "not met", or "not
   met in Dark" naming the failing variants); none otherwise (ADR
   21).
-- **Checks**: for each rule in the grid's order (rows, then
-  columns) that has checked pairs, "Text on Surfaces · Body text"
-  with its status, then its table, given as the `pairs` snippet
-  (`ruleChecks` for the rows, nothing is measured again). One
-  hint says a rule is checked once its roles have colors, when
-  one has none. The Preview button, named "Preview Grey on
-  White", toggles `previewedUid` to `<bgId>-<fgId>`; it previews
-  the selected variant's colors, so only that variant's column
-  has one for now (ADR 20, step 3); **Override** in the row
-  header of a pair that is not one-off declares it one-off with
-  the targets the rules give, to edit it alone; a one-off pair's
-  row header has a number field per target (**WCAG 2**, **APCA**,
-  **Difference**, empty for none), applied on change, clearing
-  them all removing the pair, and **Remove pair**; buttons and
-  fields name their pair, as "Override Grey on White".
+- **Checks**: the table, given as the `pairs` snippet: each rule
+  in the grid's order (rows, then columns) that has checked
+  pairs, "Text on Surfaces · Body text" with its status, then the
+  one-off pairs by use ("One-off pairs · Custom"; `requirements`,
+  Custom last, a pair under each use it holds). Nothing is
+  measured again (`ruleChecks`). One hint says a rule is checked
+  once its roles have colors, when one has none. The Preview
+  button, named "Preview Grey on White", toggles `previewedUid`
+  to `<bgId>-<fgId>`; it previews the selected variant's colors,
+  so only that variant's column has one for now (ADR 20, step 3);
+  **Override** in the row header of a pair that is not one-off
+  declares it one-off with the targets the rules give, to edit it
+  alone; a one-off pair's row header has a number field per
+  target (**WCAG 2**, **APCA**, **Difference**, empty for none),
+  applied on change, clearing them all removing the pair, and
+  **Remove pair**; buttons and fields name their pair, as
+  "Override Grey on White".
 
 **One-off pairs** follow, always shown: **+ Pair** opens a
 compact form, a **Foreground** and a **Background** color (each a
 select of the visible colors by name, with a swatch of the chosen
 one) and **For** (the use), then **Add pair**, which calls
 `addPair` (one color on both sides gives an alert and nothing is
-declared). Under it, the declared pairs that replace or add to
-rules, by use (`requirements`, Custom last, a pair under each use
-it holds), each use a table. Pairs with a hidden color follow as
-**Not checked, a color is hidden**. With nothing declared, a hint
-says to pick a use or declare a pair.
+declared). The declared pairs are in the Checks table. Pairs with
+a hidden color follow as **Not checked, a color is hidden**. With
+nothing declared, a hint says to pick a use or declare a pair.
 
 ### 11.6 Theming
 

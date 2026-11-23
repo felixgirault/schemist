@@ -10,13 +10,13 @@
 	import type {AppRole, AppRule} from '#lib/core/nodes.js';
 	import {targetNames, uses} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
-	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
+	import type {CheckGroup} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import type {Snippet} from 'svelte';
 
 	interface Props {
-		// Draws the pairs under each role and in the one-off groups.
-		pairs: Snippet<[PairCheck[]]>;
+		// Draws the pairs of every group, as one table.
+		pairs: Snippet<[CheckGroup[], Snippet<[AppRule[]]>]>;
 	}
 
 	let {pairs}: Props = $props();
@@ -99,6 +99,31 @@
 				cellRules(row.id, col.id)
 			)
 		)
+	);
+
+	// The groups with checked pairs: rules in the grid's order, then
+	// the one-off pairs by use.
+	let groups = $derived(
+		[
+			...gridRules.map((rule): CheckGroup => {
+				const {label, use} = combinations.describeRule(rule);
+
+				return {
+					id: rule.id,
+					title: `${label} · ${use}`,
+					rules: [rule],
+					checks: combinations.ruleChecks.get(rule.id) ?? []
+				};
+			}),
+			...combinations.requirements.map(
+				({id, name, checks}): CheckGroup => ({
+					id,
+					title: `One-off pairs · ${name}`,
+					rules: [],
+					checks
+				})
+			)
+		].filter(({checks}) => checks.length)
 	);
 
 	const handleUse = (fg: string, bg: string, event: Event) => {
@@ -365,21 +390,11 @@
 				</tbody>
 			</table>
 		</div>
+	{/if}
 
+	{#if groups.length || palette.rules.length}
 		<h4 class="h3">Checks</h4>
-		{#each gridRules as rule (rule.id)}
-			{@const checks =
-				combinations.ruleChecks.get(rule.id) ?? []}
-			{#if checks.length}
-				<h5 class="h3">
-					{combinations.describeRule(rule).label} · {combinations.describeRule(
-						rule
-					).use}
-					{@render status([rule])}
-				</h5>
-				{@render pairs(checks)}
-			{/if}
-		{/each}
+		{@render pairs(groups, status)}
 		{#if gridRules.some(({id}) => !combinations.ruleChecks.get(id)?.length)}
 			<p class="hint">
 				A rule is checked once its roles have colors.
@@ -433,10 +448,6 @@
 	>
 		+ Pair
 	</button>
-	{#each combinations.requirements as { id, name, checks } (id)}
-		<h5 class="h3">{name}</h5>
-		{@render pairs(checks)}
-	{/each}
 
 	{#if combinations.hiddenPairs.length}
 		<h4 class="h3">Not checked, a color is hidden</h4>

@@ -19,6 +19,15 @@ export type PairCheck = {
 	for: ReturnType<typeof usesOf>;
 };
 
+// Pairs listed under one title: a rule's, or the one-off pairs of a
+// use, which have no rules.
+export type CheckGroup = {
+	id: string;
+	title: string;
+	rules: AppRule[];
+	checks: PairCheck[];
+};
+
 class Combinations {
 	blindnessTypes = $state<BlindnessType[]>([]);
 	isLuminosityAnalysisEnabled = $state(false);

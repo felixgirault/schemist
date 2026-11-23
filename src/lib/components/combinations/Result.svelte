@@ -2,13 +2,17 @@
 	import {wcag2Grade, wcag3Grade} from '#lib/color/contrast.js';
 	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import PreviewIcon from '#lib/components/icons/PreviewIcon.svelte';
-	import type {PairTargets} from '#lib/core/nodes.js';
+	import type {AppRule, PairTargets} from '#lib/core/nodes.js';
 	import type {TargetCheck} from '#lib/core/pairs.js';
 	import {targetNames} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
-	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
+	import type {
+		CheckGroup,
+		PairCheck
+	} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
 	import {round} from '#lib/utils/math.js';
+	import type {Snippet} from 'svelte';
 	import Requirements from './Requirements.svelte';
 
 	const targetLabels = {
@@ -136,8 +140,11 @@
 	</td>
 {/snippet}
 
-{#snippet cards(checks: PairCheck[])}
-	{#if checks.length}
+{#snippet table(
+	groups: CheckGroup[],
+	status: Snippet<[AppRule[]]>
+)}
+	{#if groups.length}
 		<div class="scroll">
 			<table>
 				<thead>
@@ -156,67 +163,84 @@
 						{/each}
 					</tr>
 				</thead>
-				<tbody>
-					{#each checks as check (check.id)}
-						{@const names = `${check.fg.name} on ${check.bg.name}`}
+				{#each groups as { id, title, rules, checks } (id)}
+					<tbody>
 						<tr>
-							<th scope="row">
-								{check.fg.name} & {check.bg.name}
-								{#if check.pair.sources.oneOff}
-									<div class="targets">
-										{#each targetNames as name (name)}
-											<label>
-												{targetLabels[name]}
-												<input
-													type="number"
-													min={0}
-													step="any"
-													aria-label="{targetLabels[
-														name
-													]} target of {names}"
-													value={check.pair[name] ??
-														''}
-													onchange={(event) =>
-														handleTarget(
-															check,
-															name,
-															event
-														)}
-												/>
-											</label>
-										{/each}
-									</div>
-									<button
-										class="button"
-										aria-label="Remove pair {names}"
-										onclick={() => handleRemove(check)}
-									>
-										Remove pair
-									</button>
-								{:else if check.pair.sources.rules.length}
-									<button
-										class="button"
-										aria-label="Override {names}"
-										title="Declare this pair with the rule's targets, to edit them here"
-										onclick={() =>
-											handleOverride(check)}
-									>
-										Override
-									</button>
-								{/if}
+							<th
+								class="group"
+								scope="rowgroup"
+								colspan={variants.length + 1}
+							>
+								{title}
+								{@render status(rules)}
 							</th>
-							{#each variants as { name, byId }}
-								{@render cell(byId.get(check.id)!, name)}
-							{/each}
 						</tr>
-					{/each}
-				</tbody>
+						{#each checks as check (check.id)}
+							{@const names = `${check.fg.name} on ${check.bg.name}`}
+							<tr>
+								<th scope="row">
+									{check.fg.name} & {check.bg.name}
+									{#if check.pair.sources.oneOff}
+										<div class="targets">
+											{#each targetNames as name (name)}
+												<label>
+													{targetLabels[name]}
+													<input
+														type="number"
+														min={0}
+														step="any"
+														aria-label="{targetLabels[
+															name
+														]} target of {names}"
+														value={check.pair[
+															name
+														] ?? ''}
+														onchange={(event) =>
+															handleTarget(
+																check,
+																name,
+																event
+															)}
+													/>
+												</label>
+											{/each}
+										</div>
+										<button
+											class="button"
+											aria-label="Remove pair {names}"
+											onclick={() =>
+												handleRemove(check)}
+										>
+											Remove pair
+										</button>
+									{:else if check.pair.sources.rules.length}
+										<button
+											class="button"
+											aria-label="Override {names}"
+											title="Declare this pair with the rule's targets, to edit them here"
+											onclick={() =>
+												handleOverride(check)}
+										>
+											Override
+										</button>
+									{/if}
+								</th>
+								{#each variants as { name, byId }}
+									{@render cell(
+										byId.get(check.id)!,
+										name
+									)}
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				{/each}
 			</table>
 		</div>
 	{/if}
 {/snippet}
 
-<Requirements pairs={cards} />
+<Requirements pairs={table} />
 
 <style>
 	.targets {
@@ -227,7 +251,7 @@
 	}
 
 	.targets input {
-		width: 100%;
+		width: 10ch;
 		color: inherit;
 		background: transparent;
 		border: 1px solid currentColor;
@@ -250,6 +274,11 @@
 		font-weight: normal;
 		vertical-align: middle;
 		white-space: nowrap;
+	}
+
+	.group {
+		padding-top: 1rem;
+		font-weight: bold;
 	}
 
 	th .button {

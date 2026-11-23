@@ -47,8 +47,16 @@ beforeAll(() => {
 const text = (html: string) =>
 	html.replace(/<!--.*?-->|<[^>]*>/g, '').replace(/\s+/g, ' ');
 
-test('shows each rule with its pairs as a table', () => {
-	const html = text(render(Result).body);
+test('shows every rule in one table, its pairs under its title', () => {
+	const {body} = render(Result);
+	const html = text(body);
+
+	// the grid of targets, then the checks
+	expect(body.match(/<table/g)).toHaveLength(2);
+	expect(body.match(/scope="rowgroup"/g)).toHaveLength(2);
+	expect(html).toMatch(
+		/Text on Surfaces · Body text not met ?Black &amp; White.*Series among themselves · Categories met ?(Red|Blue) &amp; /
+	);
 
 	expect(html).not.toContain('Pack my box');
 	expect(html).toContain(
@@ -60,7 +68,6 @@ test('shows each rule with its pairs as a table', () => {
 	expect(html).toMatch(
 		/(Red|Blue) &amp; (Blue|Red) Override Difference [\d.]+ ✓ met/
 	);
-	expect(render(Result).body).toContain('<table');
 });
 
 // The text of the selected option of a select, by its label
@@ -154,9 +161,14 @@ test('lists one-off pairs by use', () => {
 	combinations.addPair(grey, root, body);
 	palette.setPair(id('Red'), root, {wcag2: 4.5, apca: 80});
 
-	const html = render(Result).body;
+	const html = text(render(Result).body);
 
-	expect(html).toContain('<h5 class="h3">Body text</h5>');
+	expect(html).toContain(
+		'One-off pairs · Body text Grey &amp; White'
+	);
+	expect(html).toContain(
+		'One-off pairs · Custom Red &amp; White'
+	);
 	expect(combinations.requirements.map((r) => r.id)).toEqual([
 		'body',
 		'custom'

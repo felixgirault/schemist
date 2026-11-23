@@ -12,7 +12,7 @@ column of "No pair yet".
 
 ## Decision
 
-The panel becomes three flat sections, plus the one-off pairs.
+The panel becomes three flat sections, then **+ Pair**.
 
 ```
 Roles
@@ -27,11 +27,14 @@ Targets      on Surfaces            on Text     on Borders
   Borders    [Large…      ▾] ✓      [— ▾]       [— ▾]
 
 Checks
-  Text on Surfaces · Body text ⚠
                Light          Dark
+  Text on Surfaces · Body text ⚠
   Ink & Page   AAA 15.8 ✓     AA 5.1 ✗
   …
+  One-off pairs · Custom
+  …
 One-off pairs
+  + Pair
 ```
 
 - **Roles**: a line per role, its name (editable), its colors as
@@ -52,10 +55,13 @@ One-off pairs
   beside a filled cell; none while nothing is checked (ADR 21).
 - **Empty cells** are faded, not hidden, still at a readable
   contrast.
-- **Checks**: the table of ADR 20 for each rule, all listed, in
-  the grid's order, under "Text on Surfaces · Body text" and its
-  status. A rule without checked pairs is left out: the grid
-  shows it, and one hint replaces every "No pair yet".
+- **Checks**: one table (amended after the first build, which had
+  a table per rule), the combination first, then a column per
+  variant. Each rule, in the grid's order, then each use of the
+  one-off pairs, is a title spanning the row ("Text on Surfaces ·
+  Body text" and its status) over a row per combination, as ADR
+  20 draws them. A rule without checked pairs is left out: the
+  grid shows it, and one hint replaces every "No pair yet".
 - **Names**: each select is labelled by its couple ("Text on
   Surfaces", "Text among themselves").
 - **Narrow panels**: the grid scrolls sideways, role names
