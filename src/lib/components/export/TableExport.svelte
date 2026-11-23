@@ -102,7 +102,8 @@
 		overflow-x: auto;
 	}
 
-	td {
+	td,
+	th {
 		white-space: nowrap;
 	}
 
