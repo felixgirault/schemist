@@ -14,6 +14,7 @@
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
+	import Swatch from './Swatch.svelte';
 	import './tree.css';
 
 	interface Props {
@@ -161,6 +162,21 @@
 		{#if hasOptions}
 			<NodeOptions id={optionsId} {node} />
 		{/if}
+
+		{#if isPreset}
+			{@const colors = Object.entries(node.generated)}
+			<details class="colors" open>
+				<summary>{colors.length} colors</summary>
+				<ul>
+					{#each colors as [colorId, { color, name }] (colorId)}
+						<li>
+							<Swatch id={colorId} {color} />
+							{name}
+						</li>
+					{/each}
+				</ul>
+			</details>
+		{/if}
 	</div>
 
 	{#if node.children.length}
@@ -220,6 +236,21 @@
 <style>
 	.isHidden > .self .title {
 		opacity: 0.5;
+	}
+
+	.isHidden > .self .colors {
+		opacity: 0.5;
+	}
+
+	.colors summary {
+		cursor: pointer;
+		font-size: 0.9rem;
+	}
+
+	.colors ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
 
 	.mark {

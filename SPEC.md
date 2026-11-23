@@ -888,6 +888,13 @@ colors, top to bottom) and name, then actions:
   anchor positioning is supported. Neither is open by default.
 - The name is editable in place (Enter or blur commits). The hint
   reads "Insert parent color name with $." on child nodes.
+- A preset lists its colors under its row (ADR 23), read-only: a
+  native `<details>`, open by default and not saved, summarised
+  as "9 colors", a line each in the order of `generated` (flat:
+  ids don't hold the template's nesting) with a swatch (`Swatch`
+  takes the `color` for one the palette doesn't list, a hidden
+  preset's) and its name; dimmed on a hidden preset. Hidden
+  template colors have no line.
 - A root without children shows a "Start by adding matching
   colors" call to action.
 - With variants (§5.4), the **Palette** header holds the variant
@@ -1159,7 +1166,8 @@ server-side render of the Pairs panel. Unit tests of
 `exportTokens` cover nesting, empty parts, `$` parts, conflicts
 and duplicates (with no color dropped, whatever the tree order);
 `names.test.ts` renders the tokens export and its conflict
-notice. Export components are rendered server-side; there are no
+notice. `palette/Node.test.ts` renders a preset's list of colors
+(ADR 23). Export components are rendered server-side; there are no
 browser or end-to-end tests. A core test asserts that `evaluate`
 matches `collectOutputs` for every preset, and store tests cover
 preset outputs, children and expanding. CLI tests cover tree
