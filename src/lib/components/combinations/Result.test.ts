@@ -95,6 +95,17 @@ test('shows a row per role, with its rules and colors', () => {
 	expect(html).toContain('+ Role');
 });
 
+test('draws a difference card as two swatches, not text on a background', () => {
+	const html = render(Result).body;
+
+	// Red & Blue, the Series among themselves; Text on Surfaces keeps
+	// its colors.
+	expect(html.match(/combination--difference/g)).toHaveLength(
+		1
+	);
+	expect(html.match(/class="swatches\b/g)).toHaveLength(1);
+});
+
 test('offers Override on a rule card, Remove pair on a one-off', () => {
 	expect(render(Result).body).toContain('Override');
 	expect(render(Result).body).not.toContain('Remove pair');

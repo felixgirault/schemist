@@ -104,6 +104,10 @@
 				rows={rowsOf(check.checks, (c) => c.level)}
 				simulations={simulationsOf(check)}
 				onPreview={handlePreview}
+				isDifference={check.checks.length > 0 &&
+					check.checks.every(
+						({target}) => target === 'difference'
+					)}
 			>
 				{@const names = `${check.fg.name} on ${check.bg.name}`}
 				{#if check.pair.sources.oneOff}

@@ -845,7 +845,11 @@ requirement with its cards underneath.
   own colors, with names, and a row per target
   (`{name, level, met?}`): grade and level (rounded to 1 decimal,
   APCA prefixed by `APCA`), followed by "met" or "not met"; then
-  one strip per simulation with its own rows.
+  one strip per simulation with its own rows. A pair whose
+  targets are all `difference` (`isDifference`) is not text on a
+  background: its card is in the page's colors, with the two
+  colors as swatches side by side, under its names and in each
+  strip, so that close colors stay readable.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.

@@ -33,6 +33,9 @@
 		rows: Row[];
 		simulations: Simulation[];
 		onPreview: (uid: string) => void;
+		// Two areas side by side, not text on a background: a
+		// difference is between two colors, not one drawn on the other.
+		isDifference?: boolean;
 		// Actions and fields of the pair, under its levels
 		children?: Snippet;
 	}
@@ -46,8 +49,14 @@
 		rows,
 		simulations,
 		onPreview,
+		isDifference = false,
 		children
 	}: Props = $props();
+
+	const colorsOf = (bg: RgbColor, fg: RgbColor) =>
+		isDifference
+			? ''
+			: `background: ${formatRgbToHex(bg)}; color: ${formatRgbToHex(fg)};`;
 </script>
 
 {#snippet levels(list: Row[])}
@@ -65,11 +74,17 @@
 	{/each}
 {/snippet}
 
+{#snippet swatches(fg: RgbColor, bg: RgbColor)}
+	<span class="swatches" aria-hidden="true">
+		<span style="background: {formatRgbToHex(fg)};"></span>
+		<span style="background: {formatRgbToHex(bg)};"></span>
+	</span>
+{/snippet}
+
 <div
 	class="combination elevated"
-	style="background: {formatRgbToHex(
-		bg
-	)}; color: {formatRgbToHex(fg)};"
+	class:combination--difference={isDifference}
+	style={colorsOf(bg, fg)}
 >
 	<div class="inner">
 		<p class="colors">
@@ -77,6 +92,10 @@
 			<br />
 			& {bgName}
 		</p>
+
+		{#if isDifference}
+			{@render swatches(fg, bg)}
+		{/if}
 
 		<p class="level level--withPreview">
 			<span class="levels">
@@ -100,9 +119,7 @@
 			{#each simulations as { type, bg, fg, rows }}
 				<li
 					class="simulation simulation--{type}"
-					style="background: {formatRgbToHex(
-						bg
-					)}; color: {formatRgbToHex(fg)};"
+					style={colorsOf(bg, fg)}
 				>
 					<strong class="simulation-type">
 						{type}
@@ -111,6 +128,9 @@
 					<span class="levels">
 						{@render levels(rows)}
 					</span>
+					{#if isDifference}
+						{@render swatches(fg, bg)}
+					{/if}
 				</li>
 			{/each}
 		</ul>
@@ -122,6 +142,32 @@
 		overflow: hidden;
 		border-radius: var(--radius);
 		contain: style paint;
+	}
+
+	.combination--difference {
+		border: 1px solid currentColor;
+	}
+
+	.swatches {
+		display: flex;
+		height: 2.5rem;
+		margin-bottom: 0.5rem;
+		overflow: hidden;
+		border-radius: var(--radius);
+	}
+
+	.swatches span {
+		flex: 1;
+	}
+
+	.simulation .swatches {
+		width: 3rem;
+		height: 1rem;
+		margin: 0;
+	}
+
+	.combination--difference .simulation {
+		border-top: 1px solid currentColor;
 	}
 
 	.inner {
@@ -172,6 +218,7 @@
 		display: flex;
 		flex-direction: row-reverse;
 		justify-content: space-between;
+		gap: 1ch;
 		padding: 0.5rem 1rem;
 	}
 
