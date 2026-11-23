@@ -14,6 +14,7 @@
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
+	import './tree.css';
 
 	interface Props {
 		node: Node;
@@ -76,7 +77,7 @@
 	};
 </script>
 
-<article class:isHidden={node.isHidden}>
+<article class="tree-node" class:isHidden={node.isHidden}>
 	<div class="output" class:isPreset style={outputStyle}></div>
 
 	<div class="self">
@@ -207,72 +208,12 @@
 {/if}
 
 <style>
-	article {
-		display: grid;
-		grid-template-columns: min-content auto;
-		grid-template-rows: auto auto;
-		grid-template-areas:
-			'output self'
-			'output children';
-		column-gap: 0.75rem;
-		animation: slide-up 250ms ease-out;
-		contain: style;
-	}
-
-	.self {
-		grid-area: self;
-		display: flex;
-		flex-direction: column;
-	}
-
-	header {
-		display: flex;
-		align-items: center;
-		border-radius: var(--radius);
-		gap: 3ch;
-	}
-
-	.title {
-		flex-grow: 1;
-	}
-
 	.isHidden > .self .title {
 		opacity: 0.5;
 	}
 
-	.name {
-		font-size: 1em;
-		font-weight: bold;
-	}
-
-	.label {
-		text-transform: lowercase;
-		line-height: 1rem;
-		font-variant: small-caps;
-		font-size: 0.9rem;
-		font-weight: normal;
-		letter-spacing: 0.04ch;
-	}
-
-	@media screen and (min-width: 30rem) {
-		.title {
-			display: flex;
-			flex-direction: column;
-		}
-	}
-
 	.args {
 		font-size: 0.74em;
-	}
-
-	.output {
-		grid-area: output;
-		place-self: stretch;
-		box-sizing: border-box;
-		border-radius: var(--radius);
-		width: 0.75rem;
-		min-height: 1.5rem;
-		background: var(--output);
 	}
 
 	.isHidden > .output {
@@ -283,20 +224,9 @@
 		);
 	}
 
-	.output.isPreset {
-		background: var(--outputs);
-	}
-
 	/* Stripes can't be drawn in several colors. */
 	.isHidden > .output.isPreset {
+		background: var(--outputs);
 		opacity: 0.25;
-	}
-
-	.children {
-		grid-area: children;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		margin-top: 0.5rem;
 	}
 </style>

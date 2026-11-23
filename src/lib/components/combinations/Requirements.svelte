@@ -1,34 +1,40 @@
 <script lang="ts">
-	import {formatRgbToHex} from '#lib/color/formatting.js';
+	import {
+		formatRgbToHex,
+		formatSchemist
+	} from '#lib/color/formatting.js';
+	import AddIcon from '#lib/components/icons/AddIcon.svelte';
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
+	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
-	import type {AppRole} from '#lib/core/nodes.js';
+	import '#lib/components/palette/tree.css';
+	import type {AppRole, AppRule} from '#lib/core/nodes.js';
 	import {uses} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
+	import {discreteGradient} from '#lib/utils/css.js';
 	import type {Snippet} from 'svelte';
 
 	interface Props {
-		// Draws the pairs under each rule and in the one-off groups.
+		// Draws the pairs under each role and in the one-off groups.
 		pairs: Snippet<[PairCheck[]]>;
 	}
 
 	let {pairs}: Props = $props();
 
-	// Rules shown with their roles and failing pairs.
-	let expanded = $state<string[]>([]);
 	// The role a color is being picked for, and the search.
 	let picking = $state<string | null>(null);
 	let query = $state('');
 
-	// The new rule: a role id, or `new` (named in its field), or for
-	// the second role `self`.
-	let fg = $state('');
-	let bg = $state('self');
+	// The role a rule is being added to, with the form: the role it is
+	// on (an id, `self` or `new`, named in its field) and the use.
+	let ruling = $state<string | null>(null);
+	let on = $state('self');
+	let newOn = $state('');
 	let use = $state<string>(uses[0].id);
-	let newFg = $state('');
-	let newBg = $state('');
+	let isAddingRole = $state(false);
+	let newRole = $state('');
 	let error = $state('');
 
 	let byId = $derived(
@@ -37,18 +43,29 @@
 	let names = $derived(
 		new Map(palette.allColors.map(({id, name}) => [id, name]))
 	);
-	let chosenFg = $derived(fg || palette.roles[0]?.id || 'new');
 
-	const toggle = (id: string) => {
-		expanded = expanded.includes(id)
-			? expanded.filter((e) => e !== id)
-			: [...expanded, id];
+	const outputOf = (id: string) => {
+		const color = byId.get(id);
+
+		return color
+			? `--output: ${formatRgbToHex(color.rgbColor)};`
+			: '';
 	};
 
-	const usedBy = (role: AppRole) =>
+	// The role shows its colors, top to bottom, like a preset.
+	const outputsOf = (role: AppRole) =>
+		`--outputs: ${discreteGradient(
+			role.colors.flatMap((id) => byId.get(id)?.color ?? []),
+			180
+		)};`;
+
+	const rulesOf = (role: AppRole) =>
+		palette.rules.filter(({fg}) => fg === role.id);
+
+	const usedOn = (role: AppRole) =>
 		palette.rules.filter(
-			({fg, bg}) => fg === role.id || bg === role.id
-		).length;
+			({fg, bg}) => bg === role.id && fg !== role.id
+		);
 
 	const candidates = (role: AppRole) =>
 		palette.colors.filter(
@@ -59,9 +76,10 @@
 					.includes(query.trim().toLowerCase())
 		);
 
-	const pick = (role: AppRole, id: string) => {
-		palette.addMember(role.id, id);
-	};
+	const failing = (rule: AppRule) =>
+		(combinations.ruleChecks.get(rule.id) ?? []).some(
+			({pass}) => !pass
+		);
 
 	const handleRename = (role: AppRole, event: Event) => {
 		const input = event.currentTarget as HTMLInputElement;
@@ -71,32 +89,44 @@
 		}
 	};
 
-	// The role of a menu, created when it is `new`.
-	const roleOf = (choice: string, name: string) =>
-		choice === 'new' ? palette.addRole(name) : choice;
+	const toggleRuling = (role: AppRole) => {
+		ruling = ruling === role.id ? null : role.id;
+		on = 'self';
+		newOn = '';
+		error = '';
+	};
 
-	const handleAdd = (event: SubmitEvent) => {
+	const handleAddRule = (role: AppRole, event: SubmitEvent) => {
 		event.preventDefault();
 
-		const from = roleOf(chosenFg, newFg);
-		const to = bg === 'self' ? undefined : roleOf(bg, newBg);
+		const to =
+			on === 'self'
+				? undefined
+				: on === 'new'
+					? palette.addRole(newOn)
+					: on;
 
-		// a name taken or empty: nothing was added but the first role
-		if (!from || (bg !== 'self' && !to)) {
+		if (on === 'new' && !to) {
 			error =
 				'A new role needs a name that no other role has.';
-			if (from && chosenFg === 'new')
-				palette.deleteRole(from);
 			return;
 		}
 
-		error = '';
-		const id = palette.addRule(from, to, use);
+		palette.addRule(role.id, to, use);
+		ruling = null;
+	};
 
-		expanded = [...expanded, id];
-		fg = from;
-		bg = to ?? 'self';
-		newFg = newBg = '';
+	const handleAddRole = (event: SubmitEvent) => {
+		event.preventDefault();
+
+		if (!palette.addRole(newRole)) {
+			error = 'A role needs a name that no other role has.';
+			return;
+		}
+
+		isAddingRole = false;
+		newRole = '';
+		error = '';
 	};
 </script>
 
@@ -120,89 +150,235 @@
 	{/if}
 {/snippet}
 
-{#snippet roleEditor(role: AppRole)}
-	{@const count = usedBy(role)}
-	<div class="role" role="group" aria-label="Role {role.name}">
-		<input
-			aria-label="Role name"
-			value={role.name}
-			onchange={(event) => handleRename(role, event)}
-		/>
-		<ul class="chips">
-			{#each role.colors as id (id)}
-				<li>
-					{@render swatch(id)}
-					{names.get(id)}
-					<button
-						class="button"
-						aria-label="Remove {names.get(
-							id
-						)} from {role.name}"
-						onclick={() =>
-							palette.removeMember(role.id, id)}
-					>
-						×
-					</button>
-				</li>
-			{/each}
-			<li>
-				<button
-					class="button"
-					aria-label="Add a color to {role.name}"
-					aria-expanded={picking === role.id}
-					onclick={() => {
-						picking = picking === role.id ? null : role.id;
-						query = '';
-					}}
-				>
-					+
-				</button>
-			</li>
-		</ul>
-		{#if picking === role.id}
-			<div
-				role="group"
-				aria-label="Colors to add to {role.name}"
-			>
-				<input
-					type="search"
-					aria-label="Search colors"
-					onkeydown={(event) => {
-						if (event.key === 'Escape') picking = null;
-					}}
-					placeholder="Search"
-					bind:value={query}
-				/>
-				<ul class="picker">
-					{#each candidates(role) as { id, name } (id)}
-						<li>
-							<button
-								class="button"
-								onclick={() => pick(role, id)}
+{#snippet roleRow(role: AppRole)}
+	{@const rules = rulesOf(role)}
+	{@const others = usedOn(role)}
+	{@const count = palette.rules.filter(
+		({fg, bg}) => fg === role.id || bg === role.id
+	).length}
+	<article class="tree-node">
+		<div class="output isPreset" style={outputsOf(role)}></div>
+
+		<div class="self">
+			<header>
+				<div class="title">
+					<div class="name">
+						<input
+							aria-label="Role name"
+							value={role.name}
+							onchange={(event) =>
+								handleRename(role, event)}
+						/>
+					</div>
+
+					<p class="label meta">
+						{#each rules as rule (rule.id)}
+							{@const {use: useName} =
+								combinations.describeRule(rule)}
+							{@const to = palette.roles.find(
+								({id}) => id === rule.bg
+							)}
+							<span
+								class="rule"
+								role="group"
+								aria-label="Rule {role.name} {to
+									? `on ${to.name}`
+									: 'among themselves'}"
+								onpointerenter={() =>
+									(combinations.ruleId = rule.id)}
+								onpointerleave={() =>
+									(combinations.ruleId = null)}
+								onfocusin={() =>
+									(combinations.ruleId = rule.id)}
+								onfocusout={() =>
+									(combinations.ruleId = null)}
 							>
-								{@render swatch(id)}
-								{name}
-							</button>
-						</li>
-					{:else}
-						<li class="hint">No other color.</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-		{#if count > 1}
-			<p class="hint">Used by {count} rules.</p>
-		{/if}
-		<button
-			class="button"
-			aria-label="Delete role {role.name}"
-			onclick={() => palette.deleteRole(role.id)}
-		>
-			Delete role{count
-				? ` and its ${count} rule${count > 1 ? 's' : ''}`
-				: ''}
-		</button>
-	</div>
+								{to
+									? `on ${to.name}`
+									: 'among themselves'} · {useName}
+								{@render status(!failing(rule))}
+								<button
+									class="button button--small"
+									aria-label="Remove rule {role.name} {to
+										? `on ${to.name}`
+										: 'among themselves'}, {useName}"
+									onclick={() =>
+										palette.removeRule(rule.id)}
+								>
+									×
+								</button>
+							</span>
+						{/each}
+						{#if others.length}
+							<span>
+								used by {others
+									.map(
+										(rule) =>
+											combinations.describeRule(rule)
+												.label
+									)
+									.join(', ')}
+							</span>
+						{/if}
+						<button
+							class="button button--small"
+							aria-expanded={ruling === role.id}
+							onclick={() => toggleRuling(role)}
+						>
+							+ rule
+						</button>
+					</p>
+				</div>
+
+				<div class="button-list">
+					<button
+						class="button button--icon"
+						type="button"
+						aria-label="Add a color to {role.name}"
+						aria-expanded={picking === role.id}
+						title="Add a color to this role"
+						onclick={() => {
+							picking =
+								picking === role.id ? null : role.id;
+							query = '';
+						}}
+					>
+						<AddIcon />
+					</button>
+					<button
+						class="button button--icon"
+						type="button"
+						aria-label="Delete role {role.name}"
+						title="Delete this role{count
+							? ` and its ${count} rule${count > 1 ? 's' : ''}`
+							: ''}"
+						onclick={() => palette.deleteRole(role.id)}
+					>
+						<CloseIcon />
+					</button>
+				</div>
+			</header>
+
+			{#if ruling === role.id}
+				<form
+					onsubmit={(event) => handleAddRule(role, event)}
+				>
+					<label>
+						{role.name} on
+						<select bind:value={on}>
+							{#each palette.roles.filter(({id}) => id !== role.id) as { id, name } (id)}
+								<option value={id}>{name}</option>
+							{/each}
+							<option value="self">
+								Among themselves
+							</option>
+							<option value="new">New role…</option>
+						</select>
+					</label>
+					{#if on === 'new'}
+						<label>
+							New role name
+							<input bind:value={newOn} />
+						</label>
+					{/if}
+					<label>
+						For
+						<select bind:value={use}>
+							{#each uses as { id, name } (id)}
+								<option value={id}>{name}</option>
+							{/each}
+						</select>
+					</label>
+					{#if error}
+						<p role="alert">{error}</p>
+					{/if}
+					<button class="button" type="submit">
+						Add rule
+					</button>
+				</form>
+			{/if}
+
+			{#if picking === role.id}
+				<div
+					role="group"
+					aria-label="Colors to add to {role.name}"
+				>
+					<input
+						type="search"
+						aria-label="Search colors"
+						onkeydown={(event) => {
+							if (event.key === 'Escape') picking = null;
+						}}
+						placeholder="Search"
+						bind:value={query}
+					/>
+					<ul class="picker">
+						{#each candidates(role) as { id, name } (id)}
+							<li>
+								<button
+									class="button"
+									onclick={() =>
+										palette.addMember(role.id, id)}
+								>
+									{@render swatch(id)}
+									{name}
+								</button>
+							</li>
+						{:else}
+							<li class="hint">No other color.</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
+		</div>
+
+		<div class="children">
+			{#each role.colors as id (id)}
+				<article
+					class="tree-node"
+					class:isHidden={!byId.has(id)}
+				>
+					<div class="output" style={outputOf(id)}></div>
+					<div class="self">
+						<header>
+							<div class="title">
+								<h4 class="name">{names.get(id)}</h4>
+							</div>
+							<div class="button-list">
+								<button
+									class="button button--icon"
+									type="button"
+									aria-label="Remove {names.get(
+										id
+									)} from {role.name}"
+									title="Remove this color from the role"
+									onclick={() =>
+										palette.removeMember(role.id, id)}
+								>
+									<CloseIcon />
+								</button>
+							</div>
+						</header>
+					</div>
+				</article>
+			{/each}
+			{#each rules as rule (rule.id)}
+				{@const checks =
+					combinations.ruleChecks.get(rule.id) ?? []}
+				{#if rules.length > 1}
+					<h4 class="h3">
+						{combinations.describeRule(rule).label}, {combinations.describeRule(
+							rule
+						).use}
+					</h4>
+				{/if}
+				{#if !checks.length}
+					<p class="hint">No pair yet: add colors.</p>
+				{/if}
+				{@render pairs(checks)}
+			{/each}
+		</div>
+	</article>
 {/snippet}
 
 <section
@@ -211,113 +387,34 @@
 >
 	<h3 class="h3" id="requirements-title">Requirements</h3>
 
-	<ul class="rules">
-		{#each palette.rules as rule (rule.id)}
-			{@const {label, use: useName} =
-				combinations.describeRule(rule)}
-			{@const checks =
-				combinations.ruleChecks.get(rule.id) ?? []}
-			{@const failing = checks.filter(({pass}) => !pass)}
-			{@const isOpen = expanded.includes(rule.id)}
-			{@const from = palette.roles.find(
-				(r) => r.id === rule.fg
-			)}
-			{@const to = palette.roles.find(
-				(r) => r.id === rule.bg
-			)}
-			<li
-				class="rule"
-				onpointerenter={() =>
-					(combinations.ruleId = rule.id)}
-				onpointerleave={() => (combinations.ruleId = null)}
-				onfocusin={() => (combinations.ruleId = rule.id)}
-				onfocusout={() => (combinations.ruleId = null)}
-			>
-				<div class="head">
-					<button
-						class="button"
-						aria-expanded={isOpen}
-						aria-controls="rule-{rule.id}"
-						onclick={() => toggle(rule.id)}
-					>
-						{isOpen ? '▾' : '▸'}
-						{label}, {useName}
-						{@render status(!failing.length)}
-					</button>
-					<button
-						class="button"
-						aria-label="Remove rule {label}, {useName}"
-						onclick={() => palette.removeRule(rule.id)}
-					>
-						×
-					</button>
-				</div>
-				{#if isOpen}
-					<div id="rule-{rule.id}">
-						{#if from}{@render roleEditor(from)}{/if}
-						{#if to && to !== from}{@render roleEditor(
-								to
-							)}{/if}
-						{#if !checks.length}
-							<p class="hint">No pair yet: add colors.</p>
-						{/if}
-					</div>
-				{/if}
-				{@render pairs(checks)}
-			</li>
+	<div class="roles">
+		{#each palette.roles as role (role.id)}
+			{@render roleRow(role)}
 		{/each}
-	</ul>
+	</div>
 
-	<form onsubmit={handleAdd}>
-		<h4 class="h3">Add a rule</h4>
-		<label>
-			Role
-			<select
-				value={chosenFg}
-				onchange={(event) =>
-					(fg = event.currentTarget.value)}
-			>
-				{#each palette.roles as { id, name } (id)}
-					<option value={id}>{name}</option>
-				{/each}
-				<option value="new">New role…</option>
-			</select>
-		</label>
-		{#if chosenFg === 'new'}
+	{#if isAddingRole}
+		<form onsubmit={handleAddRole}>
 			<label>
 				New role name
-				<input bind:value={newFg} />
+				<input bind:value={newRole} />
 			</label>
-		{/if}
-		<label>
-			On
-			<select bind:value={bg}>
-				{#each palette.roles as { id, name } (id)}
-					<option value={id}>{name}</option>
-				{/each}
-				<option value="self">Among itself</option>
-				<option value="new">New role…</option>
-			</select>
-		</label>
-		{#if bg === 'new'}
-			<label>
-				New role name
-				<input bind:value={newBg} />
-			</label>
-		{/if}
-		<label>
-			For
-			<select bind:value={use}>
-				{#each uses as { id, name } (id)}
-					<option value={id}>{name}</option>
-				{/each}
-			</select>
-		</label>
-		{#if error}
-			<p role="alert">{error}</p>
-		{/if}
-		<button class="button" type="submit">+ Rule</button>
-	</form>
+			{#if error}
+				<p role="alert">{error}</p>
+			{/if}
+			<button class="button" type="submit">Add role</button>
+		</form>
+	{/if}
+	<button
+		class="button"
+		aria-expanded={isAddingRole}
+		onclick={() => {
+			isAddingRole = !isAddingRole;
+			error = '';
+		}}
+	>
+		+ Role
+	</button>
 
 	{#if combinations.requirements.length}
 		<h4 class="h3">One-off pairs</h4>
@@ -345,43 +442,40 @@
 </section>
 
 <style>
-	.rules,
-	.chips,
-	.picker {
-		padding: 0;
-		list-style: none;
+	.roles {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		margin-bottom: 1rem;
 	}
 
-	.chips {
+	.name input {
+		width: 100%;
+		border: 0;
+		padding: 0;
+		background: transparent;
+		font: inherit;
+		color: inherit;
+	}
+
+	.meta {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
-	}
-
-	.head {
-		display: flex;
-		gap: 0.25rem;
-	}
-
-	.rule {
-		margin-bottom: 0.5rem;
-	}
-
-	.role {
-		margin: 0.5rem 0;
-		padding-left: 0.5rem;
-		border-left: 2px solid currentColor;
+		align-items: center;
+		gap: 0 1ch;
 	}
 
 	.picker {
 		max-height: 10rem;
 		overflow: auto;
+		padding: 0;
+		list-style: none;
 	}
 
 	form {
 		display: grid;
 		gap: 0.5rem;
-		margin-block: 1rem;
+		margin-block: 0.5rem;
 	}
 
 	label {

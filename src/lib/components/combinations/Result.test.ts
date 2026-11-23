@@ -79,3 +79,17 @@ test('previews a pair, declared or not', () => {
 	expect(previewed?.bgName).toBe('White');
 	expect(combinations.previewed).toBeNull();
 });
+
+test('shows a row per role, with its rules and colors', () => {
+	const html = render(Result).body;
+	const plain = text(html);
+
+	expect(html).toContain('aria-label="Role name" value="Text"');
+	expect(plain).toContain('on Surfaces · Body text');
+	expect(plain).toContain('among themselves · Categories');
+	expect(plain).toContain('used by Text on Surfaces');
+	expect(html).toContain('aria-label="Delete role Text"');
+	expect(html).toContain('aria-label="Add a color to Series"');
+	expect(html).toContain('aria-label="Remove Black from Text"');
+	expect(html).toContain('+ Role');
+});

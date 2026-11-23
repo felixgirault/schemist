@@ -1,0 +1,72 @@
+/* A row of the colors tree, shared with the roles of the requirements. */
+.tree-node {
+	display: grid;
+	grid-template-columns: min-content auto;
+	grid-template-rows: auto auto;
+	grid-template-areas:
+		'output self'
+		'output children';
+	column-gap: 0.75rem;
+	animation: slide-up 250ms ease-out;
+	contain: style;
+}
+
+.tree-node > .self {
+	grid-area: self;
+	display: flex;
+	flex-direction: column;
+}
+
+.tree-node > .self > header {
+	display: flex;
+	align-items: center;
+	border-radius: var(--radius);
+	gap: 3ch;
+}
+
+.tree-node .title {
+	flex-grow: 1;
+}
+
+.tree-node .name {
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.tree-node .label {
+	text-transform: lowercase;
+	line-height: 1rem;
+	font-variant: small-caps;
+	font-size: 0.9rem;
+	font-weight: normal;
+	letter-spacing: 0.04ch;
+}
+
+@media screen and (min-width: 30rem) {
+	.tree-node .title {
+		display: flex;
+		flex-direction: column;
+	}
+}
+
+.tree-node > .output {
+	grid-area: output;
+	place-self: stretch;
+	box-sizing: border-box;
+	border-radius: var(--radius);
+	width: 0.75rem;
+	min-height: 1.5rem;
+	background: var(--output);
+}
+
+.tree-node > .output.isPreset {
+	background: var(--outputs);
+}
+
+.tree-node > .children {
+	grid-area: children;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}

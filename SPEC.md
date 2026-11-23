@@ -921,40 +921,50 @@ pairs only); a **Preview** button toggling `previewedUid` to
 color is gone.
 
 **The requirements** (`Requirements.svelte`) are a labelled
-region titled **Requirements**. Each rule is collapsed to one
-line: a disclosure button (`aria-expanded`) with the roles, the
-use and an icon with a text alternative (met when none of the
-rule's pairs fails, in the worst case of the selected
-simulations), and a button to remove the rule; then its cards,
-given as the `pairs` snippet: one combination card per pair
-(`ruleChecks`, nothing is measured again), in the real colors,
-each target with its grade, level and "met" or "not met", and one
+region titled **Requirements**, laid out like the colors tree
+(`Node.svelte`, sharing `palette/tree.css`): one row per role,
+then **One-off pairs**. A role's row has a preview on the left
+(its visible colors stacked, like a preset), its name as an input
+(labelled **Role name**, renamed on change, reverted if empty or
+taken), a meta line below, and on the right **Add a color to
+Role** (`+`, `aria-expanded`) opening a picker (a search field
+and the visible colors not in the role, as buttons with swatches;
+Esc closes it) and **Delete role Role** (also deletes its rules;
+the tooltip counts them). Its children are the member colors,
+each a tree row with its color preview, its name (hidden members
+by name, dimmed, without preview) and **Remove X from Role**;
+then, for each rule whose first role it is, the rule's cards,
+given as the `pairs` snippet (one combination card per pair,
+`ruleChecks`, nothing is measured again, in the real colors, each
+target with its grade, level and "met" or "not met", and one
 strip per selected simulation in simulated colors with its
-levels. Its Preview button toggles `previewedUid` to
-`<bgId>-<fgId>`. Expanded, a rule shows its roles (the one role
-once for a role among itself): a name field (rename, reverted if
-empty or taken), chips with the members' swatches and names, each
-with a **Remove X from Role** button, **Add a color to Role**
-(`+`) opening a picker, a search field and the visible colors not
-in the role, as buttons with swatches (Esc closes it), "Used by N
-rules" when shared, and **Delete role** (which also deletes its
-rules). Hovering or focusing a rule sets `ruleId`, and the grid
-draws a ring (`pair-cell--rule`, a box shadow in the highlight
-color) around exactly the cells of the rule's pairs, both orders
-for a role among itself. It also dims (`pair-cell--dim`, the
-colors only, not the marks) the cells of `dimmedCells`, which
-miss the rule's use whether declared or not; their accessible
-name says "misses the focused rule". Nothing is dimmed without a
-focused rule. The ring and the dimming mean one thing each: the
-rule's cells, and missing its use. **Add a rule** is a form: the
-role (all roles, **New role…** with a name field), **On** (all
-roles, **Among itself**, **New role…**) and the use; a new role
-needs a free name, else an alert and nothing is added. The new
-rule opens expanded. **One-off pairs** follow: the declared pairs
-that replace or add to rules, by use (`requirements`, Custom
-last, a pair under each use it holds), with their cards. Pairs
-with a hidden color follow as **Not checked, a color is hidden**.
-With nothing declared, a hint says to add a rule or open a cell.
+levels; its Preview button toggles `previewedUid` to
+`<bgId>-<fgId>`), under a heading naming the rule when the role
+has several. The meta line lists the rules where the role is the
+first one: "on Surfaces · Body text" or "among themselves ·
+Categories", an icon with a text alternative (met when none of
+the rule's pairs fails, in the worst case of the selected
+simulations) and **Remove rule** (`×`); then "used by Text on
+Surfaces" for the rules where it is only the second role; then
+**+ rule** (`aria-expanded`), a compact form: **on** (the other
+roles, **Among themselves**, **New role…** with a name field),
+**For** (the use) and **Add rule**; a new role needs a free name,
+else an alert and nothing is added. **+ Role**, at the end of the
+roles, opens a form with a name field (**Add role**, same alert).
+Hovering or focusing a rule in the meta line sets `ruleId`, and
+the grid draws a ring (`pair-cell--rule`, a box shadow in the
+highlight color) around exactly the cells of the rule's pairs,
+both orders for a role among itself. It also dims
+(`pair-cell--dim`, the colors only, not the marks) the cells of
+`dimmedCells`, which miss the rule's use whether declared or not;
+their accessible name says "misses the focused rule". Nothing is
+dimmed without a focused rule. The ring and the dimming mean one
+thing each: the rule's cells, and missing its use. **One-off
+pairs** follow: the declared pairs that replace or add to rules,
+by use (`requirements`, Custom last, a pair under each use it
+holds), with their cards. Pairs with a hidden color follow as
+**Not checked, a color is hidden**. With nothing declared, a hint
+says to add a rule or open a cell.
 
 ### 11.6 Theming
 
