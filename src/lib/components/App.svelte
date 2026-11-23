@@ -2,6 +2,7 @@
 	import BlindnessFilter from '#lib/components/combinations/BlindnessFilter.svelte';
 	import Combinations from '#lib/components/combinations/Combinations.svelte';
 	import LuminosityFilter from '#lib/components/combinations/LuminosityFilter.svelte';
+	import Result from '#lib/components/combinations/Result.svelte';
 	import Export from '#lib/components/export/Export.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
@@ -111,12 +112,7 @@
 
 	<section class="combinations">
 		<header>
-			<h2 class="h2">
-				Combinations <span>
-					({combinations.passingPairs} / {combinations
-						.pairChecks.length})
-				</span>
-			</h2>
+			<h2 class="h2">Combinations</h2>
 			<div class="toggles">
 				<BlindnessFilter />
 				<LuminosityFilter />
@@ -124,6 +120,25 @@
 		</header>
 
 		<Combinations />
+	</section>
+
+	<section
+		class="requirements"
+		aria-labelledby="requirements-title"
+	>
+		<header>
+			<h2 class="h2" id="requirements-title">
+				Requirements <span>
+					({combinations.passingPairs} / {combinations
+						.pairChecks.length})
+				</span>
+			</h2>
+		</header>
+
+		<!-- The panel class styles the card and the role chips -->
+		<div class="matrix-panel">
+			<Result />
+		</div>
 	</section>
 </main>
 
@@ -139,16 +154,36 @@
 {/if}
 
 <style>
+	/* The requirements go under the combinations, then beside them
+	once there is room for three panels. */
 	@media screen and (min-width: 55rem) {
 		main {
 			display: grid;
 			grid-template-columns: 45ch 1fr;
+			grid-template-areas:
+				'palette combinations'
+				'palette requirements';
+			align-items: start;
+		}
+
+		.palette {
+			grid-area: palette;
+		}
+
+		.combinations {
+			grid-area: combinations;
+			min-width: 0;
+		}
+
+		.requirements {
+			grid-area: requirements;
 		}
 	}
 
 	@media screen and (min-width: 80rem) {
 		main {
-			grid-template-columns: 50ch 1fr;
+			grid-template-columns: 50ch minmax(0, 1fr) 40ch;
+			grid-template-areas: 'palette combinations requirements';
 		}
 	}
 

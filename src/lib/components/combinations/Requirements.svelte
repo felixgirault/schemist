@@ -409,12 +409,7 @@
 	</article>
 {/snippet}
 
-<section
-	class="requirements"
-	aria-labelledby="requirements-title"
->
-	<h3 class="h3" id="requirements-title">Requirements</h3>
-
+<div class="requirements">
 	<div class="roles">
 		{#each palette.roles as role (role.id)}
 			{@render roleRow(role)}
@@ -467,7 +462,7 @@
 			open a cell and pick a use to declare a pair.
 		</p>
 	{/if}
-</section>
+</div>
 
 <style>
 	/* As tall as the text it follows */

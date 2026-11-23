@@ -773,11 +773,15 @@ compressing links is recorded in
 - Header: app name and baseline, **Dark/Light theme** toggle,
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
-- Two sections: **Palette** (tree, Export, Share, Undo and Redo
-  buttons) and **Combinations (met / checked)**: the declared
-  pairs that pass (`passingPairs`) over the declared pairs of
-  visible colors (`pairChecks`), with the **Simulate** and
-  **Grayscale** toggles (§11.5) in the section's header.
+- Three sections, each under a large title (`h2`): **Palette**
+  (tree, Export, Share, Undo and Redo buttons), **Combinations**
+  (the grid, with the **Simulate** and **Grayscale** toggles,
+  §11.5, in its header) and **Requirements (met / checked)**: the
+  declared pairs that pass (`passingPairs`) over the declared
+  pairs of visible colors (`pairChecks`), then the open cell's
+  card and the requirements (§11.5). From 55rem, Palette is a
+  column beside Combinations, with Requirements under it; from
+  80rem, the three are side by side.
 - Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
   `Z` redoes, except while editing text (text inputs, textareas,
   the editable node name), where native undo applies. Undo and
@@ -833,13 +837,14 @@ change.
 
 ### 11.5 Combinations panel
 
-One page, no mode (ADR 17): the grid beside the requirements,
-each requirement with its cards underneath. The panel
-(`Combinations.svelte`) is a single container (`matrix-panel`,
-which styles the grid, the card and the role chips) with the grid
-(`PairMatrix.svelte`) and the column (`Result.svelte`) side by
-side from a container width of 48rem, the grid above the column
-when narrower. Esc, from anywhere, closes the open cell's card.
+No mode (ADR 17): the grid beside the requirements, each
+requirement with its cards underneath. The grid
+(`Combinations.svelte` holding `PairMatrix.svelte`) and the
+requirements (`Result.svelte`: the open cell's card, then
+`Requirements.svelte`) are two sections of the page (§11.1), each
+in a `matrix-panel` container, which styles the grid, the card
+and the role chips. Esc, from anywhere, closes the open cell's
+card.
 
 - **Header toggles** (in `App.svelte`, always shown):
   **Simulate** with one toggle per simulation, **P**, **D**,
@@ -920,17 +925,17 @@ pairs only); a **Preview** button toggling `previewedUid` to
 `<bgId>-<fgId>`; and **Close**. The panel closes the card when a
 color is gone.
 
-**The requirements** (`Requirements.svelte`) are a labelled
-region titled **Requirements**, laid out like the colors tree
-(`Node.svelte`, sharing `palette/tree.css`): one row per role,
-then **One-off pairs**. A role's row has no preview (only its
-colors have one), its name as an input (labelled **Role name**,
-renamed on change, reverted if empty or taken), "used by Text on
-Surfaces" below it for the rules where it is only the second
-role, and on the right **Delete role Role** (also deletes its
-rules; the tooltip counts them). It has two children, tree rows
-without preview, each with an add button on the right
-(`aria-expanded`):
+**The requirements** (`Requirements.svelte`), in the
+**Requirements** section (§11.1, a region labelled by its title),
+are laid out like the colors tree (`Node.svelte`, sharing
+`palette/tree.css`): one row per role, then **One-off pairs**. A
+role's row has no preview (only its colors have one), its name as
+an input (labelled **Role name**, renamed on change, reverted if
+empty or taken), "used by Text on Surfaces" below it for the
+rules where it is only the second role, and on the right **Delete
+role Role** (also deletes its rules; the tooltip counts them). It
+has two children, tree rows without preview, each with an add
+button on the right (`aria-expanded`):
 
 - **Colors**, **Add a color to Role** opening a picker (a search
   field and the visible colors not in the role, as buttons with
