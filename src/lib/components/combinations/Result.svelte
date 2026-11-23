@@ -6,6 +6,7 @@
 	import type {TargetCheck} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
+	import {palette} from '#lib/stores/palette.svelte.js';
 	import PairCard from './PairCard.svelte';
 	import Requirements from './Requirements.svelte';
 	import './matrix.css';
@@ -50,6 +51,23 @@
 			rows: rowsOf(checks, (c) => c.simulated[i].level)
 		}));
 
+	// Declares the pair with the targets its rules give it, to edit it
+	// alone.
+	const handleOverride = (uid: string) => {
+		const {fg, bg, pair} = byUid(uid);
+
+		palette.setPair(fg.id, bg.id, pair);
+	};
+
+	const handleRemove = (uid: string) => {
+		const {fg, bg} = byUid(uid);
+
+		palette.setPair(fg.id, bg.id, {});
+	};
+
+	const byUid = (uid: string) =>
+		combinations.pairChecks.find(({id}) => id === uid)!;
+
 	const handlePreview = (uid: string) => {
 		combinations.previewedUid =
 			combinations.previewedUid === uid ? null : uid;
@@ -68,6 +86,13 @@
 				rows={rowsOf(check.checks, (c) => c.level)}
 				simulations={simulationsOf(check)}
 				onPreview={handlePreview}
+				onOverride={check.pair.sources.rules.length &&
+				!check.pair.sources.oneOff
+					? handleOverride
+					: undefined}
+				onRemove={check.pair.sources.oneOff
+					? handleRemove
+					: undefined}
 			/>
 		{/each}
 	</div>

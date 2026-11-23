@@ -32,6 +32,9 @@
 		rows: Row[];
 		simulations: Simulation[];
 		onPreview: (uid: string) => void;
+		// Replace the rules' targets on this pair, or remove the pair.
+		onOverride?: (uid: string) => void;
+		onRemove?: (uid: string) => void;
 	}
 
 	let {
@@ -42,7 +45,9 @@
 		fg,
 		rows,
 		simulations,
-		onPreview
+		onPreview,
+		onOverride,
+		onRemove
 	}: Props = $props();
 </script>
 
@@ -87,6 +92,18 @@
 				<PreviewIcon />
 			</button>
 		</p>
+
+		{#if onOverride}
+			<button class="button" onclick={() => onOverride(uid)}>
+				Override
+			</button>
+		{/if}
+
+		{#if onRemove}
+			<button class="button" onclick={() => onRemove(uid)}>
+				Remove pair
+			</button>
+		{/if}
 	</div>
 
 	{#if simulations.length}

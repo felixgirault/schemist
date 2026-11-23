@@ -1,4 +1,5 @@
 import {parseColor} from '#lib/color/parsing.js';
+import {uses} from '#lib/core/pairs.js';
 import {combinations} from '#lib/stores/combinations.svelte.js';
 import {collectNodes} from '#lib/stores/nodes.svelte.js';
 import {palette} from '#lib/stores/palette.svelte.js';
@@ -92,4 +93,36 @@ test('shows a row per role, with its rules and colors', () => {
 	expect(html).toContain('aria-label="Add a color to Series"');
 	expect(html).toContain('aria-label="Remove Black from Text"');
 	expect(html).toContain('+ Role');
+});
+
+test('offers Override on a rule card, Remove pair on a one-off', () => {
+	expect(render(Result).body).toContain('Override');
+	expect(render(Result).body).not.toContain('Remove pair');
+});
+
+test('shows One-off pairs and + Pair with no one-off pair', () => {
+	const html = text(render(Result).body);
+
+	expect(combinations.oneOffChecks).toHaveLength(0);
+	expect(html).toContain('One-off pairs');
+	expect(html).toContain('+ Pair');
+});
+
+test('declares a pair for a use, two different colors only', () => {
+	const grey = id('Grey');
+	const red = id('Red');
+	const body = uses.find(({id}) => id === 'body')!;
+	const pairOf = () =>
+		palette.pairs.find(
+			({fg, bg}) => fg === grey && bg === red
+		);
+
+	expect(combinations.addPair(grey, grey, body)).toBe(false);
+	expect(pairOf()).toBeUndefined();
+
+	expect(combinations.addPair(grey, red, body)).toBe(true);
+	expect(pairOf()).toMatchObject({wcag2: 4.5, apca: 75});
+	expect(text(render(Result).body)).toContain('Remove pair');
+
+	palette.setPair(grey, red, {});
 });

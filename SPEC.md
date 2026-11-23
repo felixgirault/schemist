@@ -434,6 +434,7 @@ expensive combination computations during slider drags.
 | `hiddenPairs`                                            | Declared pairs with a hidden color, left out of `pairChecks`                                                                                                                                                                          |
 | `toggleUse(fg, bg, use)`                                 | Sets every target of a built-in use (an entry of `uses`) on the pair, keeping its others, or removes them if it has them all at those values                                                                                          |
 | `requirements`                                           | The one-off pairs (`sources.oneOff`) of `pairChecks` by use: `{id, name, checks}` for each built-in use and Custom (last) with a pair, a pair under each use it holds (`for`)                                                         |
+| `addPair(fg, bg, use)`                                   | Declares the pair (ids) with every target of a use, keeping its other targets; `false`, nothing declared, for one color on itself                                                                                                     |
 | `ruleChecks`                                             | `Map` rule id → the `pairChecks` the rule is a source of                                                                                                                                                                              |
 | `ruleCells`                                              | `Map` rule id → `Set` of grid cells `<bgId>-<fgId>` of its pairs, plus the reverse of each for a role among itself                                                                                                                    |
 | `ruleId`, `outlinedCells`                                | The rule hovered or focused in the requirements (or `null`), and its cells, which the grid outlines                                                                                                                                   |
@@ -956,7 +957,10 @@ button on the right (`aria-expanded`):
   measured again, in the real colors, each target with its grade,
   level and "met" or "not met", and one strip per selected
   simulation in simulated colors with its levels; its Preview
-  button toggles `previewedUid` to `<bgId>-<fgId>`).
+  button toggles `previewedUid` to `<bgId>-<fgId>`; **Override**
+  on a card whose pair is not one-off declares it one-off with
+  the targets the rules give, to edit it alone; a one-off pair's
+  card has **Remove pair**).
 
 **+ Role**, at the end of the roles, opens a form with a name
 field (**Add role**, same alert). Hovering or focusing a rule's
@@ -968,11 +972,16 @@ of `dimmedCells`, which miss the rule's use whether declared or
 not; their accessible name says "misses the focused rule".
 Nothing is dimmed without a focused rule. The ring and the
 dimming mean one thing each: the rule's cells, and missing its
-use. **One-off pairs** follow: the declared pairs that replace or
-add to rules, by use (`requirements`, Custom last, a pair under
-each use it holds), with their cards. Pairs with a hidden color
-follow as **Not checked, a color is hidden**. With nothing
-declared, a hint says to add a rule or open a cell.
+use. **One-off pairs** follow, always shown: **+ Pair** opens a
+compact form, a **Foreground** and a **Background** color (each a
+select of the visible colors by name, with a swatch of the chosen
+one) and **For** (the use), then **Add pair**, which calls
+`addPair` (one color on both sides gives an alert and nothing is
+declared). Under it, the declared pairs that replace or add to
+rules, by use (`requirements`, Custom last, a pair under each use
+it holds), with their cards. Pairs with a hidden color follow as
+**Not checked, a color is hidden**. With nothing declared, a hint
+says to add a rule or declare a pair.
 
 ### 11.6 Theming
 

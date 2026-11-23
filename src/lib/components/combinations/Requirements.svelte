@@ -36,6 +36,13 @@
 	let newRole = $state('');
 	let error = $state('');
 
+	// The one-off pair being added: its colors (ids) and use.
+	let isAddingPair = $state(false);
+	let pairFg = $state('');
+	let pairBg = $state('');
+	let pairUse = $state<string>(uses[0].id);
+	let pairError = $state('');
+
 	let byId = $derived(
 		new Map(palette.colors.map((color) => [color.id, color]))
 	);
@@ -106,6 +113,26 @@
 
 		palette.addRule(role.id, to, use);
 		ruling = null;
+	};
+
+	const toggleAddingPair = () => {
+		isAddingPair = !isAddingPair;
+		pairFg = palette.colors[0]?.id ?? '';
+		pairBg = palette.colors[1]?.id ?? '';
+		pairError = '';
+	};
+
+	const handleAddPair = (event: SubmitEvent) => {
+		event.preventDefault();
+
+		const use = uses.find(({id}) => id === pairUse)!;
+
+		if (!combinations.addPair(pairFg, pairBg, use)) {
+			pairError = 'A pair needs two different colors.';
+			return;
+		}
+
+		isAddingPair = false;
 	};
 
 	const handleAddRole = (event: SubmitEvent) => {
@@ -439,13 +466,56 @@
 		+ Role
 	</button>
 
-	{#if combinations.requirements.length}
-		<h4 class="h3">One-off pairs</h4>
-		{#each combinations.requirements as { id, name, checks } (id)}
-			<h5 class="h3">{name}</h5>
-			{@render pairs(checks)}
-		{/each}
+	<h4 class="h3">One-off pairs</h4>
+	{#if isAddingPair}
+		<form onsubmit={handleAddPair}>
+			<label>
+				Foreground
+				<span class="pick">
+					{@render swatch(pairFg)}
+					<select bind:value={pairFg}>
+						{#each palette.colors as { id, name } (id)}
+							<option value={id}>{name}</option>
+						{/each}
+					</select>
+				</span>
+			</label>
+			<label>
+				Background
+				<span class="pick">
+					{@render swatch(pairBg)}
+					<select bind:value={pairBg}>
+						{#each palette.colors as { id, name } (id)}
+							<option value={id}>{name}</option>
+						{/each}
+					</select>
+				</span>
+			</label>
+			<label>
+				For
+				<select bind:value={pairUse}>
+					{#each uses as { id, name } (id)}
+						<option value={id}>{name}</option>
+					{/each}
+				</select>
+			</label>
+			{#if pairError}
+				<p role="alert">{pairError}</p>
+			{/if}
+			<button class="button" type="submit">Add pair</button>
+		</form>
 	{/if}
+	<button
+		class="button"
+		aria-expanded={isAddingPair}
+		onclick={toggleAddingPair}
+	>
+		+ Pair
+	</button>
+	{#each combinations.requirements as { id, name, checks } (id)}
+		<h5 class="h3">{name}</h5>
+		{@render pairs(checks)}
+	{/each}
 
 	{#if combinations.hiddenPairs.length}
 		<h4 class="h3">Not checked, a color is hidden</h4>
@@ -459,7 +529,7 @@
 	{#if !palette.rules.length && !combinations.requirements.length && !combinations.hiddenPairs.length}
 		<p class="hint">
 			Add a rule to see its pairs as they will be used, or
-			open a cell and pick a use to declare a pair.
+			declare a one-off pair.
 		</p>
 	{/if}
 </div>
@@ -504,5 +574,11 @@
 	label {
 		display: grid;
 		gap: 0.25rem;
+	}
+
+	.pick {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 </style>

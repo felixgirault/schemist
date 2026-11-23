@@ -348,6 +348,19 @@ class Combinations {
 		palette.setPair(fg.id, bg.id, targets);
 	}
 
+	// Declares a pair for a use, keeping its other targets; false for
+	// one color on itself.
+	addPair(fg: string, bg: string, use: Use) {
+		if (fg === bg) return false;
+
+		const pair = palette.pairs.find(
+			(p) => p.fg === fg && p.bg === bg
+		);
+
+		palette.setPair(fg, bg, {...pair, ...use.targets});
+		return true;
+	}
+
 	// The pair of the preview, declared or not: a cell of the grid.
 	previewed = $derived.by(() => {
 		const uid = this.previewedUid;
