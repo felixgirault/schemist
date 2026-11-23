@@ -84,8 +84,13 @@ const surfaces = () => {
 test('renaming a role or removing a rule rewrites nothing else', () => {
 	const surfacesId = surfaces();
 	const textId = palette.roles[1].id;
-	const body = palette.addRule(textId, surfacesId, 'body');
-	const large = palette.addRule(textId, surfacesId, 'large');
+	const body = 'body';
+	const large = 'large';
+
+	palette.rules = [
+		{id: body, fg: textId, bg: surfacesId, use: 'body'},
+		{id: large, fg: textId, bg: surfacesId, use: 'large'}
+	];
 	const names = () =>
 		palette.expandedPairs.map(({fg, sources}) => [
 			fg,
@@ -103,7 +108,7 @@ test('renaming a role or removing a rule rewrites nothing else', () => {
 	expect(palette.rules).toBe(rulesBefore);
 	expect(names()).toHaveLength(2);
 
-	palette.removeRule(body);
+	palette.rules = palette.rules.filter(({id}) => id !== body);
 	expect(palette.expandedPairs[0]).toMatchObject({
 		wcag2: 3,
 		sources: {rules: [large]}
@@ -144,7 +149,7 @@ test('role members and rules are added, removed and undone', () => {
 	step(() => palette.addMember(id, node('Accent').id));
 	expect(palette.roles[0].colors).toHaveLength(2);
 
-	step(() => palette.addRule(textId, id, 'body'));
+	step(() => palette.setRule(textId, id, 'body'));
 	step(() => palette.removeMember(textId, node('Muted').id));
 	expect(palette.expandedPairs).toHaveLength(2);
 
@@ -159,16 +164,16 @@ test('role members and rules are added, removed and undone', () => {
 test('a couple is set in one change, in place, and undone', () => {
 	const id = surfaces();
 	const textId = palette.roles[1].id;
-	const other = palette.addRule(
-		textId,
-		undefined,
-		'categories'
-	);
+	const other = 'other';
+	const after = 'after';
 
-	palette.addRule(textId, id, 'body');
-	palette.addRule(textId, id, 'large');
-	palette.addRule(id, textId, 'large');
-	const after = palette.addRule(id, undefined, 'categories');
+	palette.rules = [
+		{id: other, fg: textId, use: 'categories'},
+		{id: 'a', fg: textId, bg: id, use: 'body'},
+		{id: 'b', fg: textId, bg: id, use: 'large'},
+		{id: 'c', fg: id, bg: textId, use: 'large'},
+		{id: after, fg: id, use: 'categories'}
+	];
 
 	history.reset(snapshot());
 
@@ -203,8 +208,8 @@ test('deleting a role deletes its rules', () => {
 	const id = surfaces();
 	const textId = palette.roles[1].id;
 
-	palette.addRule(textId, id, 'body');
-	palette.addRule(textId, undefined, 'categories');
+	palette.setRule(textId, id, 'body');
+	palette.setRule(textId, undefined, 'categories');
 	palette.deleteRole(id);
 
 	expect(palette.roles).toHaveLength(1);
@@ -215,7 +220,9 @@ test('deleting a role deletes its rules', () => {
 test('a one-off pair names the rules it overrides', () => {
 	const id = surfaces();
 	const textId = palette.roles[1].id;
-	const rule = palette.addRule(textId, id, 'body');
+	palette.setRule(textId, id, 'body');
+
+	const rule = palette.rules[0].id;
 
 	palette.setPair(node('Text').id, node('Bg').id, {wcag2: 3});
 

@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		formatRgbToHex,
-		formatSchemist
-	} from '#lib/color/formatting.js';
+	import {formatRgbToHex} from '#lib/color/formatting.js';
 	import AddIcon from '#lib/components/icons/AddIcon.svelte';
 	import CheckIcon from '#lib/components/icons/CheckIcon.svelte';
 	import CloseIcon from '#lib/components/icons/CloseIcon.svelte';
@@ -42,14 +39,6 @@
 	let names = $derived(
 		new Map(palette.allColors.map(({id, name}) => [id, name]))
 	);
-
-	const outputOf = (id: string) => {
-		const color = byId.get(id);
-
-		return color
-			? `--output: ${formatRgbToHex(color.rgbColor)};`
-			: '';
-	};
 
 	const candidates = (role: AppRole) =>
 		palette.colors.filter(
@@ -322,7 +311,7 @@
 {/snippet}
 
 <div class="requirements">
-	<h4 class="h3">Roles</h4>
+	<h3 class="h3">Roles</h3>
 	<ul class="roles">
 		{#each palette.roles as role (role.id)}
 			{@render roleRow(role)}
@@ -353,9 +342,9 @@
 	</button>
 
 	{#if palette.roles.length}
-		<h4 class="h3">Targets</h4>
+		<h3 class="h3">Targets</h3>
 		<div class="scroll">
-			<table>
+			<table class="targets">
 				<thead>
 					<tr>
 						<td></td>
@@ -376,6 +365,7 @@
 								{@const value = valueOf(rules)}
 								<td>
 									<select
+										class:empty={!value}
 										aria-label={row.id === col.id
 											? `${row.name} among themselves`
 											: `${row.name} on ${col.name}`}
@@ -410,7 +400,7 @@
 	{/if}
 
 	{#if groups.length || palette.rules.length}
-		<h4 class="h3">Checks</h4>
+		<h3 class="h3">Checks</h3>
 		{@render pairs(groups, status)}
 		{#if gridRules.some(({id}) => !combinations.ruleChecks.get(id)?.length)}
 			<p class="hint">
@@ -419,7 +409,7 @@
 		{/if}
 	{/if}
 
-	<h4 class="h3">One-off pairs</h4>
+	<h3 class="h3">One-off pairs</h3>
 	{#if isAddingPair}
 		<form onsubmit={handleAddPair}>
 			<label>
@@ -467,7 +457,7 @@
 	</button>
 
 	{#if combinations.hiddenPairs.length}
-		<h4 class="h3">Not checked, a color is hidden</h4>
+		<h3 class="h3">Not checked, a color is hidden</h3>
 		<ul>
 			{#each combinations.hiddenPairs as { id, fg, bg } (id)}
 				<li>{fg} on {bg}</li>
@@ -500,8 +490,47 @@
 		vertical-align: middle;
 	}
 
+	h3 {
+		margin-top: 2rem;
+		margin-bottom: 0.5rem;
+		font-size: 1.6rem;
+		line-height: 1.3;
+	}
+
 	.scroll {
 		overflow-x: auto;
+	}
+
+	/* In the panel's font, not the export table's; compact */
+	.targets {
+		width: auto;
+		font-family: var(--font-sans);
+	}
+
+	.targets th,
+	.targets td {
+		padding: 0.25rem;
+		font-family: inherit;
+		white-space: nowrap;
+	}
+
+	.targets th[scope='row'] {
+		position: sticky;
+		left: 0;
+		z-index: 1;
+		padding-right: 0.5rem;
+		background: var(--bg);
+	}
+
+	.targets select {
+		width: 7.5rem;
+		font-size: 0.85rem;
+	}
+
+	/* Faded, not hidden: still 4.5:1 against the field */
+	.targets select.empty:not(:hover, :focus-visible) {
+		color: color-mix(in srgb, var(--fg) 70%, var(--bg-hard));
+		box-shadow: inset 0 0 0 1px var(--bg-neutral);
 	}
 
 	.roles {
@@ -521,6 +550,7 @@
 	}
 
 	.chips {
+		flex: 1;
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;

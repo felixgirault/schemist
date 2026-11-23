@@ -176,8 +176,10 @@
 								scope="rowgroup"
 								colspan={variants.length + 1}
 							>
-								{title}
-								{@render status(rules)}
+								<span class="title">
+									{title}
+									{@render status(rules)}
+								</span>
 							</th>
 						</tr>
 						{#each checks as check (check.id)}
@@ -281,12 +283,30 @@
 		white-space: nowrap;
 	}
 
+	th[scope='row'] {
+		position: sticky;
+		left: 0;
+		z-index: 1;
+		background: var(--bg);
+	}
+
+	/* Stays at the left of a table that scrolls sideways */
+	.title {
+		position: sticky;
+		left: 0;
+		display: inline-flex;
+		gap: 0.5ch;
+		align-items: center;
+	}
+
 	.group {
 		padding-top: 1rem;
 		font-weight: bold;
 	}
 
 	th .button {
+		display: inline-flex;
+		vertical-align: middle;
 		margin-left: 0.5ch;
 		font-size: 0.8rem;
 	}

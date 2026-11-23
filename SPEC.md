@@ -454,14 +454,13 @@ is empty or taken, names being what a permalink holds),
 `renameRole(id, name)` (false when empty or taken),
 `deleteRole(id)` (also deletes its rules),
 `addMember(roleId, colorId)`, `removeMember`,
-`addRule(fg, bg | undefined, use)` (no `bg`, or `bg` equal to
-`fg`, is a role among itself), `removeRule(id)` and
-`setRule(fg, bg | undefined, use?)`, which replaces the rules of
-a couple with one of `use` (in place of the first, else at the
-end) or with none, in one change. A role member whose name is
-shared by several colors is left out of the saved role until
-renamed, and listed in `unsavedMembers`; the pairs notice lists
-it with the unsaved pairs' names.
+`setRule(fg, bg | undefined, use?)` (no `bg`, or `bg` equal to
+`fg`, is a role among itself), which replaces the rules of a
+couple with one of `use` (in place of the first, else at the end)
+or with none, in one change. A role member whose name is shared
+by several colors is left out of the saved role until renamed,
+and listed in `unsavedMembers`; the pairs notice lists it with
+the unsaved pairs' names.
 
 **Pairs hold color ids, never names.** `ColorPair` has no name
 field, so a pair cannot go out of sync with its colors: a rename
@@ -933,7 +932,8 @@ No grid (ADR 18): the requirements are a section of the page
 (§11.1), `Result.svelte` holding `Requirements.svelte`, with
 every pair checked in one table (ADR 20, 22; simulation rows,
 sticky headers and the selected column's highlight are still to
-come).
+come). Its headings (Roles, Targets, Checks, One-off pairs) are
+`h3`, under the section's `h2`, larger and with space above.
 
 - **Header toggles** (in `App.svelte`, in the Requirements header
   beside the title, wrapping under it on narrow panels, always
@@ -962,7 +962,9 @@ come).
   its cell is in the page's colors, with the two colors as a
   small swatch pair before its level. The table uses the panel's
   font, not the export table's, and scrolls sideways when wider
-  than the panel.
+  than the panel, the row headers and the group titles staying at
+  the left (sticky, on the page's background). The scroll
+  container has no `tabindex`: it holds focusable buttons.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
@@ -972,8 +974,7 @@ come).
 
 **The requirements** (`Requirements.svelte`), in the
 **Requirements** section (§11.1, a region labelled by its title),
-are three flat sections (ADR 22; sticky names and fading are
-still to come), then **One-off pairs**.
+are three flat sections (ADR 22), then **One-off pairs**.
 
 - **Roles**: one line per role: its name as an input (**Role
   name**, renamed on change, reverted if empty or taken), its
@@ -981,14 +982,20 @@ still to come), then **One-off pairs**.
   hidden members dimmed, without swatch), **Add a color to Role**
   (`aria-expanded`) opening a picker below (a search field and
   the visible colors not in the role, as wrapping buttons with
-  swatches; Esc closes it), and **Delete role Role** (also
+  swatches; Esc closes it), and **Delete role Role**, at the end
+  of the line, right-aligned and apart from the chips (also
   deletes its rules; the tooltip counts them). **+ Role** opens a
   form with a name field (**Add role**; a free name, else an
   alert).
 - **Targets**, with roles only: a `<table>` of the roles as rows
   (`fg`, `<th scope="row">`) and columns (`bg`, "on Surfaces"),
-  in role order. Each cell is a `<select>` labelled by its couple
-  ("Text on Surfaces", "Text among themselves"): "—" or a use. A
+  in role order, in the panel's font, the row headers sticky when
+  it scrolls sideways. Each cell is a `<select>` labelled by its
+  couple ("Text on Surfaces", "Text among themselves"): "—" or a
+  use, styled as the app's other fields (global `select`, with a
+  focus ring) and 7.5rem wide, so that four roles fit a wide
+  panel; an empty one is faded (`color-mix`, at least 4.5:1)
+  until hovered or focused. The status icon stays on its line. A
   cell is a view of the rules of its couple (on the diagonal,
   `bg` missing or the same as `fg`; `cellRules`); picking
   replaces them with one rule of the use, "—" removes them

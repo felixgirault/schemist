@@ -39,8 +39,8 @@ beforeAll(() => {
 		id('Blue')
 	]);
 
-	palette.addRule(text!, surfaces!, 'body');
-	palette.addRule(series!, undefined, 'categories');
+	palette.setRule(text!, surfaces!, 'body');
+	palette.setRule(series!, undefined, 'categories');
 });
 
 // The text of the page, without tags and comments
@@ -118,8 +118,10 @@ test('shows a row per role with its colors, and a grid of its rules', () => {
 	expect(plain).toContain(
 		'Series among themselves · Categories'
 	);
-	expect(html).toContain('<th scope="row">Text</th>');
-	expect(html).toContain('<th scope="col">on Surfaces</th>');
+	expect(html).toMatch(/<th scope="row"[^>]*>Text<\/th>/);
+	expect(html).toMatch(
+		/<th scope="col"[^>]*>on Surfaces<\/th>/
+	);
 	expect(selected('Text on Surfaces')).toBe('Body text');
 	expect(selected('Series among themselves')).toBe(
 		'Categories'
@@ -129,6 +131,16 @@ test('shows a row per role with its colors, and a grid of its rules', () => {
 	expect(html).toContain('aria-label="Add a color to Series"');
 	expect(html).toContain('aria-label="Remove Black from Text"');
 	expect(html).toContain('+ Role');
+	expect(html).toMatch(/<h3[^>]*>Roles<\/h3>/);
+	expect(
+		html.match(
+			/<select[^>]*aria-label="Surfaces on Text"[^>]*>/
+		)![0]
+	).toMatch(/class="[^"]*empty/);
+	// Delete role comes after the colors' list, apart from the chips
+	expect(html.indexOf('Add a color to Text')).toBeLessThan(
+		html.indexOf('Delete role Text')
+	);
 });
 
 test('draws a difference cell as two swatches, not text on a background', () => {
@@ -229,8 +241,11 @@ test('a one-off pair edits its targets, buttons name their pair', () => {
 test('a cell with several rules offers them as one extra option', () => {
 	const [, role, series] = palette.roles;
 
-	palette.addRule(role.id, series.id, 'body');
-	palette.addRule(role.id, series.id, 'large');
+	palette.rules = [
+		...palette.rules,
+		{id: 'a', fg: role.id, bg: series.id, use: 'body'},
+		{id: 'b', fg: role.id, bg: series.id, use: 'large'}
+	];
 
 	const html = render(Result).body;
 

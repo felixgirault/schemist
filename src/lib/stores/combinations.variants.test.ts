@@ -23,7 +23,7 @@ beforeAll(() => {
 	const surfaces = palette.addRole('Surfaces', [nodes[0].id]);
 	const text = palette.addRole('Text', [nodes[1].id]);
 
-	palette.addRule(text!, surfaces!, 'body');
+	palette.setRule(text!, surfaces!, 'body');
 	palette.addVariant();
 	palette.selectVariant();
 	nodes[0].overrides = {
@@ -123,11 +123,13 @@ test('has no variant column without variants', () => {
 	const [white, pale] = collectNodes(palette.root!);
 
 	// Fresh names: the roles of the first palette are still there.
-	const rule = palette.addRule(
+	palette.setRule(
 		palette.addRole('Pale text', [pale.id])!,
 		palette.addRole('Page', [white.id])!,
 		'body'
 	);
+
+	const rule = palette.rules.at(-1)!.id;
 
 	expect(combinations.ruleStatus(rule).text).toBe('not met');
 	expect(

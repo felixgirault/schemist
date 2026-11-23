@@ -366,17 +366,6 @@ class Palette {
 		this.settle();
 	}
 
-	// Without `bg`, a role among itself. Returns the id of the rule.
-	addRule(fg: string, bg: string | undefined, use: string) {
-		const id = `u${uid()}`;
-
-		this.rules = [
-			...this.rules,
-			{id, fg, bg: bg === fg ? undefined : bg, use}
-		];
-		return id;
-	}
-
 	// Replaces the rules of a couple (on the diagonal, `bg` missing
 	// or the same as `fg`) with one of `use`, or with none. In place
 	// of the first one, so one change.
@@ -399,10 +388,6 @@ class Palette {
 			}),
 			...(next && !placed ? [next] : [])
 		];
-	}
-
-	removeRule(id: string) {
-		this.rules = this.rules.filter((rule) => rule.id !== id);
 	}
 
 	constructor() {
