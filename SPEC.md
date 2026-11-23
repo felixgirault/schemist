@@ -882,8 +882,8 @@ colors, top to bottom) and name, then actions:
   (commits on change; a blank or taken name is put back) and a
   **Delete <name>** button, disabled for the base. A palette
   without variants shows only the **+**. The tree and its colors
-  show the selected variant, the Requirements tables every one;
-  rule statuses and the count still cover the base only.
+  show the selected variant, the Requirements tables every one,
+  and rule statuses and the count cover every variant (§11.5).
 - In a variant other than the base, the Options fields write
   overrides. A node with one shows a "●" mark before its type
   (text alternative "Overridden in this variant"), and each field
