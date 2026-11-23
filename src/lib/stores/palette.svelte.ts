@@ -17,7 +17,9 @@ import type {
 } from '#lib/stores/nodes.svelte.js';
 import {
 	collectColors,
-	collectOutputs
+	collectNodes,
+	collectOutputs,
+	view
 } from '#lib/stores/nodes.svelte.js';
 import {namePairs, nameRoles, serializeTree} from '#lib/tree.js';
 import {
@@ -48,6 +50,12 @@ class Palette {
 	// The variants as set (ADR 19), the base first; none for a palette
 	// without. Overrides of the nodes are keyed by their ids.
 	variants = $state.raw<AppVariant[]>([]);
+	// The variant shown, the base (or none) unless another is chosen.
+	// View state: not saved, not in history.
+	selectedVariant = $derived(
+		this.variants.find(({id}) => id === view.variant) ??
+			this.variants[0]
+	);
 	// Roles and rules as set (ADR 16), linked by ids: roles hold color
 	// ids, rules hold role ids. Names are only in the saved format.
 	storedRoles = $state.raw<AppRole[]>([]);
@@ -229,6 +237,72 @@ class Palette {
 					}
 				: role
 		);
+	}
+
+	// Variants are edited by ids too, with names as free as roles'.
+	// Adding the first writes the base, as the saved format lists it
+	// first. Returns the id of the new variant, which is selected.
+	addVariant() {
+		const taken = (name: string) =>
+			this.variants.some((v) => v.name === name);
+		let name = 'Dark';
+
+		for (let i = 2; taken(name); i++) {
+			name = `Variant ${i}`;
+		}
+
+		const id = `v${uid()}`;
+
+		this.variants = [
+			...(this.variants.length
+				? this.variants
+				: [{id: `v${uid()}`, name: 'Light'}]),
+			{id, name}
+		];
+		this.selectVariant(id);
+		return id;
+	}
+
+	renameVariant(id: string, name: string) {
+		name = name.trim();
+
+		if (
+			name === '' ||
+			this.variants.some(
+				(v) => v.name === name && v.id !== id
+			)
+		) {
+			return false;
+		}
+
+		this.variants = this.variants.map((v) =>
+			v.id === id ? {...v, name} : v
+		);
+		return true;
+	}
+
+	// Not the base. Removes its overrides everywhere.
+	deleteVariant(id: string) {
+		if (id === this.variants[0]?.id) return;
+
+		this.variants = this.variants.filter((v) => v.id !== id);
+
+		if (this.root) {
+			collectNodes(this.root).forEach((node) => {
+				const {[id]: _, ...rest} = node.overrides;
+				node.overrides = rest;
+			});
+		}
+
+		this.selectVariant(view.variant);
+	}
+
+	// Selects a variant, or the base if it doesn't exist (anymore).
+	selectVariant(id?: string) {
+		view.variant =
+			id && id !== this.variants[0]?.id
+				? this.variants.find((v) => v.id === id)?.id
+				: undefined;
 	}
 
 	// Without `bg`, a role among itself. Returns the id of the rule.

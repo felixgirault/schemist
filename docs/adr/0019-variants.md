@@ -43,10 +43,10 @@ often don't change at all.
   variant; its color may still differ, derived from a parent that
   has one.
 - **Params that change a preset's structure can't be
-  overridden**: Scale `steps`, Rainbow `colors`, the Harmonies
-  and Schemist theme booleans. Their defs mark them, so the rule
-  is enforced by code, not remembered. Other preset params
-  (States `amount`, Neutral `saturation`) can.
+  overridden**: Scale `steps`, Rainbow `count` ("colors"), the
+  Harmonies and Schemist theme booleans. Their defs mark them, so
+  the rule is enforced by code, not remembered. Other preset
+  params (States `amount`, Neutral `saturation`) can.
 - **Roles, rules, one-off pairs and their targets are shared.**
   Each pair is checked in each variant.
 - **Swap** (ADR 8) treats overrides as it treats args: kept for

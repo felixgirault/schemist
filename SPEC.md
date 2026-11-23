@@ -183,19 +183,20 @@ Numbers are rounded to a `precision` (decimals, default 3).
 
 A class with reactive fields:
 
-| Field       | Kind     | Description                                                                           |
-| ----------- | -------- | ------------------------------------------------------------------------------------- |
-| `id`        | readonly | `n<uid>`, unique per session                                                          |
-| `def`       | raw      | Node type definition (§6), replaced by `setType`                                      |
-| `token`     | state    | Name template (§4.4), `''` for an automatic name                                      |
-| `isHidden`  | state    | Excluded from combinations and exports, still drawn in the tree                       |
-| `args`      | state    | Parameter values, initialized from the type's defaults                                |
-| `overrides` | state    | Args by variant id, never the base's (§5.4), `{}` without                             |
-| `children`  | getter   | Child nodes, ordered (private state, read-only)                                       |
-| `parent`    | getter   | Parent node, `undefined` for the root (private state)                                 |
-| `input`     | derived  | `parent.output`, or `{color: white, name: ''}` for the root                           |
-| `generated` | derived  | Colors of a preset, `{[id]: {color, name}}`, `{}` for other types (§7)                |
-| `output`    | derived  | `{color: def.apply(input.color, args), name: generateName(token, color, input.name)}` |
+| Field        | Kind     | Description                                                                                 |
+| ------------ | -------- | ------------------------------------------------------------------------------------------- |
+| `id`         | readonly | `n<uid>`, unique per session                                                                |
+| `def`        | raw      | Node type definition (§6), replaced by `setType`                                            |
+| `token`      | state    | Name template (§4.4), `''` for an automatic name                                            |
+| `isHidden`   | state    | Excluded from combinations and exports, still drawn in the tree                             |
+| `args`       | state    | Parameter values, initialized from the type's defaults                                      |
+| `overrides`  | state    | Args by variant id, never the base's (§5.4), `{}` without                                   |
+| `activeArgs` | derived  | `args` with the overrides of the selected variant (`view.variant`) over them                |
+| `children`   | getter   | Child nodes, ordered (private state, read-only)                                             |
+| `parent`     | getter   | Parent node, `undefined` for the root (private state)                                       |
+| `input`      | derived  | `parent.output`, or `{color: white, name: ''}` for the root                                 |
+| `generated`  | derived  | Colors of a preset, `{[id]: {color, name}}`, `{}` for other types (§7)                      |
+| `output`     | derived  | `{color: def.apply(input.color, activeArgs), name: generateName(token, color, input.name)}` |
 
 Both ends of the parent-children link are private and only change
 through the operations: `addChild(child)` (detaches it from its
@@ -233,7 +234,16 @@ without the store, as `PaletteColor`s
 (`'0'`, `'1'`, …). With a `variant` (a name of the tree's
 `variants`, §5.4) the node's overrides apply over its args, and a
 preset builds its colors from them; ids are the same in every
-variant. The store only evaluates the base for now.
+variant. In the store, `view.variant`
+(`#lib/stores/nodes.svelte.ts`: the id of the selected variant,
+nothing for the base; view state, not saved nor in history) makes
+`output`, `generated` and so every color read from the nodes
+those of that variant. `setArg(name, value)` writes an override
+of the selected variant, or the arg without one;
+`isOverridden(name?)` tells whether it has one (for the name, or
+any) and `resetArg(name)` removes it (a variant left with none is
+dropped). An override equal to the base's value is kept: it stays
+until reset.
 
 ### 5.3 Tree data (`#lib/tree.ts`, `#lib/core/tree.ts`)
 
@@ -283,8 +293,8 @@ roles): `palette.variants` holds them, base first, empty without
 variants, and a node's `overrides` are keyed by id.
 `parseVariants` makes the ids when a tree loads and
 `withVariantIds` keys the overrides by them; `serializeTree` with
-`variants` writes names back. There is no way to edit variants in
-the UI yet. `expandPreset` gives each generated node, per
+`variants` writes names back. Variants are edited in the Palette
+(§8.1, §11.2). `expandPreset` gives each generated node, per
 variant, the args that differ from the base (`withOverrides`):
 the structure being the same, they line up.
 
@@ -389,23 +399,36 @@ each exporting a single reactive object.
 
 ### 8.1 `palette`
 
-| Member           | Description                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `root`           | Root `Node` (`undefined` until the palette component mounts)                                                        |
-| `outputs`        | `collectOutputs(root)`, updated synchronously                                                                       |
-| `settledOutputs` | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms)                 |
-| `storedPairs`    | Declared pairs as set, `{fg: string, bg: string, wcag2?, apca?, difference?}` (`ColorPair`, color ids), set on load |
-| `pairs`          | `storedPairs` whose two colors are still in the tree (hidden and generated ones included)                           |
-| `storedRoles`    | Roles as set, `{id, name, colors: string[]}` (color ids), set on load (ADR 16)                                      |
-| `roles`          | `storedRoles` without the colors since removed; a role stays until deleted, even empty                              |
-| `rules`          | Rules as set, `{id, fg, bg?, use?, ...targets}` with `fg` and `bg` **role ids** (§9.7), set on load                 |
-| `variants`       | Variants as set, `{id, name}`, base first, `[]` without (§5.4, ADR 19), set on load                                 |
-| `expandedPairs`  | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off and rule pairs, `sources` holding **rule ids**   |
-| `unsavedPairs`   | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                   |
-| `unsavedMembers` | Names of role members a permalink cannot hold, shared by several colors (see below)                                 |
-| `permalink`      | `permalink(serializeTree(root, pairs, roles, rules, variants), window.location.origin)` (§10.1)                     |
-| `colors`         | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                  |
-| `rootColor`      | Root's color in `settledOutputs`, else the first output, else `#feffff`                                             |
+| Member            | Description                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `root`            | Root `Node` (`undefined` until the palette component mounts)                                                        |
+| `outputs`         | `collectOutputs(root)`, updated synchronously                                                                       |
+| `settledOutputs`  | Copy of `outputs`, updated after `10 + clamp(400 − ms since last update, 0–400) / 2` ms (10–210 ms)                 |
+| `storedPairs`     | Declared pairs as set, `{fg: string, bg: string, wcag2?, apca?, difference?}` (`ColorPair`, color ids), set on load |
+| `pairs`           | `storedPairs` whose two colors are still in the tree (hidden and generated ones included)                           |
+| `storedRoles`     | Roles as set, `{id, name, colors: string[]}` (color ids), set on load (ADR 16)                                      |
+| `roles`           | `storedRoles` without the colors since removed; a role stays until deleted, even empty                              |
+| `rules`           | Rules as set, `{id, fg, bg?, use?, ...targets}` with `fg` and `bg` **role ids** (§9.7), set on load                 |
+| `variants`        | Variants as set, `{id, name}`, base first, `[]` without (§5.4, ADR 19), set on load                                 |
+| `selectedVariant` | The variant shown (`view.variant`), the base if none is chosen or it is gone; `undefined` without variants          |
+| `expandedPairs`   | `expandRules(roles, rules, pairs).pairs`: what is checked, one-off and rule pairs, `sources` holding **rule ids**   |
+| `unsavedPairs`    | `{pair, names}` for the pairs a permalink cannot hold (see below)                                                   |
+| `unsavedMembers`  | Names of role members a permalink cannot hold, shared by several colors (see below)                                 |
+| `permalink`       | `permalink(serializeTree(root, pairs, roles, rules, variants), window.location.origin)` (§10.1)                     |
+| `colors`          | `PaletteColor`s `{id, name, color, rgbColor}` from `settledOutputs`, in tree order                                  |
+| `rootColor`       | Root's color in `settledOutputs`, else the first output, else `#feffff`                                             |
+
+`addVariant()` adds a variant with no overrides, named "Dark" if
+free, else "Variant 2", "Variant 3"…, selects it and returns its
+id; the first one also writes the base, "Light", before it.
+`renameVariant(id, name)` trims the name and refuses it (returns
+`false`) if blank or taken by another variant, the base being
+renamable like the others. `deleteVariant(id)` does nothing for
+the base, else removes the variant and its overrides in every
+node. `selectVariant(id?)` selects a variant, the base if there
+is no such id (the selection also falls back after an undo that
+removes the selected variant). Changes to variants are changes
+like any other (§8.5); the selection is not.
 
 `setPair(fg, bg, targets)` declares or replaces a pair, or
 removes it when it has no target. It only touches one-off pairs
@@ -847,6 +870,22 @@ colors, top to bottom) and name, then actions:
   reads "Insert parent color name with $." on child nodes.
 - A root without children shows a "Start by adding matching
   colors" call to action.
+- With variants (§5.4), the **Palette** header holds the variant
+  switch: a group "Variants" of one toggle button per variant
+  (`aria-pressed`, the base first), a **+** button ("Add a
+  variant"), and for the selected variant a **Name** field
+  (commits on change; a blank or taken name is put back) and a
+  **Delete <name>** button, disabled for the base. A palette
+  without variants shows only the **+**. The tree, its colors and
+  the Requirements' cards show the selected variant; rule
+  statuses and the count still cover the base only.
+- In a variant other than the base, the Options fields write
+  overrides. A node with one shows a "●" mark before its type
+  (text alternative "Overridden in this variant"), and each field
+  with one a **Reset to <base name>** button. Structural params
+  (`isStructural`) are disabled, with the hint that they are the
+  same in every variant. An edit of an override groups into one
+  undo step like an arg edit does.
 - Range fields show a gradient previewing the parameter's effect
   (none for presets). Boolean fields are toggle buttons.
 

@@ -5,6 +5,7 @@
 	import Export from '#lib/components/export/Export.svelte';
 	import Modal from '#lib/components/Modal.svelte';
 	import Palette from '#lib/components/Palette.svelte';
+	import VariantSwitch from '#lib/components/palette/VariantSwitch.svelte';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import {history} from '#lib/stores/history.svelte.js';
 	import {palette} from '#lib/stores/palette.svelte.js';
@@ -62,6 +63,7 @@
 	<section class="palette">
 		<header>
 			<h2 class="h2">Palette</h2>
+			<VariantSwitch />
 		</header>
 
 		<Palette />
@@ -155,6 +157,14 @@
 	}
 
 	/* The title and the toggles share a row, wrapping on narrow panels */
+	.palette > header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 1.5rem;
+		margin-bottom: var(--vgap);
+	}
+
 	.requirements > header {
 		display: flex;
 		flex-wrap: wrap;
@@ -164,6 +174,7 @@
 		margin-bottom: var(--vgap);
 	}
 
+	.palette h2,
 	.requirements h2 {
 		margin-bottom: 0;
 	}

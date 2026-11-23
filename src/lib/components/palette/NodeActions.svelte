@@ -148,6 +148,8 @@
 		background: var(--fg);
 		color: var(--bg);
 		z-index: 10;
+		/* Doesn't cover what it points above. */
+		pointer-events: none;
 		animation: slide-down 500ms ease-out;
 	}
 

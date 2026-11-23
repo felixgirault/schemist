@@ -103,6 +103,7 @@ export const history = new History<Snapshot>({
 		palette.storedRoles = rolesOn(root, roles);
 		palette.rules = rules;
 		palette.variants = variants;
+		palette.selectVariant(palette.selectedVariant?.id);
 	},
 	onChange: persist,
 	group: (previous, next) =>

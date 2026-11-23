@@ -4,7 +4,8 @@ import type {
 	NodeDef,
 	NodeOutput,
 	NodeType,
-	Overrides
+	Overrides,
+	ParamValue
 } from '#lib/core/nodes.js';
 import {
 	applyDef,
@@ -21,6 +22,10 @@ import {uid} from '#lib/utils/generators.js';
 
 export type NodeOutputRecord = Record<Node['id'], NodeOutput>;
 
+// What the app shows, not what it saves: the variant whose overrides
+// apply, by id, or nothing for the base (ADR 19).
+export const view = $state<{variant?: string}>({});
+
 export class Node {
 	readonly id: string;
 	// Raw, as definitions are never mutated, only replaced.
@@ -30,6 +35,11 @@ export class Node {
 	args: Args = $state({});
 	// By variant id, never the base's (ADR 19).
 	overrides: Overrides = $state({});
+	// The args in the selected variant.
+	activeArgs: Args = $derived({
+		...this.args,
+		...(view.variant && this.overrides[view.variant])
+	});
 	// Only changed through the tree methods, which keep both ends
 	// of a link in sync.
 	#children: Node[] = $state([]);
@@ -38,11 +48,11 @@ export class Node {
 		this.#parent?.output ?? defaultInput
 	);
 	output: NodeOutput = $derived.by(() =>
-		applyDef(this.def, this.args, this.token, this.input)
+		applyDef(this.def, this.activeArgs, this.token, this.input)
 	);
 	// Colors of a preset, keyed by `<preset id>.<index>`.
 	generated: NodeOutputRecord = $derived.by(() => {
-		const {def, args, output, id} = this;
+		const {def, activeArgs: args, output, id} = this;
 
 		return isPresetDef(def)
 			? Object.fromEntries(
@@ -66,6 +76,43 @@ export class Node {
 		this.isHidden = isHidden;
 		this.token = token;
 		this.args = defaultArgs(this.def);
+	}
+
+	// Sets an arg of the selected variant, or the base's.
+	setArg(name: string, value: ParamValue) {
+		const variant = view.variant;
+
+		if (variant) {
+			this.overrides = {
+				...this.overrides,
+				[variant]: {
+					...this.overrides[variant],
+					[name]: value
+				}
+			};
+		} else {
+			this.args[name] = value;
+		}
+	}
+
+	// Whether the selected variant overrides an arg, or any.
+	isOverridden(name?: string) {
+		const args = view.variant && this.overrides[view.variant];
+
+		return !!args && (name === undefined || name in args);
+	}
+
+	resetArg(name: string) {
+		const variant = view.variant;
+
+		if (variant && this.isOverridden(name)) {
+			const {[name]: _, ...rest} = this.overrides[variant];
+			const {[variant]: __, ...others} = this.overrides;
+
+			this.overrides = Object.keys(rest).length
+				? {...others, [variant]: rest}
+				: others;
+		}
 	}
 
 	// Keeps the id, token, visibility and children, so that the

@@ -540,17 +540,36 @@ export const changedArg = (
 			old.type !== node.type ||
 			old.token !== node.token ||
 			old.isHidden !== node.isHidden ||
-			!sameValue(old.overrides, node.overrides) ||
 			childIds(old) !== childIds(node)
 		) {
 			return;
 		}
 
-		for (const name of Object.keys(node.args ?? {})) {
-			if (
-				JSON.stringify(old.args?.[name]) !==
-				JSON.stringify(node.args?.[name])
-			) {
+		// An override is an arg of its variant, added or removed as
+		// well as changed.
+		const argsOf = ({
+			args,
+			overrides
+		}: IdentifiedNodeData) => ({
+			...args,
+			...Object.fromEntries(
+				Object.entries(overrides ?? {}).flatMap(
+					([variant, values]) =>
+						Object.entries(values).map(([name, value]) => [
+							`${variant}.${name}`,
+							value
+						])
+				)
+			)
+		});
+		const oldArgs = argsOf(old);
+		const newArgs = argsOf(node);
+
+		for (const name of new Set([
+			...Object.keys(oldArgs),
+			...Object.keys(newArgs)
+		])) {
+			if (!sameValue(oldArgs[name], newArgs[name])) {
 				if (changed) {
 					return;
 				}

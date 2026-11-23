@@ -114,10 +114,20 @@
 				{/if}
 
 				<p class="label">
+					{#if node.isOverridden()}
+						<span
+							class="mark"
+							role="img"
+							aria-label="Overridden in this variant"
+							title="Overridden in this variant"
+						>
+							●
+						</span>
+					{/if}
 					{def.label}
 					{#if def?.argsLabel}
 						<span class="args">
-							{def.argsLabel(node.args)}
+							{def.argsLabel(node.activeArgs)}
 						</span>
 					{/if}
 				</p>
@@ -210,6 +220,10 @@
 <style>
 	.isHidden > .self .title {
 		opacity: 0.5;
+	}
+
+	.mark {
+		font-size: 0.74em;
 	}
 
 	.args {
