@@ -93,7 +93,6 @@
 		check.checks.every(({target}) => target === 'difference')}
 	<td
 		class="cell"
-		class:cell--difference={isDifference}
 		style={isDifference
 			? ''
 			: `background: ${formatRgbToHex(check.bg.rgbColor)}; color: ${formatRgbToHex(check.fg.rgbColor)};`}
@@ -112,13 +111,13 @@
 				></span>
 			</span>
 		{/if}
-		{#each rowsOf(check.checks, (c) => c.level) as { name, level, met } (name)}
+		{#each rowsOf(check.checks, (c) => c.level) as { name, level, met }, i (name)}
+			{#if i}·{/if}
 			<span class="level">
 				<span class="grade">{name}</span>
-				({round(level, 1)})
-				<span class="status">
-					{met ? 'met' : '✗ not met'}
-				</span>
+				{round(level, 1)}
+				<span aria-hidden="true">{met ? '✓' : '✗'}</span>
+				<span class="hidden">{met ? 'met' : 'not met'}</span>
 			</span>
 		{/each}
 		<!-- Preview shows the selected variant's colors (ADR 20, step 3
@@ -222,8 +221,8 @@
 <style>
 	.targets {
 		display: grid;
-		grid-template-columns: 1fr;
 		gap: 0.25rem;
+		margin-block: 0.25rem;
 		font-size: 0.8rem;
 	}
 
@@ -238,48 +237,45 @@
 		overflow-x: auto;
 	}
 
+	/* Compact rows in the panel's font, not the export table's */
 	table {
-		border-collapse: separate;
-		border-spacing: 0.5rem;
+		width: auto;
+		font-family: var(--font-sans);
 	}
 
-	th {
-		min-width: 12ch;
-		text-align: left;
+	th,
+	td {
+		padding: 0.25rem 0.5rem;
+		font-family: inherit;
 		font-weight: normal;
-		vertical-align: top;
+		vertical-align: middle;
+		white-space: nowrap;
 	}
 
-	.cell {
-		min-width: 16ch;
-		padding: 0.75rem;
-		vertical-align: top;
-		border-radius: var(--radius);
-	}
-
-	.cell--difference {
-		border: 1px solid currentColor;
-	}
-
-	.cell .level {
-		display: block;
+	th .button {
+		margin-left: 0.5ch;
+		font-size: 0.8rem;
 	}
 
 	.grade {
-		font-size: 1.25rem;
-		font-weight: 900;
+		font-weight: bold;
 	}
 
-	.status {
-		font-size: 0.9rem;
+	/* On the levels' line: icon buttons are flex boxes */
+	.cell .button {
+		display: inline-flex;
+		margin-left: 0.5ch;
+		vertical-align: middle;
 	}
 
 	.swatches {
-		display: flex;
-		height: 1.5rem;
-		margin-bottom: 0.5rem;
+		display: inline-flex;
+		width: 2rem;
+		height: 1rem;
+		margin-right: 0.5ch;
 		overflow: hidden;
 		border-radius: var(--radius);
+		vertical-align: middle;
 	}
 
 	.swatches span {

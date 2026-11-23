@@ -34,12 +34,13 @@ Muted & Page         [AAA 9.2 met]       [AAA 8.0 met]
 - **Always the table**: a palette without variants has one
   column, and without simulations a pair is one row. One layout,
   compact cells, replacing the card grid.
-- **A cell** is the pair drawn in that variant's colors, under
-  the row's simulation if any: each target's grade, level and met
-  or not met, as cards today. A failing cell is marked by more
-  than color (✗ and "not met"). Difference pairs keep their two
-  swatches, in the panel's colors (as their cards since
-  `829f4d1`).
+- **A cell** is one line, the pair drawn in that variant's
+  colors, under the row's simulation if any: each target's grade
+  and level, then ✓ or ✗ ("met" or "not met" as text), as in the
+  sketch; not a card (amended after the first build, which drew
+  cards in cells). A failing cell is marked by more than color.
+  Difference pairs show their two colors as a small swatch pair,
+  in the panel's colors.
 - **The row header** holds the pair's names and its actions, in
   the panel's colors: **Override** on a rule's pair, the target
   fields and **Remove pair** on a one-off pair. Their names don't

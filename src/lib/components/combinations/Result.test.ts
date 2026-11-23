@@ -52,13 +52,13 @@ test('shows each rule with its pairs as a table', () => {
 
 	expect(html).not.toContain('Pack my box');
 	expect(html).toContain(
-		'Black &amp; White Override AAA (21) metAPCA 5 (106) met'
+		'Black &amp; White Override AAA 21 ✓ met· APCA 5 106 ✓ met'
 	);
 	expect(html).toContain(
-		'Grey &amp; White Override KO (1.2) ✗ not met'
+		'Grey &amp; White Override KO 1.2 ✗ not met'
 	);
 	expect(html).toMatch(
-		/(Red|Blue) &amp; (Blue|Red) Override Difference \([\d.]+\) met/
+		/(Red|Blue) &amp; (Blue|Red) Override Difference [\d.]+ ✓ met/
 	);
 	expect(render(Result).body).toContain('<table');
 });
@@ -90,10 +90,12 @@ test('shows a row per role, with its rules and colors', () => {
 test('draws a difference cell as two swatches, not text on a background', () => {
 	const html = render(Result).body;
 
-	// Red & Blue, the Series among themselves; Text on Surfaces keeps
-	// its colors.
-	expect(html.match(/cell--difference/g)).toHaveLength(1);
+	// Red & Blue, the Series among themselves, in the panel's colors;
+	// Text on Surfaces keeps its own.
 	expect(html.match(/class="swatches\b/g)).toHaveLength(1);
+	expect(html).toMatch(
+		/<td class="cell[^"]*"( style="")?>(<!--.*?-->)*<span class="swatches/
+	);
 });
 
 test('offers Override on a rule pair, Remove pair on a one-off', () => {

@@ -939,13 +939,16 @@ highlight are still to come).
   per variant of `allChecks` (one column with a visually hidden
   header "Colors" without variants). The row header
   (`<th scope="row">`) has the names ("Grey & White") and the
-  pair's actions, in the panel's colors. A cell is the pair in
-  that variant's colors (`allChecks`, empty if a color is hidden
-  there): a row per target (`{name, level, met?}`): grade and
-  level (rounded to 1 decimal, APCA prefixed by `APCA`), followed
-  by "met" or "✗ not met". A pair whose targets are all
-  `difference` is not text on a background: its cell is in the
-  page's colors, with the two colors as swatches side by side.
+  pair's actions, in the panel's colors, on one line. A cell is
+  one line in that variant's colors (`allChecks`, looked up by
+  pair id): per target (`{name, level, met?}`), the grade in bold
+  and the level (rounded to 1 decimal, APCA prefixed by `APCA`),
+  then ✓ or ✗ with "met" or "not met" as hidden text, targets
+  separated by "·". A pair whose targets are all `difference` is
+  not text on a background: its cell is in the page's colors,
+  with the two colors as a small swatch pair before its level.
+  The tables use the panel's font, not the export table's, and
+  scroll sideways within their rule when wider than it.
 - The **preview** button themes the whole app with the pair; the
   notification names it and has a stop button. `previewed` finds
   the pair among the visible colors, declared or not.
