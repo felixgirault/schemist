@@ -1,4 +1,4 @@
-/* A row of the colors tree, shared with the roles of the requirements. */
+/* A row of the colors tree. */
 .tree-node {
 	display: grid;
 	grid-template-columns: min-content auto;

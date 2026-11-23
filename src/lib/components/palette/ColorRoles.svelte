@@ -1,5 +1,4 @@
 <script lang="ts">
-	import RolesIcon from '#lib/components/icons/RolesIcon.svelte';
 	import WarningIcon from '#lib/components/icons/WarningIcon.svelte';
 	import {palette} from '#lib/stores/palette.svelte.js';
 
@@ -11,7 +10,6 @@
 
 	let {id, name}: Props = $props();
 
-	const popoverId = $derived(`${id}-roles`);
 	const given = $derived(
 		palette.roles.filter(({colors}) => colors.includes(id))
 	);
@@ -21,16 +19,6 @@
 	);
 	const warning =
 		"Another color has this name: its roles won't be saved until one of the colors is renamed.";
-
-	const handleChange = (roleId: string, event: Event) => {
-		const {checked} = event.currentTarget as HTMLInputElement;
-
-		if (checked) {
-			palette.addMember(roleId, id);
-		} else {
-			palette.removeMember(roleId, id);
-		}
-	};
 </script>
 
 {#if given.length}
@@ -46,32 +34,6 @@
 	</span>
 {/if}
 
-<button
-	class="button button--icon"
-	type="button"
-	title="Roles of {name}"
-	aria-label="Roles of {name}"
-	popovertarget={popoverId}
->
-	<RolesIcon />
-</button>
-
-<fieldset id={popoverId} popover class="form">
-	<legend>Roles of {name}</legend>
-	{#each palette.roles as role (role.id)}
-		<label>
-			<input
-				type="checkbox"
-				checked={role.colors.includes(id)}
-				onchange={(event) => handleChange(role.id, event)}
-			/>
-			{role.name}
-		</label>
-	{:else}
-		<p class="hint">No role yet: add one in Targets.</p>
-	{/each}
-</fieldset>
-
 <style>
 	/* Positioned, to hold the visually hidden text */
 	.warning {
@@ -82,11 +44,5 @@
 		width: 1em;
 		height: 1em;
 		vertical-align: -0.125em;
-	}
-
-	label {
-		display: flex;
-		align-items: center;
-		gap: 0.5ch;
 	}
 </style>

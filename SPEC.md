@@ -854,13 +854,13 @@ compressing links is recorded in
   link to the GitHub repository.
 - Notification area: shows the previewed combination (§11.5).
 - Two sections, each under a large title (`h2`): **Palette**
-  (tree, then Export, Share, Undo and Redo buttons) and **Requirements (met /
-  checked)**: the declared pairs that pass (`passingPairs`) over
-  the declared pairs of visible colors (`checkedPairs`), each
-  counted once per variant (ADR 19), with the **Simulate** and
-  **Grayscale** toggles (§11.5) in its header, then the
-  requirements (§11.5). From 55rem, they are two columns, Palette
-  (60ch, for long names) then Requirements.
+  (tree, then Export, Share, Undo and Redo buttons) and
+  **Requirements (met / checked)**: the declared pairs that pass
+  (`passingPairs`) over the declared pairs of visible colors
+  (`checkedPairs`), each counted once per variant (ADR 19), with
+  the **Simulate** and **Grayscale** toggles (§11.5) in its
+  header, then the requirements (§11.5). From 55rem, they are two
+  columns, Palette (60ch, for long names) then Requirements.
 - Shortcuts: `Ctrl`/`Cmd` + `Z` undoes, `Ctrl`/`Cmd` + `Shift` +
   `Z` redoes, except while editing text (text inputs, textareas,
   the editable node name), where native undo applies. Undo and
@@ -873,6 +873,7 @@ colors, top to bottom) and name, then actions:
 
 | Action     | Tooltip                                                             | Effect                                                                                          |
 | ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Roles      | Roles of <name>                                                     | Popover with a checkbox per role; not on presets                                                |
 | Remove     | Remove this color and all of its derivatives                        | Not available on the root                                                                       |
 | Visibility | Hide this color: kept as a base for others, not exported or checked | Toggles `isHidden`                                                                              |
 | Info       | Show color info                                                     | Popover with the Hex, RGB, HSL and LCH values; name and hex of each generated color for presets |
@@ -881,35 +882,36 @@ colors, top to bottom) and name, then actions:
 | Swap       | Change this color's type                                            | Opens the child picker to replace the type; not on the root, replaced by Expand on presets      |
 | Add        | Add matching colors                                                 | Opens the child picker; disabled on presets                                                     |
 
-- Info and Options open popovers (the native `popover` attribute,
-  toggled by `popovertarget` buttons, which close on outside
-  click or Escape), positioned below their button where CSS
-  anchor positioning is supported. Neither is open by default.
+- Roles, Info and Options open popovers (the native `popover`
+  attribute, toggled by `popovertarget` buttons, which close on
+  outside click or Escape), positioned below their button where
+  CSS anchor positioning is supported. None is open by default.
 - The name is editable in place (Enter or blur commits). The hint
   reads "Insert parent color name with $." on child nodes.
 - A preset lists its colors under its row (ADR 23), read-only: a
   native `<details>`, open by default and not saved, summarised
-  as "9 colors", a line each in the order of `generated` (flat:
-  ids don't hold the template's nesting) with a swatch (`Swatch`
-  takes the `color` for one the palette doesn't list, a hidden
-  preset's) and its name; dimmed on a hidden preset. Hidden
-  template colors have no line.
-- **Roles on a color** (`ColorRoles.svelte`, ADR 23), for a node
-  (not a preset's own row) and for each line of a preset's list,
-  taking the color's id and name: its roles' names after the
-  label or the name ("custom color · Text, Borders"), then a
-  **Roles of Ink** button (`RolesIcon`; the only action of a
-  line) opening a popover (the native `popover`, id `<color
-  id>-roles`, valid for ids with dots) that is a `fieldset` named
-  by its `legend` "Roles of Ink", with a checkbox per role
-  (`palette.roles` order), checked when the role holds the id and
-  controlled by the store: a click is `addMember` or
-  `removeMember`, one undo, and an undo unchecks it. Without
-  roles it says to add one in Targets. A color that has a role
-  and whose name is in `unsavedMembers` also shows a warning icon
-  with a text (visually hidden, and tooltip) saying its roles
-  won't be saved until one of the colors with that name is
-  renamed.
+  as "9 colors" ("1 color"), a line each in the order of
+  `generated` (flat: ids don't hold the template's nesting) with
+  a swatch (`Swatch` takes the `color` for one the palette
+  doesn't list, a hidden preset's) and its name; dimmed on a
+  hidden preset. Hidden template colors have no line.
+- **Roles on a color** (`ColorRoles.svelte` and
+  `RolesButton.svelte`, ADR 23), for a node (not a preset's own
+  row) and for each line of a preset's list, taking the color's
+  id and name: its roles' names after the label or the name
+  ("custom color · Text, Borders"), in the label's style, and a
+  **Roles of Ink** button (`RolesIcon`), first of a node's
+  actions and the only one of a line, at its end, opening a
+  popover (the native `popover`, id `<color id>-roles`, valid for
+  ids with dots) that is a `fieldset` named by its `legend`
+  "Roles of Ink", with a checkbox per role (`palette.roles`
+  order), checked when the role holds the id and controlled by
+  the store: a click is `addMember` or `removeMember`, one undo,
+  and an undo unchecks it. Without roles it says to add one in
+  Targets. A color that has a role and whose name is in
+  `unsavedMembers` also shows a warning icon with a text
+  (visually hidden, and tooltip) saying its roles won't be saved
+  until one of the colors with that name is renamed.
 - A root without children shows a "Start by adding matching
   colors" call to action.
 - With variants (§5.4), the **Palette** header holds the variant
@@ -959,8 +961,8 @@ No grid (ADR 18): the requirements are a section of the page
 (§11.1), `Result.svelte` holding `Requirements.svelte`, with
 every pair checked in one table (ADR 20, 22; simulation rows,
 sticky headers and the selected column's highlight are still to
-come). Its headings (Targets, Checks, One-off pairs) are
-`h3`, under the section's `h2`, larger and with space above.
+come). Its headings (Targets, Checks, One-off pairs) are `h3`,
+under the section's `h2`, larger and with space above.
 
 - **Header toggles** (in `App.svelte`, in the Requirements header
   beside the title, wrapping under it on narrow panels, always
@@ -1011,9 +1013,9 @@ are two flat sections (ADR 22), then **One-off pairs**.
   the role's name as an input (**Role name**, renamed on change,
   reverted if empty or taken) and **Delete role Role** (also
   deletes its rules; the tooltip counts them). **+ Role**, under
-  the table, opens a form with a name field (**Add role**; a
-  free name, else an alert). Without roles the section stays,
-  with a hint and **+ Role**. Each cell is a `<select>` labelled by its
+  the table, opens a form with a name field (**Add role**; a free
+  name, else an alert). Without roles the section stays, with a
+  hint and **+ Role**. Each cell is a `<select>` labelled by its
   couple ("Text on Surfaces", "Text among themselves"): "—" or a
   use, styled as the app's other fields (global `select`, with a
   focus ring), as wide as its use (9.5rem at most) and narrower
@@ -1175,18 +1177,19 @@ and duplicates (with no color dropped, whatever the tree order);
 `names.test.ts` renders the tokens export and its conflict
 notice. `palette/Node.test.ts` renders a preset's list of colors,
 the roles on a node and on a generated color (label, checkboxes,
-popover ids) and the warning of a shared name (ADR 23). Export components are rendered server-side; there are no
-browser or end-to-end tests. A core test asserts that `evaluate`
-matches `collectOutputs` for every preset, and store tests cover
-preset outputs, children and expanding. CLI tests cover tree
-validation and argument handling, and build the CLI to run it
-under plain Node (it crashes on runes if a store leaks into
-`core/`), comparing `eval` with the core and checking that an
-invalid tree, or conflicting token names, fails with its message.
-The eval harness (§15) is tested on small recorded transcripts
-and trees under `evals/fixtures/`, with the core standing in for
-the CLI: no model is called. CI runs the unit tests and `check`
-(not `lint` or `build`).
+popover ids) and the warning of a shared name (ADR 23). Export
+components are rendered server-side; there are no browser or
+end-to-end tests. A core test asserts that `evaluate` matches
+`collectOutputs` for every preset, and store tests cover preset
+outputs, children and expanding. CLI tests cover tree validation
+and argument handling, and build the CLI to run it under plain
+Node (it crashes on runes if a store leaks into `core/`),
+comparing `eval` with the core and checking that an invalid tree,
+or conflicting token names, fails with its message. The eval
+harness (§15) is tested on small recorded transcripts and trees
+under `evals/fixtures/`, with the core standing in for the CLI:
+no model is called. CI runs the unit tests and `check` (not
+`lint` or `build`).
 
 ## 13. Known issues and limits
 

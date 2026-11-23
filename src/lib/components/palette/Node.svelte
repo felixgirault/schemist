@@ -15,6 +15,7 @@
 	import type {EventHandler} from 'svelte/elements';
 	import Node_1 from './Node.svelte';
 	import NodeInfo from './NodeInfo.svelte';
+	import RolesButton from './RolesButton.svelte';
 	import Swatch from './Swatch.svelte';
 	import './tree.css';
 
@@ -115,29 +116,27 @@
 					</p>
 				{/if}
 
-				<div class="line">
-					<p class="label">
-						{#if node.isOverridden()}
-							<span
-								class="mark"
-								role="img"
-								aria-label="Overridden in this variant"
-								title="Overridden in this variant"
-							>
-								●
-							</span>
-						{/if}
-						{def.label}
-						{#if def?.argsLabel}
-							<span class="args">
-								{def.argsLabel(node.activeArgs)}
-							</span>
-						{/if}
-					</p>
+				<p class="label">
+					{#if node.isOverridden()}
+						<span
+							class="mark"
+							role="img"
+							aria-label="Overridden in this variant"
+							title="Overridden in this variant"
+						>
+							●
+						</span>
+					{/if}
+					{def.label}
+					{#if def?.argsLabel}
+						<span class="args">
+							{def.argsLabel(node.activeArgs)}
+						</span>
+					{/if}
 					{#if !isPreset}
 						<ColorRoles {id} name={node.output.name} />
 					{/if}
-				</div>
+				</p>
 			</div>
 
 			<NodeActions
@@ -147,6 +146,8 @@
 				isRemovable={hasParent}
 				isSwappable={hasParent}
 				{isPreset}
+				{id}
+				name={node.output.name}
 				bind:isHidden={node.isHidden}
 				{hasOptions}
 				{hasHint}
@@ -172,13 +173,20 @@
 		{#if isPreset}
 			{@const colors = Object.entries(node.generated)}
 			<details class="colors" open>
-				<summary>{colors.length} colors</summary>
+				<summary>
+					{colors.length} color{colors.length > 1
+						? 's'
+						: ''}
+				</summary>
 				<ul>
 					{#each colors as [colorId, { color, name }] (colorId)}
 						<li>
 							<Swatch id={colorId} {color} />
 							{name}
-							<ColorRoles id={colorId} {name} />
+							<span class="label">
+								<ColorRoles id={colorId} {name} />
+							</span>
+							<RolesButton id={colorId} {name} />
 						</li>
 					{/each}
 				</ul>
@@ -254,17 +262,14 @@
 		font-size: 0.9rem;
 	}
 
-	.line {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0 0.5ch;
-	}
-
 	.colors li {
 		display: flex;
 		align-items: center;
 		gap: 0.5ch;
+	}
+
+	.colors li :global(.button) {
+		margin-left: auto;
 	}
 
 	.colors ul {

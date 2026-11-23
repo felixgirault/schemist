@@ -7,6 +7,7 @@
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import OffIcon from '../icons/OffIcon.svelte';
 	import OnIcon from '../icons/OnIcon.svelte';
+	import RolesButton from './RolesButton.svelte';
 
 	interface Props {
 		infoId: string;
@@ -14,7 +15,10 @@
 		isHiddenId: string;
 		isRemovable: boolean;
 		isSwappable: boolean;
-		// Presets can be expanded, but can't have children.
+		// The node's color, for its roles.
+		id: string;
+		name: string;
+		// Presets can be expanded, but can't have children nor roles.
 		isPreset: boolean;
 		isHidden: boolean;
 		hasOptions: boolean;
@@ -32,6 +36,8 @@
 		isRemovable,
 		isSwappable,
 		isPreset,
+		id,
+		name,
 		isHidden = $bindable(),
 		hasOptions,
 		hasHint,
@@ -45,6 +51,10 @@
 </script>
 
 <div class="button-list">
+	{#if !isPreset}
+		<RolesButton {id} {name} />
+	{/if}
+
 	<button
 		class="button button--icon"
 		type="button"

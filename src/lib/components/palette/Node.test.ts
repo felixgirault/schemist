@@ -57,7 +57,7 @@ const checkbox = (
 ) => {
 	const fieldset = html
 		.split('<fieldset')
-		.find((part) => part.includes(`<legend>${legend}`))!;
+		.find((part) => part.includes(`>${legend}</legend>`))!;
 
 	return fieldset.match(
 		new RegExp(`<input[^>]*/> ${role}</label>`)
@@ -123,4 +123,17 @@ test('warns of a shared name only for a color with a role', () => {
 	expect(render(Node, {props: {node: two}}).body).not.toContain(
 		'class="warning '
 	);
+});
+
+test('counts a single color', () => {
+	loadPalette(
+		rootTree('#3b82f6', [{type: 'lsc', args: {steps: 1}}])
+	);
+
+	expect(
+		text(
+			render(Node, {props: {node: palette.root!.children[0]}})
+				.body
+		)
+	).toContain('1 color ');
 });
