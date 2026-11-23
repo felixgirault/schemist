@@ -1163,6 +1163,22 @@ one has `sources`: `rules[i]` for every rule it comes from, and
 `pairs` when a declared pair set its targets. The evals' graders
 use combinations, not declared pairs, so they need no change.
 
+The root may also have `variants` and nodes `overrides` (§5.4),
+validated with the rest. `eval` then checks every variant
+(`variantsOf` in `cli/tree.ts`): `colors`, `combinations` and the
+declared `pairs` hold one entry per variant, each with a
+`variant` (its name), and a pair passes only if its entries pass
+in every variant. Names are the base's in every variant
+(`inVariant`): the declared pairs and `--pair` resolve once, on
+the base, whatever a color is called in another variant (a name
+derived from its color changes with it). A tree without variants
+has no `variant` field, as before. `export --variant <name>`
+exports one variant (default: the base, the first); it fails on a
+name that is not declared, on a tree without variants and on
+`eval`. CSS has no block per variant yet (ADR 19, later step).
+`types` marks the params a variant can't override with
+`structural: true`.
+
 `export --format tokens` nests names split on `/` and `.`
 (§11.8). When `exportTokens` reports conflicts, it fails like a
 tree error (no usage text, exit code 1, nothing on stdout):

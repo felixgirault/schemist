@@ -13,6 +13,7 @@ const listParams = (params: readonly Param[]) =>
 		min: 'min' in param ? param.min : undefined,
 		max: 'max' in param ? param.max : undefined,
 		unit: 'unit' in param ? param.unit : undefined,
+		structural: param.isStructural,
 		default:
 			param.type === 'color'
 				? formatSchemistToHex(param.default)

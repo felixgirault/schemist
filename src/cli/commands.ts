@@ -27,7 +27,9 @@ import {parsePair} from './pair.js';
 import {
 	declaredPairs,
 	exportRequirements,
-	parseTreeJson
+	inVariant,
+	parseTreeJson,
+	variantsOf
 } from './tree.js';
 import {listPresets, listTypes} from './vocabulary.js';
 
@@ -38,7 +40,8 @@ export const usage = `Usage: schemist <command> [options]
 Commands:
   types                       List node types and their params
   presets                     List presets
-  eval <tree.json|->          Colors, contrast combinations and permalink
+  eval <tree.json|->          Colors, contrast combinations and permalink,
+                              for every variant
   export <tree.json|->        Export colors as CSS, Sass or design tokens
 
 eval options:
@@ -52,6 +55,8 @@ eval options:
 
 export options:
   --format css|sass|tokens    Required
+  --variant <name>            The variant to export (default: the base, the
+                              tree's first)
   --color-format hex|rgb|hsl|lch, --casing dash|camel,
   --prefix <text>, --precision <digits>
 
@@ -113,7 +118,8 @@ const parse = (argv: string[]) => {
 				'prefix': {type: 'string'},
 				'precision': {type: 'string'},
 				'origin': {type: 'string'},
-				'pair': {type: 'string', multiple: true}
+				'pair': {type: 'string', multiple: true},
+				'variant': {type: 'string'}
 			}
 		});
 	} catch (error) {
@@ -189,7 +195,25 @@ export const run = (
 	}
 
 	const tree = parseTreeJson(read(input));
-	const entries = evaluate(tree);
+	const variant = values.variant;
+
+	if (variant !== undefined) {
+		if (command !== 'export') {
+			throw new UsageError(
+				'--variant: only for export, eval checks every variant'
+			);
+		}
+
+		if (!tree.variants?.includes(variant)) {
+			throw new UsageError(
+				tree.variants
+					? `--variant: expected ${tree.variants.join(', ')}`
+					: '--variant: the tree has no variants'
+			);
+		}
+	}
+
+	const entries = inVariant(tree, variant);
 	const link = permalink(tree, values.origin ?? defaultOrigin);
 
 	if (command === 'export') {
@@ -285,105 +309,129 @@ export const run = (
 		bg.name
 	]);
 	const visible = new Set(entries.map(({id}) => id));
-	const declared = values.pair
-		? []
-		: declaredPairs(tree, all).map((pair) => {
-				const sources = [
-					...pair.sources.rules.map((i) => `rules[${i}]`),
-					...(pair.sources.oneOff ? ['pairs'] : [])
-				];
-				const fg = pair.fg.name;
-				const bg = pair.bg.name;
+	// One result per variant, each tagged with it when there are any.
+	const results = variantsOf(tree).map((variant) => {
+		const tag = variant === undefined ? {} : {variant};
+		const entries = inVariant(tree, variant);
+		const all = inVariant(tree, variant, true);
+		const declared = values.pair
+			? []
+			: declaredPairs(tree, all).map((pair) => {
+					const sources = [
+						...pair.sources.rules.map(
+							(i) => `rules[${i}]`
+						),
+						...(pair.sources.oneOff ? ['pairs'] : [])
+					];
+					const fg = pair.fg.name;
+					const bg = pair.bg.name;
 
-				// hidden colors are not exported, so not checked, as in the app
-				if (
-					!visible.has(pair.fg.id) ||
-					!visible.has(pair.bg.id)
-				) {
+					// hidden colors are not exported, so not checked, as in the app
+					if (
+						!visible.has(pair.fg.id) ||
+						!visible.has(pair.bg.id)
+					) {
+						return {
+							...tag,
+							fg,
+							bg,
+							sources,
+							targets: Object.fromEntries(
+								targetNames
+									.filter(
+										(name) => pair[name] !== undefined
+									)
+									.map((name) => [name, pair[name]])
+							),
+							hidden: true
+						};
+					}
+
+					const checks = checkPair(
+						pair,
+						pair.fg.rgbColor,
+						pair.bg.rgbColor,
+						blindness as BlindnessType[]
+					);
+
 					return {
+						...tag,
 						fg,
 						bg,
 						sources,
 						targets: Object.fromEntries(
-							targetNames
-								.filter(
-									(name) => pair[name] !== undefined
-								)
-								.map((name) => [name, pair[name]])
+							checks.map(({target, goal}) => [
+								target,
+								goal
+							])
 						),
-						hidden: true
+						levels: Object.fromEntries(
+							checks.map(({target, minLevel}) => [
+								target,
+								truncate(minLevel)
+							])
+						),
+						pass: checks.every(({pass}) => pass)
 					};
-				}
+				});
 
-				const checks = checkPair(
-					pair,
-					pair.fg.rgbColor,
-					pair.bg.rgbColor,
+		return {
+			colors: entries.map(({name, color}) => ({
+				...tag,
+				name,
+				hex: formatSchemistToHex(color)
+			})),
+			combinations: pick(
+				combine(
+					pairs.length ? all : entries,
+					pairs.length ? all : entries,
+					contrast === 'apca' ? 'wcag3' : 'wcag2',
 					blindness as BlindnessType[]
-				);
-
-				return {
-					fg,
-					bg,
-					sources,
-					targets: Object.fromEntries(
-						checks.map(({target, goal}) => [target, goal])
+				).filter(({minLevel}) => minLevel >= min),
+				pairs
+			).map(
+				({
+					bgName,
+					fgName,
+					contrast,
+					minLevel,
+					minGrade,
+					simulatedContrasts
+				}) => ({
+					...tag,
+					bg: bgName,
+					fg: fgName,
+					level: truncate(contrast.level),
+					grade: contrast.grade,
+					...(blindness.length && {
+						minLevel: truncate(minLevel),
+						minGrade
+					}),
+					simulated: simulatedContrasts.map(
+						({type, level, grade}) => ({
+							type,
+							level: truncate(level),
+							grade
+						})
 					),
-					levels: Object.fromEntries(
-						checks.map(({target, minLevel}) => [
-							target,
-							truncate(minLevel)
-						])
-					),
-					pass: checks.every(({pass}) => pass)
-				};
-			});
+					...(values.difference && {
+						difference: differenceOf(
+							contrast.bg,
+							contrast.fg,
+							blindness as BlindnessType[]
+						)
+					})
+				})
+			),
+			declared
+		};
+	});
+	const declared = results.flatMap((result) => result.declared);
 
 	return json({
-		colors: entries.map(({name, color}) => ({
-			name,
-			hex: formatSchemistToHex(color)
-		})),
-		combinations: pick(
-			combine(
-				pairs.length ? all : entries,
-				pairs.length ? all : entries,
-				contrast === 'apca' ? 'wcag3' : 'wcag2',
-				blindness as BlindnessType[]
-			).filter(({minLevel}) => minLevel >= min),
-			pairs
-		).map(
-			({
-				bgName,
-				fgName,
-				contrast,
-				minLevel,
-				minGrade,
-				simulatedContrasts
-			}) => ({
-				bg: bgName,
-				fg: fgName,
-				level: truncate(contrast.level),
-				grade: contrast.grade,
-				...(blindness.length && {
-					minLevel: truncate(minLevel),
-					minGrade
-				}),
-				simulated: simulatedContrasts.map(
-					({type, level, grade}) => ({
-						type,
-						level: truncate(level),
-						grade
-					})
-				),
-				...(values.difference && {
-					difference: differenceOf(
-						contrast.bg,
-						contrast.fg,
-						blindness as BlindnessType[]
-					)
-				})
-			})
+		colors: results.flatMap((result) => result.colors),
+		combinations: results.flatMap(
+			(result) => result.combinations
 		),
 		...(declared.length && {pairs: declared}),
 		permalink: link

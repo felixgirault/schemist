@@ -571,3 +571,76 @@ test('export carries roles and rules into every format', () => {
 		tokens.Colors.Bg.$extensions['fr.fglt.schemist'].roles
 	).toEqual(['Surfaces']);
 });
+
+const variantTree = JSON.stringify({
+	type: 'clr',
+	token: 'Bg',
+	args: {color: '#ffffff'},
+	variants: ['Light', 'Dark'],
+	children: [
+		{
+			type: 'l',
+			token: 'Text',
+			args: {amount: 20},
+			overrides: {Dark: {amount: 85}}
+		}
+	],
+	roles: [
+		{name: 'Surfaces', colors: ['Bg']},
+		{name: 'Text', colors: ['Text']}
+	],
+	rules: [{fg: 'Text', bg: 'Surfaces', use: 'body'}]
+});
+const execVariants = (...argv: string[]) =>
+	run(argv, () => variantTree);
+
+test('eval checks every variant, a pair passes only in all', () => {
+	const {colors, pairs} = JSON.parse(execVariants('eval', '-'));
+	const pass = (variant: string) =>
+		pairs.find((p: {variant: string}) => p.variant === variant)
+			.pass;
+
+	expect(
+		colors.map(
+			({variant, name}: {variant: string; name: string}) =>
+				`${variant} ${name}`
+		)
+	).toEqual(['Light Bg', 'Light Text', 'Dark Bg', 'Dark Text']);
+	expect(pairs).toHaveLength(2);
+	expect(pass('Light')).toBe(true);
+	// 85% lightness on white
+	expect(pass('Dark')).toBe(false);
+});
+
+test('eval of a tree without variants has no variant field', () => {
+	expect(
+		JSON.parse(exec('eval', '-')).colors[0]
+	).not.toHaveProperty('variant');
+});
+
+test('export --variant exports one variant, the base without', () => {
+	const css = (...extra: string[]) =>
+		execVariants('export', '-', '--format', 'css', ...extra);
+
+	expect(css()).toBe(css('--variant', 'Light'));
+	expect(css('--variant', 'Dark')).not.toBe(css());
+});
+
+test('--variant is checked', () => {
+	expect(() =>
+		execVariants(
+			'export',
+			'-',
+			'--format',
+			'css',
+			'--variant',
+			'X'
+		)
+	).toThrow('expected Light, Dark');
+	expect(() =>
+		exec('export', '-', '--format', 'css', '--variant', 'X')
+	).toThrow('no variants');
+	expect(() =>
+		execVariants('eval', '-', '--variant', 'Dark')
+	).toThrow('only for export');
+});

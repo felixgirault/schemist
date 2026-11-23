@@ -111,6 +111,19 @@ reports whether each pair meets them, in the worst case of
 tree invalid. Invalid trees are rejected with the path of the
 problem, e.g. `root.children[2].args.amount`.
 
+For a light and a dark version, keep one tree and declare the
+root's `variants` (names, the base first, e.g.
+`["Light", "Dark"]`). A node then takes `overrides`, the args a
+variant changes:
+`{"type": "l", "args": {"amount": 90}, "overrides": {"Dark": {"amount": 15}}}`.
+Everything else (types, tokens, structure, roles, rules, pairs)
+is shared, and the params that change a preset's structure
+(`structural` in `types`) can't be overridden. `eval` checks
+every variant: each color, combination and pair result has a
+`variant`, and a pair passes only if it passes in all of them.
+`export --variant Dark` exports one variant, the base without the
+flag.
+
 Rather than pairs one by one, declare the intent. A root's
 `roles` are named lists of colors (`{name, colors}`), and its
 `rules` put a role on another, for a use (`body`: wcag2 4.5 and

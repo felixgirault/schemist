@@ -141,3 +141,13 @@ test('keeps the pairs of the root, naming hidden colors too', () => {
 		}).pairs
 	).toEqual(pairs);
 });
+
+test('rejects an override of a structural param', () => {
+	expect(() =>
+		parse({
+			type: 'clr',
+			variants: ['Light', 'Dark'],
+			children: [{type: 'lsc', overrides: {Dark: {steps: 3}}}]
+		})
+	).toThrow('root.children[0].overrides.Dark.steps');
+});

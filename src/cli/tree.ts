@@ -28,6 +28,28 @@ export const parseTreeJson = (json: string): NodeData => {
 	return tree;
 };
 
+// The variants to check: each one of the tree's, or just the base
+// (`undefined`) for a tree without.
+export const variantsOf = (tree: NodeData) =>
+	tree.variants ?? [undefined];
+
+// The colors of a variant, named as in the base, so that one name
+// is one color in every variant, whatever its color is called there.
+export const inVariant = (
+	tree: NodeData,
+	variant?: string,
+	withHidden = false
+) => {
+	const names = new Map(
+		evaluate(tree, true).map(({id, name}) => [id, name])
+	);
+
+	return evaluate(tree, withHidden, variant).map((color) => ({
+		...color,
+		name: names.get(color.id) ?? color.name
+	}));
+};
+
 // The pairs a tree declares, its own and the ones its rules give,
 // with their sources; `colors` are all the colors, hidden included.
 export const declaredPairs = <T extends {name: string}>(
