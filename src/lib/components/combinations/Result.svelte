@@ -6,18 +6,8 @@
 	import type {TargetCheck} from '#lib/core/pairs.js';
 	import {combinations} from '#lib/stores/combinations.svelte.js';
 	import type {PairCheck} from '#lib/stores/combinations.svelte.js';
-	import {palette} from '#lib/stores/palette.svelte.js';
 	import Requirements from './Requirements.svelte';
 	import './matrix.css';
-
-	// One card per pair of each rule.
-	let sections = $derived(
-		palette.rules.map((rule) => ({
-			rule,
-			...combinations.describeRule(rule),
-			checks: combinations.ruleChecks.get(rule.id) ?? []
-		}))
-	);
 
 	const gradeOf = (
 		target: TargetCheck['target'],
@@ -82,82 +72,13 @@
 	</div>
 {/snippet}
 
-{#snippet group(title: string, checks: PairCheck[])}
-	<section class="group">
-		<h3 class="h3">{title}</h3>
-
-		{#if !checks.length}
-			<p class="hint">No pair yet: add colors.</p>
-		{:else}
-			{@render cards(checks)}
-		{/if}
-	</section>
-{/snippet}
-
+<!-- Each requirement with its cards underneath; the panel class
+styles the role chips' swatches -->
 <div class="matrix-panel">
-	<div class="layout">
-		<div class="body">
-			<div class="results">
-				{#each sections as { rule, label, use, checks } (rule.id)}
-					{@render group(`${label}, ${use}`, checks)}
-				{/each}
-
-				{#if combinations.oneOffChecks.length}
-					{@render group(
-						'One-off pairs',
-						combinations.oneOffChecks
-					)}
-				{/if}
-
-				{#if !sections.length && !combinations.oneOffChecks.length}
-					<p>
-						Declare rules or pairs in the requirements to
-						see the palette as it will be used.
-					</p>
-				{/if}
-			</div>
-
-			<Requirements />
-		</div>
-	</div>
+	<Requirements pairs={cards} />
 </div>
 
 <style>
-	.layout {
-		container-type: inline-size;
-	}
-
-	.body {
-		display: grid;
-		gap: 1rem;
-	}
-
-	.results {
-		display: grid;
-		gap: 2rem;
-		min-width: 0;
-	}
-
-	@container (min-width: 48rem) {
-		.body {
-			grid-template-columns: minmax(0, 1fr) 32ch;
-			align-items: start;
-		}
-
-		.body :global(.details) {
-			position: sticky;
-			top: 0;
-			max-height: 100vh;
-			margin-top: 0;
-			overflow: auto;
-		}
-	}
-
-	.group {
-		display: grid;
-		gap: 1rem;
-	}
-
 	.cards {
 		display: grid;
 		grid-template-columns: repeat(

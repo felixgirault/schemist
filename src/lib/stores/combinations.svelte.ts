@@ -287,14 +287,14 @@ class Combinations {
 			...uses.map((use) => ({
 				id: use.id,
 				name: use.name,
-				checks: this.pairChecks.filter(({for: f}) =>
+				checks: this.oneOffChecks.filter(({for: f}) =>
 					f.uses.includes(use)
 				)
 			})),
 			{
 				id: 'custom',
 				name: 'Custom',
-				checks: this.pairChecks.filter(
+				checks: this.oneOffChecks.filter(
 					({for: f}) => f.custom
 				)
 			}

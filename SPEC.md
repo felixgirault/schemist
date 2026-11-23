@@ -971,22 +971,23 @@ declared count. **Colors** restricts the grid's rows and columns,
 **Color blindness simulation** and **Luminosity analysis** work
 as in the other modes.
 
-**Result mode** (`'result'`, `Result.svelte`) shows each rule as
-its use, with the Requirements column beside it (same layout as
-the grid: a container query at 48rem, under it when narrower).
-The Colors and Check filters are not shown. A section per rule,
-titled as in the requirements, reads the rule's `pairChecks`
-(`ruleChecks`, nothing is measured again), once, in the real
-colors. Every rule, a role among itself (Categories) included,
-has one combination card (§11.5 Contrast cards) per pair: each
-target with its grade, level and "met" or "not met", and one
-strip per selected simulation in simulated colors with its
-levels. Its Preview button toggles `previewedUid` to
-`<bgId>-<fgId>`; `previewed` falls back to the `pairChecks` pair
-when `all` (limited by the Colors filter) lacks it. Hidden colors
-and pairs not checked are left out. A final **One-off pairs**
-section shows the one-off pairs (`oneOffChecks`) as cards. With
-nothing declared a hint asks to declare rules or pairs.
+**Result mode** (`'result'`, `Result.svelte`) is the requirements
+(`Requirements.svelte`, as in the grid's column, at the panel's
+full width) with the cards of each rule directly under it, given
+as its `pairs` snippet: the rule's line and editor, then its
+pairs (`ruleChecks`, nothing is measured again), once, in the
+real colors. The expanded rule then has no list of failing pairs,
+the cards showing them. The Colors and Check filters are not
+shown. Every rule, a role among itself (Categories) included, has
+one combination card (§11.5 Contrast cards) per pair: each target
+with its grade, level and "met" or "not met", and one strip per
+selected simulation in simulated colors with its levels. Its
+Preview button toggles `previewedUid` to `<bgId>-<fgId>`;
+`previewed` falls back to the `pairChecks` pair when `all`
+(limited by the Colors filter) lacks it. Hidden colors and pairs
+not checked are left out. The one-off pairs, grouped by use as in
+the column, show their cards too. With nothing declared a hint
+asks to add a rule.
 
 ### 11.6 Theming
 
